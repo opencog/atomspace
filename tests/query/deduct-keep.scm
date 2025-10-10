@@ -6,7 +6,8 @@
 ;; Part of the "Einstein puzzle" demo.
 
 (define (print-ownership)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -47,12 +48,13 @@
 			(VariableNode "$house")
 			(VariableNode "$pet")
 		)
-	)
+	))
 )
 
 
 (define (print-results)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -80,7 +82,7 @@
 			(VariableNode "$pred")
 			(VariableNode "$attr")
 		)
-	)
+	))
 )
 
 

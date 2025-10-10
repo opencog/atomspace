@@ -23,8 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 #include "test-types.h"
 
 using namespace opencog;
@@ -96,7 +94,7 @@ void BuggyNot::test_bugnot(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != trans_rule);
 
 	// First, deduce if two seemingly different people are the same ...
-	Handle same = bindlink(as, same_rule);
+	Handle same = HandleCast(same_rule->execute(as.get()));
 	logger().debug("Same-people list is %s\n", oc_to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
@@ -108,7 +106,7 @@ void BuggyNot::test_bugnot(void)
 	// failed, because it was still using a left-over portion of the previous
 	// implication link. This was a rather distressing bug ... a very obvious
 	// but poor bug, and hadn't been noticed before. Alas.
-	Handle trans = bindlink(as, trans_rule);
+	Handle trans = HandleCast(trans_rule->execute(as.get()));
 	logger().debug("Transitive list is %s\n", oc_to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(trans));
 

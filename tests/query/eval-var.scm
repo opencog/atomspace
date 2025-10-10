@@ -44,7 +44,8 @@
 
 ; This pattern will accept one of the two above, reject the other.
 (define (do-cond condi)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$cxt")
 			(VariableNode "$condition")
@@ -62,6 +63,7 @@
 		)
 		; ...  then perform the action.
 		(VariableNode "$action")
+	)
 	)
 )
 

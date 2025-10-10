@@ -23,8 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 #include "test-types.h"
 
 using namespace opencog;
@@ -105,7 +103,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	// counting, as otherwise, there would be six solutions. Why six?
 	// Obviously, four above, but also, the reversed grounding matches:
 	// (1,1) and (2,2), via predicates Nationality and KeepsPet.
-	Handle puzzle_solution = bindlink(as, puzzle_rules);
+	Handle puzzle_solution = HandleCast(puzzle_rules->execute(as.get()));
 	logger().debug("trivial puzzle solution is %s\n",
 	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4,
@@ -136,15 +134,15 @@ void EinsteinPuzzle::test_trivial_keep(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != print_rule);
 
 	// First, deduce if two seemingly different people are the same ...
-	bindlink(as, same_rule);
+	same_rule->execute(as.get());
 	// Next, deduce that the same properties apply to each
-	bindlink(as, trans_rule);
+	trans_rule->execute(as.get());
 
 	// Result should be a ListLink w/ two solutions
 	//
 	// Why two? Because person 1 and 2 are the same person, so both
 	// solutions get listed.
-	Handle puzzle_solution = bindlink(as, print_rule);
+	Handle puzzle_solution = HandleCast(print_rule->execute(as.get()));
 	logger().debug("trivial puzzle keepers are %s\n",
 	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2,
@@ -211,13 +209,13 @@ void EinsteinPuzzle::test_full(void)
 	// person10 == person15 (blend)
 	// person14 == person9 (norweigan)
 	// dunhill smoker(rule 12) == person7
-	Handle same = bindlink(as, same_rule);
+	Handle same = HandleCast(same_rule->execute(as.get()));
 	logger().debug("After first same-rule\n%s\n",
 	               oc_to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(same));
 
 	// Next, propagate this knowledge transitively
-	Handle trans = bindlink(as, trans_rule);
+	Handle trans = HandleCast(trans_rule->execute(as.get()));
 	logger().debug("After first transitive-rule\n%s\n",
 	               oc_to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
@@ -225,7 +223,7 @@ void EinsteinPuzzle::test_full(void)
 	// -----------
 	// Next, make a deduction about the house on the end.
 	// This combines facts 9+14: blue house has address 101. This is just a single result.
-	Handle faddr = bindlink(as, faddr_rule);
+	Handle faddr = HandleCast(faddr_rule->execute(as.get()));
 	logger().debug("After first-address-rule\n%s\n",
 	               oc_to_string(faddr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
@@ -233,7 +231,7 @@ void EinsteinPuzzle::test_full(void)
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// The original facts were's stated symmetrically; we make up for that now:
 	// symmetrize rules 10, 12, 14, 15
-	Handle neigh = bindlink(as, nesym_rule);
+	Handle neigh = HandleCast(nesym_rule->execute(as.get()));
 	logger().debug("After neighbor-symmetry-rule\n%s\n",
 	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
@@ -241,34 +239,34 @@ void EinsteinPuzzle::test_full(void)
 	// Deduce new neighbors.
 	// The above made a deduction about address 102, and fact 8 has
 	// address 103 in it.
-	neigh = bindlink(as, neigh_rule);
+	neigh = HandleCast(neigh_rule->execute(as.get()));
 	logger().debug("After first neighbor-rule\n%s\n",
 	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Neighbor relations are symmetric.  Propagate this symmetry.
 	// This symmetrizes the findings from the rule application immediately above.
-	neigh = bindlink(as, nesym_rule);
+	neigh = HandleCast(nesym_rule->execute(as.get()));
 	logger().debug("After second neighbor-symmetry-rule\n%s\n",
 	               oc_to_string(neigh).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// -----------
 	// If some attribute holds for a neighbor, it cannot hold for a person.
-	Handle nattr = bindlink(as, nattr_rule);
+	Handle nattr = HandleCast(nattr_rule->execute(as.get()));
 	logger().debug("After first neighbor-not-attr rule\n%s\n",
 	               oc_to_string(nattr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 17, getarity(nattr));
 
 	// Next, propagate this knowledge transitively
-	Handle ntran = bindlink(as, ntran_rule);
+	Handle ntran = HandleCast(ntran_rule->execute(as.get()));
 	logger().debug("After first transitive-not-rule\n%s\n",
 	               oc_to_string(ntran).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 3, getarity(ntran));
 
 	// -----------
 	// Two distinct people cannot have a common attribute
-	Handle distc = bindlink(as, distc_rule);
+	Handle distc = HandleCast(distc_rule->execute(as.get()));
 	logger().debug() << "After first distinct-attr rule\n"
 	                 << oc_to_string(distc).c_str();
 
@@ -279,21 +277,21 @@ void EinsteinPuzzle::test_full(void)
 	// -----------
 	// By-elimination rule
 	// If a person doesn't smoke/drink/live-in four items, they must do the fifth.
-	Handle elimi = bindlink(as, elimi_rule);
+	Handle elimi = HandleCast(elimi_rule->execute(as.get()));
 	logger().debug() << "After elimination\n" << oc_to_string(elimi);
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 29, getarity(elimi));
 
 	// -----------
 	// Print partial results.
 	Handle prt_stuff = eval->apply("print-results", Handle::UNDEFINED);
-	Handle stuff = bindlink(as, prt_stuff);
+	Handle stuff = HandleCast(prt_stuff->execute(as.get()));
 	logger().debug() << "stuff\n" << oc_to_string(stuff);
 
 	// -----------
 	// Result should be a ListLink w/ five solutions
 	// Right now, we accept zero solutions, because above was not yet
 	// enough to solve the pouzzle.
-	Handle puzzle_solution = bindlink(as, solun_rule);
+	Handle puzzle_solution = HandleCast(solun_rule->execute(as.get()));
 	logger().debug("puzzle solution is\n%s\n",
 	               oc_to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 0,

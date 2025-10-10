@@ -4,10 +4,8 @@
 ;; Crazy NotLink bug
 ;;
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ;; Person1 lives in the red house.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person1") ; AvatarNode
@@ -16,7 +14,7 @@
 )
 
 ;; Person2 lives the red house.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person2")
@@ -28,7 +26,8 @@
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
 (define (is-same-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -86,10 +85,12 @@
 			)
 		)
 	)
+	)
 )
 
 (define (transitive-rule)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable declarations
 		(VariableList
 			(TypedVariableLink
@@ -116,5 +117,6 @@
 			(VariableNode "$person_a")
 			(VariableNode "$person_b")
 		)
+	)
 	)
 )

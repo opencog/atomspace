@@ -1,7 +1,6 @@
 ;
 ; query.scm -- QueryLink usage example.
 ;
-; The QueryLink and the BindLink are both very similar ...
 
 (use-modules (opencog) (opencog exec))
 

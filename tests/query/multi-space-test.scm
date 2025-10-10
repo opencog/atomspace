@@ -26,8 +26,8 @@
 (cog-set-atomspace! c)
 
 (define get-concepts
-	(Get (TypedVariable (Variable "$x") (Type 'Concept))
-		(Variable "$x")))
+	(CollectionOf (Meet (TypedVariable (Variable "$x") (Type 'Concept))
+		(Variable "$x"))))
 
 ; Run the query. It should find both Concepts. This is, it should
 ; print out a `SetLink` containing both of the above Concepts.

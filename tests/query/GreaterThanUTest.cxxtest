@@ -23,8 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 using namespace opencog;
 
 class GreaterThanUTest: public CxxTest::TestSuite
@@ -85,10 +83,10 @@ void GreaterThanUTest::test_scm_greater(void)
 	Handle richer_than_obama = eval->eval_h("(scm-than-obama)");
 	Handle richer_than_gates = eval->eval_h("(scm-than-gates)");
 
-	Handle people_richer_than_george = bindlink(as, richer_than_george);
-	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+	Handle people_richer_than_george = HandleCast(richer_than_george->execute(as.get()));
+	Handle people_richer_than_susan = HandleCast(richer_than_susan->execute(as.get()));
+	Handle people_richer_than_obama = HandleCast(richer_than_obama->execute(as.get()));
+	Handle people_richer_than_gates = HandleCast(richer_than_gates->execute(as.get()));
 
 	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
 	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));
@@ -110,10 +108,10 @@ void GreaterThanUTest::test_builtin_greater(void)
 	Handle richer_than_obama = eval->eval_h("(builtin-than-obama)");
 	Handle richer_than_gates = eval->eval_h("(builtin-than-gates)");
 
-	Handle people_richer_than_george = bindlink(as, richer_than_george);
-	Handle people_richer_than_susan = bindlink(as, richer_than_susan);
-	Handle people_richer_than_obama = bindlink(as, richer_than_obama);
-	Handle people_richer_than_gates = bindlink(as, richer_than_gates);
+	Handle people_richer_than_george = HandleCast(richer_than_george->execute(as.get()));
+	Handle people_richer_than_susan = HandleCast(richer_than_susan->execute(as.get()));
+	Handle people_richer_than_obama = HandleCast(richer_than_obama->execute(as.get()));
+	Handle people_richer_than_gates = HandleCast(richer_than_gates->execute(as.get()));
 
 	TS_ASSERT_EQUALS(0, getarity(people_richer_than_gates));
 	TS_ASSERT_EQUALS(1, getarity(people_richer_than_obama));

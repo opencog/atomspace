@@ -5,23 +5,29 @@
 ; This is an infinite loop, except that the QuoteLink is supposed
 ; to stop the recursion.
 (define crasher
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$x") ; Variable decl
 		(VariableNode "$x") ; body
 		(ListLink
 			(ConceptNode "And the answer is ...")
-			(QuoteLink (VariableNode "$x")))))
+			(QuoteLink (VariableNode "$x"))))
+	)
+	)
 
 ; (cog-execute! crasher)
 
 ;; This is an infinite loop, because there are no type restrictions on
 ;; the variable, and the instantiator can get confused.
 (define infloop
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$x") ; Variable decl
 		(VariableNode "$x") ; body
 		(ListLink
 			(ConceptNode "And the answer is ...")
-			(VariableNode "$x"))))
+			(VariableNode "$x")))
+	)
+	)
 
 ; (cog-execute! infloop)

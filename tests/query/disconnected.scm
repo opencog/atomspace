@@ -2,9 +2,9 @@
 
 ; The bindlink below has two disconnected parts. The pattern matcher
 ; should throw an error for this situation, as it is an undesirable
-; kind of thing to have. 
+; kind of thing to have.
 (define anaphora-resolution
-   (BindLink
+   (QueryLink
       (VariableList
          (TypedVariableLink
             (VariableNode "$word-inst-antecedent")
@@ -39,7 +39,7 @@
 ; An unused binlink, it provides some confounding junk to confuse
 ; the pattern matcher.
 (define pronoun-finder
-   (BindLink
+   (QueryLink
       (VariableList
            (VariableNode "$sent")
            (VariableNode "$parse")
@@ -73,41 +73,47 @@
 ; Relex parse of sentence Tom ate it
 ; (S (NP Tom.m) (VP ate.v-d (NP it)))
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
-(ReferenceLink (stv 1.0 1.0)
+(ReferenceLink
    (WordInstanceNode "LEFT-WALL@sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
    (WordNode "###LEFT-WALL###")
 )
-(WordInstanceLink (stv 1.0 1.0)
+
+(WordInstanceLink
    (WordInstanceNode "LEFT-WALL@sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
    (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
 )
-(ReferenceLink (stv 1.0 1.0)
+
+(ReferenceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (WordNode "Tom")
 )
-(WordInstanceLink (stv 1.0 1.0)
+
+(WordInstanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
 )
-(ReferenceLink (stv 1.0 1.0)
+
+(ReferenceLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (WordNode "ate")
 )
-(WordInstanceLink (stv 1.0 1.0)
+
+(WordInstanceLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
 )
-(ReferenceLink (stv 1.0 1.0)
+
+(ReferenceLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (WordNode "it")
 )
-(WordInstanceLink (stv 1.0 1.0)
+
+(WordInstanceLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
 )
-(ReferenceLink (stv 1.0 1.0)
+
+(ReferenceLink
    (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
    (ListLink
      (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
@@ -115,135 +121,157 @@
      (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    )
 )
-(ParseLink (stv 1 1)
-   (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0"(stv 1.0 0.9231))
+
+(ParseLink
+   (ParseNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
    (SentenceNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8")
 )
-(EvaluationLink (stv 1.0 1.0)
+
+(EvaluationLink
    (LgConnectorNode "Osx")
    (ListLink
       (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
       (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    )
 )
-(EvaluationLink (stv 1.0 1.0)
+
+(EvaluationLink
    (LgConnectorNode "WV")
    (ListLink
       (WordInstanceNode "LEFT-WALL@sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
       (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    )
 )
-(EvaluationLink (stv 1.0 1.0)
+
+(EvaluationLink
    (LgConnectorNode "Ss")
    (ListLink
       (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
       (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    )
 )
-(EvaluationLink (stv 1.0 1.0)
+
+(EvaluationLink
    (LgConnectorNode "Wd")
    (ListLink
       (WordInstanceNode "LEFT-WALL@sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8_parse_0")
       (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    )
 )
-(LemmaLink (stv 1.0 1.0)
+
+(LemmaLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (WordNode "Tom")
 )
-(LemmaLink (stv 1.0 1.0)
+
+(LemmaLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (WordNode "eat")
 )
-(LemmaLink (stv 1.0 1.0)
+
+(LemmaLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (WordNode "it")
 )
-; _subj (<<eat>>, <<Tom>>) 
-(EvaluationLink (stv 1.0 1.0)
+
+; _subj (<<eat>>, <<Tom>>)
+(EvaluationLink
    (DefinedLinguisticRelationshipNode "_subj")
    (ListLink
       (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
       (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    )
 )
-; _obj (<<eat>>, <<it>>) 
-(EvaluationLink (stv 1.0 1.0)
+
+; _obj (<<eat>>, <<it>>)
+(EvaluationLink
    (DefinedLinguisticRelationshipNode "_obj")
    (ListLink
       (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
       (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    )
 )
+
 ; tense (eat, past)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (DefinedLinguisticConceptNode "past")
 )
+
 ; subscript-TAG (eat, .v-d)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (DefinedLinguisticConceptNode ".v-d")
 )
+
 ; pos (eat, verb)
-(PartOfSpeechLink (stv 1.0 1.0)
+(PartOfSpeechLink
    (WordInstanceNode "ate@0d0cf639-73c2-4d6f-9893-7de70ea9c654")
    (DefinedLinguisticConceptNode "verb")
 )
+
 ; gender (Tom, masculine)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode "masculine")
 )
+
 ; person-FLAG (Tom, T)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode "person")
 )
+
 ; subscript-TAG (Tom, .m)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode ".m")
 )
+
 ; definite-FLAG (Tom, T)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode "definite")
 )
+
 ; pos (Tom, noun)
-(PartOfSpeechLink (stv 1.0 1.0)
+(PartOfSpeechLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode "noun")
 )
+
 ; noun_number (Tom, singular)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "Tom@316f309d-cf95-493b-bf55-98bebcc91c5a")
    (DefinedLinguisticConceptNode "singular")
 )
+
 ; gender (it, neuter)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (DefinedLinguisticConceptNode "neuter")
 )
+
 ; definite-FLAG (it, T)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (DefinedLinguisticConceptNode "definite")
 )
+
 ; pos (it, noun)
-(PartOfSpeechLink (stv 1.0 1.0)
+(PartOfSpeechLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (DefinedLinguisticConceptNode "noun")
 )
+
 ; pronoun-FLAG (it, T)
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
    (WordInstanceNode "it@2f788834-beeb-4c8d-914d-8b677bca95fb")
    (DefinedLinguisticConceptNode "pronoun")
 )
 
-(ListLink (stv 1 1)
+(ListLink
    (AnchorNode "# New Parsed Sentence")
    (SentenceNode "sentence@f73f6f0d-8822-4220-b6fa-7afa24ec3af8")
 )
 ; END OF SENTENCE
-

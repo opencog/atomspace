@@ -24,11 +24,14 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atoms/value/StringValue.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/Implicator.h>
 
 #include "imply.h"
 
@@ -144,7 +147,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "be"),
 			hcapital = an(CONCEPT_NODE, "capital")
 		)
-	)->setValue(truth_key(), TruthValue::TRUE_TV());
+	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
 
 	Handle hprep;
 	al(EVALUATION_LINK,
@@ -153,7 +156,7 @@ void ExecutionOutputUTest::test_exec(void)
 			an(CONCEPT_NODE, "capital"),
 			an(CONCEPT_NODE, "Spain")
 		)
-	)->setValue(truth_key(), TruthValue::TRUE_TV());
+	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
@@ -227,24 +230,24 @@ void ExecutionOutputUTest::test_varsub(void)
 	);
 
 	Handle situ =
-	al(BIND_LINK,
+	al(QUERY_LINK,
 	   al(CONTEXT_LINK,
 	      an(CONCEPT_NODE, "situation"),
 	      an(VARIABLE_NODE, "$action")
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr situation(BindLinkCast(situ));
+	QueryLinkPtr situation(QueryLinkCast(situ));
 
 	Handle pred =
-	al(BIND_LINK,
+	al(QUERY_LINK,
 	   al(CONTEXT_LINK,
 	      an(CONCEPT_NODE, "predicament"),
 	      an(VARIABLE_NODE, "$action")
 	      ),
 	   an(VARIABLE_NODE, "$action")
 	);
-	BindLinkPtr predicament(BindLinkCast(pred));
+	QueryLinkPtr predicament(QueryLinkCast(pred));
 
 	// Now perform the search.
 	QueueValuePtr qvp(createQueueValue());
@@ -287,11 +290,11 @@ void ExecutionOutputUTest::test_query_exec(void)
 	eval.eval("(load-from-path \"tests/query/exec.scm\")");
 
 	Handle exec_query = eval.eval_h("exec-query");
-	Handle results = satisfying_set(as, exec_query);
+	Handle results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 4);
 
 	exec_query = eval.eval_h("quote-exec-query");
-	results = satisfying_set(as, exec_query);
+	results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -389,16 +392,18 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_EQUALS(va->get_type(), STRING_VALUE);
 
 	//------------
-	result = eval.eval_v("(cog-execute! exec-query-truth-value)");
+	result = eval.eval_v("(cog-execute! exec-query-float-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
 	for (const ValuePtr& va : vals)
 	{
-		TS_ASSERT_EQUALS(va->get_type(), SIMPLE_TRUTH_VALUE);
-		TruthValuePtr stv = TruthValueCast(va);
-		TS_ASSERT_DELTA(stv->get_mean(), 0.6, 1.0e-8);
-		TS_ASSERT_DELTA(stv->get_confidence(), 0.3, 1.0e-8);
+		TS_ASSERT_EQUALS(va->get_type(), FLOAT_VALUE);
+		FloatValuePtr fvp = FloatValueCast(va);
+		const std::vector<double>& fvals = fvp->value();
+		TS_ASSERT_EQUALS(fvals.size(), 2);
+		TS_ASSERT_DELTA(fvals[0], 0.6, 1.0e-8);
+		TS_ASSERT_DELTA(fvals[1], 0.3, 1.0e-8);
 	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -537,7 +542,8 @@ void ExecutionOutputUTest::test_variable_schema(void)
 
 
 	Handle get_link =
-	al(BIND_LINK, {
+	al(COLLECTION_OF_LINK, {
+	al(QUERY_LINK, {
 		al(TYPED_VARIABLE_LINK, {
 			an(VARIABLE_NODE, "$SCHEMA"), an(TYPE_NODE, "DefinedSchemaNode")}),
 		al(AND_LINK, {
@@ -550,7 +556,7 @@ void ExecutionOutputUTest::test_variable_schema(void)
 			an(VARIABLE_NODE, "$SCHEMA"),
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
-	});
+	})});
 	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(get_link);
@@ -570,7 +576,8 @@ void ExecutionOutputUTest::test_exec_variable(void)
 				an(VARIABLE_NODE, "y")})
 		})});
 	Handle bind_link =
-	al(BIND_LINK, {
+	al(COLLECTION_OF_LINK, {
+	al(QUERY_LINK, {
 		al(TYPED_VARIABLE_LINK, {
 			an(VARIABLE_NODE, "x"), an(TYPE_NODE, "DefinedSchemaNode")}),
 		al(AND_LINK, {al(PRESENT_LINK, {an(VARIABLE_NODE, "x")})}),
@@ -578,7 +585,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 			an(VARIABLE_NODE, "x"),
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
-	});
+	})});
 	Instantiator inst(as.get());
 
 	ValuePtr result = inst.execute(bind_link);

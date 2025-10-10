@@ -25,7 +25,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -56,7 +55,6 @@ public:
 
 	void test_get();
 	void test_put();
-	// void test_bind();
 };
 
 void LocalQuoteUTest::setUp()
@@ -75,7 +73,7 @@ void LocalQuoteUTest::setUp()
 	             al(TYPED_VARIABLE_LINK, vardecl_var, VT),
 	             body_var);
 	forall_pattern = al(FORALL_LINK, vardecl_var, body_var);
-	forall_get = al(GET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern));
+	forall_get = al(COLLECTION_OF_LINK, {al(MEET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern))});
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
 	P_A = al(EVALUATION_LINK, P, A);
@@ -93,7 +91,7 @@ void LocalQuoteUTest::test_get()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(_as, forall_get),
+	Handle result = HandleCast(forall_get->execute(_as.get())),
 	    expected = al(SET_LINK, al(LIST_LINK, X, P_X));
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -127,52 +125,6 @@ void LocalQuoteUTest::test_put()
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
-
-// Re-enable this once a solution for the static checking of no
-// variables in clause has been fixed.
-//
-// /**
-//  * LocalQuoteLink unit test on a Rule rewrite using a Bind
-//  */
-// void LocalQuoteUTest::test_bind()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-// 	// Meta rule, given an RuleLink creates a
-// 	// corresponding BindLink
-// 	Handle bl = al(BIND_LINK,
-// 	               al(LOCAL_QUOTE_LINK,
-// 	                  al(RULE_LINK,
-// 	                     vardecl_var, body_var, rewrite_var)),
-// 	               al(LOCAL_QUOTE_LINK,
-// 	                  al(BIND_LINK,
-// 	                     vardecl_var, body_var, rewrite_var)));
-
-// 	// Implication to serve as grounding for the meta rule
-// 	Handle impl = al(RULE_LINK,
-// 	                 al(TYPED_VARIABLE_LINK, X, CT), P_X, Q_X);
-
-// 	// Result
-// 	Handle result = bindlink(_as, bl),
-// 		expected = al(SET_LINK,
-// 		              al(BIND_LINK,
-// 		                 al(TYPED_VARIABLE_LINK,
-// 		                    an(VARIABLE_NODE, "$X"),
-// 		                    an(TYPE_NODE, "ConceptNode")),
-// 		                 al(EVALUATION_LINK,
-// 		                    an(PREDICATE_NODE, "P"),
-// 		                    an(VARIABLE_NODE, "$X")),
-// 		                 al(EVALUATION_LINK,
-// 		                    an(PREDICATE_NODE, "Q"),
-// 		                    an(VARIABLE_NODE, "$X"))));
-
-// 	printf("Meta-rule %s\n", bl->to_string().c_str());
-// 	printf("Expecting %s\n", expected->to_string().c_str());
-// 	printf("Got %s\n", result->to_string().c_str());
-// 	TS_ASSERT_EQUALS(result, expected);
-
-// 	logger().info("END TEST: %s", __FUNCTION__);
-// }
 
 #undef al
 #undef an

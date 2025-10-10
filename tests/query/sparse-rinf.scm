@@ -10,7 +10,7 @@
 
 ; This defines an broken esterification reaction.
 (define ester
-	(BindLink
+	(CollectionOf (Query
 		; Variable declaration
 		(VariableList
 
@@ -76,7 +76,7 @@
 				(SB (Variable "$hydroxO1") (Variable "$hydroxH1"))
 			)
 		)
-	)
+	))
 )
 
 ; ------------------------------------------------

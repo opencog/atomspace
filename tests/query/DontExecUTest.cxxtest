@@ -24,8 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
@@ -126,7 +124,7 @@ void DontExecUTest::test_DontExecLink_consumption()
 	eval.eval("(load-from-path \"tests/query/dont-exec.scm\")");
 
 	Handle bl = eval.eval_h("bl");
-	Handle result = bindlink(as, bl);
+	Handle result = HandleCast(bl->execute(as.get()));
 	Handle simple_bl = eval.eval_h("simple-bl");
 	Handle expected = al(SET_LINK, al(DONT_EXEC_LINK, simple_bl));
 

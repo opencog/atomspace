@@ -25,7 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -88,9 +87,9 @@ void UnquoteUTest::test_list(void)
 	                    al(LIST_LINK,
 	                       al(UNQUOTE_LINK, X),
 	                       al(UNQUOTE_LINK, Y))));
-	Handle pat = al(GET_LINK, var_decl, body);
+	Handle pat = al(COLLECTION_OF_LINK, {al(MEET_LINK, var_decl, body)});
 
-	Handle result = satisfying_set(as, pat);
+	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_list);
 
 	logger().fine() << "result = " << result->to_string();
@@ -116,9 +115,9 @@ void UnquoteUTest::test_and_1(void)
 	                       al(UNQUOTE_LINK, X),
 	                       al(UNQUOTE_LINK, Y))));
 	Handle rewrite = al(AND_LINK, X, Y);
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
-	Handle result = bindlink(as, pat);
+	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_and);
 
 	logger().debug() << "result = " << result->to_string();
@@ -145,9 +144,9 @@ void UnquoteUTest::test_and_2(void)
 	                    al(UNQUOTE_LINK, X),
 	                    al(UNQUOTE_LINK, Y)));
 	Handle rewrite = body;
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
-	Handle result = bindlink(as, pat);
+	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK, simple_and);
 
 	logger().debug() << "result = " << result->to_string();
@@ -174,9 +173,9 @@ void UnquoteUTest::test_rewrite(void)
 	                       an(GROUNDED_SCHEMA_NODE, "hs: foo"),
 	                       al(UNQUOTE_LINK,
 	                          al(LIST_LINK, X, Y))));
-	Handle pat = al(BIND_LINK, var_decl, body, rewrite);
+	Handle pat = al(COLLECTION_OF_LINK, {al(QUERY_LINK, var_decl, body, rewrite)});
 
-	Handle result = bindlink(as, pat);
+	Handle result = HandleCast(pat->execute(as.get()));
 	Handle expected = al(SET_LINK,
 	                     al(EXECUTION_OUTPUT_LINK,
 	                        an(GROUNDED_SCHEMA_NODE, "hs: foo"),

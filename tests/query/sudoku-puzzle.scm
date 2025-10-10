@@ -46,7 +46,8 @@
 (EvaluationLink (PredicateNode "fix98") (ConceptNode "eight"))
 
 (define (puzzle)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		; There are eighty-one variables! 81 = 9x9 cells
 		(VariableList
 			(variable-decls)
@@ -97,5 +98,6 @@
 		(ListLink
 			(variable-decls)
 		)
+	)
 	)
 )

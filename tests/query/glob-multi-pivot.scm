@@ -29,7 +29,7 @@
 ; ---------------------------------------------
 
 (define glob-unify-plain
-	(GetLink
+	(CollectionOf (Meet
 		(TypedVariableLink
 			(GlobNode "$G")
 			(TypeIntersectionLink
@@ -46,11 +46,11 @@
 				(GlobNode "$G")
 				(ConceptNode "class-3"))
 		)
-	)
+	))
 )
 
 (define glob-unify-tall
-	(GetLink
+	(CollectionOf (Meet
 		(TypedVariableLink
 			(GlobNode "$G")
 			(TypeIntersectionLink
@@ -67,13 +67,13 @@
 				(OrderedLink (GlobNode "$G"))
 				(ConceptNode "class-1"))
 		)
-	)
+	))
 )
 
 ; ---------------------------------------------
 
 (define glob-chase-pivot
-	(GetLink
+	(CollectionOf (Meet
 		(VariableList
 			(Variable "$cls")
 			(TypedVariableLink
@@ -97,12 +97,12 @@
 				(GlobNode "$G")
 				(Variable "$cls"))
 		)
-	)
+	))
 )
 
 ; ---------------------------------------------
 (define glob-multi-pivot
-	(GetLink
+	(CollectionOf (Meet
 		(TypedVariableLink
 			(GlobNode "$G")
 			(TypeIntersectionLink
@@ -127,12 +127,12 @@
 				(OrderedLink (GlobNode "$G"))
 				(ConceptNode "class-2"))
 		)
-	)
+	))
 )
 
 ; ---------------------------------------------
 (define glob-chase-multi-pivot
-	(GetLink
+	(CollectionOf (Meet
 		(VariableList
 			(Variable "$cls")
 			(TypedVariableLink
@@ -160,5 +160,5 @@
 				(GlobNode "$G")
 				(Variable "$cls"))
 		)
-	)
+	))
 )

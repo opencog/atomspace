@@ -22,7 +22,6 @@
 
 #include <thread>
 
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
@@ -92,7 +91,7 @@ void PermutationsUTest::test_bind(void)
 	// Query
 	Handle body = al(PRESENT_LINK, al(LIST_LINK, X, al(SET_LINK, Y, Z)));
 	Handle rewrite = al(ORDERED_LINK, X, Y, Z);
-	Handle query = al(BIND_LINK, body, rewrite);
+	Handle query = al(COLLECTION_OF_LINK, {al(QUERY_LINK, body, rewrite)});
 
 	Handle result = HandleCast(query->execute(_as.get()));
 	Handle expect = al(SET_LINK,

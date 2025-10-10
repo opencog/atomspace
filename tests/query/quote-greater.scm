@@ -62,9 +62,10 @@
 	)
 )
 
-;; The actual BindLink that will be tested.
+;; The actual QueryLink that will be tested.
 (define (richer-than-person-x person-x)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$who")
 			(VariableNode "$less-wealth")
@@ -100,6 +101,7 @@
 
 		;; output result: just the concept node of who it is.
 		(VariableNode "$who")
+	)
 	)
 )
 

@@ -14,14 +14,14 @@
 (State (Concept "alice") (Concept "at home"))
 
 (define who-is-hungry-1?
-	(Get
+	(CollectionOf (Meet
 		(VariableList
 			(TypedVariable (Variable "x") (Type 'Concept))
 			(TypedVariable (Variable "y") (Type 'Concept)))
 		(Present
 			(State (Variable "x") (Variable "y"))
 			(State (List (Variable "x") (Predicate "hungry")) (Concept "TRUE"))
-		)))
+		))))
 
 (test-assert "alice at home"
 	(equal? (cog-execute! who-is-hungry-1?)
@@ -29,14 +29,14 @@
 
 ; -----------------
 (define who-is-hungry-2?
-	(Get
+	(CollectionOf (Meet
 		(VariableList
 			(TypedVariable (Variable "x") (Type 'Concept))
 			(TypedVariable (Variable "y") (Type 'Concept)))
 		(Or
 			(Present (State (Variable "x") (Variable "y")))
 			(Present (State (List (Variable "x") (Predicate "hungry")) (Concept "TRUE")))
-			)))
+			))))
 
 ; Well, look, the naked Variable y appearing in the search results
 ; is sinfully ugly, but its associated with a clause that never actually
@@ -49,14 +49,14 @@
 
 ; -----------------
 (define who-is-hungry-3?
-	(Get
+	(CollectionOf (Meet
 		(VariableList
 			(TypedVariable (Variable "x") (Type 'Concept))
 			(TypedVariable (Variable "y") (Type 'Concept)))
 		(Choice
 			(Present (State (Variable "x") (Variable "y")))
 			(Present (State (List (Variable "x") (Predicate "hungry")) (Concept "TRUE")))
-			)))
+			))))
 
 ; Well, look, the naked Variable y appearing in the search results
 ; is sinfully ugly, but its associated with a clause that never actually
@@ -80,7 +80,7 @@
 (State (List (Concept "at home") (Predicate "is cozy")) (Concept "TRUE"))
 
 (define whos-on-first?
-	(Get
+	(CollectionOf (Meet
 		(VariableList
 			(TypedVariable (Variable "x") (Type 'Concept))
 			(TypedVariable (Variable "y") (Type 'Concept)))
@@ -95,7 +95,7 @@
 				(State (List (Variable "x") (Predicate "thirsty")) (Concept "FALSE")))
 			(Present
 				(State (List (Variable "x") (Predicate "hungry")) (Concept "TRUE")))
-			)))
+			))))
 
 ; Well, look, the naked Variable y appearing in the search results
 ; is sinfully ugly, but its associated with a clause that never actually

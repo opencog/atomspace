@@ -106,7 +106,8 @@
 ; This puzzle should have exactly one solution, since fixing the
 ; upper-left corner constrains everything else.
 (define (x2-puzzle)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(x2-variable-decls 'VariableList)
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
@@ -119,6 +120,7 @@
 		; The solution
 		(x2-variable-decls 'ListLink)
 	)
+	)
 )
 
 ; This puzzle should have 2 solutions total: no cells are fixed, and
@@ -129,7 +131,8 @@
 ;   2 1      1 2
 ;
 (define (x2-any)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(x2-variable-decls 'VariableList)
 		(AndLink
 			; There are 4 constraints. One is actually redundant...
@@ -137,6 +140,7 @@
 		)
 		; The solution
 		(x2-variable-decls 'ListLink)
+	)
 	)
 )
 
@@ -269,7 +273,8 @@
 (EvaluationLink (PredicateNode "x3-fix11") (ConceptNode "one"))
 
 (define (x3-puzzle)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(x3-variable-decls 'VariableList)
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
@@ -281,5 +286,6 @@
 		)
 		; The solution
 		(x3-variable-decls 'ListLink)
+	)
 	)
 )

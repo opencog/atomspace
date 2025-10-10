@@ -49,7 +49,8 @@
 
 
 (define (member-to-evaluation-2-1-rule)
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (VariableList
          (VariableNode "$B")
          (VariableNode "$C")
@@ -97,12 +98,14 @@
          )
       )
    )
+   )
 )
 
 ; Same as above, but apha-renamed deduction. Should get the same
 ; results.
 (define (member-to-evaluation-2-1-alt)
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (VariableList
          (VariableNode "$B")
          (VariableNode "$C")
@@ -149,6 +152,7 @@
             )
          )
       )
+   )
    )
 )
 

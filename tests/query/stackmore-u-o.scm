@@ -1,5 +1,3 @@
-
-(define (stv mean conf) (cog-new-stv mean conf))
 ;;
 ;; The matching solution, and the bind link are in the middle 
 ;; of this file, so that the pattern matcher doesn't accidentally
@@ -8,10 +6,10 @@
 ;; of this file ...
 
 ;; this should not match.
-(InheritanceLink (stv 1.0 1.0)
+(InheritanceLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -22,10 +20,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -35,10 +33,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(AtTimeLink (stv 1.0 1.0)
+	(AtTimeLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -49,10 +47,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(PrepositionalRelationshipNode "Big Red Button")
 		(ListLink
 			(LemmaNode "thing1")
@@ -63,10 +61,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(FeatureNode "here kitty kitty")
-	(EvaluationLink (stv 1.0 1.0)
+	(EvaluationLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -77,10 +75,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(FeatureNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -95,10 +93,10 @@
 ;; randomized in the atomspace -- i.e. not at the beginning (lowest
 ;; handle uuid's) nor at the end (highest handle numbers) of the
 ;; atomspace
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -109,10 +107,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing2")
@@ -122,10 +120,10 @@
 )
 
 ;; this should not match.
-(FeatureLink (stv 1.0 1.0)
+(FeatureLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -136,10 +134,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(WordNode "bird is the word")
 		(ListLink
 			(LemmaNode "thing1")
@@ -150,10 +148,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(SemeNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -164,10 +162,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(HebbianLink (stv 1.0 1.0)
+	(HebbianLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -178,17 +176,18 @@
 )
 
 (define (bind_uo)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
 		;; body
-		(SimilarityLink (stv 1.0 1.0)
+		(SimilarityLink
 			(VariableNode "$var_schema")
 			(VariableNode "$var_number")
-			(ExecutionLink (stv 1.0 1.0)
+			(ExecutionLink
 				(VariableNode "$var_schema")
 				(ListLink
 					(LemmaNode "thing1")
@@ -203,13 +202,14 @@
 			(VariableNode "$var_schema")
 		)
 	)
+	)
 )
 
 ;; this should not match.
-(SubsetLink (stv 1.0 1.0)
+(SubsetLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -220,10 +220,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(WordNode "bird is the word")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -234,10 +234,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ParseLink (stv 1.0 1.0)
+	(ParseLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -248,10 +248,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing ohh noo")
@@ -262,10 +262,10 @@
 )
 
 ;; this should not match.
-(SimilarityLink (stv 1.0 1.0)
+(SimilarityLink
 	(PrepositionalRelationshipNode "Big Red Button")
 	(NumberNode "0.24")
-	(ExecutionLink (stv 1.0 1.0)
+	(ExecutionLink
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")

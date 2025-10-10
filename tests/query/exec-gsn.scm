@@ -20,7 +20,7 @@
 
 (define (ret-handle A B) (Unordered A B))
 (define (ret-link-value A B) (LinkValue A B))
-(define (ret-truth-value A B) (SimpleTruthValue 0.6 0.3))
+(define (ret-float-value A B) (FloatValue 0.6 0.3))
 (define (ret-string-value A B) (StringValue (cog-name A) (cog-name B)))
 
 (define (make-exec-query fun)
@@ -36,5 +36,5 @@
 
 (define exec-query-handle (make-exec-query "scm: ret-handle"))
 (define exec-query-link-value (make-exec-query "scm: ret-link-value"))
-(define exec-query-truth-value (make-exec-query "scm: ret-truth-value"))
+(define exec-query-float-value (make-exec-query "scm: ret-float-value"))
 (define exec-query-string-value (make-exec-query "scm: ret-string-value"))

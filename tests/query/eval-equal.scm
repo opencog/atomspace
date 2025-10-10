@@ -45,10 +45,12 @@
 )
 
 (define (wrapper core)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$x")
 		(AndLink core)
 		(VariableNode "$x")
+	)
 	)
 )
 

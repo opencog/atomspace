@@ -10,7 +10,7 @@
 ;
 ; There are two variants in here: one with an AndLink, and one
 ; without.  The issue is that the AndLink has a special meaning for
-; the BindLink, as opposed to PLN, and thus must be quoted. Also,
+; the QueryLink, as opposed to PLN, and thus must be quoted. Also,
 ; it is an unordered link, so takes a different path through the
 ; pattern matcher.  Thus, the second variant uses a ListLink instead,
 ; to simplify debugging, in case there is a bug.
@@ -60,7 +60,8 @@
 
 ; The pattern matcher, looks for the List variant
 (define blist
-  (BindLink
+  (CollectionOf
+  (QueryLink
     (VariableList
       (TypedVariableLink
         (VariableNode "$TyVs-one")
@@ -85,12 +86,14 @@
     (OrderedLink
       A1-lamb
       A2-lamb))
+  )
 )
 
 ; The pattern matcher, looks for the And variant. Notice that
 ; the quoting is different from the above.
 (define bland
-  (BindLink
+  (CollectionOf
+  (QueryLink
     ; Variable declaration
     (VariableList
       (TypedVariableLink
@@ -125,4 +128,5 @@
     (UnorderedLink
       A1-lamb
       A2-lamb))
+  )
 )

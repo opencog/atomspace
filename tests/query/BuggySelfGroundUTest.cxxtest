@@ -25,8 +25,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 using namespace opencog;
 
 class BuggySelfGroundUTest: public CxxTest::TestSuite
@@ -82,7 +80,7 @@ void BuggySelfGroundUTest::test_crash(void)
     Handle hbnd = eval->eval_h("bnd");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != hbnd);
 
-    Handle items = bindlink(as, hbnd);
+    Handle items = HandleCast(hbnd->execute(as.get()));
     TS_ASSERT_EQUALS(1, getarity(items));
 
     logger().debug("END TEST: %s", __FUNCTION__);

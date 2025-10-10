@@ -8,73 +8,73 @@
 (State (Concept "her") (Predicate "tired"))
 
 (define double-a
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(Absent (State (Variable "s") (Predicate "hungry"))))))
+		(Absent (State (Variable "s") (Predicate "hungry")))))))
 
 (define double-b
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(Not (Present (State (Variable "s") (Predicate "hungry")))))))
+		(Not (Present (State (Variable "s") (Predicate "hungry"))))))))
 
 (define double-c
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(Not (And (Present (State (Variable "s") (Predicate "hungry"))))))))
+		(Not (And (Present (State (Variable "s") (Predicate "hungry")))))))))
 
 (define double-d
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(Not (Or (Present (State (Variable "s") (Predicate "hungry"))))))))
+		(Not (Or (Present (State (Variable "s") (Predicate "hungry")))))))))
 
 (define double-e
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(And (Not (Present (State (Variable "s") (Predicate "hungry"))))))))
+		(And (Not (Present (State (Variable "s") (Predicate "hungry")))))))))
 
 (define double-f
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
 	(And
 		(Present (Variable "s"))
-		(Or (Not (Present (State (Variable "s") (Predicate "hungry"))))))))
+		(Or (Not (Present (State (Variable "s") (Predicate "hungry")))))))))
 
 (define single-a
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(Absent (State (Variable "s") (Predicate "hungry")))))
+	(Absent (State (Variable "s") (Predicate "hungry"))))))
 
 (define single-b
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(Not (Present (State (Variable "s") (Predicate "hungry"))))))
+	(Not (Present (State (Variable "s") (Predicate "hungry")))))))
 
 (define single-c
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(Not (And (Present (State (Variable "s") (Predicate "hungry")))))))
+	(Not (And (Present (State (Variable "s") (Predicate "hungry"))))))))
 
 (define single-d
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(Not (Or (Present (State (Variable "s") (Predicate "hungry")))))))
+	(Not (Or (Present (State (Variable "s") (Predicate "hungry"))))))))
 
 (define single-e
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(And (Not (Present (State (Variable "s") (Predicate "hungry")))))))
+	(And (Not (Present (State (Variable "s") (Predicate "hungry"))))))))
 
 (define single-f
-(Get
+(CollectionOf (Meet
 	(TypedVariable (Variable "s") (Type 'Concept))
-	(Or (Not (Present (State (Variable "s") (Predicate "hungry")))))))
+	(Or (Not (Present (State (Variable "s") (Predicate "hungry"))))))))

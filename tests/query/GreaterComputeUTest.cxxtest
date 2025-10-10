@@ -23,8 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
 using namespace opencog;
 
 class GreaterComputeUTest: public CxxTest::TestSuite
@@ -81,7 +79,7 @@ void GreaterComputeUTest::test_computation(void)
 
     Handle try_out = eval->eval_h("(threshold)");
 
-    Handle crash_b = bindlink(as, try_out);
+    Handle crash_b = HandleCast(try_out->execute(as.get()));
 
     std::cout << "Answer: " << crash_b->to_string() << std::endl;
     TS_ASSERT_EQUALS(1, getarity(crash_b));

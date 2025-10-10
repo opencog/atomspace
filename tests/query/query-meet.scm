@@ -1,8 +1,6 @@
 ;
 ; query-meet.scm -- MeetLink usage example.
 ;
-; The MeetLink and the GetLink are both very similar ...
-
 (use-modules (opencog) (opencog exec))
 
 ; -------------

@@ -24,7 +24,7 @@
                         (Variable "person2") )))
 
 ; This should not throw...
-(define (get-dancers) (Get variables target))
+(define (get-dancers) (CollectionOf (Meet variables target)))
 
 ; This should work...
 ; (cog-execute! (get-dancers))

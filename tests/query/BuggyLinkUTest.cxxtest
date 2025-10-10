@@ -23,9 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
-
 using namespace opencog;
 
 class BuggyLinkUTest: public CxxTest::TestSuite
@@ -87,7 +84,7 @@ void BuggyLinkUTest::test_link(void)
     Handle bindy = eval->eval_h("bindy");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindy);
 
-    Handle lily = bindlink(as, bindy);
+    Handle lily = HandleCast(bindy->execute(as.get()));
     logger().debug() << "Result is this:\n" << lily->to_string();
 
     TS_ASSERT_EQUALS(1, getarity(lily));

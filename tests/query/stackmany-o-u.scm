@@ -155,7 +155,8 @@
 )
 
 (define (many_ou)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		;; variable decls
 		(VariableList
 			(VariableNode "$var_number")
@@ -177,6 +178,7 @@
 			(VariableNode "$var_number")
 			(VariableNode "$var_schema")
 		)
+	)
 	)
 )
 

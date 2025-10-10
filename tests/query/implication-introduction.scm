@@ -1,5 +1,6 @@
 (define and-lambda-distribution-rule
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (VariableList
          (TypedVariableLink
             (VariableNode "$TyVs")
@@ -40,10 +41,12 @@
          )
       )
    )
+   )
 )
 
 (define implication-introduction-rule
-   (BindLink
+   (CollectionOf
+   (QueryLink
       (VariableList
          (TypedVariableLink
             (VariableNode "$P")
@@ -81,6 +84,7 @@
             (VariableNode "$Q")
          )
       )
+   )
    )
 )
 

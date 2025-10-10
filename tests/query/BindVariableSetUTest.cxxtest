@@ -22,7 +22,6 @@
 
 #include <thread>
 
-#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
@@ -91,7 +90,7 @@ void BindVariableSetUTest::test_no_type(void)
 	// Handle vardecl = al(VARIABLE_SET, X, Y, Z);
 	Handle body = al(PRESENT_LINK, al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z)));
 	Handle rewrite = al(LIST_LINK, X, Y, Z);
-	Handle query = al(BIND_LINK, body, rewrite);
+	Handle query = al(COLLECTION_OF_LINK, {al(QUERY_LINK, body, rewrite)});
 
 	Handle result = HandleCast(query->execute(_as.get()));
 	Handle expect = al(SET_LINK,

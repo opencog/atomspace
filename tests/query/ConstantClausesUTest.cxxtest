@@ -24,7 +24,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
 
 using namespace std;
 using namespace opencog;
@@ -102,8 +101,8 @@ void ConstantClausesUTest::setUp()
 void ConstantClausesUTest::test_constant_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, A, B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, A, B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -115,8 +114,8 @@ void ConstantClausesUTest::test_constant_1()
 void ConstantClausesUTest::test_constant_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, AB, C),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, AB, C)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -128,8 +127,8 @@ void ConstantClausesUTest::test_constant_2()
 void ConstantClausesUTest::test_constant_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(AND_LINK, AB, A), C),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, AB, A), C)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, C);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -142,8 +141,8 @@ void ConstantClausesUTest::test_constant_3()
 void ConstantClausesUTest::test_evaluatable_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, IdAA, B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, IdAA, B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, B);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -156,8 +155,8 @@ void ConstantClausesUTest::test_evaluatable_1()
 void ConstantClausesUTest::test_evaluatable_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(NOT_LINK, IdAA), B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(NOT_LINK, IdAA), B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -170,8 +169,8 @@ void ConstantClausesUTest::test_evaluatable_2()
 void ConstantClausesUTest::test_evaluatable_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(AND_LINK, IdAA, al(NOT_LINK, IdAA)), B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, IdAA, al(NOT_LINK, IdAA)), B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -184,8 +183,8 @@ void ConstantClausesUTest::test_evaluatable_3()
 void ConstantClausesUTest::test_constant_evaluatable_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, A, IdAA), B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, B);
 	printf("  Found : %s\n", result->to_string().c_str());
 	printf("Expected: %s\n", expected->to_string().c_str());
@@ -200,8 +199,8 @@ void ConstantClausesUTest::test_constant_evaluatable_1()
 void ConstantClausesUTest::test_constant_evaluatable_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -215,12 +214,12 @@ void ConstantClausesUTest::test_constant_evaluatable_2()
 void ConstantClausesUTest::test_constant_evaluatable_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B),
-		result = bindlink(as, bl),
+	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK);
-	printf("Bindlink: %s\n", bl->to_string().c_str());
-	printf("  Found : %s\n", result->to_string().c_str());
-	printf("Expected: %s\n", expected->to_string().c_str());
+	printf("Querylink: %s\n", bl->to_string().c_str());
+	printf("   Found : %s\n", result->to_string().c_str());
+	printf("Expected : %s\n", expected->to_string().c_str());
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -232,7 +231,8 @@ void ConstantClausesUTest::test_complex()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	Handle bl = eval.eval_h(
-		"(BindLink"
+		"(CollectionOf"
+		"(QueryLink"
 		"  (VariableList"
 		"  )"
 		"  (AndLink"
@@ -243,7 +243,7 @@ void ConstantClausesUTest::test_complex()
 		"            (VariableNode \"$X\")"
 		"            (TypeNode \"ConceptNode\")"
 		"          )"
-		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"          (EvaluationLink"
 		"            (PredicateNode \"contain\")"
 		"            (ListLink"
 		"              (ConceptNode \"treatment-1\")"
@@ -268,7 +268,7 @@ void ConstantClausesUTest::test_complex()
 		"    )"
 		"    (EvaluationLink"
 		"      (GroundedPredicateNode \"scm: cog-tv\")"
-		"      (EvaluationLink (stv 1.000000 1.000000)"
+		"      (EvaluationLink"
 		"        (PredicateNode \"contain\")"
 		"        (ListLink"
 		"          (ConceptNode \"treatment-1\")"
@@ -297,7 +297,7 @@ void ConstantClausesUTest::test_complex()
 		"            (TypeNode \"ConceptNode\")"
 		"          )"
 		"          (AndLink"
-		"            (EvaluationLink (stv 1.000000 1.000000)"
+		"            (EvaluationLink"
 		"              (PredicateNode \"contain\")"
 		"              (ListLink"
 		"                (ConceptNode \"treatment-1\")"
@@ -322,7 +322,7 @@ void ConstantClausesUTest::test_complex()
 		"            (VariableNode \"$X\")"
 		"            (TypeNode \"ConceptNode\")"
 		"          )"
-		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"          (EvaluationLink"
 		"            (PredicateNode \"contain\")"
 		"            (ListLink"
 		"              (ConceptNode \"treatment-1\")"
@@ -347,7 +347,7 @@ void ConstantClausesUTest::test_complex()
 		"    )"
 		"    (EvaluationLink"
 		"      (GroundedPredicateNode \"scm: cog-tv\")"
-		"      (AndLink (stv 1.000000 1.000000)"
+		"      (AndLink"
 		"        (LambdaLink"
 		"          (TypedVariableLink"
 		"            (VariableNode \"$X\")"
@@ -366,7 +366,7 @@ void ConstantClausesUTest::test_complex()
 		"            (VariableNode \"$X\")"
 		"            (TypeNode \"ConceptNode\")"
 		"          )"
-		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"          (EvaluationLink"
 		"            (PredicateNode \"contain\")"
 		"            (ListLink"
 		"              (ConceptNode \"treatment-1\")"
@@ -389,7 +389,7 @@ void ConstantClausesUTest::test_complex()
 		"        )"
 		"      )"
 		"    )"
-		"    (EvaluationLink (stv 1.000000 1.000000)"
+		"    (EvaluationLink"
 		"      (PredicateNode \"contain\")"
 		"      (ListLink"
 		"        (ConceptNode \"treatment-1\")"
@@ -402,8 +402,9 @@ void ConstantClausesUTest::test_complex()
 		"    ))"
 		"  )"
 		"  (ConceptNode \"B\")"
+		")"
 		")");
-	Handle result = bindlink(as, bl);
+	Handle result = HandleCast(bl->execute(as.get()));
 	Handle expected = al(SET_LINK, B);
 
 	TS_ASSERT_EQUALS(result, expected);
@@ -423,10 +424,11 @@ void ConstantClausesUTest::test_constant_pattern()
 	AtomSpacePtr derived_as(as);
 	Handle DA = derived_as->add_node(CONCEPT_NODE, "DA"),
 		DB = derived_as->add_node(CONCEPT_NODE, "DB"),
-		bl = derived_as->add_link(BIND_LINK,
-		                         derived_as->add_link(INHERITANCE_LINK, DA, DB),
-		                         DB),
-		result = bindlink(as, bl),
+		bl = derived_as->add_link(COLLECTION_OF_LINK,
+		                         derived_as->add_link(QUERY_LINK,
+		                                             derived_as->add_link(INHERITANCE_LINK, DA, DB),
+		                                             DB)),
+		result = HandleCast(bl->execute(as.get())),
 		expected = al(SET_LINK, DB);
 	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -461,7 +463,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	eval.eval("(load-from-path \"blair-witch.scm\")");
 
 	Handle query = eval.eval_h("find-something");
-	Handle result = bindlink(as, query);
+	Handle result = HandleCast(query->execute(as.get()));
 	Handle expected = al(SET_LINK, A);
 
 	logger().debug() << "y result = " << oc_to_string(result);
@@ -470,7 +472,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	TS_ASSERT_EQUALS(result, expected);
 
 	query = eval.eval_h("find-nothing"),
-	result = bindlink(as, query),
+	result = HandleCast(query->execute(as.get())),
 	expected = al(SET_LINK);
 
 	logger().debug() << "n result = " << oc_to_string(result);
@@ -489,7 +491,7 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 	eval.eval("(load-from-path \"constant-scope.scm\")");
 
 	Handle query = eval.eval_h("query"),
-		result = satisfying_set(as, query),
+		result = HandleCast(query->execute(as.get())),
 		expected = eval.eval_h("expected");
 	HandleSet results(result->getOutgoingSet().begin(),
 	                  result->getOutgoingSet().end()),

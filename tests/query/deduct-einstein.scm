@@ -10,13 +10,11 @@
 ;; expression of facts to be closely tied to human patterns of speech.
 ;; Being "efficient" or "clever" is NOT the point.
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ;; A little handly-dandy utility to avoid over-reporting of "obvious"
 ;; results. We declare that person1 is the same as person1, etc.
 ;; A kind-of pauli-exclusion-principle at work.
 (define (same person)
-	(EvaluationLink (stv 1 1)
+	(EvaluationLink
 		(PredicateNode "IsSamePerson")
 		(ListLink
 			(FeatureNode person) ; AvatarNode
@@ -28,7 +26,7 @@
 ;; A declaration of fact: it is true that pred has value for person.
 (define (fact person pred value)
 	(same person)
-	(EvaluationLink (stv 1 1)
+	(EvaluationLink
 		(PredicateNode pred)
 		(ListLink
 			(FeatureNode person)
@@ -41,7 +39,7 @@
 (define (neighbor person1 person2)
 	(same person1)
 	(same person2)
-	(EvaluationLink (stv 1 1)
+	(EvaluationLink
 		(PredicateNode "Neighbor")
 		(ListLink
 			(FeatureNode person1)
@@ -52,7 +50,7 @@
 
 ;; A left-of predicate: one house is left of another
 (define (left-of house1 house2)
-	(EvaluationLink (stv 1 1)
+	(EvaluationLink
 		(PredicateNode "LeftOf")
 		(ListLink
 			(ConceptNode house1)
@@ -139,7 +137,7 @@
 ;; State some implicitly assumed facts about neighboring houses
 ;; This is the 'successor' function for ordinal numbers.
 (define (successor house1 house2)
-	(EvaluationLink (stv 1 1)
+	(EvaluationLink
 		(PredicateNode "Successor")
 		(ListLink
 			(ConceptNode house1)

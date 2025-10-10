@@ -23,7 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
 
 using namespace opencog;
 
@@ -68,7 +67,7 @@ public:
 	void test_hide_1();
 	void test_hide_2();
 	void test_rule();
-	void test_ill_bind();
+	void test_ill_query();
 	void test_trivial_scope();
 };
 
@@ -243,9 +242,11 @@ void ScopeUTest::test_hide_1()
 	Handle forall = eval->eval_h("forall");
 	Handle varx = forall->getOutgoingAtom(0);
 
-	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0);
+	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0)->getOutgoingAtom(0);
 	Handle patvar = forpat->getOutgoingAtom(0);
 
+	printf("varx = %s\n", varx->to_string().c_str());
+	printf("patvar = %s\n", patvar->to_string().c_str());
 	// This unit test doesn't test anything critical if the pattern
 	// and the ground don't happen to have the same variable.
 	TS_ASSERT_EQUALS(varx, patvar);
@@ -270,8 +271,8 @@ void ScopeUTest::test_hide_2()
 
 	std::string eval_result = eval->eval("(load-from-path \"tests/query/scope-hide.scm\")");
 	Handle rule = eval->eval_h("rule");
-	Handle result = bindlink(as, rule);
-	Handle expected = al(SET_LINK, rule->getOutgoingAtom(2));
+	Handle result = HandleCast(rule->execute(as.get()));
+	Handle expected = al(SET_LINK, rule->getOutgoingAtom(0)->getOutgoingAtom(2));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -289,24 +290,24 @@ void ScopeUTest::test_rule()
 		"(RuleLink"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$A\")"
-		"    (TypeNode \"BindLink\"))"
+		"    (TypeNode \"MeetLink\"))"
 		"  (DontExecLink (DefinedSchemaNode \"deduction-inheritance-rule\"))"
 		"  (DontExecLink (VariableNode \"$A\")))"
 		);
 	Handle query = eval->eval_h(
-		"(GetLink"
+		"(CollectionOf (Meet"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$Rule\")"
 		"    (TypeNode \"DefinedSchemaNode\"))"
 		"  (RuleLink"
 		"    (TypedVariableLink"
 		"      (VariableNode \"$A\")"
-		"      (TypeNode \"BindLink\"))"
+		"      (TypeNode \"MeetLink\"))"
 		"    (DontExecLink (VariableNode \"$Rule\"))"
-		"    (DontExecLink (VariableNode \"$A\"))))"
+		"    (DontExecLink (VariableNode \"$A\")))))"
 		);
 
-	Handle result = satisfying_set(as, query);
+	Handle result = HandleCast(query->execute(as.get()));
 	Handle expected =
 		al(SET_LINK,
 		   eval->eval_h("(DefinedSchemaNode \"deduction-inheritance-rule\")"));
@@ -319,11 +320,11 @@ void ScopeUTest::test_rule()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void ScopeUTest::test_ill_bind()
+void ScopeUTest::test_ill_query()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(Bind (Variable \"$X\"))"));
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_v("(Query (Variable \"$X\"))"));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

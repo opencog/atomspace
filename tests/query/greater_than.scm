@@ -3,7 +3,7 @@
 ;
 ; Test data for the GroundedPredicateNode, which is a virtual node.
 ; This declares the net worth of four individuals.  It also declares
-; four BindLinks, which find everyone who is richer.  The greater-than
+; four QueryLinks, which find everyone who is richer.  The greater-than
 ; comparison of richness is performed via the virtual link evaluation.
 ;
 (EvaluationLink
@@ -39,7 +39,8 @@
 )
 
 (define (richer-than-person-x-cmp person-x comp-link)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$who")
 			(TypedVariableLink
@@ -73,6 +74,7 @@
 
 		;; output result: just the concept node of who it is.
 		(VariableNode "$who")
+	)
 	)
 )
 

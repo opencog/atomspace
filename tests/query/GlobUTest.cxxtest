@@ -763,27 +763,27 @@ void GlobUTest::test_multi_pivot(void)
 		"			(ConceptNode \"blah\"))))"
 	);
 
-	Handle plain = eval->eval_h("(cog-execute! (CollectionOf glob-unify-plain))");
+	Handle plain = eval->eval_h("(cog-execute! glob-unify-plain)");
 	printf("unify-plain got %s\n", plain->to_string().c_str());
 	TS_ASSERT_EQUALS(1, plain->get_arity());
 	TS_ASSERT_EQUALS(plain, response);
 
-	Handle tall = eval->eval_h("(cog-execute! (CollectionOf glob-unify-tall))");
+	Handle tall = eval->eval_h("(cog-execute! glob-unify-tall)");
 	printf("unify-tall got %s\n", tall->to_string().c_str());
 	TS_ASSERT_EQUALS(1, tall->get_arity());
 	TS_ASSERT_EQUALS(tall, response);
 
-	Handle pivot = eval->eval_h("(cog-execute! (CollectionOf glob-multi-pivot))");
+	Handle pivot = eval->eval_h("(cog-execute! glob-multi-pivot)");
 	printf("multi-pivot got %s\n", pivot->to_string().c_str());
 	TS_ASSERT_EQUALS(1, pivot->get_arity());
 	TS_ASSERT_EQUALS(pivot, response);
 
-	Handle chase = eval->eval_h("(cog-execute! (CollectionOf glob-chase-pivot))");
+	Handle chase = eval->eval_h("(cog-execute! glob-chase-pivot)");
 	printf("chase-pivot got %s\n", chase->to_string().c_str());
 	TS_ASSERT_EQUALS(1, chase->get_arity());
 	TS_ASSERT_EQUALS(chase, chesponse);
 
-	Handle mhase = eval->eval_h("(cog-execute! (CollectionOf glob-chase-multi-pivot))");
+	Handle mhase = eval->eval_h("(cog-execute! glob-chase-multi-pivot)");
 	printf("multi-chase got %s\n", mhase->to_string().c_str());
 	TS_ASSERT_EQUALS(1, mhase->get_arity());
 	TS_ASSERT_EQUALS(mhase, chesponse);

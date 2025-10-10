@@ -22,7 +22,7 @@
 )
 
 (define get-put
-(Get
+(CollectionOf (Meet
   (TypedVariable
     (Variable "$P")
     (Type "PutLink"))
@@ -30,7 +30,7 @@
     (Variable "$P")
     (Evaluation
       (GroundedPredicate "scm-eager: well-formed?")
-      (Variable "$P"))))
+      (Variable "$P")))))
 )
 
 (define (well-formed? P)

@@ -64,7 +64,8 @@
 )
 
 (define (threshold)
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableList
 			(VariableNode "$who")
 			(VariableNode "$how_much")
@@ -106,5 +107,6 @@
 				(VariableNode "$how_much")
 			)
 		)
+	)
 	)
 )

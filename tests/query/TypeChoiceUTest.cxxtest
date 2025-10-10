@@ -25,8 +25,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
-#include "imply.h"
-
 
 using namespace opencog;
 
@@ -89,14 +87,14 @@ void TypeChoiceUTest::setUp(void)
 		         an(TYPE_NODE, "LambdaLink"))));
 
 	connected_pattern =
-		al(GET_LINK,
+		al(COLLECTION_OF_LINK, {al(MEET_LINK,
 		   type_choice_decl,
-		   al(IMPLICATION_LINK, X, Y));
+		   al(IMPLICATION_LINK, X, Y))});
 
 	disconnected_pattern =
-		al(GET_LINK,
+		al(COLLECTION_OF_LINK, {al(MEET_LINK,
 		   type_choice_decl,
-		   al(AND_LINK, X, Y));
+		   al(AND_LINK, X, Y))});
 
 	predicate = an(PREDICATE_NODE, "P");
 
@@ -120,7 +118,7 @@ void TypeChoiceUTest::test_connected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(as, connected_pattern);
+	Handle result = HandleCast(connected_pattern->execute(as.get()));
 	Handle expected = al(SET_LINK, al(LIST_LINK, predicate, lambda));
 
 	logger().debug() << "result = " << result->to_string();
@@ -136,7 +134,7 @@ void TypeChoiceUTest::test_disconnected()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle result = satisfying_set(as, disconnected_pattern);
+	Handle result = HandleCast(disconnected_pattern->execute(as.get()));
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK, lambda, predicate),
 	                     al(LIST_LINK, predicate, predicate),
@@ -168,7 +166,7 @@ void TypeChoiceUTest::test_disconnected()
  *         (UnquoteLink (VariableNode "$B"))))
  *
  * (define forall-instantiation-get
- *   (Get
+ *   (Meet
  *      forall-instantiation-vardecl
  *      forall-instantiation-body))
  *
@@ -221,9 +219,9 @@ void TypeChoiceUTest::test_forall()
 		                               al(FORALL_LINK,
 		                                  al(UNQUOTE_LINK, TyVs),
 		                                  al(UNQUOTE_LINK, B))),
-		forall_instantiation_get = al(GET_LINK,
+		forall_instantiation_get = al(COLLECTION_OF_LINK, {al(MEET_LINK,
 		                              forall_instantiation_vardecl,
-		                              forall_instantiation_body),
+		                              forall_instantiation_body)}),
 		X = an(VARIABLE_NODE, "$X"),
 		CT = an(TYPE_NODE, "ConceptNode"),
 		X_vardecl = al(TYPED_VARIABLE_LINK, X, CT),
@@ -237,7 +235,7 @@ void TypeChoiceUTest::test_forall()
 		                      forall_candidate_vardecl,
 		                      forall_candidate_body);
 
-	Handle result = satisfying_set(as, forall_instantiation_get);
+	Handle result = HandleCast(forall_instantiation_get->execute(as.get()));
 	Handle expected = al(SET_LINK,
 	                     al(LIST_LINK,
 	                        forall_candidate_vardecl,

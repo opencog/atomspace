@@ -5,12 +5,13 @@
 ;; blair-witch is here to emphasize the weirdness of the bug.
 
 ;; Grounded Predicate
-(define (truth X) (stv 1 1))
-(define (alternative-fact X) (stv 0 1))
+(define (truth X) (cog-new-stv 1 1))
+(define (alternative-fact X) (cog-new-stv 0 1))
 
 ;; Query
 (define find-something
-(BindLink
+(CollectionOf
+(QueryLink
   (AndLink
     (VariableNode "$f-lamb-e84bdd8")
     (NumberNode "2.000000")
@@ -21,9 +22,11 @@
   )
   (Concept "A"))
 )
+)
 
 (define find-nothing
-(BindLink
+(CollectionOf
+(QueryLink
   (AndLink
     (VariableNode "$f-lamb-e84bdd8")
     (NumberNode "2.000000")
@@ -33,4 +36,5 @@
     )
   )
   (Concept "A"))
+)
 )

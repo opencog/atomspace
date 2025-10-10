@@ -25,8 +25,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Handle.h>
-#include "imply.h"
-
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
@@ -98,7 +96,7 @@ void NoExceptionUTest::test_exception()
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bl);
 
 	// We expect NOT to catch an error.
-	TS_ASSERT_THROWS_NOTHING(bindlink(as, bl));
+	TS_ASSERT_THROWS_NOTHING(bl->execute(as.get()));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

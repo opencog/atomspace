@@ -17,13 +17,15 @@
 ; the first constant link in the clause is the quote ... 
 ; and that's won't provide the desired start ...
 (define bindy
-	(BindLink
+	(CollectionOf
+	(QueryLink
 		(VariableNode "$stuff")
 		(EvaluationLink
 			(QuoteLink (GroundedPredicateNode "scm:do_stuff"))
 			(VariableNode "$stuff")
 		)
 		(VariableNode "$stuff")
+	)
 	)
 )
 
@@ -36,7 +38,8 @@
 ; Pattern uses QuoteLink to match TimesLink without
 ; making actual calculations
 (define get-times-link
-	(GetLink
+	(CollectionOf
+	(MeetLink
 		(VariableList
 			(VariableNode "$a")
 			(VariableNode "$b")
@@ -48,4 +51,5 @@
 				)
 			)
 		)
+	)
 	)

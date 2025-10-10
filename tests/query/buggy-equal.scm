@@ -22,7 +22,7 @@
 
 
 ; --------------------------------------------------------------------
-;; The Bindlink from bug opencog/opencog#1520, with one change:
+;; The QueryLink from bug opencog/opencog#1520, with one change:
 ;; Use NotLink instead of AbsentLink.
 ;;
 ;; Absence is looking for the lack of a pattern.

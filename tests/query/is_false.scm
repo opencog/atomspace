@@ -10,7 +10,7 @@
 
 ;; Query all concepts
 (define query
-  (Get
+  (Meet
     (TypedVariable
       (Variable "$C")
       (Type 'Concept))
@@ -18,7 +18,7 @@
 
 ;; Query only false concepts
 (define false-query
-  (Get
+  (Meet
     (TypedVariable
       (Variable "$C")
       (Type 'Concept))

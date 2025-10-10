@@ -28,7 +28,7 @@
 (define (dummy x) (stv 1 1))
 
 (define query
-  (BindLink
+  (CollectionOf (Query
     (AndLink
       (EvaluationLink
         (GroundedPredicateNode "scm: dummy")
@@ -61,5 +61,5 @@
       )
     )
     (Concept "OK")
-  )
+  ))
 )

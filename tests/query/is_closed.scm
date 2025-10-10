@@ -14,7 +14,7 @@
 
 ;; Query all inheritance links
 (define query
-  (Get
+  (Meet
     (TypedVariable
       (Variable "$I")
       (Type 'Inheritance))
@@ -22,7 +22,7 @@
 
 ;; Query only inheritance links
 (define closed-query
-  (Get
+  (Meet
     (TypedVariable
       (Variable "$I")
       (Type 'Inheritance))

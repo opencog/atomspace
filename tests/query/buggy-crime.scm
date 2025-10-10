@@ -6,7 +6,7 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
-(RuleLink (stv .99 .99)
+(RuleLink
     (AndLink
         (InheritanceLink
             (VariableNode "$x")
@@ -33,7 +33,7 @@
 ; In fact, the pattern has no variables in it at all, since any
 ; quoted variable is not a variable, but is a constant.
 (define (query_rule_bad)
-    (BindLink (stv 1 1)
+    (QueryLink
         (VariableNode "$x")
         (InheritanceLink
             (QuoteLink
@@ -61,7 +61,8 @@
 ;
 ; Conclude: the below will find only one grounding!
 (define query_rule_good
-    (BindLink (stv 1 1)
+    (CollectionOf
+    (QueryLink
         (VariableNode "$zzz")
         (InheritanceLink
             (VariableNode "$zzz")
@@ -71,5 +72,6 @@
             (VariableNode "$zzz")
             (ConceptNode "criminal")
         )
+    )
     )
 )

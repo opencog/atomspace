@@ -23,9 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include "imply.h"
-
-
 using namespace opencog;
 
 class BuggyBindLinkUTest: public CxxTest::TestSuite
@@ -79,7 +76,7 @@ void BuggyBindLinkUTest::test_implication_introduction(void)
     Handle implication_introduction_rule =
 	    eval.eval_h("implication-introduction-rule");
 
-    Handle result = bindlink(as, implication_introduction_rule);
+    Handle result = HandleCast(implication_introduction_rule->execute(as.get()));
     logger().debug() << "Result is this:\n" << result->to_string();
 
     TS_ASSERT_EQUALS(0, result->get_arity());

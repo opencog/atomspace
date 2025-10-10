@@ -6,10 +6,8 @@
 ;; Part of the "Einstein puzzle" demo.
 ;;
 
-(define (stv mean conf) (cog-new-stv mean conf))
-
 ;; The Englishman lives in the red house.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "Nationality")
 	(ListLink
 		(FeatureNode "person1") ; AvatarNode
@@ -17,7 +15,7 @@
 	)
 )
 
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person1") ; AvatarNode
@@ -26,7 +24,7 @@
 )
 
 ;; The person who lives in the red house keeps fish.
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "LivesIn")
 	(ListLink
 		(FeatureNode "person2")
@@ -34,7 +32,7 @@
 	)
 )
 
-(EvaluationLink (stv 1 1)
+(EvaluationLink
 	(PredicateNode "KeepsPet")
 	(ListLink
 		(FeatureNode "person2")
