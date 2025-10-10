@@ -34,6 +34,7 @@
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -765,7 +766,23 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	{
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
 		Handle args(createLink(std::move(cargs), LIST_LINK));
-		return TruthValueCast(gpn->execute_args(as, args, silent));
+		ValuePtr result = gpn->execute_args(as, args, silent);
+
+		// Check if result is a BoolValue and convert to TruthValue
+		if (result->is_type(BOOL_VALUE))
+		{
+			BoolValuePtr bvp = BoolValueCast(result);
+			std::vector<bool> bvals = bvp->value();
+			if (bvals.empty())
+				return TruthValue::FALSE_TV();
+			// Use first boolean value
+			if (bvals[0])
+				return createSimpleTruthValue(1.0, 1.0);
+			else
+				return createSimpleTruthValue(0.0, 1.0);
+		}
+
+		return TruthValueCast(result);
 	}
 
 	// If it's evaluatable, assume it has some free variables.

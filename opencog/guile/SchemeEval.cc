@@ -39,6 +39,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -1095,6 +1096,12 @@ ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 			// At any rate, we must not return a TV of any sort, here.
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 		}
+		// Check if the return value is a scheme boolean (#t or #f)
+		// and convert to BoolValue
+		if (scm_is_bool(smob))
+		{
+			return createBoolValue(scm_to_bool(smob) != 0);
+		}
 		return SchemeSmob::scm_to_protom(smob);
 	}
 
@@ -1123,7 +1130,16 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 	SchemeEval *self = (SchemeEval *) p;
 	SCM smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
 	if (self->eval_error()) return self;
-	self->_retval = SchemeSmob::scm_to_protom(smob);
+	// Check if the return value is a scheme boolean (#t or #f)
+	// and convert to BoolValue
+	if (scm_is_bool(smob))
+	{
+		self->_retval = createBoolValue(scm_to_bool(smob) != 0);
+	}
+	else
+	{
+		self->_retval = SchemeSmob::scm_to_protom(smob);
+	}
 	return self;
 }
 
