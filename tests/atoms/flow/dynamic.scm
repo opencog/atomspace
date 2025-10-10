@@ -9,7 +9,10 @@
 (define A (Concept "A"))
 (define B (Concept "B"))
 
-(define tvkey (Predicate "*-TruthValueKey-*"))
+(define tvkey (Predicate "*-Fake TruthValueKey-*"))
+(define (set-fake-tv! ATOM TV) (cog-set-value! ATOM tvkey TV))
+(define (fake-tv ATOM) (cog-value ATOM tvkey))
+
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
 
