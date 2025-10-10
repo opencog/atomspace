@@ -62,7 +62,7 @@
 	)
 )
 
-;; The actual BindLink that will be tested.
+;; The actual QueryLink that will be tested.
 (define (richer-than-person-x person-x)
 	(CollectionOf
 	(QueryLink

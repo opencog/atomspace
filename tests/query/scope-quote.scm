@@ -10,7 +10,7 @@
 ;
 ; There are two variants in here: one with an AndLink, and one
 ; without.  The issue is that the AndLink has a special meaning for
-; the BindLink, as opposed to PLN, and thus must be quoted. Also,
+; the QueryLink, as opposed to PLN, and thus must be quoted. Also,
 ; it is an unordered link, so takes a different path through the
 ; pattern matcher.  Thus, the second variant uses a ListLink instead,
 ; to simplify debugging, in case there is a bug.
