@@ -62,6 +62,7 @@ class scope_exit
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
@@ -1036,6 +1037,15 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     SCOPE_GUARD(&gstate) {
         PyGILState_Release(gstate);
     } SCOPE_GUARD_END;
+
+    // Check if the return value is a Python boolean (True or False)
+    // and convert to BoolValue
+    if (PyBool_Check(pyValue))
+    {
+        bool bval = (pyValue == Py_True);
+        Py_DECREF(pyValue);
+        return createBoolValue(bval);
+    }
 
     // Did we actually get a Value?
     // One way to do this would be to say

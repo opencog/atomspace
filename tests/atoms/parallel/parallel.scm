@@ -6,7 +6,7 @@
 (use-modules (opencog) (opencog exec))
 
 (define nnn 0)
-(define (incr) (set! nnn (+ nnn 1)) (stv 1 0))
+(define (incr) (set! nnn (+ nnn 1)) #t)
 
 (define pllel
 	(Parallel

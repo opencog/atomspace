@@ -40,7 +40,7 @@
 
 
 (define trig 0)
-(define (incr-trig) (set! trig (+ trig 1)) (stv 1 1))
+(define (incr-trig) (set! trig (+ trig 1)) #t)
 
 (define or-presence
 	(SatisfactionLink

@@ -9,13 +9,15 @@
 (define tname "or-link-test")
 (test-begin tname)
 
-; Initial data. Note the (stv 1 1) is necessary, because the IsTrueLink
-; will fail with the default TruthValue of (stv 1 0) (true but not
-; confident).
+; Initial data. The IsTrueLink looks at the BooValue directly.
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
 (State (Concept "you") (Concept "thirsty"))
 (State (Concept "me") (Concept "hungry"))
-(Evaluation (stv 1 1) (Predicate "cold") (Concept "me"))
-(Evaluation (stv 0.6 0.1) (Predicate "tired") (Concept "her"))
+(cog-set-value! (Evaluation (Predicate "cold") (Concept "me"))
+	tvkey (BoolValue #t))
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	tvkey (BoolValue #t))
 
 (define qr2
 	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
@@ -60,11 +62,27 @@
 			(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))
 			(IsTrue (Evaluation (Predicate "tired") (Variable "someone")))))))
 
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	tvkey (BoolValue #f))
+
 (test-assert "thirsty or cold but not tired"
 	(equal? (cog-execute! qr6) (Set (Concept "you") (Concept "me"))))
 
 ; ------------
-(define tvkey (Predicate "*-TruthValueKey-*"))
+; Add the stv to force it to be strictly true.
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	tvkey (BoolValue #t))
+
+(test-assert "thirsty or cold or tired"
+	(equal? (cog-execute! qr6)
+		(Set (Concept "you") (Concept "me") (Concept "her"))))
+
+; ------------
+(cog-set-value! (Evaluation (Predicate "cold") (Concept "me"))
+	tvkey (FloatValue 0.9 0.8))
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	tvkey (FloatValue 0.6 0.1))
+
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 
 (define qr7
@@ -93,14 +111,6 @@
 
 (test-assert "not strong tired no confidence"
 	(equal? (cog-execute! qr8)
-		(Set (Concept "you") (Concept "me") (Concept "her"))))
-
-; ------------
-; Add the stv to force it to be strictly true.
-(Evaluation (stv 1 1) (Predicate "tired") (Concept "her"))
-
-(test-assert "thirsty or cold or tired"
-	(equal? (cog-execute! qr6)
 		(Set (Concept "you") (Concept "me") (Concept "her"))))
 
 (test-end tname)

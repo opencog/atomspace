@@ -77,7 +77,7 @@
 (define (do-stuff atom)
 	(set! cnt (+ cnt 1))
 	(format #t "At count ~a found this part: ~a \n" cnt atom)
-	(stv 1 1))
+	#t)
 
 (DefineLink
 	(DefinedPredicate "Counter Printer")

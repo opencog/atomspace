@@ -298,16 +298,12 @@
 			(Concept "I"))))
 
 ; Only returns true if ATOM is "C"
-(define-public (match-c ATOM)
-	(if (equal? (Concept "C") ATOM)
-		(stv 1 1)
-		(stv 0 1)))
+(define (match-c ATOM)
+	(equal? (Concept "C") ATOM))
 
 ; Only returns true if ATOM is "DEF"
-(define-public (match-def ATOM)
-	(if (equal? (List (Concept "D") (Concept "E") (Concept "F")) ATOM)
-		(stv 1 1)
-		(stv 0 1)))
+(define (match-def ATOM)
+	(equal? (List (Concept "D") (Concept "E") (Concept "F")) ATOM))
 
 ; The situation below is that there are many different ways
 ; to ground all these three globs, but the black-box link

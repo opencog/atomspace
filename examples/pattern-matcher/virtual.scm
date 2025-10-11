@@ -67,8 +67,8 @@
 (define (cmp nx ny)
 	(define x (string->number (cog-name nx)))
 	(define y (string->number (cog-name ny)))
-	(set! cnt (+ cnt 1)) 
-	(if (> x y) (stv 1 1) (stv 0 1)))
+	(set! cnt (+ cnt 1))
+	(> x y))
 
 ; A query that looks for cities where there are more phones than people.
 (define phone-inversion

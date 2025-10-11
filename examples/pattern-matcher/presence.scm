@@ -26,11 +26,11 @@
 
 ; Print a message, return a TV value
 (define (tv-print-msg)
-	(display "Hello, I've been triggered!\n") (stv 1 1))
+	(display "Hello, I've been triggered!\n") #t)
 
 ; Print an atom, return a TV value
 (define (tv-print-atom atom)
-	(format #t "Hello, I got this atom: ~a\n" atom) (stv 1 1))
+	(format #t "Hello, I got this atom: ~a\n" atom) #t)
 
 ; Print an Atom, return an Atom.
 (define (atom-print-atom atom)

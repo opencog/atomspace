@@ -65,16 +65,10 @@ void IsTrueUTest::setUp(void)
 }
 
 /*
- * Basic IsTrueLink unit test. The atomspace contains 2 atoms, one
- * with a TRUE_TV
+ * Basic IsTrueLink unit test. The atomspace contains 3 atoms;
+ * one with (BoolValue #t) One with (BoolValue #f) and one with nothing.
  *
- * (Concept "A" (stv 1 1))
- *
- * one without
- *
- * (Concept "B")
- *
- * querying such atomspace with the condition that the candidates are
+ * Querying such atomspace with the condition that the candidates are
  * true should return only the first atom.
  */
 void IsTrueUTest::test_basic_is_true(void)
@@ -92,7 +86,7 @@ void IsTrueUTest::test_basic_is_true(void)
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "true_results = " << oc_to_string(true_results);
 
-	TS_ASSERT_EQUALS(2, results->size());
+	TS_ASSERT_EQUALS(3, results->size());
 	TS_ASSERT_EQUALS(1, true_results->size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);

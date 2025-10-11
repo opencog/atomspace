@@ -17,7 +17,7 @@
 (define (like-pie ATOM)
 	(define label (cog-name ATOM))
 	(format #t "I was told ~A" ATOM)
-	(if (string-contains label "pie") (stv 1 1) (stv 0 1)))
+	(if (string-contains label "pie") #t #f))
 
 (define min-gpn
 	(MinimalJoin

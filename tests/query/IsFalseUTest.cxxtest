@@ -65,16 +65,10 @@ void IsFalseUTest::setUp(void)
 }
 
 /*
- * Basic IsFalseLink unit test. The atomspace contains 2 atoms, one
- * with a FALSE_TV
+ * Basic IsFalseLink unit test. The atomspace contains 3 atoms;
+ * one with (BoolValue #f) one with (BoolValue #t) and one with nothing. 
  *
- * (Concept "A" (stv 1 1))
- *
- * one without
- *
- * (Concept "B")
- *
- * querying such atomspace with the condition that the candidates are
+ * Querying such atomspace with the condition that the candidates are
  * false should return only the first atom.
  */
 void IsFalseUTest::test_basic_is_false(void)
@@ -92,7 +86,7 @@ void IsFalseUTest::test_basic_is_false(void)
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "false_results = " << oc_to_string(false_results);
 
-	TS_ASSERT_EQUALS(2, results->size());
+	TS_ASSERT_EQUALS(3, results->size());
 	TS_ASSERT_EQUALS(1, false_results->size());
 
 	logger().debug("END TEST: %s", __FUNCTION__);

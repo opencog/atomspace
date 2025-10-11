@@ -70,13 +70,24 @@
 )
 )
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
+(define (get-tv ATOM)
+	(cog-value ATOM tvkey))
+
+(define (get-tv-mean TV)
+	(if TV (cog-value-ref TV 0) #f))
+
+(define (get-tv-confidence TV)
+	(if TV (cog-value-ref TV 1) #f))
+
 (define (get-mean ATOM)
-	(define tv (cog-tv ATOM))
-	(if tv (cog-tv-mean tv) 1))
+	(define tv (get-tv ATOM))
+	(if tv (get-tv-mean tv) 1))
 
 (define (get-confidence ATOM)
-	(define tv (cog-tv ATOM))
-	(if tv (cog-tv-confidence tv) 0))
+	(define tv (get-tv ATOM))
+	(if tv (get-tv-confidence tv) 0))
 
 ;; Schema returning undefined handle
 (define (crisp-modus-ponens-formula A AB B)
@@ -85,13 +96,11 @@
             (sAB (get-mean AB))
             (cAB (get-confidence AB)))
         (if (and (>= sA 0.5) (>= cA 0.5) (>= sAB 0.5) (>= cAB 0.5))
-            (cog-set-tv! B (stv 1 1)))))
+            (cog-set-value! B tvkey (FloatValue 1 1)))))
 
 ;; Grounds
-(Implication (stv 1 1)
- (Predicate "R")
- (Predicate "S"))
+(cog-set-value! (Implication (Predicate "R") (Predicate "S"))
+	tvkey (FloatValue 1 1))
 
-(Implication (stv 1 1)
- (Predicate "S")
- (Predicate "T"))
+(cog-set-value! (Implication (Predicate "S") (Predicate "T"))
+	tvkey (FloatValue 1 1))

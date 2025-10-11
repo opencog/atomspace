@@ -25,7 +25,7 @@
 
 ;; Query
 
-(define (dummy x) (stv 1 1))
+(define (dummy x) #t)
 
 (define query
   (CollectionOf (Query

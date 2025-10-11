@@ -36,6 +36,7 @@ SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 
 ADD_GUILE_TEST(CopyAtomTest copy-atom-test.scm)
 ADD_GUILE_TEST(InlineValuesTest inline-values-test.scm)
+ADD_GUILE_TEST(BooleanPredicateTest boolean-predicate-test.scm)
 
 # Guile-python bridge requires python
 IF (HAVE_CYTHON)

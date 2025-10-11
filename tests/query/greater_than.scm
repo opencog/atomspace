@@ -106,10 +106,7 @@
 ;; -----------------------------------------------------
 ;; This variant uses a hand-rolled scm compare function
 (define (richer a b)
-	(if (> (cog-number a) (cog-number b))
-		(stv 1 1)  ;; true
-		(stv 0 1)  ;; false
-	)
+	(> (cog-number a) (cog-number b))
 )
 
 ; the compare eval link
