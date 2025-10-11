@@ -506,7 +506,7 @@ static TruthValuePtr bool_to_tv(bool truf)
 ///
 /// A different class of Atoms will naturally have fuzzy or
 /// probabilistic valuations associated with them. These are evaluated
-/// by the `tv_eval_scratch()` function.
+/// by the `crisp_eval_scratch()` function.
 ///
 /// Both kinds can be mixed together with one-another. An implicit
 /// conversion from crisp-to-fuzzy and back is performed, when needed,
@@ -533,12 +533,6 @@ static bool crisp_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
                                 const HandleSeq& cargs,
                                 bool silent);
-
-static TruthValuePtr tv_eval_scratch(AtomSpace* as,
-                                     const Handle& evelnk,
-                                     AtomSpace* scratch,
-                                     bool silent,
-                                     bool& try_crispy);
 
 static bool crispy_maybe(AtomSpace* as,
                          const Handle& evelnk,
@@ -690,7 +684,7 @@ static bool crispy_maybe(AtomSpace* as,
 	}
 
 	// -------------------------
-	// Cases that are naturally crisp (moved from tv_eval_scratch)
+	// Cases that are naturally crisp (moved from crisp_eval_scratch)
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -721,7 +715,7 @@ static bool crispy_maybe(AtomSpace* as,
 		if (not is_evaluatable_sat(evelnk))
 		{
 			// Has variables, needs pattern matching - not crisp
-			// Fall through to tv_eval_scratch
+			// Fall through to crisp_eval_scratch
 			failed = true;
 			return false;
 		}
@@ -779,7 +773,7 @@ static bool crispy_maybe(AtomSpace* as,
 		if (pap->is_atom())
 			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
 
-		// Non-atom case - fall through to let tv_eval_scratch handle it
+		// Non-atom case - fall through to let crisp_eval_scratch handle it
 		failed = true;
 		return false;
 	}
@@ -903,26 +897,6 @@ static bool crisp_eval_with_args(AtomSpace* as,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
-static TruthValuePtr tv_eval_scratch(AtomSpace* as,
-                                     const Handle& evelnk,
-                                     AtomSpace* scratch,
-                                     bool silent,
-                                     bool& try_crispy)
-{
-	try_crispy = false;
-	Type t = evelnk->get_type();
-
-	// SatisfactionLink with variables needs pattern matching
-	if (SATISFACTION_LINK == t)
-	{
-		if (not is_evaluatable_sat(evelnk))
-			return evelnk->evaluate(as);
-	}
-
-	try_crispy = true;
-	return nullptr;
-}
-
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& evelnk,
                                           bool silent)
@@ -939,12 +913,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	bool fuzzy;
 	bool tf = crispy_maybe(as, evelnk, scratch, silent, fuzzy);
 	if (not fuzzy) return tf;
-
-	bool fail;
-	const TruthValuePtr& tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                           silent, fail);
-	if (not fail)
-		return tvp->get_mean() >= 0.5;
 
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
