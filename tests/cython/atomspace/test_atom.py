@@ -105,11 +105,11 @@ class AtomTest(TestCase):
 
 def grounded_cond1(*args):
     print(args)
-    return TruthValue(0, 0)
+    return False
 
 def grounded_cond2(*args):
     print(args)
-    return TruthValue(1, 1)
+    return True
 
 import __main__
 
