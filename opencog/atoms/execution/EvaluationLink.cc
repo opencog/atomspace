@@ -913,16 +913,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	{
 		if (not is_evaluatable_sat(evelnk))
 			return evelnk->evaluate(as);
-
-		// Evaluatable case is handled in crispy_maybe
-		try_crispy = true;
-		return nullptr;
-	}
-
-	// Generic evaluatable links
-	if (evelnk->is_evaluatable())
-	{
-		return evelnk->evaluate(scratch, silent);
 	}
 
 	try_crispy = true;
