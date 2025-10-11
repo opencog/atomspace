@@ -12,7 +12,7 @@
 ; Check to make sure that python actually throws an exception,
 ; when it gets the wrong number of arguments passed to it.
 
-; Define a python func returning a TV
+; Define a python func returning a boolean
 (python-eval "
 from opencog.atomspace import AtomSpace, types, tvkey
 from opencog.type_constructors import TruthValue
@@ -24,11 +24,11 @@ def foo(atom_a, atom_b) :
     TV = TruthValue(0.2, 0.69)
     atomspace.add_node(types.ConceptNode, 'Apple').set_value(tvkey, TV)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
-    return TruthValue(0.42, 0.24)
+    return True
 ")
 
 ; Call the python func defined above.
-(define returned-tv
+(define returned-bool
 	(cog-evaluate!
 		(Evaluation
 			(GroundedPredicate "py:foo")
@@ -43,8 +43,8 @@ def foo(atom_a, atom_b) :
 (test-assert "TV on Apple is wrong"
 	(< (abs (- 0.2 (cog-mean (Concept "Apple")))) 0.00001))
 
-(test-assert "returned TV is wrong"
-	(< (abs (- 0.42 (cog-tv-mean returned-tv))) 0.00001))
+(test-assert "returned boolean is wrong"
+	(equal? (stv 1 1) returned-bool))
 
 ; Handy-dandy try-catch wrapper
 (define (catch-wrong-args thunk)
@@ -58,7 +58,7 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that the handy-dandy try-catch wrapper is working.
 (test-assert "Threw exception even when given the right number of arguments"
-	(equal? (SimpleTruthValue 0.42 0.24)
+	(equal? (stv 1 1)
 		(catch-wrong-args (lambda ()
 			(cog-evaluate!
 				(Evaluation
