@@ -231,8 +231,9 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	{
 		try
 		{
-			return ValueCast(EvaluationLink::do_eval_scratch(as,
-			                    term, scratch, silent));
+			if (EvaluationLink::crisp_eval_scratch(as, term, scratch, silent))
+				return ValueCast(TruthValue::TRUE_TV());
+			return ValueCast(TruthValue::FALSE_TV());
 		}
 		catch (const SilentException& ex)
 		{
@@ -482,37 +483,137 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
-static TruthValuePtr bool_to_tv(bool truf)
+/// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
+/// returning a boolean result.
+///
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode and
+///     the DefinedPredicateNode.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
+///
+/// The predicate as a whole is then evaluated and returns bool.
+///
+/// This is called after unwrapping EvaluationLinks of the form
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// or
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         SomeAtom
+///         OtherAtom
+///
+/// (Skipping the ListLink...)
+///
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
+///
+/// For DefinedPredicateNodes, the defintiion is looked up first.
+///
+static bool crisp_eval_with_args(AtomSpace* as,
+                                const Handle& pn,
+                                const HandleSeq& cargs,
+                                bool silent)
 {
-	if (truf) return TruthValue::TRUE_TV();
-	return TruthValue::FALSE_TV();
+	Type pntype = pn->get_type();
+	if (DEFINED_PREDICATE_NODE == pntype)
+	{
+		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->get_type();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->get_type();
+		}
+
+		// If its not a LambdaLink, then I don't know what to do...
+		if (LAMBDA_LINK != dtype)
+			throw SyntaxException(TRACE_INFO,
+				"Expecting definition to be a LambdaLink, got %s",
+				defn->to_string().c_str());
+
+		// Treat LambdaLink as if it were a PutLink -- perform
+		// the beta-reduction, and evaluate the result.
+		LambdaLinkPtr lam(LambdaLinkCast(defn));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	// Treat LambdaLink as if it were a PutLink -- perform
+	// the beta-reduction, and evaluate the result.
+	if (LAMBDA_LINK == pntype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(pn));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	// Throw a silent exception; this is called in some try..catch blocks.
+	if (GROUNDED_PREDICATE_NODE == pntype)
+	{
+		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
+		Handle args(createLink(std::move(cargs), LIST_LINK));
+		ValuePtr result = gpn->execute_args(as, args, silent);
+
+		// Check if result is a BoolValue and return the bool directly
+		if (result->is_type(BOOL_VALUE))
+		{
+			BoolValuePtr bvp = BoolValueCast(result);
+			std::vector<bool> bvals = bvp->value();
+			if (bvals.empty())
+				return false;
+			// Use first boolean value
+			return bvals[0];
+		}
+		if (result->is_type(VOID_VALUE))
+			throwSyntaxException(silent, "GroundedPredicate returned VoidValue");
+
+		throw RuntimeException(TRACE_INFO,
+			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
+			result->to_string().c_str());
+	}
+
+	// If it's evaluatable, assume it has some free variables.
+	// Use the LambdaLink to find those variables (via FreeLink)
+	// and then reduce it.
+	if (nameserver().isA(pntype, EVALUATABLE_LINK))
+	{
+		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	if (silent)
+		throw NotEvaluatableException();
+	throw SyntaxException(TRACE_INFO,
+			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
 /// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
-/// There are two general kinds "truth values" that we are concerned
-/// about.  For many cases, the "truth value" is explicitly a crisp,
-/// binary Boolean-logic truth value, being either "true" or "false"
-/// and having no other qusi-ambiguous, fuzzy or probabilistic
-/// interpretation. Examples include the logical constants TrueLink,
-/// FalseLink, and the logical connectives NotLink, AndLink, OrLink.
-/// Yes, it is possible for these to have other interpretations, e.g.
-/// probabilistic interpretations. That is not what we are doing here:
-/// we are working with uninterpreted logical constants and connectives.
-/// The `crisp_eval_scratch()` function handles the evaluation of Atoms
-/// that have a natural crisp-truth interpretation.
+/// This handles evaluation of all crisp Boolean-logic constructs including:
+/// - Logical constants (TrueLink, FalseLink)
+/// - Logical connectives (NotLink, AndLink, OrLink, SequentialAndLink, etc.)
+/// - Comparison operations (GreaterThanLink, EqualLink, IdenticalLink, etc.)
+/// - Predicates (EvaluationLink with GroundedPredicateNode, DefinedPredicateNode)
+/// - Special forms (PutLink)
+/// - Set operations (MemberLink, SubsetLink, ExclusiveLink)
 ///
-/// A different class of Atoms will naturally have fuzzy or
-/// probabilistic valuations associated with them. These are evaluated
-/// by the `do_eval_scratch()` function.
+/// All evaluation is done with crisp Boolean semantics - there are no
+/// fuzzy or probabilistic truth values involved. Results are always
+/// true or false.
 ///
-/// Both kinds can be mixed together with one-another. An implicit
-/// conversion from crisp-to-fuzzy and back is performed, when needed,
-/// when appropriate. Maybe this is a design flaw? Maybe we should force
-/// the user to declare an explicit conversion?
-///
-/// The implementation here is one big giant case-statement. It works.
+/// The implementation here is one big case-statement. It works.
 /// In the long-run, it might be better to just have C++ classes for
 /// each distinct atom type, and have an `evaluate()` method on each.
 /// Whatever. Performance is probably about the same, and for just right
@@ -528,19 +629,11 @@ static TruthValuePtr bool_to_tv(bool truf)
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-static bool crispy_eval_scratch(AtomSpace* as,
-                                const Handle& evelnk,
-                                AtomSpace* scratch,
-                                bool silent);
-
-static bool crispy_maybe(AtomSpace* as,
-                         const Handle& evelnk,
-                         AtomSpace* scratch,
-                         bool silent,
-                         bool& failed)
+bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
+                                        const Handle& evelnk,
+                                        AtomSpace* scratch,
+                                        bool silent)
 {
-	failed = false;
-
 	Type t = evelnk->get_type();
 
 	// Logical constants
@@ -570,28 +663,28 @@ static bool crispy_maybe(AtomSpace* as,
 	// Crisp-binary-valued Boolean Logical connectives
 	if (NOT_LINK == t)
 	{
-		return not crispy_eval_scratch(as,
+		return not EvaluationLink::crisp_eval_scratch(as,
 		      evelnk->getOutgoingAtom(0), scratch, silent);
 	}
-	else if (AND_LINK == t)
+	if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crispy_eval_scratch(as, h, scratch, silent);
+			bool tv = EvaluationLink::crisp_eval_scratch(as, h, scratch, silent);
 			if (not tv) return false;
 		}
 		return true;
 	}
-	else if (OR_LINK == t)
+	if (OR_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crispy_eval_scratch(as, h, scratch, silent);
+			bool tv = EvaluationLink::crisp_eval_scratch(as, h, scratch, silent);
 			if (tv) return true;
 		}
 		return false;
 	}
-	else if (SEQUENTIAL_AND_LINK == t)
+	if (SEQUENTIAL_AND_LINK == t)
 	{
 		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
@@ -606,13 +699,13 @@ static bool crispy_maybe(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = EvaluationLink::crisp_eval_scratch(as, oset[i], scratch, silent);
 				if (not tv) return false;
 			}
 		} while (is_trec);
 		return true;
 	}
-	else if (SEQUENTIAL_OR_LINK == t)
+	if (SEQUENTIAL_OR_LINK == t)
 	{
 		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
@@ -627,7 +720,7 @@ static bool crispy_maybe(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = EvaluationLink::crisp_eval_scratch(as, oset[i], scratch, silent);
 				if (tv) return true;
 			}
 		} while (is_trec);
@@ -657,188 +750,7 @@ static bool crispy_maybe(AtomSpace* as,
 		return evelnk->bevaluate(scratch, silent);
 	}
 
-	// Special-case for CondLink, which normally is just executable,
-	// and not evaluatable. But if someone is trying to evaluate it,
-	// then we surmise that they really want to execute it, and then
-	// evaluate the clause that it selected. This is what is done here.
-	//
-	// The alternative design, of making the CondLink evaluatable,
-	// results in ambiguities, and breaks several unit tests, which
-	// do NOT want the cond results evaluated (even though they are
-	// evaluatable.) In particular, this is the case for knob-turning
-	// in as-moses.
-	if (COND_LINK == t)
-	{
-		ValuePtr vp = evelnk->execute(scratch, silent);
-		if (vp->is_type(TRUTH_VALUE))
-		{
-			TruthValuePtr tv(TruthValueCast(vp));
-			if (0.5 < tv->get_mean()) return true;
-			return false;
-		}
-		if (not vp->is_atom())
-			return false;
-
-		return crispy_eval_scratch(as, HandleCast(vp), scratch, silent);
-	}
-
-	// A handful of link types that should be auto-converted into
-	// crisp truth values.
-	if (EVALUATION_LINK == t or
-	    DEFINED_PREDICATE_NODE == t)
-	{
-		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-		                 evelnk, scratch, silent));
-		// tv_eval_scratch nelow circa line 814 used to return
-		// (stv 1 0) for DEFAULT_TV. Now it returns nullptr.
-		// Since get_mean was 1.0, we return true for this case.
-		if (nullptr == tv) return true;
-		if (0.5 < tv->get_mean()) return true;
-		return false;
-	}
-
-	failed = true;
-	return false;
-}
-
-static bool crispy_eval_scratch(AtomSpace* as,
-                                const Handle& evelnk,
-                                AtomSpace* scratch,
-                                bool silent)
-{
-	bool failed;
-	bool tf = crispy_maybe(as, evelnk, scratch, silent, failed);
-	if (not failed)
-		return tf;
-
-	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet (crisp). Cannot evaluate %s",
-		evelnk->to_string().c_str());
-
-	return false;
-}
-
-/// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
-///
-/// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode and
-///     the DefinedPredicateNode.
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// The predicate as a whole is then evaluated.
-///
-TruthValuePtr do_eval_with_args(AtomSpace* as,
-                                const Handle& pn,
-                                const HandleSeq& cargs,
-                                bool silent)
-{
-	Type pntype = pn->get_type();
-	if (DEFINED_PREDICATE_NODE == pntype)
-	{
-		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->get_type();
-
-		// Allow recursive definitions. This can be handy.
-		while (DEFINED_PREDICATE_NODE == dtype)
-		{
-			defn = DefineLink::get_definition(defn);
-			dtype = defn->get_type();
-		}
-
-		// If its not a LambdaLink, then I don't know what to do...
-		if (LAMBDA_LINK != dtype)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting definition to be a LambdaLink, got %s",
-				defn->to_string().c_str());
-
-		// Treat LambdaLink as if it were a PutLink -- perform
-		// the beta-reduction, and evaluate the result.
-		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
-	}
-
-	// Treat LambdaLink as if it were a PutLink -- perform
-	// the beta-reduction, and evaluate the result.
-	if (LAMBDA_LINK == pntype)
-	{
-		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
-	}
-
-	// Throw a silent exception; this is called in some try..catch blocks.
-	if (GROUNDED_PREDICATE_NODE == pntype)
-	{
-		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
-		Handle args(createLink(std::move(cargs), LIST_LINK));
-		ValuePtr result = gpn->execute_args(as, args, silent);
-
-		// Check if result is a BoolValue and convert to TruthValue
-		if (result->is_type(BOOL_VALUE))
-		{
-			BoolValuePtr bvp = BoolValueCast(result);
-			std::vector<bool> bvals = bvp->value();
-			if (bvals.empty())
-				return TruthValue::FALSE_TV();
-			// Use first boolean value
-			if (bvals[0])
-				return createSimpleTruthValue(1.0, 1.0);
-			else
-				return createSimpleTruthValue(0.0, 1.0);
-		}
-		if (result->is_type(VOID_VALUE))
-			return nullptr;
-
-		throw RuntimeException(TRACE_INFO,
-			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
-			result->to_string().c_str());
-	}
-
-	// If it's evaluatable, assume it has some free variables.
-	// Use the LambdaLink to find those variables (via FreeLink)
-	// and then reduce it.
-	if (nameserver().isA(pntype, EVALUATABLE_LINK))
-	{
-		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
-	}
-
-	if (silent)
-		throw NotEvaluatableException();
-	throw SyntaxException(TRACE_INFO,
-			"This predicate is not evaluatable: %s", pn->to_string().c_str());
-}
-
-/// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully
-/// result in a fuzzy or probabilistic truth value. See description
-/// for `crispy_eval_scratch()`, up above, for a general explanation.
-/// This function handles miscellaneous Atoms that don't have a natural
-/// interpretation in terms of crisp truth values.
-///
-/// If the argument is an EvaluationLink with a GPN in it, it should
-/// have the following structure:
-///
-///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
-///         ListLink
-///             SomeAtom
-///             OtherAtom
-///
-/// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
-/// on the provided ListLink of arguments.
-///
-static TruthValuePtr tv_eval_scratch(AtomSpace* as,
-                                     const Handle& evelnk,
-                                     AtomSpace* scratch,
-                                     bool silent,
-                                     bool& try_crispy)
-{
-	try_crispy = false;
-	Type t = evelnk->get_type();
+	// -------------------------
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -856,29 +768,17 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		else
 		{
 			// Copy all but the first.
-			// XXX Is there a more efficient way to do this copy?
 			size_t sz = sna.size();
 			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
 		}
 
 		// Extract the args, and run the evaluation with them.
-		TruthValuePtr tvp(do_eval_with_args(scratch,
-		                                    sna.at(0), args, silent));
-		return tvp;
+		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
-	else if (SATISFACTION_LINK == t)
-	{
-		if (not is_evaluatable_sat(evelnk))
-			return evelnk->evaluate(as);
 
-		// If we are here, then we can optimize: we can evaluate
-		// directly, instead of going through the pattern matcher.
-		// The only reason we want to do even this much is to do
-		// tail-recursion optimization, if possible.
-		return EvaluationLink::do_eval_scratch(as,
-		                     evelnk->getOutgoingAtom(0), scratch, silent);
-	}
-	else if (PUT_LINK == t)
+	// I'm confused ... why is this here? Shouldn't PutLink just be executable,
+	// and that's it? XXX FXIME
+	if (PUT_LINK == t)
 	{
 		PutLinkPtr pl(PutLinkCast(evelnk));
 
@@ -904,93 +804,32 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
-		return EvaluationLink::do_eval_scratch(as, red, scratch, silent);
-	}
-	else if (DEFINED_PREDICATE_NODE == t)
-	{
-		return EvaluationLink::do_eval_scratch(as,
-		                       DefineLink::get_definition(evelnk),
-		                       scratch, silent);
+		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
 	}
 
-	else if (nameserver().isA(t, VALUE_OF_LINK))
+	if (DEFINED_PREDICATE_NODE == t)
+	{
+		return EvaluationLink::crisp_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
+	}
+
+	if (nameserver().isA(t, VALUE_OF_LINK))
 	{
 		ValuePtr pap(evelnk->execute(scratch));
 
 		// There might not be a Value at the given key.
 		if (nullptr == pap)
-			return TruthValue::FALSE_TV();
+			return false;
 
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
-			return EvaluationLink::do_eval_scratch(as,
-			                    HandleCast(pap), scratch, silent);
-
-		return TruthValueCast(pap);
+			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
 	}
-	else if (evelnk->is_evaluatable())
-	{
-		return evelnk->evaluate(scratch, silent);
-	}
-	else if ( // Links that evaluate to themselves
-		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
-	{
-		return TruthValueCast(evelnk->getValue(truth_key()));
-	}
-
-	try_crispy = true;
-	return nullptr;
-}
-
-TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                                              const Handle& evelnk,
-                                              AtomSpace* scratch,
-                                              bool silent)
-{
-	// Try the probabilistic ones first, then the crispy ones.
-	bool fail;
-	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                    silent, fail);
-	if (not fail) return tvp;
-
-	return bool_to_tv(crispy_eval_scratch(as, evelnk, scratch, silent));
-}
-
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                          const Handle& evelnk,
-                                          bool silent)
-{
-	return do_eval_scratch(as, evelnk, as, silent);
-}
-
-bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
-                                        const Handle& evelnk,
-                                        AtomSpace* scratch,
-                                        bool silent)
-{
-	// Try the crispy ones first, then the probabilistic ones.
-	bool fuzzy;
-	bool tf = crispy_maybe(as, evelnk, scratch, silent, fuzzy);
-	if (not fuzzy) return tf;
-
-	bool fail;
-	const TruthValuePtr& tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                           silent, fail);
-	if (not fail)
-		return tvp->get_mean() >= 0.5;
 
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->to_string().c_str());
 
 	return false; // make compiler stop complaining.
-}
-
-bool EvaluationLink::crisp_evaluate(AtomSpace* as,
-                                    const Handle& evelnk,
-                                    bool silent)
-{
-	return crisp_eval_scratch(as, evelnk, as, silent);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

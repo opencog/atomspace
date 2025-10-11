@@ -95,9 +95,7 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 {
 	for (unsigned i = 0; i < conds.size(); ++i)
 	{
-		bool crisp(EvaluationLink::crisp_evaluate(scratch, conds[i]));
-
-		if (crisp)
+		if (EvaluationLink::crisp_eval_scratch(scratch, conds[i], scratch, silent))
 		{
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);

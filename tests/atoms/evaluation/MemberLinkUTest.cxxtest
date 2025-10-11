@@ -65,12 +65,12 @@ void MemberLinkUTest::test_membership()
 	Handle AS = L(MEMBER_LINK, {A, S});
 	Handle DS = L(MEMBER_LINK, {D, S});
 
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AS);
-	printf("Got tvp=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, AS, &_as);
+	printf("Got result=%s\n", result ? "true" : "false");
+	TS_ASSERT(result);
 
-	tvp = EvaluationLink::do_evaluate(&_as, DS);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_eval_scratch(&_as, DS, &_as);
+	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

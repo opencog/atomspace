@@ -78,29 +78,29 @@ void EqualLinkUTest::test_equality()
 	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
 
 	// -------
-	bool result = EvaluationLink::crisp_evaluate(&_as, ident_aa);
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, ident_aa, &_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, ident_asa);
+	result = EvaluationLink::crisp_eval_scratch(&_as, ident_asa, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, ident_ab);
+	result = EvaluationLink::crisp_eval_scratch(&_as, ident_ab, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, ident_asb);
+	result = EvaluationLink::crisp_eval_scratch(&_as, ident_asb, &_as);
 	TS_ASSERT(!result); // false
 
 	// -------
-	result = EvaluationLink::crisp_evaluate(&_as, equal_aa);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aa, &_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_asa);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_asa, &_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_ab);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_ab, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_asb);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_asb, &_as);
 	TS_ASSERT(!result); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -128,22 +128,22 @@ void EqualLinkUTest::test_alpha()
 	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
 
 	// -------
-	bool result = EvaluationLink::crisp_evaluate(&_as, equal_23);
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, equal_23, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, alpha_23);
+	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_23, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_xx);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_xx, &_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, alpha_xx);
+	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_xx, &_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_xy);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_xy, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, alpha_xy);
+	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_xy, &_as);
 	TS_ASSERT(result);  // true
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -164,16 +164,16 @@ void EqualLinkUTest::test_nway()
 	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
 
 	// -------
-	bool result = EvaluationLink::crisp_evaluate(&_as, equal_aaa);
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, equal_aaa, &_as);
 	TS_ASSERT(result); // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_aaaa);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aaaa, &_as);
 	TS_ASSERT(result); // true
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_aba);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aba, &_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_evaluate(&_as, equal_abaa);
+	result = EvaluationLink::crisp_eval_scratch(&_as, equal_abaa, &_as);
 	TS_ASSERT(!result); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
