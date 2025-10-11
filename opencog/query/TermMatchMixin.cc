@@ -520,62 +520,6 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
 	              << gvirt->to_short_string() << std::endl;})
 
-	// At this time, we expect all virtual links to be in one of two
-	// forms: either EvaluationLink's or GreaterThanLink's.  The
-	// EvaluationLinks should have the structure
-	//
-	//   EvaluationLink
-	//       GroundedPredicateNode "scm:blah"
-	//       ListLink
-	//           Arg1Atom
-	//           Arg2Atom
-	//
-	// The GreaterThanLink's should have the "obvious" structure
-	//
-	//   GreaterThanLink
-	//       Arg1Atom
-	//       Arg2Atom
-	//
-	// XXX TODO as discussed on the mailing list, we should perhaps first
-	// see if the following can be found in the atomspace:
-	//
-	//   EvaluationLink
-	//       PredicateNode "blah"  ; not Grounded any more, and scm: stripped
-	//       ListLink
-	//           Arg1Atom
-	//           Arg2Atom
-	//
-	// If it does, we should declare a match.  If not, only then run the
-	// do_evaluate callback.  Alternately, perhaps the
-	// EvaluationLink::do_evaluate() method should do this ??? Its a toss-up.
-
-	// The instantiator would have taken care of expanding out
-	// and executing any FunctionLinks and the like.  Just use
-	// the TV value on the resulting atom.
-	//
-	// However, we also want to have a side-effect: the result of
-	// executing one of these things should be placed into the atomspace.
-	Type vty = virt->get_type();
-	if (EXECUTION_OUTPUT_LINK == vty or
-	    DEFINED_SCHEMA_NODE == vty or
-	    _nameserver.isA(vty, FUNCTION_LINK))
-	{
-		gvirt = _as->add_atom(gvirt);
-		ValuePtr tvp = gvirt->getValue(truth_key());
-
-		// Avoid null-pointer dereference if user specified a bogus evaluation.
-		// i.e. an evaluation that failed to return a TV.
-		if (nullptr == tvp)
-			throw InvalidParamException(TRACE_INFO,
-			        "Expecting a TruthValue for an evaluatable link: %s\n",
-			         gvirt->to_short_string().c_str());
-
-		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded tv="
-		                      << tvp->to_string() << std::endl;})
-
-		return crisp_truth_from_tv(TruthValueCast(tvp));
-	}
-
 	_temp_aspace->clear();
 	try
 	{
