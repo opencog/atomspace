@@ -14,8 +14,10 @@
 ; confident).
 (State (Concept "you") (Concept "thirsty"))
 (State (Concept "me") (Concept "hungry"))
-(Evaluation (stv 1 1) (Predicate "cold") (Concept "me"))
-(Evaluation (stv 0.6 0.1) (Predicate "tired") (Concept "her"))
+(cog-set-value! (Evaluation (Predicate "cold") (Concept "me"))
+	(Predicate "*-TruthValueKey-*") (FloatValue 1 1))
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	(Predicate "*-TruthValueKey-*") (FloatValue 0.6 0.1))
 
 (define qr2
 	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
@@ -97,7 +99,8 @@
 
 ; ------------
 ; Add the stv to force it to be strictly true.
-(Evaluation (stv 1 1) (Predicate "tired") (Concept "her"))
+(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+	(Predicate "*-TruthValueKey-*") (FloatValue 1 1))
 
 (test-assert "thirsty or cold or tired"
 	(equal? (cog-execute! qr6)
