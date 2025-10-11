@@ -19,12 +19,10 @@
 	(if (< 0 r)
 		(begin
 			(simple-format #t "Picked ~A\n" (cog-name atom))
-			(stv 1 1) ; return true
-		)
+			#t)
 		(begin
 			(simple-format #t "Did not pick ~A\n" (cog-name atom))
-			(stv 0 1) ; return false
-		)
+			#f)
 	)
 )
 

@@ -21,7 +21,7 @@
 			(format #t " -- The time is ~A\n\n"
 				(strftime "%c" (localtime (current-time))))
 			(set! nnn (+ nnn 1)) ; This increment is not thread-safe!
-			(stv 1 0))
+			#t)
 	))
 
 (define incr (make-counter))

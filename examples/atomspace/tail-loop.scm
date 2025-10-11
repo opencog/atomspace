@@ -32,7 +32,7 @@
    (GreaterThan (Number 2.5) (Plus uniform uniform uniform)))
 
 ; Print something.
-(define (print-stuff) (display "hi there!\n") (stv 1 1))
+(define (print-stuff) (display "hi there!\n") #t)
 
 ; Define a tail-recursive loop.
 (Define
