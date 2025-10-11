@@ -28,8 +28,7 @@
 ; AtomSpace. The following just plugs "mammal" into "this" and
 ; "vertebrate" into "that", and then checks to see if there is
 ; an InheritanceLink of this kind in the AtomSpace. Running this
-; should return true, or rather (SimpleTruthValue 1 1) which is
-; printed in short-hand form as (stv 1 1)
+; should return true.
 (cog-evaluate!
 	(Evaluation
 		(Present (Inheritance (Variable "this") (Variable "that")))
