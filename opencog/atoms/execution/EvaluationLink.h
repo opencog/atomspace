@@ -59,12 +59,6 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
 
-	static TruthValuePtr do_evaluate(const AtomSpacePtr& asp, const Handle& h,
-	                                 bool silent=false)
-	{
-		return do_evaluate(asp.get(), h, silent);
-	}
-
 	static bool crisp_evaluate(AtomSpace*, const Handle&,
 	                           bool silent=false);
 	static bool crisp_eval_scratch(AtomSpace* main,
