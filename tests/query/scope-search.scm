@@ -156,5 +156,11 @@
    )
 )
 
+(define tvkey (Predicate "*-TruthValueKey-*"))
+
+(define (get-tv ATOM)
+	(cog-value ATOM tvkey))
+
 (define (member-to-evaluation-formula EVAL MEM)
-   (cog-set-tv! EVAL (cog-tv MEM)))
+	(define tv (get-tv MEM))
+	(if tv (cog-set-value! EVAL tvkey tv) EVAL))
