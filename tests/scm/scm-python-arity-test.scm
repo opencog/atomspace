@@ -14,15 +14,16 @@
 
 ; Define a python func returning a boolean
 (python-eval "
-from opencog.atomspace import AtomSpace, types, tvkey
-from opencog.type_constructors import TruthValue
+from opencog.atomspace import AtomSpace, types
+from opencog.type_constructors import FloatValue, PredicateNode
 
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b) :
     atomspace = atom_a.atomspace
-    TV = TruthValue(0.2, 0.69)
-    atomspace.add_node(types.ConceptNode, 'Apple').set_value(tvkey, TV)
+    key = PredicateNode('my-key')
+    fv = FloatValue([0.2, 0.69])
+    atomspace.add_node(types.ConceptNode, 'Apple').set_value(key, fv)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return True
 ")
@@ -38,10 +39,13 @@ def foo(atom_a, atom_b) :
 (test-assert "Apple atom was created"
 	(not (eq? '() (cog-node 'ConceptNode "Apple"))))
 
-; Make sure the scheme version of Apple has the same TV on it that
+; Make sure the scheme version of Apple has the same FloatValue on it that
 ; the python code placed on it.
-(test-assert "TV on Apple is wrong"
-	(< (abs (- 0.2 (cog-mean (Concept "Apple")))) 0.00001))
+(define apple-value (cog-value (Concept "Apple") (Predicate "my-key")))
+(test-assert "FloatValue on Apple is wrong"
+	(and apple-value
+	     (< (abs (- 0.2 (car (cog-value->list apple-value)))) 0.00001)
+	     (< (abs (- 0.69 (cadr (cog-value->list apple-value)))) 0.00001)))
 
 (test-assert "returned boolean is wrong"
 	(equal? (stv 1 1) returned-bool))
