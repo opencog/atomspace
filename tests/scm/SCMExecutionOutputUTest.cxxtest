@@ -330,11 +330,11 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Define a Scheme procedure that return a TV
-	eval->eval("(define (grab-tv x) (cog-tv x))");
+	// Define a Scheme procedure that returns a boolean
+	eval->eval("(define (grab-tv x) #t)");
 	CHKEV(eval);
 
-	// Wrap the procedure, returning a TV
+	// Wrap the procedure, returning a boolean (as stv)
 	eval->eval(
 		"(define (evl-tv x) "
 		"   (cog-evaluate! "
@@ -344,10 +344,10 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	);
 	CHKEV(eval);
 
-	// Compare the TV's that were obtained in two different ways.
+	// Check that the predicate returns true (as stv 1 1)
 	eval->eval(
 		"(define (chk-tv x) "
-		"  (if (not (equal? (cog-tv x) (evl-tv x))) "
+		"  (if (not (equal? (stv 1 1) (evl-tv x))) "
 		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
 	);
 	CHKEV(eval);
@@ -365,10 +365,10 @@ void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Define a Scheme procedure that return a TV
+	// Define a Scheme procedure that returns a boolean
 	eval->eval(
 		"(define (copy-tv x) "
-		"    (begin (ConceptNode \"cpy\" (cog-tv x)) (cog-new-stv 1 1)))");
+		"    (begin (ConceptNode \"cpy\" (cog-tv x)) #t))");
 	CHKEV(eval);
 
 	// Wrap the procedure, returning a TV
@@ -559,11 +559,11 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Define a Scheme procedure that return a TV
-	eval->eval("(define (grab-tv x) (cog-tv x))");
+	// Define a Scheme procedure that returns a boolean
+	eval->eval("(define (grab-tv x) #t)");
 	CHKEV(eval);
 
-	// Wrap the procedure, returning a TV
+	// Wrap the procedure, returning a boolean (as stv)
 	eval->eval(
 		"(define (single-arg-evl-tv x) "
 		"   (cog-evaluate! "
@@ -573,10 +573,10 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 	);
 	CHKEV(eval);
 
-	// Compare the TV's that were obtained in two different ways.
+	// Check that the predicate returns true (as stv 1 1)
 	eval->eval(
 		"(define (chk-tv x) "
-		"  (if (not (equal? (cog-tv x) (single-arg-evl-tv x))) "
+		"  (if (not (equal? (stv 1 1) (single-arg-evl-tv x))) "
 		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
 	);
 	CHKEV(eval);
