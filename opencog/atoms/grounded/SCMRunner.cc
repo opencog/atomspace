@@ -75,9 +75,8 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	if (saved_as)
 		applier->set_scheme_as(saved_as);
 
-	// In general, we expect the scheme fuction to return some Value,
-	// maybe a TruthValue for predicates, or Atoms for Schemas. But
-	// user-written functions can return anything, e.g. scheme
+	// In general, we expect the scheme fuction to return some Value.
+	// But user-written functions can return anything, e.g. scheme
 	// expressions. These are converted by scm_to_protom() into
 	// null pointers. Here, we convert them to VoidValue.
 	if (nullptr == vp) return createVoidValue();

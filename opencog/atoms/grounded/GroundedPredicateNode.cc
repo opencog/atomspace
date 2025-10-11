@@ -25,7 +25,6 @@
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Force.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>

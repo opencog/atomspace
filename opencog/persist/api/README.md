@@ -36,7 +36,7 @@ To use:
 The old deprecated API functions are:
 
 * `fetch-atom ATOM` --
-      Get the current Values (including TruthValues) on `ATOM`.
+      Get the current Values on `ATOM`.
 * `fetch-value ATOM KEY` --
       Get the current Value on `ATOM` at `KEY`.
 * `fetch-incoming-set ATOM` --
