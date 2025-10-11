@@ -809,25 +809,6 @@ static bool crisp_eval_with_args(AtomSpace* as,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
-/// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
-///
-/// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode and
-///     the DefinedPredicateNode.
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// The predicate as a whole is then evaluated.
-///
-TruthValuePtr do_eval_with_args(AtomSpace* as,
-                                const Handle& pn,
-                                const HandleSeq& cargs,
-                                bool silent)
-{
-	// Call the crisp version and convert bool to TruthValue
-	return bool_to_tv(crisp_eval_with_args(as, pn, cargs, silent));
-}
-
 /// `tv_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a fuzzy or probabilistic truth value. See description
 /// for `crispy_eval_scratch()`, up above, for a general explanation.
@@ -878,9 +859,7 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		}
 
 		// Extract the args, and run the evaluation with them.
-		TruthValuePtr tvp(do_eval_with_args(scratch,
-		                                    sna.at(0), args, silent));
-		return tvp;
+		return bool_to_tv(crisp_eval_with_args(scratch, sna.at(0), args, silent));
 	}
 	else if (SATISFACTION_LINK == t)
 	{
