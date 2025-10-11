@@ -529,11 +529,6 @@ static TruthValuePtr bool_to_tv(bool truf)
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-static bool crispy_eval_scratch(AtomSpace* as,
-                                const Handle& evelnk,
-                                AtomSpace* scratch,
-                                bool silent);
-
 static bool crisp_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
                                 const HandleSeq& cargs,
@@ -582,14 +577,14 @@ static bool crispy_maybe(AtomSpace* as,
 	// Crisp-binary-valued Boolean Logical connectives
 	if (NOT_LINK == t)
 	{
-		return not crispy_eval_scratch(as,
+		return not EvaluationLink::crisp_eval_scratch(as,
 		      evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crispy_eval_scratch(as, h, scratch, silent);
+			bool tv = EvaluationLink::crisp_eval_scratch(as, h, scratch, silent);
 			if (not tv) return false;
 		}
 		return true;
@@ -598,7 +593,7 @@ static bool crispy_maybe(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			bool tv = crispy_eval_scratch(as, h, scratch, silent);
+			bool tv = EvaluationLink::crisp_eval_scratch(as, h, scratch, silent);
 			if (tv) return true;
 		}
 		return false;
@@ -618,7 +613,7 @@ static bool crispy_maybe(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = EvaluationLink::crisp_eval_scratch(as, oset[i], scratch, silent);
 				if (not tv) return false;
 			}
 		} while (is_trec);
@@ -639,7 +634,7 @@ static bool crispy_maybe(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = crispy_eval_scratch(as, oset[i], scratch, silent);
+				bool tv = EvaluationLink::crisp_eval_scratch(as, oset[i], scratch, silent);
 				if (tv) return true;
 			}
 		} while (is_trec);
@@ -691,7 +686,7 @@ static bool crispy_maybe(AtomSpace* as,
 		if (not vp->is_atom())
 			return false;
 
-		return crispy_eval_scratch(as, HandleCast(vp), scratch, silent);
+		return EvaluationLink::crisp_eval_scratch(as, HandleCast(vp), scratch, silent);
 	}
 
 	// -------------------------
@@ -735,7 +730,7 @@ static bool crispy_maybe(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return crispy_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
+		return EvaluationLink::crisp_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 
 	if (PUT_LINK == t)
@@ -764,12 +759,12 @@ static bool crispy_maybe(AtomSpace* as,
 		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
-		return crispy_eval_scratch(as, red, scratch, silent);
+		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
 	}
 
 	if (DEFINED_PREDICATE_NODE == t)
 	{
-		return crispy_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
+		return EvaluationLink::crisp_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
 	}
 
 	if (nameserver().isA(t, VALUE_OF_LINK))
@@ -782,7 +777,7 @@ static bool crispy_maybe(AtomSpace* as,
 
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
-			return crispy_eval_scratch(as, HandleCast(pap), scratch, silent);
+			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
 
 		// Non-atom case - fall through to let tv_eval_scratch handle it
 		failed = true;
@@ -790,30 +785,6 @@ static bool crispy_maybe(AtomSpace* as,
 	}
 
 	failed = true;
-	return false;
-}
-
-static bool crispy_eval_scratch(AtomSpace* as,
-                                const Handle& evelnk,
-                                AtomSpace* scratch,
-                                bool silent)
-{
-	bool failed;
-	bool tf = crispy_maybe(as, evelnk, scratch, silent, failed);
-	if (not failed)
-		return tf;
-
-	// Fall back to tv_eval_scratch for things like DEFINED_PREDICATE_NODE
-	// that aren't naturally crisp but need to be evaluated.
-	bool try_crispy;
-	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch, silent, try_crispy);
-	if (tvp != nullptr)
-		return tvp->get_mean() >= 0.5;
-
-	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet (crisp). Cannot evaluate %s",
-		evelnk->to_string().c_str());
-
 	return false;
 }
 
