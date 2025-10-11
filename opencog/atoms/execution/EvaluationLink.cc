@@ -483,12 +483,6 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
-static TruthValuePtr bool_to_tv(bool truf)
-{
-	if (truf) return TruthValue::TRUE_TV();
-	return TruthValue::FALSE_TV();
-}
-
 /// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
@@ -854,7 +848,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& evelnk,
                                           bool silent)
 {
-	return bool_to_tv(crisp_eval_scratch(as, evelnk, as, silent));
+	if (crisp_eval_scratch(as, evelnk, as, silent))
+		return TruthValue::TRUE_TV();
+	return TruthValue::FALSE_TV();
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
