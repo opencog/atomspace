@@ -27,7 +27,6 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeUtils.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
@@ -640,9 +639,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 			// Plug in any variables ...
 			Handle topper = Replacement::replace_nocheck(toc, plugs);
 			topper = temp->add_atom(topper);
-			TruthValuePtr tvp =
-				EvaluationLink::do_evaluate(temp, topper, silent);
-			if (tvp->get_mean() < 0.5)
+			if (not topper->bevaluate(temp, silent))
 			{
 				rejects.insert(h);
 				break;
