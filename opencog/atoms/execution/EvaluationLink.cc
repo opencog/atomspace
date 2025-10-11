@@ -919,26 +919,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		return nullptr;
 	}
 
-	// VALUE_OF_LINK that returns non-atom values (FloatValue, etc)
-	if (nameserver().isA(t, VALUE_OF_LINK))
-	{
-		ValuePtr pap(evelnk->execute(scratch));
-
-		// There might not be a Value at the given key.
-		if (nullptr == pap)
-			return TruthValue::FALSE_TV();
-
-		// If it's an atom, crispy_maybe handles it
-		if (pap->is_atom())
-		{
-			try_crispy = true;
-			return nullptr;
-		}
-
-		// Non-atom values need TV conversion
-		return TruthValueCast(pap);
-	}
-
 	// Generic evaluatable links
 	if (evelnk->is_evaluatable())
 	{
