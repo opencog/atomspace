@@ -937,11 +937,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	{
 		return evelnk->evaluate(scratch, silent);
 	}
-	else if ( // Links that evaluate to themselves
-		nameserver().isA(t, DIRECTLY_EVALUATABLE_LINK))
-	{
-		return TruthValueCast(evelnk->getValue(truth_key()));
-	}
 
 	try_crispy = true;
 	return nullptr;
