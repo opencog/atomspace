@@ -533,6 +533,12 @@ static bool crispy_eval_scratch(AtomSpace* as,
                                 AtomSpace* scratch,
                                 bool silent);
 
+static TruthValuePtr tv_eval_scratch(AtomSpace* as,
+                                     const Handle& evelnk,
+                                     AtomSpace* scratch,
+                                     bool silent,
+                                     bool& try_crispy);
+
 static bool crispy_maybe(AtomSpace* as,
                          const Handle& evelnk,
                          AtomSpace* scratch,
@@ -682,21 +688,6 @@ static bool crispy_maybe(AtomSpace* as,
 		return crispy_eval_scratch(as, HandleCast(vp), scratch, silent);
 	}
 
-	// A handful of link types that should be auto-converted into
-	// crisp truth values.
-	if (EVALUATION_LINK == t or
-	    DEFINED_PREDICATE_NODE == t)
-	{
-		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
-		                 evelnk, scratch, silent));
-		// tv_eval_scratch nelow circa line 814 used to return
-		// (stv 1 0) for DEFAULT_TV. Now it returns nullptr.
-		// Since get_mean was 1.0, we return true for this case.
-		if (nullptr == tv) return true;
-		if (0.5 < tv->get_mean()) return true;
-		return false;
-	}
-
 	failed = true;
 	return false;
 }
@@ -710,6 +701,13 @@ static bool crispy_eval_scratch(AtomSpace* as,
 	bool tf = crispy_maybe(as, evelnk, scratch, silent, failed);
 	if (not failed)
 		return tf;
+
+	// Fall back to tv_eval_scratch for things like DEFINED_PREDICATE_NODE
+	// that aren't naturally crisp but need to be evaluated.
+	bool try_crispy;
+	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch, silent, try_crispy);
+	if (tvp != nullptr)
+		return tvp->get_mean() >= 0.5;
 
 	throwSyntaxException(silent,
 		"Either incorrect or not implemented yet (crisp). Cannot evaluate %s",
@@ -947,13 +945,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               AtomSpace* scratch,
                                               bool silent)
 {
-	// Try the probabilistic ones first, then the crispy ones.
-	bool fail;
-	TruthValuePtr tvp = tv_eval_scratch(as, evelnk, scratch,
-	                                    silent, fail);
-	if (not fail) return tvp;
-
-	return bool_to_tv(crispy_eval_scratch(as, evelnk, scratch, silent));
+	return bool_to_tv(crisp_eval_scratch(as, evelnk, scratch, silent));
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
