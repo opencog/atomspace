@@ -60,9 +60,9 @@
 	 (NumberNode 2)))
 )
 
-(define (grounded_cond1 ) (cog-new-stv 0 0))
+(define (grounded_cond1) (BoolValue #f))
 
-(define (grounded_cond2 ) (cog-new-stv 1 1))
+(define (grounded_cond2) (BoolValue #t))
 
 (define grounded-cond
  (CondLink
