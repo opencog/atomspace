@@ -17,7 +17,7 @@ def add_link(atom_one, atom_two):
     return atom_one.atomspace.add_link(types.ListLink, [atom_one, atom_two])
 
 def bogus_tv(atom_one, atom_two):
-    return TruthValue(0.6, 0.234)
+    return True
 
 green = 0
 red = 0
@@ -50,27 +50,31 @@ def stop_go(atom):
     if atom == compare_green:
         print ("got a green light!")
         increment_green()
-        return TruthValue(1,1)
+        return True
     elif atom == compare_red:
         print ("got a red light")
         increment_red()
-        return TruthValue(0,1)
+        return False
     else:
-        print ("got no match :-(")
         assert(false)
 
-    return TruthValue(0,0)
+    return False
 
-func_one_result = TruthValue (0,1) # false
+func_one_result = FloatValue([0,0,1])
 def func_one(v):
     thing = ConceptNode("barleycorn")
     thang = ListLink(thing, v)
     thang.set_value(tvkey, func_one_result)
-    return func_one_result
+    print(f"func_one: set {func_one_result} on {thang}")
+    if (func_one_result == FloatValue([0,0,1])):
+        return False
+    return True
 
 
 def func_two(v):
     tv = ListLink(ConceptNode("barleycorn"), v).get_value(tvkey)
     if (tv is None):
-        return TruthValue(1, 0)
-    return tv
+        return True
+    if (tv == FloatValue([1,1,1])):
+        return True
+    return False

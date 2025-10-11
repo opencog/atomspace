@@ -156,7 +156,7 @@ class BindlinkTest(unittest.TestCase):
                     )
                 )
             )
-        self.assertEqual(result, TruthValue(0.6, 0.234))
+        self.assertEqual(result, TruthValue(1, 1))
 
     def test_execute_atom_no_return_value(self):
         result = PutLink(DeleteLink(VariableNode("X")),
@@ -178,7 +178,7 @@ class BindlinkTest(unittest.TestCase):
         result = get.execute()
         self.assertFalse(result.out)
         self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
-        test_functions.func_one_result = TruthValue(1,1)
+        test_functions.func_one_result = FloatValue([1,1,1])
         result = get.execute()
         self.assertTrue(result.out)
         # still should not be in the current namespace
