@@ -681,7 +681,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	}
 
 	// -------------------------
-	// Cases that are naturally crisp (moved from crisp_eval_scratch)
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -705,24 +704,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 
 		// Extract the args, and run the evaluation with them.
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
-	}
-
-	if (SATISFACTION_LINK == t)
-	{
-		if (not is_evaluatable_sat(evelnk))
-		{
-			// Has variables, needs pattern matching - not crisp
-			// Fall through to crisp_eval_scratch
-			throwSyntaxException(silent,
-				"Either incorrect or not implemented yet. Cannot evaluate %s",
-				evelnk->to_string().c_str());
-		}
-
-		// If we are here, then we can optimize: we can evaluate
-		// directly, instead of going through the pattern matcher.
-		// The only reason we want to do even this much is to do
-		// tail-recursion optimization, if possible.
-		return EvaluationLink::crisp_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 
 	if (PUT_LINK == t)
