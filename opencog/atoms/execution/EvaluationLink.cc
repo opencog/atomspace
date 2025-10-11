@@ -483,6 +483,121 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
+/// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
+/// returning a boolean result.
+///
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode and
+///     the DefinedPredicateNode.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
+///
+/// The predicate as a whole is then evaluated and returns bool.
+///
+/// This is called after unwrapping EvaluationLinks of the form
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// or
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         SomeAtom
+///         OtherAtom
+///
+/// (Skipping the ListLink...)
+///
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
+///
+/// For DefinedPredicateNodes, the defintiion is looked up first.
+///
+static bool crisp_eval_with_args(AtomSpace* as,
+                                const Handle& pn,
+                                const HandleSeq& cargs,
+                                bool silent)
+{
+	Type pntype = pn->get_type();
+	if (DEFINED_PREDICATE_NODE == pntype)
+	{
+		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->get_type();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->get_type();
+		}
+
+		// If its not a LambdaLink, then I don't know what to do...
+		if (LAMBDA_LINK != dtype)
+			throw SyntaxException(TRACE_INFO,
+				"Expecting definition to be a LambdaLink, got %s",
+				defn->to_string().c_str());
+
+		// Treat LambdaLink as if it were a PutLink -- perform
+		// the beta-reduction, and evaluate the result.
+		LambdaLinkPtr lam(LambdaLinkCast(defn));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	// Treat LambdaLink as if it were a PutLink -- perform
+	// the beta-reduction, and evaluate the result.
+	if (LAMBDA_LINK == pntype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(pn));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	// Throw a silent exception; this is called in some try..catch blocks.
+	if (GROUNDED_PREDICATE_NODE == pntype)
+	{
+		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
+		Handle args(createLink(std::move(cargs), LIST_LINK));
+		ValuePtr result = gpn->execute_args(as, args, silent);
+
+		// Check if result is a BoolValue and return the bool directly
+		if (result->is_type(BOOL_VALUE))
+		{
+			BoolValuePtr bvp = BoolValueCast(result);
+			std::vector<bool> bvals = bvp->value();
+			if (bvals.empty())
+				return false;
+			// Use first boolean value
+			return bvals[0];
+		}
+		if (result->is_type(VOID_VALUE))
+			throwSyntaxException(silent, "GroundedPredicate returned VoidValue");
+
+		throw RuntimeException(TRACE_INFO,
+			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
+			result->to_string().c_str());
+	}
+
+	// If it's evaluatable, assume it has some free variables.
+	// Use the LambdaLink to find those variables (via FreeLink)
+	// and then reduce it.
+	if (nameserver().isA(pntype, EVALUATABLE_LINK))
+	{
+		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
+		Handle reduct(lam->beta_reduce(cargs));
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+	}
+
+	if (silent)
+		throw NotEvaluatableException();
+	throw SyntaxException(TRACE_INFO,
+			"This predicate is not evaluatable: %s", pn->to_string().c_str());
+}
+
 /// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
@@ -523,11 +638,6 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 /// that were wrapped up by TrueLink, FalseLink. This is needed to get
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
-static bool crisp_eval_with_args(AtomSpace* as,
-                                const Handle& pn,
-                                const HandleSeq& cargs,
-                                bool silent);
-
 bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
                                         const Handle& evelnk,
                                         AtomSpace* scratch,
@@ -727,121 +837,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		evelnk->to_string().c_str());
 
 	return false; // make compiler stop complaining.
-}
-
-/// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
-/// returning a boolean result.
-///
-/// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode and
-///     the DefinedPredicateNode.
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// The predicate as a whole is then evaluated and returns bool.
-///
-/// This is called after unwrapping EvaluationLinks of the form
-///
-///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
-///         ListLink
-///             SomeAtom
-///             OtherAtom
-///
-/// or
-///
-///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
-///         SomeAtom
-///         OtherAtom
-///
-/// (Skipping the ListLink...)
-///
-/// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
-/// on the provided ListLink of arguments.
-///
-/// For DefinedPredicateNodes, the defintiion is looked up first.
-///
-static bool crisp_eval_with_args(AtomSpace* as,
-                                const Handle& pn,
-                                const HandleSeq& cargs,
-                                bool silent)
-{
-	Type pntype = pn->get_type();
-	if (DEFINED_PREDICATE_NODE == pntype)
-	{
-		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->get_type();
-
-		// Allow recursive definitions. This can be handy.
-		while (DEFINED_PREDICATE_NODE == dtype)
-		{
-			defn = DefineLink::get_definition(defn);
-			dtype = defn->get_type();
-		}
-
-		// If its not a LambdaLink, then I don't know what to do...
-		if (LAMBDA_LINK != dtype)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting definition to be a LambdaLink, got %s",
-				defn->to_string().c_str());
-
-		// Treat LambdaLink as if it were a PutLink -- perform
-		// the beta-reduction, and evaluate the result.
-		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
-	}
-
-	// Treat LambdaLink as if it were a PutLink -- perform
-	// the beta-reduction, and evaluate the result.
-	if (LAMBDA_LINK == pntype)
-	{
-		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
-	}
-
-	// Throw a silent exception; this is called in some try..catch blocks.
-	if (GROUNDED_PREDICATE_NODE == pntype)
-	{
-		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
-		Handle args(createLink(std::move(cargs), LIST_LINK));
-		ValuePtr result = gpn->execute_args(as, args, silent);
-
-		// Check if result is a BoolValue and return the bool directly
-		if (result->is_type(BOOL_VALUE))
-		{
-			BoolValuePtr bvp = BoolValueCast(result);
-			std::vector<bool> bvals = bvp->value();
-			if (bvals.empty())
-				return false;
-			// Use first boolean value
-			return bvals[0];
-		}
-		if (result->is_type(VOID_VALUE))
-			throwSyntaxException(silent, "GroundedPredicate returned VoidValue");
-
-		throw RuntimeException(TRACE_INFO,
-			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
-			result->to_string().c_str());
-	}
-
-	// If it's evaluatable, assume it has some free variables.
-	// Use the LambdaLink to find those variables (via FreeLink)
-	// and then reduce it.
-	if (nameserver().isA(pntype, EVALUATABLE_LINK))
-	{
-		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
-		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
-	}
-
-	if (silent)
-		throw NotEvaluatableException();
-	throw SyntaxException(TRACE_INFO,
-			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
