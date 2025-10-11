@@ -534,6 +534,11 @@ static bool crispy_eval_scratch(AtomSpace* as,
                                 AtomSpace* scratch,
                                 bool silent);
 
+static bool crisp_eval_with_args(AtomSpace* as,
+                                const Handle& pn,
+                                const HandleSeq& cargs,
+                                bool silent);
+
 static TruthValuePtr tv_eval_scratch(AtomSpace* as,
                                      const Handle& evelnk,
                                      AtomSpace* scratch,
@@ -689,6 +694,101 @@ static bool crispy_maybe(AtomSpace* as,
 		return crispy_eval_scratch(as, HandleCast(vp), scratch, silent);
 	}
 
+	// -------------------------
+	// Cases that are naturally crisp (moved from tv_eval_scratch)
+	if (EVALUATION_LINK == t)
+	{
+		const HandleSeq& sna(evelnk->getOutgoingSet());
+
+		HandleSeq args;
+		if (LIST_LINK == sna.at(1)->get_type())
+		{
+			if (2 != sna.size())
+				throw SyntaxException(TRACE_INFO,
+					"EvaluationLink: Incorrect number of arguments, "
+					"expecting 2, got %lu for:\n\t%s",
+					sna.size(), evelnk->to_string().c_str());
+			args = sna.at(1)->getOutgoingSet();
+		}
+		else
+		{
+			// Copy all but the first.
+			size_t sz = sna.size();
+			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
+		}
+
+		// Extract the args, and run the evaluation with them.
+		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
+	}
+
+	if (SATISFACTION_LINK == t)
+	{
+		if (not is_evaluatable_sat(evelnk))
+		{
+			// Has variables, needs pattern matching - not crisp
+			// Fall through to tv_eval_scratch
+			failed = true;
+			return false;
+		}
+
+		// If we are here, then we can optimize: we can evaluate
+		// directly, instead of going through the pattern matcher.
+		// The only reason we want to do even this much is to do
+		// tail-recursion optimization, if possible.
+		return crispy_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
+	}
+
+	if (PUT_LINK == t)
+	{
+		PutLinkPtr pl(PutLinkCast(evelnk));
+
+		// Evalating a PutLink requires three steps:
+		// (1) execute the arguments, first,
+		// (2) beta reduce (put arguments into body)
+		// (3) evaluate the resulting body.
+		Handle pvals = pl->get_arguments();
+		Instantiator inst(as);
+		// Step (1)
+		Handle gvals(HandleCast(inst.execute(pvals, silent)));
+		if (gvals != pvals)
+		{
+			as->add_atom(gvals);
+			HandleSeq goset;
+			if (pl->get_vardecl())
+				goset.emplace_back(pl->get_vardecl());
+			goset.emplace_back(pl->get_body());
+			goset.emplace_back(gvals);
+			pl = createPutLink(std::move(goset));
+		}
+		// Step (2)
+		Handle red = HandleCast(pl->execute(as));
+
+		// Step (3)
+		return crispy_eval_scratch(as, red, scratch, silent);
+	}
+
+	if (DEFINED_PREDICATE_NODE == t)
+	{
+		return crispy_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
+	}
+
+	if (nameserver().isA(t, VALUE_OF_LINK))
+	{
+		ValuePtr pap(evelnk->execute(scratch));
+
+		// There might not be a Value at the given key.
+		if (nullptr == pap)
+			return false;
+
+		// If it's an atom, recursively evaluate.
+		if (pap->is_atom())
+			return crispy_eval_scratch(as, HandleCast(pap), scratch, silent);
+
+		// Non-atom case - fall through to let tv_eval_scratch handle it
+		failed = true;
+		return false;
+	}
+
 	failed = true;
 	return false;
 }
@@ -836,85 +936,20 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 {
 	try_crispy = false;
 	Type t = evelnk->get_type();
-	if (EVALUATION_LINK == t)
-	{
-		const HandleSeq& sna(evelnk->getOutgoingSet());
 
-		HandleSeq args;
-		if (LIST_LINK == sna.at(1)->get_type())
-		{
-			if (2 != sna.size())
-				throw SyntaxException(TRACE_INFO,
-					"EvaluationLink: Incorrect number of arguments, "
-					"expecting 2, got %lu for:\n\t%s",
-					sna.size(), evelnk->to_string().c_str());
-			args = sna.at(1)->getOutgoingSet();
-		}
-		else
-		{
-			// Copy all but the first.
-			// XXX Is there a more efficient way to do this copy?
-			size_t sz = sna.size();
-			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
-		}
-
-		// Extract the args, and run the evaluation with them.
-		return bool_to_tv(crisp_eval_with_args(scratch, sna.at(0), args, silent));
-	}
-	else if (SATISFACTION_LINK == t)
+	// SatisfactionLink with variables needs pattern matching
+	if (SATISFACTION_LINK == t)
 	{
 		if (not is_evaluatable_sat(evelnk))
 			return evelnk->evaluate(as);
 
-		// If we are here, then we can optimize: we can evaluate
-		// directly, instead of going through the pattern matcher.
-		// The only reason we want to do even this much is to do
-		// tail-recursion optimization, if possible.
-		if (EvaluationLink::crisp_eval_scratch(as,
-		                     evelnk->getOutgoingAtom(0), scratch, silent))
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
-	}
-	else if (PUT_LINK == t)
-	{
-		PutLinkPtr pl(PutLinkCast(evelnk));
-
-		// Evalating a PutLink requires three steps:
-		// (1) execute the arguments, first,
-		// (2) beta reduce (put arguments into body)
-		// (3) evaluate the resulting body.
-		Handle pvals = pl->get_arguments();
-		Instantiator inst(as);
-		// Step (1)
-		Handle gvals(HandleCast(inst.execute(pvals, silent)));
-		if (gvals != pvals)
-		{
-			as->add_atom(gvals);
-			HandleSeq goset;
-			if (pl->get_vardecl())
-				goset.emplace_back(pl->get_vardecl());
-			goset.emplace_back(pl->get_body());
-			goset.emplace_back(gvals);
-			pl = createPutLink(std::move(goset));
-		}
-		// Step (2)
-		Handle red = HandleCast(pl->execute(as));
-
-		// Step (3)
-		if (EvaluationLink::crisp_eval_scratch(as, red, scratch, silent))
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
-	}
-	else if (DEFINED_PREDICATE_NODE == t)
-	{
-		if (EvaluationLink::crisp_eval_scratch(as,
-		                       DefineLink::get_definition(evelnk),
-		                       scratch, silent))
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
+		// Evaluatable case is handled in crispy_maybe
+		try_crispy = true;
+		return nullptr;
 	}
 
-	else if (nameserver().isA(t, VALUE_OF_LINK))
+	// VALUE_OF_LINK that returns non-atom values (FloatValue, etc)
+	if (nameserver().isA(t, VALUE_OF_LINK))
 	{
 		ValuePtr pap(evelnk->execute(scratch));
 
@@ -922,18 +957,19 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		if (nullptr == pap)
 			return TruthValue::FALSE_TV();
 
-		// If it's an atom, recursively evaluate.
+		// If it's an atom, crispy_maybe handles it
 		if (pap->is_atom())
 		{
-			if (EvaluationLink::crisp_eval_scratch(as,
-			                    HandleCast(pap), scratch, silent))
-				return TruthValue::TRUE_TV();
-			return TruthValue::FALSE_TV();
+			try_crispy = true;
+			return nullptr;
 		}
 
+		// Non-atom values need TV conversion
 		return TruthValueCast(pap);
 	}
-	else if (evelnk->is_evaluatable())
+
+	// Generic evaluatable links
+	if (evelnk->is_evaluatable())
 	{
 		return evelnk->evaluate(scratch, silent);
 	}
