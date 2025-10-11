@@ -31,13 +31,13 @@ class TestExceptions(unittest.TestCase):
     # First, make sure that evaluation works.
     def test_good_evaluation(self):
         atom1 = Concept("atom1")
-        eval_link = Evaluation(GroundedPredicate("py:good_tv"),
+        eval_link = Evaluation(GroundedPredicate("py:good_predicate"),
                                         atom1, atom1, atom1)
         okay = evaluate_atom(self.space, eval_link)
 
         # Use `nosetests3 --nocapture` to see this print...
         print(f"The good TV is {str(okay)}")
-        expect = TruthValue(0.5, 0.5)
+        expect = TruthValue(1, 1)
         self.assertTrue(okay == expect)
 
     # --------------------------------------------------------------
@@ -210,6 +210,10 @@ class TestExceptions(unittest.TestCase):
 
 
 
+def good_predicate(*args):
+    print(args)
+    return True
+
 def good_tv(*args):
     print(args)
     return TruthValue(0.5, 0.5)
@@ -233,6 +237,7 @@ def ret_lst(*args):
     print(args)
     return ['a', 'b', 'c']
 
+__main__.good_predicate = good_predicate
 __main__.good_tv = good_tv
 __main__.no_ret = no_ret
 __main__.ret_num = ret_num
