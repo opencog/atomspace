@@ -6,12 +6,19 @@
 (use-modules (opencog test-runner))
 
 ;; Functions
-(define (tv->bool tv) (equal? (stv 1 1) tv))
-(define (true? A) (tv->bool (cog-tv A)))
+(define tvkey (Predicate "*-TruthValueKey-*"))
+(define (tv->bool tv)
+  (cond
+    ((equal? tv #t) #t)
+    ((equal? tv #f) #f)
+    (else #f)))
+(define (true? A)
+  (tv->bool (cog-value A tvkey)))
 (define (always-true) #t)
 
 ;; KB
-(Inheritance (stv 1 1) (Concept "human") (Concept "person"))
+(cog-set-value! (Inheritance (Concept "human") (Concept "person"))
+  (Predicate "*-TruthValueKey-*") (BoolValue #t))
 
 ;; Query
 (define query-plain
