@@ -690,7 +690,7 @@ static bool crispy_maybe(AtomSpace* as,
 		TruthValuePtr tv(EvaluationLink::do_eval_scratch(as,
 		                 evelnk, scratch, silent));
 		// tv_eval_scratch nelow circa line 814 used to return
-		// (stv 1 0) for DEFAULT_TV. Not it returns nullptr.
+		// (stv 1 0) for DEFAULT_TV. Now it returns nullptr.
 		// Since get_mean was 1.0, we return true for this case.
 		if (nullptr == tv) return true;
 		if (0.5 < tv->get_mean()) return true;
@@ -721,19 +721,12 @@ static bool crispy_eval_scratch(AtomSpace* as,
 /// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode, the
-///     DefinedPredicateNode and the FormulaPredicateLink.
+///     Currently, this includes the GroundedPredicateNode and
+///     the DefinedPredicateNode.
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-/// For the special case of GroundedPredicateNode, the arguments are
-/// "eager-evaluated", because it is assumed that the GPN is unaware
-/// of the concept of lazy evaluation, and can't do it itself.  In
-/// all other cases, lazy evaluation is done (i.e. no evaluation is
-/// done, if it is not needed.)
-///
-/// The arguments are then inserted into the predicate, and the
-/// predicate as a whole is then evaluated.
+/// The predicate as a whole is then evaluated.
 ///
 TruthValuePtr do_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
@@ -831,7 +824,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 ///             OtherAtom
 ///
 /// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for haskell.  This method will then invoke `func_name`
+/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
 /// on the provided ListLink of arguments.
 ///
 static TruthValuePtr tv_eval_scratch(AtomSpace* as,
