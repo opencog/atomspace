@@ -456,8 +456,8 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	CHKEV(eval);
 
 	// When evaluated, this one should be false.
-	tv = EvaluationLink::do_evaluate(as.get(), boolex);
-	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.001);
+	bool result = EvaluationLink::crisp_eval_scratch(as.get(), boolex, as.get());
+	TS_ASSERT(not result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
