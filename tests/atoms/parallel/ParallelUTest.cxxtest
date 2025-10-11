@@ -228,5 +228,7 @@ void ParallelUTest::test_throw(void)
     TS_ASSERT_THROWS_NOTHING(eval->eval_v("(cog-execute! wait-bad)"));
     TS_ASSERT_EQUALS(false, eval->eval_error());
 
+    // Let everything settle down, here.
+    robustSleep(1);
     logger().debug("END TEST: %s", __FUNCTION__);
 }
