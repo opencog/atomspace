@@ -54,13 +54,19 @@ public:
 		return crisp_eval_scratch(_atom_space, get_handle(), scratch, silent);
 	}
 
-	static TruthValuePtr do_evaluate(AtomSpace*, const Handle&,
-	                                 bool silent=false);
-
 	static bool crisp_eval_scratch(AtomSpace* main,
 	                               const Handle&,
 	                               AtomSpace* scratch,
 	                               bool silent=false);
+
+	static TruthValuePtr do_evaluate(AtomSpace* as,
+	                                 const Handle& evelnk,
+	                                 bool silent=false)
+	{
+		if (crisp_eval_scratch(as, evelnk, as, silent))
+			return TruthValue::TRUE_TV();
+		return TruthValue::FALSE_TV();
+	}
 
 	static Handle factory(const Handle&);
 };

@@ -832,13 +832,4 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	return false; // make compiler stop complaining.
 }
 
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                          const Handle& evelnk,
-                                          bool silent)
-{
-	if (crisp_eval_scratch(as, evelnk, as, silent))
-		return TruthValue::TRUE_TV();
-	return TruthValue::FALSE_TV();
-}
-
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
