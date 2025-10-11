@@ -601,28 +601,19 @@ static bool crisp_eval_with_args(AtomSpace* as,
 /// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a crisp-logic, binary true/false truth value.
 ///
-/// There are two general kinds "truth values" that we are concerned
-/// about.  For many cases, the "truth value" is explicitly a crisp,
-/// binary Boolean-logic truth value, being either "true" or "false"
-/// and having no other qusi-ambiguous, fuzzy or probabilistic
-/// interpretation. Examples include the logical constants TrueLink,
-/// FalseLink, and the logical connectives NotLink, AndLink, OrLink.
-/// Yes, it is possible for these to have other interpretations, e.g.
-/// probabilistic interpretations. That is not what we are doing here:
-/// we are working with uninterpreted logical constants and connectives.
-/// The `crisp_eval_scratch()` function handles the evaluation of Atoms
-/// that have a natural crisp-truth interpretation.
+/// This handles evaluation of all crisp Boolean-logic constructs including:
+/// - Logical constants (TrueLink, FalseLink)
+/// - Logical connectives (NotLink, AndLink, OrLink, SequentialAndLink, etc.)
+/// - Comparison operations (GreaterThanLink, EqualLink, IdenticalLink, etc.)
+/// - Predicates (EvaluationLink with GroundedPredicateNode, DefinedPredicateNode)
+/// - Special forms (PutLink)
+/// - Set operations (MemberLink, SubsetLink, ExclusiveLink)
 ///
-/// A different class of Atoms will naturally have fuzzy or
-/// probabilistic valuations associated with them. These are evaluated
-/// by the `crisp_eval_scratch()` function.
+/// All evaluation is done with crisp Boolean semantics - there are no
+/// fuzzy or probabilistic truth values involved. Results are always
+/// true or false.
 ///
-/// Both kinds can be mixed together with one-another. An implicit
-/// conversion from crisp-to-fuzzy and back is performed, when needed,
-/// when appropriate. Maybe this is a design flaw? Maybe we should force
-/// the user to declare an explicit conversion?
-///
-/// The implementation here is one big giant case-statement. It works.
+/// The implementation here is one big case-statement. It works.
 /// In the long-run, it might be better to just have C++ classes for
 /// each distinct atom type, and have an `evaluate()` method on each.
 /// Whatever. Performance is probably about the same, and for just right
@@ -785,6 +776,8 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
 
+	// I'm confused ... why is this here? Shouldn't PutLink just be executable,
+	// and that's it? XXX FXIME
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr pl(PutLinkCast(evelnk));
