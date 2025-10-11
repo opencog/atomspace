@@ -231,8 +231,9 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	{
 		try
 		{
-			return ValueCast(EvaluationLink::do_eval_scratch(as,
-			                    term, scratch, silent));
+			if (EvaluationLink::crisp_eval_scratch(as, term, scratch, silent))
+				return ValueCast(TruthValue::TRUE_TV());
+			return ValueCast(TruthValue::FALSE_TV());
 		}
 		catch (const SilentException& ex)
 		{
@@ -505,7 +506,7 @@ static TruthValuePtr bool_to_tv(bool truf)
 ///
 /// A different class of Atoms will naturally have fuzzy or
 /// probabilistic valuations associated with them. These are evaluated
-/// by the `do_eval_scratch()` function.
+/// by the `tv_eval_scratch()` function.
 ///
 /// Both kinds can be mixed together with one-another. An implicit
 /// conversion from crisp-to-fuzzy and back is performed, when needed,
@@ -810,7 +811,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
-/// `do_eval_scratch()` -- evaluate any Atoms that can meaningfully
+/// `tv_eval_scratch()` -- evaluate any Atoms that can meaningfully
 /// result in a fuzzy or probabilistic truth value. See description
 /// for `crispy_eval_scratch()`, up above, for a general explanation.
 /// This function handles miscellaneous Atoms that don't have a natural
@@ -873,8 +874,10 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return EvaluationLink::do_eval_scratch(as,
-		                     evelnk->getOutgoingAtom(0), scratch, silent);
+		if (EvaluationLink::crisp_eval_scratch(as,
+		                     evelnk->getOutgoingAtom(0), scratch, silent))
+			return TruthValue::TRUE_TV();
+		return TruthValue::FALSE_TV();
 	}
 	else if (PUT_LINK == t)
 	{
@@ -902,13 +905,17 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		Handle red = HandleCast(pl->execute(as));
 
 		// Step (3)
-		return EvaluationLink::do_eval_scratch(as, red, scratch, silent);
+		if (EvaluationLink::crisp_eval_scratch(as, red, scratch, silent))
+			return TruthValue::TRUE_TV();
+		return TruthValue::FALSE_TV();
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return EvaluationLink::do_eval_scratch(as,
+		if (EvaluationLink::crisp_eval_scratch(as,
 		                       DefineLink::get_definition(evelnk),
-		                       scratch, silent);
+		                       scratch, silent))
+			return TruthValue::TRUE_TV();
+		return TruthValue::FALSE_TV();
 	}
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
@@ -921,8 +928,12 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
-			return EvaluationLink::do_eval_scratch(as,
-			                    HandleCast(pap), scratch, silent);
+		{
+			if (EvaluationLink::crisp_eval_scratch(as,
+			                    HandleCast(pap), scratch, silent))
+				return TruthValue::TRUE_TV();
+			return TruthValue::FALSE_TV();
+		}
 
 		return TruthValueCast(pap);
 	}
@@ -940,19 +951,11 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 	return nullptr;
 }
 
-TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                                              const Handle& evelnk,
-                                              AtomSpace* scratch,
-                                              bool silent)
-{
-	return bool_to_tv(crisp_eval_scratch(as, evelnk, scratch, silent));
-}
-
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& evelnk,
                                           bool silent)
 {
-	return do_eval_scratch(as, evelnk, as, silent);
+	return bool_to_tv(crisp_eval_scratch(as, evelnk, as, silent));
 }
 
 bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
