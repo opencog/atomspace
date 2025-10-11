@@ -51,14 +51,6 @@ public:
 namespace opencog
 {
 /**
- * setLocalPredicate("foo", boo) enables creating GroundedPredicateNode
- * with the name "lib:\\foo",  which will call boo on evaluation of
- * corresponding EvaluationLink.
- */
-void setLocalPredicate(std::string funcName,
-                       TruthValuePtr* (*func)(AtomSpace *, Handle*));
-
-/**
  * setLocalSchema("foo", boo) enables creating GroundedSchemaNode with
  * the name "lib:\\foo", which will call boo on execution of corresponding
  * ExecutionOutputLink.

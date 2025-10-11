@@ -105,9 +105,3 @@ void opencog::setLocalSchema(std::string funcName,
 {
 	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
-
-void opencog::setLocalPredicate(std::string funcName,
-                                TruthValuePtr* (*func)(AtomSpace *, Handle*))
-{
-   LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
-}
