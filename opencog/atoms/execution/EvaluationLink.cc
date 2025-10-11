@@ -534,14 +534,11 @@ static bool crisp_eval_with_args(AtomSpace* as,
                                 const HandleSeq& cargs,
                                 bool silent);
 
-static bool crispy_maybe(AtomSpace* as,
-                         const Handle& evelnk,
-                         AtomSpace* scratch,
-                         bool silent,
-                         bool& failed)
+bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
+                                        const Handle& evelnk,
+                                        AtomSpace* scratch,
+                                        bool silent)
 {
-	failed = false;
-
 	Type t = evelnk->get_type();
 
 	// Logical constants
@@ -716,8 +713,9 @@ static bool crispy_maybe(AtomSpace* as,
 		{
 			// Has variables, needs pattern matching - not crisp
 			// Fall through to crisp_eval_scratch
-			failed = true;
-			return false;
+			throwSyntaxException(silent,
+				"Either incorrect or not implemented yet. Cannot evaluate %s",
+				evelnk->to_string().c_str());
 		}
 
 		// If we are here, then we can optimize: we can evaluate
@@ -772,14 +770,13 @@ static bool crispy_maybe(AtomSpace* as,
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
 			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
-
-		// Non-atom case - fall through to let crisp_eval_scratch handle it
-		failed = true;
-		return false;
 	}
 
-	failed = true;
-	return false;
+	throwSyntaxException(silent,
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
+		evelnk->to_string().c_str());
+
+	return false; // make compiler stop complaining.
 }
 
 /// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
@@ -902,23 +899,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           bool silent)
 {
 	return bool_to_tv(crisp_eval_scratch(as, evelnk, as, silent));
-}
-
-bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
-                                        const Handle& evelnk,
-                                        AtomSpace* scratch,
-                                        bool silent)
-{
-	// Try the crispy ones first, then the probabilistic ones.
-	bool fuzzy;
-	bool tf = crispy_maybe(as, evelnk, scratch, silent, fuzzy);
-	if (not fuzzy) return tf;
-
-	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet. Cannot evaluate %s",
-		evelnk->to_string().c_str());
-
-	return false; // make compiler stop complaining.
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
