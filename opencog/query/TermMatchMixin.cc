@@ -649,31 +649,6 @@ bool TermMatchMixin::eval_sentence(const Handle& top,
 		return false;
 	}
 
-	// --------------------------------------------------------
-	// If we are here, then what we have is some atom that is not
-	// normally "truth-valued". We can do one of two things:
-	//
-	// a) Throw an exception and complain, and tell the user to say
-	//  `(GreaterThan (TruthValueOf X) (Number 0.5))`, to get a yes/no
-	//   decision.
-	// b) Just assume the user wanted the above, by default.
-	//
-	// Currently, the below implements choice (b): i.e. it gets the TV
-	// of this atom, and checks to see if it is greater than 0.5 or not.
-	// In the long run, we might want to switch to option (a) ... ?
-	//
-	// There are several minor issues: 1) we need to check the TV
-	// of the grounded atom, not the TV of the pattern, and 2) if
-	// the atom is executable, we need to execute it.
-	const auto& g = gnds.find(top);
-	if (gnds.end() != g)
-	{
-		ValuePtr tvp(g->second->getValue(truth_key()));
-		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
-		              << tvp->to_string() << std::endl;})
-		return crisp_truth_from_tv(TruthValueCast(tvp));
-	}
-
 	// If it's not grounded, then perhaps its executable.
 	return eval_term(top, gnds);
 }
