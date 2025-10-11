@@ -717,7 +717,8 @@ static bool crispy_eval_scratch(AtomSpace* as,
 	return false;
 }
 
-/// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
+/// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
+/// returning a boolean result.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode and
@@ -725,9 +726,9 @@ static bool crispy_eval_scratch(AtomSpace* as,
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-/// The predicate as a whole is then evaluated.
+/// The predicate as a whole is then evaluated and returns bool.
 ///
-TruthValuePtr do_eval_with_args(AtomSpace* as,
+static bool crisp_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
                                 const HandleSeq& cargs,
                                 bool silent)
@@ -755,7 +756,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
 	}
 
 	// Treat LambdaLink as if it were a PutLink -- perform
@@ -764,7 +765,7 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
 		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
 	}
 
 	// Throw a silent exception; this is called in some try..catch blocks.
@@ -774,21 +775,18 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 		Handle args(createLink(std::move(cargs), LIST_LINK));
 		ValuePtr result = gpn->execute_args(as, args, silent);
 
-		// Check if result is a BoolValue and convert to TruthValue
+		// Check if result is a BoolValue and return the bool directly
 		if (result->is_type(BOOL_VALUE))
 		{
 			BoolValuePtr bvp = BoolValueCast(result);
 			std::vector<bool> bvals = bvp->value();
 			if (bvals.empty())
-				return TruthValue::FALSE_TV();
+				return false;
 			// Use first boolean value
-			if (bvals[0])
-				return createSimpleTruthValue(1.0, 1.0);
-			else
-				return createSimpleTruthValue(0.0, 1.0);
+			return bvals[0];
 		}
 		if (result->is_type(VOID_VALUE))
-			return nullptr;
+			throwSyntaxException(silent, "GroundedPredicate returned VoidValue");
 
 		throw RuntimeException(TRACE_INFO,
 			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
@@ -802,13 +800,32 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 	{
 		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
 		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::do_evaluate(as, reduct, silent);
+		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
 	}
 
 	if (silent)
 		throw NotEvaluatableException();
 	throw SyntaxException(TRACE_INFO,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
+}
+
+/// `do_eval_with_args()` -- evaluate a PredicateNode with arguments.
+///
+/// Expects "pn" to be any actively-evaluatable predicate type.
+///     Currently, this includes the GroundedPredicateNode and
+///     the DefinedPredicateNode.
+/// Expects "args" to be a ListLink. These arguments will be
+///     substituted into the predicate.
+///
+/// The predicate as a whole is then evaluated.
+///
+TruthValuePtr do_eval_with_args(AtomSpace* as,
+                                const Handle& pn,
+                                const HandleSeq& cargs,
+                                bool silent)
+{
+	// Call the crisp version and convert bool to TruthValue
+	return bool_to_tv(crisp_eval_with_args(as, pn, cargs, silent));
 }
 
 /// `tv_eval_scratch()` -- evaluate any Atoms that can meaningfully
