@@ -799,6 +799,29 @@ static bool crispy_maybe(AtomSpace* as,
 ///
 /// The predicate as a whole is then evaluated and returns bool.
 ///
+/// This is called after unwrapping EvaluationLinks of the form
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// or
+///
+///     EvaluationLink
+///         GroundedPredicateNode "lang: func_name"
+///         SomeAtom
+///         OtherAtom
+///
+/// (Skipping the ListLink...)
+///
+/// The `lang:` should be either `scm:` for scheme, `py:` for python,
+/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
+/// on the provided ListLink of arguments.
+///
+/// For DefinedPredicateNodes, the defintiion is looked up first.
+///
 static bool crisp_eval_with_args(AtomSpace* as,
                                 const Handle& pn,
                                 const HandleSeq& cargs,
@@ -880,25 +903,6 @@ static bool crisp_eval_with_args(AtomSpace* as,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
-/// `tv_eval_scratch()` -- evaluate any Atoms that can meaningfully
-/// result in a fuzzy or probabilistic truth value. See description
-/// for `crispy_eval_scratch()`, up above, for a general explanation.
-/// This function handles miscellaneous Atoms that don't have a natural
-/// interpretation in terms of crisp truth values.
-///
-/// If the argument is an EvaluationLink with a GPN in it, it should
-/// have the following structure:
-///
-///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
-///         ListLink
-///             SomeAtom
-///             OtherAtom
-///
-/// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
-/// on the provided ListLink of arguments.
-///
 static TruthValuePtr tv_eval_scratch(AtomSpace* as,
                                      const Handle& evelnk,
                                      AtomSpace* scratch,
