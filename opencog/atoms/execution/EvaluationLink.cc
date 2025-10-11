@@ -878,7 +878,6 @@ static TruthValuePtr tv_eval_scratch(AtomSpace* as,
 		// Extract the args, and run the evaluation with them.
 		TruthValuePtr tvp(do_eval_with_args(scratch,
 		                                    sna.at(0), args, silent));
-		evelnk->setValue(truth_key(), tvp);
 		return tvp;
 	}
 	else if (SATISFACTION_LINK == t)
