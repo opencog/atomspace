@@ -64,17 +64,17 @@ void IdenticalLinkUTest::test_identical()
 	Handle AAA = L(IDENTICAL_LINK, A, A, A);
 	Handle ABB = L(IDENTICAL_LINK, A, B, B);
 
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, AA);
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, AA, &_as);
+	TS_ASSERT(result);
 
-	tvp = EvaluationLink::do_evaluate(&_as, AAA);
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	result = EvaluationLink::crisp_eval_scratch(&_as, AAA, &_as);
+	TS_ASSERT(result);
 
-	tvp = EvaluationLink::do_evaluate(&_as, AB);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_eval_scratch(&_as, AB, &_as);
+	TS_ASSERT(not result);
 
-	tvp = EvaluationLink::do_evaluate(&_as, ABB);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_eval_scratch(&_as, ABB, &_as);
+	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

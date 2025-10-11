@@ -64,12 +64,12 @@ void ExclusiveLinkUTest::test_exclusive()
 	Handle T = L(EXCLUSIVE_LINK, A, B, C, A);
 
 
-	TruthValuePtr tvp = EvaluationLink::do_evaluate(&_as, S);
-	printf("Got tvp=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	bool result = EvaluationLink::crisp_eval_scratch(&_as, S, &_as);
+	printf("Got result=%s\n", result ? "true" : "false");
+	TS_ASSERT(result);
 
-	tvp = EvaluationLink::do_evaluate(&_as, T);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	result = EvaluationLink::crisp_eval_scratch(&_as, T, &_as);
+	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
