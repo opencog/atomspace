@@ -666,7 +666,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return not EvaluationLink::crisp_eval_scratch(as,
 		      evelnk->getOutgoingAtom(0), scratch, silent);
 	}
-	else if (AND_LINK == t)
+	if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
@@ -675,7 +675,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		}
 		return true;
 	}
-	else if (OR_LINK == t)
+	if (OR_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
@@ -684,7 +684,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		}
 		return false;
 	}
-	else if (SEQUENTIAL_AND_LINK == t)
+	if (SEQUENTIAL_AND_LINK == t)
 	{
 		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
@@ -705,7 +705,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		} while (is_trec);
 		return true;
 	}
-	else if (SEQUENTIAL_OR_LINK == t)
+	if (SEQUENTIAL_OR_LINK == t)
 	{
 		const HandleSeq& oset = evelnk->getOutgoingSet();
 		size_t arity = oset.size();
