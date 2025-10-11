@@ -93,10 +93,3 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 
 	return result;
 }
-
-ValuePtr LibraryRunner::evaluate(AtomSpace* as,
-                                const ValuePtr& vargs,
-                                bool silent)
-{
-	return execute(as, vargs, silent);
-}
