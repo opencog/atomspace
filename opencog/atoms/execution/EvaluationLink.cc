@@ -788,8 +788,12 @@ TruthValuePtr do_eval_with_args(AtomSpace* as,
 			else
 				return createSimpleTruthValue(0.0, 1.0);
 		}
+		if (result->is_type(VOID_VALUE))
+			return nullptr;
 
-		return TruthValueCast(result);
+		throw RuntimeException(TRACE_INFO,
+			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
+			result->to_string().c_str());
 	}
 
 	// If it's evaluatable, assume it has some free variables.
