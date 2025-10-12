@@ -30,6 +30,7 @@
 
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
+#include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/query/Implicator.h>
