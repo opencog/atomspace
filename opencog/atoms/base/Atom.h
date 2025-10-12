@@ -45,6 +45,8 @@
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
 
+#include <opencog/util/exceptions.h>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
