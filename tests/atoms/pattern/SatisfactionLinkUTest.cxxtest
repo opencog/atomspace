@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/SatisfactionLink.h>
 #include <opencog/atoms/atom_types/atom_names.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -69,12 +70,14 @@ void SatisfactionLinkUTest::test_execution()
 
 	TS_ASSERT(have_colors->is_executable());
 	ValuePtr vp = have_colors->execute();
-	TS_ASSERT(vp == TruthValue::FALSE_TV());
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
 	_as->add_atom(Inheritance(Concept("red"), Concept("Color")));
 	_as->add_atom(Inheritance(Concept("green"), Concept("Color")));
 	_as->add_atom(Inheritance(Concept("blue"), Concept("Color")));
 
 	vp = have_colors->execute();
-	TS_ASSERT(vp == TruthValue::TRUE_TV());
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 }
