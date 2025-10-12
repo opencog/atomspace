@@ -84,13 +84,13 @@
 				(List (Concept "traffic ticket"))))))
 
 (define (start-again)
-	(cog-evaluate! traffic-lights)
+	(cog-execute! traffic-lights)
 	(format #t "Have seen ~A green lights and ~A  red lights\n"
 		num-green num-red))
 
 ;;; Try the below.  This should result in an exception being thrown.
 ;;;
-; (cog-evaluate! off-road)
+; (cog-execute! off-road)
 ;
 ;;; The below should result in the green light being seen twice, and
 ;;; the red light once, and no exceptions or errors.
@@ -128,7 +128,7 @@
 				(List (Concept ".... And they're off!"))))))
 
 (define (drag-race)
-	(cog-evaluate! hot-rodding)
+	(cog-execute! hot-rodding)
 	(simple-format #t "Waited on ~A red lights\n" num-red))
 
 ;;; The below should result in the three red lights before it turns

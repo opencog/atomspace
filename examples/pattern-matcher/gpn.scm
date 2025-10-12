@@ -6,7 +6,7 @@
 ; or not.  This can be done using the GroundedPredicateNode, as shown
 ; in this demo.
 ;
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ; Define a function that takes an atom and returns an OpenCog truth
 ; value. In this case, it randomly returns true or false, about half the
@@ -26,8 +26,8 @@
 	)
 )
 
-; The function can be invoked directly, using the cog-evaluate!
-; function. The below defines an Evaluation that, when evaluated,
+; The function can be invoked directly, using the cog-execute!
+; function. The below defines an Evaluation that, when executed,
 ; sometimes picks something, and sometimes doesn't.
 ;
 (define sometimes
@@ -36,7 +36,7 @@
 		(List (Concept "something"))))
 
 ; Try it!  run the following a few times:
-; (cog-evaluate! sometimes)
+; (cog-execute! sometimes)
 
 ; The pattern-matching requires some data in the AtomSpace to match
 ; against. So populate the AtomSpace with some data.

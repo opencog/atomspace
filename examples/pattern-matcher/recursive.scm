@@ -29,13 +29,13 @@
 ; "vertebrate" into "that", and then checks to see if there is
 ; an InheritanceLink of this kind in the AtomSpace. Running this
 ; should return true.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(Present (Inheritance (Variable "this") (Variable "that")))
 		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; We can check that "foobar" is not a vertebrate:
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(Present (Inheritance (Variable "this") (Variable "that")))
 		(List (Concept "foobar") (Concept "vertebrate"))))
@@ -58,9 +58,9 @@
 ; being asked ("is something present in the AtomSpace?") from the
 ; specifics of what that question is being applied to.
 ;
-; When the cog-evaluate! runs, it substitutes (beta-reduces) the
-; ConceptNodes into the VariableNodes, and then evaluates the result.
-; The evaluation is done outside of the AtomSpace, so that it is not
+; When the cog-execute! runs, it substitutes (beta-reduces) the
+; ConceptNodes into the VariableNodes, and then executes the result.
+; The executation is done outside of the AtomSpace, so that it is not
 ; polluted with junk. (More complex queries use a scratch AtomSpace to
 ; hold temporary results; this is invisible to the user. This query is
 ; simple enough that it does not need a scratch AtomSpace.)
@@ -81,11 +81,10 @@
 ;
 ; The query is a predicate: that is, when run, it will return a
 ; true/false value. Thus, the query is defined to be a DefinedPredicate.
-; This indicates to the system that it can be evaluated, and will result
+; This indicates to the system that it can be executed, and will result
 ; in a TruthValue. We make a point of this, because most AtomSpace
-; contents are typically not predicates, and are not evaluatable or
-; executable. Atomese is typed, in order to simplify reasoning over
-; symbolic content.
+; contents are typically not predicates, and are not executable.
+; Atomese is typed, in order to simplify reasoning over symbolic content.
 ;
 ; These three ideas are combined below. The predicate abstracts away
 ; (puts a wrapper around) the internal details. The InheritanceLink is
@@ -98,16 +97,16 @@
 		(Present (Inheritance (Variable "this") (Variable "that")))))
 
 ; Lets verify that this works as expected, that is, works as before:
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "simple is-a relation")
 		(List (Concept "mammal") (Concept "vertebrate"))))
 
 ; The same query also works without the intervening Define; one can
 ; stick the Lambda directly into place in the EvaluationLink. This
-; is how the evaluation proceeds: the definition is expanded in place,
-; and then the evaluation is run.
-(cog-evaluate!
+; is how the execution proceeds: the definition is expanded in place,
+; and then the execution is run.
+(cog-execute!
 	(Evaluation
 		(Lambda
 			(VariableList (Variable "this") (Variable "that"))
@@ -117,7 +116,7 @@
 ; ----------
 ; There is an explicit AbsentLink, as well. It's the opposite of the
 ; PresentLink.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(Absent (Inheritance (Variable "this") (Variable "that")))
 		(List (Concept "foobar") (Concept "vertebrate"))))
@@ -125,7 +124,7 @@
 ; Of course, we could have said "not present"; the AbsentLink is not
 ; really needed for this demo; it is far more useful and powerful
 ; when it appears in patterns.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(Not (Absent (Inheritance (Variable "this") (Variable "that"))))
 		(List (Concept "mammal") (Concept "vertebrate"))))
@@ -136,7 +135,7 @@
 ; middle is present in the AtomSpace. (If this seems opaque or
 ; confusing, please review the earlier demos that explain how searches
 ; are performed.)
-(cog-evaluate!
+(cog-execute!
 	(Satisfaction
 		(Present
 			(Inheritance (Concept "human") (Variable "middle"))
@@ -158,13 +157,13 @@
 
 ; This new predicate can be used exactly the same way as the earlier
 ; one.  All the intervening details have been hidden.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "grandparent relation")
 		(List (Concept "foobar") (Concept "vertebrate"))))
 
 ; We can check that it indeed "skips a step" correctly.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "grandparent relation")
 		(List (Concept "human") (Concept "vertebrate"))))
@@ -219,7 +218,7 @@
 ; 2) The lambda: it binds two variables, as before.
 ; 3) A SequentialOr. Evaluation stops as soon as one of the terms
 ;    returns true.
-; 4) A direct check of inheritance. If this evaluates to true, then
+; 4) A direct check of inheritance. If this executes to true, then
 ;    we are done.
 ; 5) If not, then a SatisfactionLink, much as before.
 ; 6) The SatisfactionLink is looking to see if "this" is connected
@@ -228,7 +227,7 @@
 ;    This tells the query engine that an infinite regress will happen
 ;    here. The query engine treats this as a form of tail recursion, and
 ;    takes steps to avoid growing the stack at this point. The
-;    ContinuationLink wraps some (any) evaluatable Atom.
+;    ContinuationLink wraps some (any) executable Atom.
 ; 8) To do the recursion, we need to connect the grounded `middle` to
 ;    the recursively long chain. To get that, we refer to the recursive
 ;    definition itself. That definition takes two arguments. But which
@@ -255,13 +254,13 @@
 							(List (Variable "middle") (Variable "that")))))))))
 
 ; Let's test it out. Does it work?
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
 		(List (Concept "Ben") (Concept "animal"))))
 
 ; We can also verify that Ben isn't foobar'ed.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
 		(List (Concept "Ben") (Concept "foobar"))))
@@ -291,7 +290,7 @@
 
 ; The earlier query should work as before: in just a few steps, we
 ; can discover that 'Ben' is-a 'animal'.
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
 		(List (Concept "Ben") (Concept "animal"))))
@@ -303,7 +302,7 @@
 ; throw an exception once this limit is reached. If you need a higher
 ; limit, or a true infinite loop, please open a bug report, and describe
 ; the use case in detail!
-(cog-evaluate!
+(cog-execute!
 	(Evaluation
 		(DefinedPredicate "recursive relation")
 		(List (Concept "Ben") (Concept "foobar"))))
@@ -315,8 +314,6 @@
 ; even Atoms. Of course, in this demo, it returns the same
 ; SimpleTruthValue as before, because that is what the PresentLink
 ; returns.
-;
-; Note some differences: we use cog-execute! here, not cog-evaluate!
 (cog-execute!
 	(ExecutionOutput
 		(Lambda

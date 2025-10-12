@@ -80,19 +80,18 @@
 (define flipkey (PredicateNode "*-coinflip-*"))
 (cog-set-value! c flipkey (GreaterThan (Number 0.5) (FloatValueOf c k)))
 
-; The flipkey above should generate a stream of true and false TruthValues
-; Note that cog-evaluate! is being used here, to get truth values, and not
-; cog-execute! (which would only return the value, without evaluating it.)
-(cog-evaluate! (ValueOf c flipkey))
-(cog-evaluate! (ValueOf c flipkey))
-(cog-evaluate! (ValueOf c flipkey))
-(cog-evaluate! (ValueOf c flipkey))
-(cog-evaluate! (ValueOf c flipkey))
+; The flipkey above should generate a stream of true and false BoolValues
+; Note that cog-execute! is being used here, to get bool values.
+(cog-execute! (ValueOf c flipkey))
+(cog-execute! (ValueOf c flipkey))
+(cog-execute! (ValueOf c flipkey))
+(cog-execute! (ValueOf c flipkey))
+(cog-execute! (ValueOf c flipkey))
 
 ; Its more efficient to do this:
 (define coin-tv (ValueOf c flipkey))
-(cog-evaluate! coin-tv)
-(cog-evaluate! coin-tv)
-(cog-evaluate! coin-tv)
-(cog-evaluate! coin-tv)
-(cog-evaluate! coin-tv)
+(cog-execute! coin-tv)
+(cog-execute! coin-tv)
+(cog-execute! coin-tv)
+(cog-execute! coin-tv)
+(cog-execute! coin-tv)
