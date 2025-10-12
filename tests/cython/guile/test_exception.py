@@ -21,7 +21,7 @@ class TestExceptions(unittest.TestCase):
 
     def test_bogus_scheme(self):
         try:
-            code = """(Get (Concept "a") (Concept "a") (Concept "a"))"""
+            code = """(Meet (Concept "a") (Concept "a") (Concept "a"))"""
             scheme_eval(self.space, code)
             self.assertFalse("call should fail")
         except RuntimeError as e:

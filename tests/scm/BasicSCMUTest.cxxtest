@@ -384,7 +384,7 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
-	eval->eval("(define t (stv 0.5 0.8))");
+	eval->eval("(define t (FloatValue 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
 	eval->eval("(define l (LinkValue f h s k t))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
@@ -468,7 +468,7 @@ void BasicSCMUTest::test_value_list(void)
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
-	eval->eval("(define t (stv 0.5 0.8))");
+	eval->eval("(define t (FloatValue 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
 	eval->eval("(define l (LinkValue f h s k t))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
@@ -506,8 +506,8 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	printf("check_link(%s,%s,%s,%f,%f)\n",
 	        tipo, nodename1, nodename2, truth, conf);
 	char buff[500];
-	snprintf(buff, 500, "(%s (stv %f %f) (%s \"%s\") (%s \"%s\") )",
-	         tipo, truth, conf, nodename1, value1, nodename2, value2);
+	snprintf(buff, 500, "(cog-set-value! (%s (%s \"%s\") (%s \"%s\")) (Predicate \"*-TruthValueKey-*\") (FloatValue %f %f))",
+	         tipo, nodename1, value1, nodename2, value2, truth, conf);
 	eval->eval(buff);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
@@ -603,7 +603,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Create initially with one set of truth values
-	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.25) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	Handle inh = eval->eval_h("(define lnk (ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))) (cog-set-value! lnk (Predicate \"*-TruthValueKey-*\") (FloatValue 0.75 0.25)) lnk");
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
@@ -612,7 +612,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 
 	// Add it again, but with stronger confidence.
 	// Make sure the new values grab hold
-	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	inh = eval->eval_h("(begin (cog-set-value! lnk (Predicate \"*-TruthValueKey-*\") (FloatValue 0.6 0.42)) lnk)");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to update a link", !eval_err);
@@ -632,8 +632,9 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	printf("check_parse_link(%s,%s,%s,%f,%f)\n",
 	       tipo, nodename1, nodename2, truth, conf);
 	char buff[500];
-	snprintf(buff, 500, "(%s  (%s \"%s\"(stv %f %f)) (%s \"%s\"))",
-	         tipo, nodename1, value1, truth, conf, nodename2, value2);
+	// First create the node with TV, then create the link
+	snprintf(buff, 500, "(cog-set-value! (%s \"%s\") (Predicate \"*-TruthValueKey-*\") (FloatValue %f %f)) (%s (%s \"%s\") (%s \"%s\"))",
+	         nodename1, value1, truth, conf, tipo, nodename1, value1, nodename2, value2);
 	eval->eval(buff);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
