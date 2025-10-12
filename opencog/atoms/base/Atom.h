@@ -50,7 +50,6 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/value/BoolValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
 {
@@ -534,11 +533,9 @@ public:
         throw RuntimeException(TRACE_INFO, "Not evaluatable!");
     }
 
-    // Non-crisp evaluation is deprecated. Changed to return ValuePtr.
+    // Non-crisp evaluation is deprecated. Changed to return BoolValue.
     virtual ValuePtr evaluate(AtomSpace* as, bool silent=false) {
-        if (bevaluate(as, silent))
-            return ValueCast(TruthValue::TRUE_TV());
-        return ValueCast(TruthValue::FALSE_TV());
+        return ValueCast(createBoolValue(bevaluate(as, silent)));
     }
     virtual bool is_evaluatable() const { return false; }
 

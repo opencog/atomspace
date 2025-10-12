@@ -10,6 +10,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog
 {
@@ -45,9 +46,7 @@ public:
 
 	virtual bool is_evaluatable() const { return true; }
 	ValuePtr evaluate(AtomSpace* scratch, bool silent) {
-		if (bevaluate(scratch, silent))
-			return ValueCast(TruthValue::TRUE_TV());
-		return ValueCast(TruthValue::FALSE_TV());
+		return ValueCast(createBoolValue(bevaluate(scratch, silent)));
 	}
 
 	virtual bool bevaluate(AtomSpace* scratch, bool silent=false) {
@@ -63,9 +62,7 @@ public:
 	                            const Handle& evelnk,
 	                            bool silent=false)
 	{
-		if (crisp_eval_scratch(as, evelnk, as, silent))
-			return ValueCast(TruthValue::TRUE_TV());
-		return ValueCast(TruthValue::FALSE_TV());
+		return ValueCast(createBoolValue(crisp_eval_scratch(as, evelnk, as, silent)));
 	}
 
 	static Handle factory(const Handle&);
