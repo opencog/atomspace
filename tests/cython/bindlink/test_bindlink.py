@@ -2,7 +2,6 @@ import unittest
 import os
 
 from opencog.atomspace import Atom, types
-from opencog.execute import evaluate_atom
 
 from opencog.type_constructors import *
 
@@ -127,7 +126,7 @@ class BindlinkTest(unittest.TestCase):
             )
         )
 
-        tv = evaluate_atom(self.atomspace, satisfaction_atom)
+        tv = self.atomspace.execute(satisfaction_atom)
         self.assertEqual(green_count(), 2)
         self.assertEqual(red_count(), 1)
 
@@ -146,7 +145,7 @@ class BindlinkTest(unittest.TestCase):
         self.assertEqual(result, list_link)
 
     def test_evaluate_atom(self):
-        result = evaluate_atom(self.atomspace,
+        result = self.atomspace.execute(
                 EvaluationLink(
                     GroundedPredicateNode("py: test_functions.bogus_tv"),
                     ListLink(
