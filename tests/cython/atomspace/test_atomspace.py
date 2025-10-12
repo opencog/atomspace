@@ -45,7 +45,7 @@ class AtomSpaceTest(TestCase):
                 0, True)
         # Test with bad type
         self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test",
-                TruthValue(0.5, 0.8))
+                FloatValue([0.5, 0.8]))
 
         # From here on out we'll use the more compact type constructors
         a1 = Node("test")
@@ -63,7 +63,7 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(caught, True)
 
         # Test adding with a truthvalue
-        a3 = Node("test_w_tv").set_value(tvkey, TruthValue(0.5, 0.8))
+        a3 = Node("test_w_tv").set_value(tvkey, FloatValue([0.5, 0.8]))
         self.assertEqual(self.space.size(), 3)
 
     def test_add_link(self):
@@ -78,7 +78,7 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3)
         self.assertTrue(l3 is not None)
-        l3.set_value(tvkey, TruthValue(0.5, 0.8))
+        l3.set_value(tvkey, FloatValue([0.5, 0.8]))
 
         # Should fail when adding an intentionally bad type
         caught = False
@@ -94,27 +94,6 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(self.space.is_valid(a1))
         # check with bad type
         self.assertRaises(TypeError, self.space.is_valid, "test")
-
-    def test_truth_value(self):
-        # check attributes come back as assigned
-        tv = TruthValue(0.5, 0.8)
-        self.assertEqual(tv.mean, 0.5)
-        self.assertAlmostEqual(tv.confidence, 0.8, places=4)
-
-        # check equality
-        tv2 = TruthValue(0.5, 0.8)
-        tv3 = TruthValue(0.6, 0.8)
-        self.assertTrue(tv == tv2)
-        self.assertFalse(tv == tv3)
-
-        # check truth_value function of atom
-        atom = Node("atom with tv")
-        default_tv = atom.get_value(tvkey)
-        atom.set_value(tvkey, TruthValue(0.75, 0.9))
-        new_tv = atom.get_value(tvkey)
-        self.assertFalse(new_tv == default_tv)
-        self.assertEqual(new_tv.mean, 0.75)
-        self.assertAlmostEqual(new_tv.confidence, 0.9, places=4)
 
     def test_get_by_type(self):
         a1 = Node("test1")
@@ -236,7 +215,7 @@ class AtomTest(TestCase):
 
     def test_w_truthvalue(self):
         a = Node("test2")
-        tv = TruthValue(0.5, 100)
+        tv = FloatValue([0.5, 100])
         a.set_value(tvkey, tv)
         self.assertEqual(a.get_value(tvkey), tv)
 
@@ -247,7 +226,7 @@ class AtomTest(TestCase):
         self.assertEqual(a1.out, [])
 
         a2 = Node("test3")
-        tv = TruthValue(0.5, 100)
+        tv = FloatValue([0.5, 100])
         a2.set_value(tvkey, tv)
 
         l = Link(a1, a2)
@@ -262,7 +241,7 @@ class AtomTest(TestCase):
         self.assertEqual(a1.arity, 0)
 
         a2 = Node("test3")
-        tv = TruthValue(0.5, 100)
+        tv = FloatValue([0.5, 100])
         a2.set_value(tvkey, tv)
 
         l = Link(a1, a2)
@@ -295,11 +274,11 @@ class AtomTest(TestCase):
     def test_strings(self):
         # set up a link and atoms
         a1 = Node("test1")
-        tv = TruthValue(0.5, 0.8)
+        tv = FloatValue([0.5, 0.8])
         a1.set_value(tvkey, tv)
 
         a2 = Node("test2")
-        a2.set_value(tvkey, TruthValue(0.1, 0.3))
+        a2.set_value(tvkey, FloatValue([0.1, 0.3]))
 
         l = Link(a1, a2)
 
