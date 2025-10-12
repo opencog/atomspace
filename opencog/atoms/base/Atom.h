@@ -45,8 +45,11 @@
 #define USE_HASHABLE_WEAK_PTR 1
 #endif
 
+#include <opencog/util/exceptions.h>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog
@@ -531,12 +534,11 @@ public:
         throw RuntimeException(TRACE_INFO, "Not evaluatable!");
     }
 
-    // Non-crisp evaluation is deprecated. This method will be removed,
-    //  someday.
-    virtual TruthValuePtr evaluate(AtomSpace* as, bool silent=false) {
+    // Non-crisp evaluation is deprecated. Changed to return ValuePtr.
+    virtual ValuePtr evaluate(AtomSpace* as, bool silent=false) {
         if (bevaluate(as, silent))
-            return TruthValue::TRUE_TV();
-        return TruthValue::FALSE_TV();
+            return ValueCast(TruthValue::TRUE_TV());
+        return ValueCast(TruthValue::FALSE_TV());
     }
     virtual bool is_evaluatable() const { return false; }
 

@@ -44,10 +44,10 @@ public:
 	}
 
 	virtual bool is_evaluatable() const { return true; }
-	TruthValuePtr evaluate(AtomSpace* scratch, bool silent) {
+	ValuePtr evaluate(AtomSpace* scratch, bool silent) {
 		if (bevaluate(scratch, silent))
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
+			return ValueCast(TruthValue::TRUE_TV());
+		return ValueCast(TruthValue::FALSE_TV());
 	}
 
 	virtual bool bevaluate(AtomSpace* scratch, bool silent=false) {
@@ -59,13 +59,13 @@ public:
 	                               AtomSpace* scratch,
 	                               bool silent=false);
 
-	static TruthValuePtr do_evaluate(AtomSpace* as,
-	                                 const Handle& evelnk,
-	                                 bool silent=false)
+	static ValuePtr do_evaluate(AtomSpace* as,
+	                            const Handle& evelnk,
+	                            bool silent=false)
 	{
 		if (crisp_eval_scratch(as, evelnk, as, silent))
-			return TruthValue::TRUE_TV();
-		return TruthValue::FALSE_TV();
+			return ValueCast(TruthValue::TRUE_TV());
+		return ValueCast(TruthValue::FALSE_TV());
 	}
 
 	static Handle factory(const Handle&);

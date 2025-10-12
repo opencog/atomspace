@@ -98,7 +98,7 @@ void FutureStream::update() const
 		if (h->is_executable())
 			newval.emplace_back(h->execute(_as));
 		else if (h->is_evaluatable())
-			newval.emplace_back(ValueCast(h->evaluate(_as)));
+			newval.emplace_back(h->evaluate(_as));
 	}
 	_value.swap(newval);
 }

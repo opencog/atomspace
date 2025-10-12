@@ -19,4 +19,4 @@
             (VariableNode "$x") 
             (ConceptNode "criminal")))))))
 
-(define (sat-imp) (cog-evaluate! imp))
+; (define (sat-imp) (cog-execute! imp))

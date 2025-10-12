@@ -92,13 +92,6 @@ class TermMatchMixin : public virtual PatternMatchCallback
 			return _connectives;
 		}
 
-		// Remarks:
-		// 1) This could be made virtual, if someone wants to over-load.
-		// 2) End-users should stop depending on this, and should start
-		//    using `(GreaterThan (TruthValueOf X) (Number 0.5))` instead.
-		bool crisp_truth_from_tv(const TruthValuePtr& tvp)
-		{ return tvp->get_mean() >= 0.5; }
-
 		bool optionals_present(void) { return _optionals_present; }
 
 	protected:
