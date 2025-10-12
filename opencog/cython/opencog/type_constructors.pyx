@@ -13,7 +13,6 @@ from opencog.atomspace import (createBoolValue,
                                createLinkValue,
                                createQueueValue,
                                createStringValue,
-                               createTruthValue,
                                createUnisetValue,
                                # createVoidValue,
                                # createRandomStream
@@ -54,9 +53,6 @@ def StringValue(arg):
 
 def UnisetValue(arg=None):
     return createUnisetValue(arg)
-
-def TruthValue(double strength=1.0, double confidence=1.0):
-    return createTruthValue(strength, confidence)
 
 # Argh. Need to hand-craft a pyx file for these. XXX FIXME
 # def VoidValue():
