@@ -11,7 +11,6 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/ValueOfLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
