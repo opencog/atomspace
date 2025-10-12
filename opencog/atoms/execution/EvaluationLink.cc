@@ -232,8 +232,8 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 		try
 		{
 			if (EvaluationLink::crisp_eval_scratch(as, term, scratch, silent))
-				return ValueCast(TruthValue::TRUE_TV());
-			return ValueCast(TruthValue::FALSE_TV());
+				return ValueCast(createBoolValue(true));
+			return ValueCast(createBoolValue(false));
 		}
 		catch (const SilentException& ex)
 		{
