@@ -20,16 +20,16 @@ available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
-Nodes, Links, Values and TruthValues, as well as ways to get
-properties (such as the names of Nodes, or the outgoing sets of Links).
+Nodes, Links, Values, as well as ways to get properties (such as the
+names of Nodes, or the outgoing sets of Links).
 
 Atom creation can be as simple as the following example:
 ```
-   (ReferenceLink (stv 0.987 0.234)
+   (ReferenceLink
        (ConceptNode "dog-instance-1") (WordNode "dog"))
 ```
-which creates a link connecting a concept node and a word node, having
-a simple truth value. Any valid node or link name can be used in this way.
+which creates a link connecting a concept node and a word node.
+Any valid node or link name can be used in this way.
 
 A number of utilities and handy functions can be found in the directory
 ''opencog/scm''.  These can be loaded from the guile REPL by saying
@@ -70,8 +70,6 @@ interface.
 === cog-new-node node-type node-name ===
       Create a new node of the given type and name
 
-      Optionally, a truth value can follow the node name.
-
       Throws errors if node-type is not a valid atom type for a node,
       and if node-name is not a string.
 
@@ -80,18 +78,10 @@ interface.
           guile> (cog-new-node 'ConceptNode "some node name")
           (ConceptNode "some node name")
 
-          ; Creates a new node, with a truth value:
-          guile> (cog-new-node 'ConceptNode "another node"
-                        (SimpleTruthValue 0.8 0.9))
-          (ConceptNode "another node" (stv 0.8 0.9))
-
 
 === cog-node node-type node-name ===
       Returns the node of the given type and name, if it exists, else
       returns null.
-
-      Optionally, a truth value can follow the node name. If the node
-      exists, then the truth value is modified.
 
       Throws errors if node-type is not a valid atom type for a node,
       and if node-name is not a string.
@@ -111,20 +101,12 @@ interface.
           guile> (null? (cog-node 'ConceptNode "asdf"))
           #f
 
-          ; Change the truth value of an existing node:
-          guile> (cog-node 'ConceptNode "asdf" (SimpleTruthValue 0.8 0.9))
-          (ConceptNode "asdf" (stv 0.8 0.9))
-
 
 === cog-new-link link-type atom ... atom ===
       Create a new link, with the given atoms in the link.
 
-      Optionally, a truth value can be included
-      in the list of atoms.
-
       Throws errors if the link type is not a valid opencog link type,
-      or if any of the arguments after the link type are not atoms or
-      truth values.
+      or if any of the arguments after the link type are not atoms.
 
       Example:
           ; Creates two nodes, and a new link:
@@ -136,24 +118,13 @@ interface.
              (ConceptNode "def")
           )
 
-          ; Create a new link with a truth value:
-          guile> (cog-new-link 'Link x y (SimpleTruthValue 0.7 0.8))
-          (Link (stv 0.7 0.8)
-             (ConceptNode "abc")
-             (ConceptNode "def")
-          )
-
 
 === cog-link link-type atom ... atom ===
       Returns the link of the given type and list of atoms, if it
       exists, else returns null.
 
-      Optionally, a truth value can be included in the list of atoms.
-      If the link exists, then the truth value is modified.
-
       Throws errors if the link type is not a valid opencog link type,
-      or if any of the arguments after the link type are not atoms or
-      truth values.
+      or if any of the arguments after the link type are not atoms.
 
       Example:
           ; Create two nodes:
@@ -177,14 +148,6 @@ interface.
              (ConceptNode "abc")
              (ConceptNode "def")
           )
-
-          ; Change the truth value of an existing node:
-          guile> (cog-link 'Link x y (SimpleTruthValue 0.7 0.8))
-          (Link (stv 0.7 0.8)
-             (ConceptNode "abc")
-             (ConceptNode "def")
-          )
-
 
 === cog-extract atom ===
       Delete the indicated atom, but only if it has no incoming links.
@@ -369,44 +332,6 @@ interface.
          999732144055296198
          guile> (cog-handle y)
          7856230993510549357
-
-=== cog-tv? exp ===
-      Return #t if exp is a truth value, else return #f
-
-      Example:
-         ; Define a simple truth value
-         guile> (define x (SimpleTruthValue 0.7 0.9))
-         guile> (define y (+ 2 2))
-         guile> (cog-tv? x)
-         #t
-         guile> (cog-tv? y)
-         #f
-
-=== cog-tv atom ===
-      Return the truth-value of the atom.
-
-      Example:
-         ; Define a node
-         guile> (define x
-                   (ConceptNode "abc"
-                      (SimpleTruthValue 0.2 0.5)))
-         guile> (cog-tv x)
-         (stv 0.2 0.5)
-         guile> (cog-tv? (cog-tv x))
-         #t
-
-=== cog-set-tv! atom tv ===
-      Set the truth-value of the atom.
-
-      Example:
-         ; Define a node
-         guile> (define x (ConceptNode "def"))
-         guile> (cog-tv x)
-         (stv 0 0)
-         guile> (cog-set-tv! x (SimpleTruthValue 0.9 0.8))
-         (ConceptNode "def" (stv 0.9 0.8))
-         guile> (cog-tv x)
-         (stv 0.9 0.8)
 
 === cog-get-types ===
       Return a list of all of the atom types in the system.
