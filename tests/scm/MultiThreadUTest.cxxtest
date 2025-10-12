@@ -181,9 +181,12 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 		double confidence = 0.8 * ((double) N-i) / ((double) N);
 
 		std::ostringstream oss;
-		oss << "(cog-new-node 'ConceptNode \""
+		oss << "(begin "
+		    << "(define node (cog-new-node 'ConceptNode \""
 		    << "thread " << thread_id << " node " << counter
-		    << "\" (cog-new-stv " << strength << " " << confidence << "))";
+		    << "\")) "
+		    << "(cog-set-value! node (Predicate \"*-TruthValueKey-*\") (FloatValue " << strength << " " << confidence << ")) "
+		    << "node)";
 		counter ++;
 
 		Handle h = ev->eval_h(oss.str());
@@ -216,8 +219,9 @@ void MultiThreadUTest::test_multi_threads(void)
 	size_t size = as->get_size();
 	std::cout << "atomspace size:" << size << std::endl;
 
-	// we should get num_atoms * n_threads distinct atoms
-	TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+	// We should get num_atoms * n_threads distinct atoms
+	// Plus one, for the (Predicate "*-TruthValueKey-*")
+	TS_ASSERT_EQUALS(size, num_atoms * n_threads + 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
