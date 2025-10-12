@@ -268,7 +268,7 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 	else if (query->is_evaluatable())
 	{
 		AtomSpace* tas = grab_transient_atomspace(as);
-		qv = ValueCast(query->evaluate(tas));
+		qv = query->evaluate(tas);
 		release_transient_atomspace(tas);
 	}
 	else

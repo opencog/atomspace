@@ -70,7 +70,7 @@ public:
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
-		return ValueCast(evaluate(as, silent));
+		return evaluate(as, silent);
 	}
 
 	static Handle factory(const Handle&);

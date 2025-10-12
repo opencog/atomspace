@@ -44,7 +44,7 @@ public:
 
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent) {
-		return ValueCast(evaluate(as, silent)); }
+		return evaluate(as, silent); }
 
 
 	static Handle factory(const Handle&);

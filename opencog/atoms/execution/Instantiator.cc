@@ -546,7 +546,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	{
 		// XXX Don't we need to plug in the vars, first!?
 		// Maybe this is just not tested?
-		return ValueCast(EvaluationLink::do_evaluate(_as, expr, silent));
+		return EvaluationLink::do_evaluate(_as, expr, silent);
 	}
 
 	if (PUT_LINK == t)
