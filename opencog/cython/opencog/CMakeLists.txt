@@ -156,29 +156,9 @@ INSTALL (FILES
 
 ############################## execute module #####################
 
-CYTHON_ADD_MODULE_PYX(execute
-	"atomspace.pxd"
-	opencog_atom_types
-)
-
-ADD_LIBRARY(exec_cython
-	"execute.cpp"
-)
-
-TARGET_LINK_LIBRARIES(exec_cython
-	atomspace_cython
-	atomspace
-	${Python3_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(exec_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME execute)
-
 ### Install the modules ###
 INSTALL(TARGETS
 	atomspace_cython
-	exec_cython
 	logger_cython
 	type_constructors
 	utilities_cython
@@ -192,7 +172,6 @@ INSTALL(TARGETS
 # $ENV{VIRTUAL_ENV}, which is what python wants. Argh. Its a mess.
 ADD_CUSTOM_TARGET(PythonBindings DEPENDS
 	atomspace_cython
-	exec_cython
 	logger_cython
 	type_constructors
 	utilities_cython)
