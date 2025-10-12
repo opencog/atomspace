@@ -32,9 +32,6 @@
         guile> (define xca (cog-new-atom ca spacex))
         guile> (cog-atomspace xca)
 
-        ; Change the TV on it, just so that it is easier to spot.
-        guile> (cog-set-tv! xca (SimpleTruthValue 0.2 0.2))
-
         ; Print AtomSpace contents
         guile> (cog-prt-atomspace)
         guile> (cog-prt-atomspace spacex)
@@ -42,9 +39,8 @@
 
 (set-procedure-property! cog-new-node 'documentation
 "
- cog-new-node NODE-TYPE NODE-NAME [TV]
+ cog-new-node NODE-TYPE NODE-NAME
     Create a new Node of Type NODE-TYPE and name NODE-NAME.
-    Optionally, assign a TruthValue TV to it.
 
     Throws errors if NODE-TYPE is not a valid Atom Type for a Node,
     and if NODE-NAME is not a string. Use (cog-get-types) to get a
@@ -54,23 +50,16 @@
         ; Create a new node, and prints its value:
         guile> (cog-new-node 'Concept \"some node name\")
         (ConceptNode \"some node name\")
-
-        ; Creates a new node, with a truth value:
-        guile> (cog-new-node 'Concept \"another node\"
-                      (SimpleTruthValue 0.8 0.9))
-        (ConceptNode \"another node\" (SimpleTruthValue 0.8 0.9))
 ")
 
 (set-procedure-property! cog-node 'documentation
 "
- cog-node NODE-TYPE NODE-NAME [ATOMSPACE] [NEW-TV]
+ cog-node NODE-TYPE NODE-NAME [ATOMSPACE]
     Returns the Node of Type NODE-TYPE and name NODE-NAME, if it exists,
     else returns null.
 
     If an optional ATOMSPACE is specified, then it is queried for the
-    node, instead of the current AtomSpace for this thread. If an
-    optional TruthValue NEW-TV is specified, and if the atom exists,
-    then the TruthValue is changed to NEW-TV.
+    node, instead of the current AtomSpace for this thread.
 
     Throws errors if NODE-TYPE is not a valid atom type for a Node,
     and if NODE-NAME is not a string. Use (cog-get-types) to get a
@@ -90,22 +79,16 @@
         (ConceptNode \"asdf\")
         guile> (null? (cog-node 'Concept \"asdf\"))
         #f
-
-        ; Change the truth value of an existing node:
-        guile> (cog-node 'Concept \"asdf\" (SimpleTruthValue 0.8 0.9))
-        (ConceptNode \"asdf\" (stv 0.8 0.9))
 ")
 
 (set-procedure-property! cog-new-link 'documentation
 "
- cog-new-link LINK-TYPE ATOM-1 ... ATOM-N [TV]
+ cog-new-link LINK-TYPE ATOM-1 ... ATOM-N
     Create a new Link, of Type LINK-TYPE, holding the given Atoms.
-    Optionally, assign a TruthValue TV to it.
 
     Throws errors if LINK-TYPE is not a valid Link Type, or if any of
-    the arguments after the Link Type are not Atoms, TruthValues or
-    AtomSpaces. Use (cog-get-types) to get a list of the currently
-    loaded atom types.
+    the arguments after the Link Type are not Atoms or AtomSpaces.
+    Use (cog-get-types) to get a list of the currently loaded atom types.
 
     Example:
         ; Creates two nodes, and a new link:
@@ -116,30 +99,20 @@
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
-
-        ; Create a new link with a truth value:
-        guile> (cog-new-link 'Link x y (SimpleTruthValue 0.7 0.8))
-        (Link (stv 0.7 0.8)
-           (ConceptNode \"abc\")
-           (ConceptNode \"def\")
-        )
 ")
 
 (set-procedure-property! cog-link 'documentation
 "
- cog-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE] [NEW-TV]
+ cog-link LINK-TYPE ATOM-1 ... ATOM-N [ATOMSPACE]
     Returns the Link of the given type LINK-TYPE and list of atoms,
     if it exists, else returns null.
 
     If an optional ATOMSPACE is specified, then it is queried for the
-    link, instead of the current AtomSpace for this thread. If an
-    optional TruthValue NEW-TV is specified, and if the atom exists,
-    then the TruthValue is changed to NEW-TV.
+    link, instead of the current AtomSpace for this thread.
 
     Throws errors if LINK-TYPE is not a valid Link Type, or if any
-    of the arguments after the Link Type are not Atoms, TruthValues or
-    AtomSpaces. Use (cog-get-types) to get a list of the currently
-    loaded atom types.
+    of the arguments after the Link Type are not Atoms or AtomSpaces.
+    Use (cog-get-types) to get a list of the currently loaded atom types.
 
     Example:
         ; Create two nodes:
@@ -160,13 +133,6 @@
         ; Check again for existence:
         guile> (cog-link 'Link x y)
         (Link
-           (ConceptNode \"abc\")
-           (ConceptNode \"def\")
-        )
-
-        ; Change the truth value of an existing node:
-        guile> (cog-link 'Link x y (SimpleTruthValue 0.7 0.8))
-        (Link (stv 0.7 0.8)
            (ConceptNode \"abc\")
            (ConceptNode \"def\")
         )
@@ -799,9 +765,9 @@
     on ATOM, using DELTA to modify the original value.
 
     At this time, the only updates that are implemented are the
-    increment of floating-point Values, such as FloatValues and
-    TruthValues. The intended use is for the safe update of counts
-    from multiple threads.
+    increment of floating-point Values, such as FloatValues. The
+    intended use is for the safe update of counts from multiple
+    threads.
 
     This function is similar to the `cog-inc-value!` function, except
     that it allows a full-vector update. When DELTA is a vector, with
@@ -1191,8 +1157,7 @@
  cog-atomspace-ro! [ATOMSPACE]
      Mark the ATOMSPACE as being read-only. New atoms cannot be added
      to a read-only atomspace, nor can atoms be removed. The Values
-     (including the TruthValues) of atoms in the read-only atomspace
-     cannot be changed.
+     of atoms in the read-only atomspace cannot be changed.
 
      The ATOMSPACE argument is optional; if not specified, the current
      atomspace is assumed.
@@ -1272,7 +1237,7 @@
 "
  cog-set-server-mode! BOOL
      If BOOL is #t, then some server-freindly options are enabled,
-     including the high-precision printing of TruthValues. Otherwise,
+     including the high-precision printing of FloatValues. Otherwise,
      human-friendly shell-evaluator style is used. The default is
      false. Returns the previous setting.
 ")
