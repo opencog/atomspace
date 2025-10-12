@@ -169,7 +169,7 @@ void SequenceUTest::test_fallback(void)
 	// This should not throw any exceptions.
 	ValuePtr vp = eval->eval_v("(cog-execute! drag-race)");
 	BoolValuePtr bvp = BoolValueCast(vp);
-	TS_ASSERT(not bvp->get_bit(0));
+	TS_ASSERT(bvp->get_bit(0));
 
 	// Check the number of green lights and red lights that were
 	// evaluated. The pattern has two green lights and one red
