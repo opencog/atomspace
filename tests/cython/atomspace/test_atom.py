@@ -32,12 +32,11 @@ class AtomTest(TestCase):
         keys = atom.get_keys()
         self.assertEqual(0, len(keys))
 
-        tv = TruthValue(0.7, 0.7)
+        tv = FloatValue([0.7, 0.7])
         atom.set_value(tvkey, tv)
         keys = atom.get_keys()
         self.assertEqual(1, len(keys))
-        # Since the type or name of the TruthValue key may change, check that
-        # the value it refers to is the same.
+        # Check that the value it refers to is the same.
         self.assertEqual(tv, atom.get_value(keys[0]))
 
         key = Predicate('bar')

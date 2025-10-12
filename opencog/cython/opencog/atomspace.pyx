@@ -6,7 +6,6 @@
 # things work or not
 
 include "value.pyx"
-include "truth_value.pyx"
 include "bool_value.pyx"
 include "float_value.pyx"
 include "link_value.pyx"

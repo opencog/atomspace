@@ -73,34 +73,6 @@ cdef class Value:
     cdef Value create(cValuePtr& ptr)
 
 
-# TruthValue
-cdef extern from "opencog/atoms/truthvalue/TruthValue.h" namespace "opencog":
-    ctypedef shared_ptr[cTruthValue] tv_ptr "opencog::TruthValuePtr"
-
-    cdef cppclass cTruthValue "const opencog::TruthValue"(cValue):
-        double get_mean()
-        double get_confidence()
-        @staticmethod
-        bint operator==(cTruthValue h)
-        bint operator!=(cTruthValue h)
-
-    cdef tv_ptr tv_cast "TruthValueCast" (cValuePtr) except +
-    cdef cValuePtr tv_uncast "ValueCast" (tv_ptr) except +
-
-cdef extern from "opencog/atoms/truthvalue/SimpleTruthValue.h" namespace "opencog":
-    cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue"(cTruthValue):
-        cSimpleTruthValue(double, double)
-        double get_mean()
-        double get_confidence()
-        string to_string()
-        bint operator==(cTruthValue h)
-        bint operator!=(cTruthValue h)
-
-cdef class TruthValue(Value):
-    cdef double _mean(self)
-    cdef double _confidence(self)
-    cdef cTruthValue* _ptr(self)
-
 # ContentHash
 
 ctypedef size_t ContentHash;

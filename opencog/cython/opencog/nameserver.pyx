@@ -136,10 +136,6 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     if clazz is not None:
         return clazz(ptr_holder=ptr_holder)
 
-    # For handling the children types of TruthValue.
-    if is_a(value_type, types.TruthValue):
-        return TruthValue(ptr_holder=ptr_holder)
-
     # For handling the children types of LinkValue.
     if is_a(value_type, types.LinkValue):
         return LinkValue(ptr_holder=ptr_holder)

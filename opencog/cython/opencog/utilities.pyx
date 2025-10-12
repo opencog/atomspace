@@ -1,7 +1,7 @@
 from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp.set cimport set as cpp_set
-from opencog.atomspace cimport AtomSpace, Atom, TruthValue, Value
+from opencog.atomspace cimport AtomSpace, Atom, Value
 from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factoid
 
