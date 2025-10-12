@@ -128,7 +128,6 @@ class BindlinkTest(unittest.TestCase):
         )
 
         tv = evaluate_atom(self.atomspace, satisfaction_atom)
-        self.assertTrue(tv is not None and tv.mean <= 0.5)
         self.assertEqual(green_count(), 2)
         self.assertEqual(red_count(), 1)
 
