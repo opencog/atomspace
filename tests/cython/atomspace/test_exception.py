@@ -124,7 +124,7 @@ class TestExceptions(unittest.TestCase):
 
         # Use `nosetests3 --nocapture` to see this print...
         print(f"The good TV is {str(okay)}")
-        expect = TruthValue(0.5, 0.5)
+        expect = FloatValue([0.5, 0.5])
         self.assertTrue(okay == expect)
 
     # --------------------------------------------------------------
@@ -215,7 +215,7 @@ def good_predicate(*args):
 
 def good_tv(*args):
     print(args)
-    return TruthValue(0.5, 0.5)
+    return FloatValue([0.5, 0.5])
 
 def no_ret(*args):
     print(args)
