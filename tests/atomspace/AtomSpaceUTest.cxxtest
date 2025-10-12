@@ -491,9 +491,8 @@ public:
      * Add a new node to the Atom Table
      * @param t     Type of the node
      * @param name  Name of the node
-     * @param tvn   TruthValue of the node
      *
-     * virtual Handle add_node(Type t,const string& name,TruthValuePtr tvn,bool fresh=false)=0;
+     * virtual Handle add_node(Type t,const string& name)=0;
      *
      */
     void testAddNode()
@@ -551,9 +550,8 @@ public:
      * Add a new link to the Atom Table
      * @param t         Type of the link
      * @param outgoing  HandleSeq containing the outgoing set of the link
-     * @param tvn       TruthValue of the link
      *
-     * virtual Handle add_link(Type t,const HandleSeq& outgoing,TruthValuePtr tvn)=0;
+     * virtual Handle add_link(Type t,const HandleSeq& outgoing)=0;
      */
     void testAddLink()
     {
@@ -605,8 +603,7 @@ public:
     }
 
     /**
-     * Truth values should get copied over, when a new version of
-     * the same atom is added.
+     * Values should get copied over, when a new version of the same atom is added.
      */
     void testTVUpdate()
     {

@@ -95,20 +95,6 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 			ah = as->add_atom(HandleCast(pap));
 	}
 
-#if 0
-	// This case is triggered when (ValueOf (EvaluationLink...))
-	// is performed. Running the EvaluationLink will typically
-	// update the TruthValue on the thing, and we want this to
-	// be updated, before the ah->getValue(ak) further below.
-	else if (ah->is_executable() or ah->is_type(EVALUATABLE_LINK))
-	{
-		Instantiator inst(as);
-		ValuePtr pap(inst.execute(ah));
-		if (pap and pap->is_atom())
-			ah = as->add_atom(HandleCast(pap));
-	}
-#endif
-
 	// It seems extremely unlikely (to me, at this time) that
 	// the key will arrive as the result of some kind of execution.
 	// But predicting the future is hard, so ...

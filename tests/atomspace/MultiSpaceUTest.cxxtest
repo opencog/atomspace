@@ -23,11 +23,18 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
+
+// Test key for storing values
+static Handle test_key()
+{
+	static Handle key(createNode(PREDICATE_NODE, "*-test-key-*"));
+	return key;
+}
 
 // Test support for multiple atomspaces.
 // This is pursuant to github bug #523 -- several users want this
@@ -65,18 +72,18 @@ public:
 	// should.
 	void testSimple()
 	{
-		// Create three TV's
-		TruthValuePtr tv1(createSimpleTruthValue(0.5, 1.0));
-		TruthValuePtr tv2(createSimpleTruthValue(0.5, 1.0/2.0));
-		TruthValuePtr tv3(createSimpleTruthValue(0.5, 1.0/3.0));
+		// Create three float values
+		ValuePtr fv1(createFloatValue(std::vector<double>{0.5, 1.0}));
+		ValuePtr fv2(createFloatValue(std::vector<double>{0.5, 0.5}));
+		ValuePtr fv3(createFloatValue(std::vector<double>{0.5, 0.333}));
 
 		// Create three atoms in three different atomspaces
 		Handle h1 = as1.add_node(CONCEPT_NODE, "1");
-		h1->setValue(truth_key(), tv1);
+		h1->setValue(test_key(), fv1);
 		Handle h2 = as2.add_node(NUMBER_NODE, "2");
-		h2->setValue(truth_key(), tv2);
+		h2->setValue(test_key(), fv2);
 		Handle h3 = as3.add_node(VARIABLE_NODE, "3");
-		h3->setValue(truth_key(), tv3);
+		h3->setValue(test_key(), fv3);
 
 		// Fetch three atoms in three different atomspaces
 		Handle hn1 = as1.add_node(CONCEPT_NODE, "1");
@@ -93,43 +100,43 @@ public:
 		TS_ASSERT(hn2->get_type() == h2->get_type());
 		TS_ASSERT(hn3->get_type() == h3->get_type());
 
-		// The truth value *pointers* should be identical, as they
-		// should point to the same exact truth value instance.
-		TS_ASSERT(hn1->getValue(truth_key()) == h1->getValue(truth_key()));
-		TS_ASSERT(hn2->getValue(truth_key()) == h2->getValue(truth_key()));
-		TS_ASSERT(hn3->getValue(truth_key()) == h3->getValue(truth_key()));
+		// The value *pointers* should be identical, as they
+		// should point to the same exact value instance.
+		TS_ASSERT(hn1->getValue(test_key()) == h1->getValue(test_key()));
+		TS_ASSERT(hn2->getValue(test_key()) == h2->getValue(test_key()));
+		TS_ASSERT(hn3->getValue(test_key()) == h3->getValue(test_key()));
 	}
 
 	// Test multiple independent atomspaces.  Make sure they do not
 	// collide with one-another in atom insertion, deletion.
 	void testCopy()
 	{
-		// Create three TV's
-		TruthValuePtr tv1(createSimpleTruthValue(0.4, 1.0));
-		TruthValuePtr tv2(createSimpleTruthValue(0.4, 1.0/2.0));
-		TruthValuePtr tv3(createSimpleTruthValue(0.4, 1.0/3.0));
+		// Create three float values
+		ValuePtr fv1(createFloatValue(std::vector<double>{0.4, 1.0}));
+		ValuePtr fv2(createFloatValue(std::vector<double>{0.4, 0.5}));
+		ValuePtr fv3(createFloatValue(std::vector<double>{0.4, 0.333}));
 
 		// Create three nodes
 		Handle n1(createNode(CONCEPT_NODE, "uni-1"));
-		n1->setValue(truth_key(), tv1);
+		n1->setValue(test_key(), fv1);
 		Handle n2(createNode(NUMBER_NODE, "2.2222"));
-		n2->setValue(truth_key(), tv2);
+		n2->setValue(test_key(), fv2);
 		Handle n3(createNode(VARIABLE_NODE, "uni-3"));
-		n3->setValue(truth_key(), tv3);
+		n3->setValue(test_key(), fv3);
 
 		// Create three links holding these three
-		TruthValuePtr tv(createSimpleTruthValue(0.33, 1.0/3.0));
+		ValuePtr fv(createFloatValue(std::vector<double>{0.33, 0.333}));
 
 		// Create three copies of this link in three atomspaces
 		Handle h1 = as1.add_link(LIST_LINK, n1, n2, n3);
-		h1->setValue(truth_key(), tv);
+		h1->setValue(test_key(), fv);
 		Handle h2 = as2.add_atom(h1);
 		Handle h3 = as3.add_atom(h2);
 
-		// The truth values themselves should be equal, as values.
-		TS_ASSERT(*h1->getValue(truth_key()) == *tv);
-		TS_ASSERT(*h2->getValue(truth_key()) == *tv);
-		TS_ASSERT(*h3->getValue(truth_key()) == *tv);
+		// The values themselves should be equal, as values.
+		TS_ASSERT(*h1->getValue(test_key()) == *fv);
+		TS_ASSERT(*h2->getValue(test_key()) == *fv);
+		TS_ASSERT(*h3->getValue(test_key()) == *fv);
 
 		// Fetch three atoms in three different atomspaces
 		Handle h1n1 = as1.get_node(CONCEPT_NODE, "uni-1");
@@ -158,18 +165,18 @@ public:
 		TS_ASSERT(h2n2 != h3n2);
 		TS_ASSERT(h2n3 != h3n3);
 
-		// The truth values themselves should be equal, as values.
-		TS_ASSERT(*h1n1->getValue(truth_key()) == *tv1);
-		TS_ASSERT(*h2n1->getValue(truth_key()) == *tv1);
-		TS_ASSERT(*h3n1->getValue(truth_key()) == *tv1);
+		// The values themselves should be equal, as values.
+		TS_ASSERT(*h1n1->getValue(test_key()) == *fv1);
+		TS_ASSERT(*h2n1->getValue(test_key()) == *fv1);
+		TS_ASSERT(*h3n1->getValue(test_key()) == *fv1);
 
-		TS_ASSERT(*h1n2->getValue(truth_key()) == *tv2);
-		TS_ASSERT(*h2n2->getValue(truth_key()) == *tv2);
-		TS_ASSERT(*h3n2->getValue(truth_key()) == *tv2);
+		TS_ASSERT(*h1n2->getValue(test_key()) == *fv2);
+		TS_ASSERT(*h2n2->getValue(test_key()) == *fv2);
+		TS_ASSERT(*h3n2->getValue(test_key()) == *fv2);
 
-		TS_ASSERT(*h1n3->getValue(truth_key()) == *tv3);
-		TS_ASSERT(*h2n3->getValue(truth_key()) == *tv3);
-		TS_ASSERT(*h3n3->getValue(truth_key()) == *tv3);
+		TS_ASSERT(*h1n3->getValue(test_key()) == *fv3);
+		TS_ASSERT(*h2n3->getValue(test_key()) == *fv3);
+		TS_ASSERT(*h3n3->getValue(test_key()) == *fv3);
 	}
 
 	// Test copying back and forth.
@@ -313,7 +320,7 @@ public:
 		TS_ASSERT(h3 == h3copy);
 	}
 
-	// Test multiple nested (hierarchical) atomspaces.  They should 
+	// Test multiple nested (hierarchical) atomspaces.  They should
 	// work as expected...  The below is a fairly naive test, it does
 	// not test any kind of complicated semantics.  Its minimal.
 	void testNest()
@@ -322,29 +329,29 @@ public:
 		AtomSpacePtr nas2(createAtomSpace(nas1));
 		AtomSpacePtr nas3(createAtomSpace(nas2));
 
-		// Create three TV's
-		TruthValuePtr tv1(createSimpleTruthValue(0.4, 1.0));
-		TruthValuePtr tv2(createSimpleTruthValue(0.4, 1.0/2.0));
-		TruthValuePtr tv3(createSimpleTruthValue(0.4, 1.0/3.0));
+		// Create three float values
+		ValuePtr fv1(createFloatValue(std::vector<double>{0.4, 1.0}));
+		ValuePtr fv2(createFloatValue(std::vector<double>{0.4, 0.5}));
+		ValuePtr fv3(createFloatValue(std::vector<double>{0.4, 0.333}));
 
 		// Create three nodes in the base atomspace
 		Handle hnd1 = nas1->add_node(CONCEPT_NODE, "nest-1");
-		hnd1->setValue(truth_key(), tv1);
+		hnd1->setValue(test_key(), fv1);
 		Handle hnd2 = nas1->add_node(NUMBER_NODE, "2.34");
-		hnd2->setValue(truth_key(), tv2);
+		hnd2->setValue(test_key(), fv2);
 		Handle hnd3 = nas1->add_node(VARIABLE_NODE, "nest-3");
-		hnd3->setValue(truth_key(), tv3);
+		hnd3->setValue(test_key(), fv3);
 
 		// Create three links holding these three
-		TruthValuePtr tv(createSimpleTruthValue(0.33, 1.0/3.0));
+		ValuePtr fv(createFloatValue(std::vector<double>{0.33, 0.333}));
 
 		// Create a link in the middle atomspace
 		Handle h2 = nas2->add_link(LIST_LINK, hnd1, hnd2, hnd3);
-		h2->setValue(truth_key(), tv);
+		h2->setValue(test_key(), fv);
 
 		// Try to create a link in the grandchild atomspace
 		Handle h3 = nas3->add_link(LIST_LINK, hnd1, hnd2, hnd3);
-		h3->setValue(truth_key(), tv);
+		h3->setValue(test_key(), fv);
 
 		// The middle and grand-child links should be one and the same.
 		TS_ASSERT(h2 == h3);
@@ -376,19 +383,19 @@ public:
 		TS_ASSERT(hnd2 == h3n2);
 		TS_ASSERT(hnd3 == h3n3);
 
-		// The truth value *pointers* should be identical, of course,
+		// The value *pointers* should be identical, of course,
 		// since they are the very same atoms.
-		TS_ASSERT(hnd1->getValue(truth_key()) == h1n1->getValue(truth_key()));
-		TS_ASSERT(hnd2->getValue(truth_key()) == h1n2->getValue(truth_key()));
-		TS_ASSERT(hnd3->getValue(truth_key()) == h1n3->getValue(truth_key()));
+		TS_ASSERT(hnd1->getValue(test_key()) == h1n1->getValue(test_key()));
+		TS_ASSERT(hnd2->getValue(test_key()) == h1n2->getValue(test_key()));
+		TS_ASSERT(hnd3->getValue(test_key()) == h1n3->getValue(test_key()));
 
-		TS_ASSERT(hnd1->getValue(truth_key()) == h2n1->getValue(truth_key()));
-		TS_ASSERT(hnd2->getValue(truth_key()) == h2n2->getValue(truth_key()));
-		TS_ASSERT(hnd3->getValue(truth_key()) == h2n3->getValue(truth_key()));
+		TS_ASSERT(hnd1->getValue(test_key()) == h2n1->getValue(test_key()));
+		TS_ASSERT(hnd2->getValue(test_key()) == h2n2->getValue(test_key()));
+		TS_ASSERT(hnd3->getValue(test_key()) == h2n3->getValue(test_key()));
 
-		TS_ASSERT(hnd1->getValue(truth_key()) == h3n1->getValue(truth_key()));
-		TS_ASSERT(hnd2->getValue(truth_key()) == h3n2->getValue(truth_key()));
-		TS_ASSERT(hnd3->getValue(truth_key()) == h3n3->getValue(truth_key()));
+		TS_ASSERT(hnd1->getValue(test_key()) == h3n1->getValue(test_key()));
+		TS_ASSERT(hnd2->getValue(test_key()) == h3n2->getValue(test_key()));
+		TS_ASSERT(hnd3->getValue(test_key()) == h3n3->getValue(test_key()));
 	}
 
 	// This tests bug report #9

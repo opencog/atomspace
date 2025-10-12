@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -73,17 +72,19 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
-	Handle* (*func)(AtomSpace*, Handle*);
-	func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
+	// Functions can return either Handle* or ValuePtr*.
+	// Try ValuePtr* first, as it's more general.
+	ValuePtr* (*func)(AtomSpace*, Handle*);
+	func = reinterpret_cast<ValuePtr* (*)(AtomSpace *, Handle*)>(sym);
 
 	ValuePtr result;
 
 	// Execute the function
-	Handle* res = func(as, &args);
+	ValuePtr* res = func(as, &args);
 	if (nullptr != res)
 	{
 		result = *res;
-		free(res);
+		delete res;
 	}
 
 	if (nullptr == result)
@@ -93,38 +94,4 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 		        cargs->to_short_string().c_str());
 
 	return result;
-}
-
-ValuePtr LibraryRunner::evaluate(AtomSpace* as,
-                                const ValuePtr& vargs,
-                                bool silent)
-{
-	if (not vargs->is_atom())
-		throw SyntaxException(TRACE_INFO,
-			"LibraryRunner: Expecting Handle; got %s",
-			vargs->to_string().c_str());
-
-	Handle cargs = HandleCast(vargs);
-	Handle args(as->add_atom(cargs));
-
-	// Convert the void* pointer to the correct function type.
-	TruthValuePtr* (*func)(AtomSpace*, Handle*);
-	func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
-
-	// Evaluate the predicate
-	TruthValuePtr* res = func(as, &args);
-	TruthValuePtr result;
-	if (nullptr != res)
-	{
-		result = *res;
-		free(res);
-	}
-
-	if (nullptr == result)
-		throwSyntaxEx(silent,
-	        "Invalid return value from grounded predicate %s\nArgs: %s",
-		        _fname.c_str(),
-		        cargs->to_short_string().c_str());
-
-	return ValueCast(result);
 }

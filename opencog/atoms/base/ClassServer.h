@@ -52,9 +52,7 @@ class ClassServer
     friend class ::ClassServerUTest;
 
 public:
-    // Currently, we provide factories only for atoms, not for
-    // values. TruthValues could use a factory, but, for now,
-    // we don't have a pressing reason to add that.
+    // Currently, we provide factories only for atoms, not for values.
     typedef Handle (AtomFactory)(const Handle&);
 
     // Perform checking of the outgoing set, during construction.

@@ -86,10 +86,11 @@ given a Value, there is no way of finding out who else is pointing at
 it or using it. If you need to find all users/references, use an Atom.
 That's what they are for.
 
-Some Values are immutable; others are not. For historical reasons,
-TruthValues are immutable; this was used to guaranteed a single view
-of a Truth value to multiple observrs looking at the same time. That
-is, TruthVales were designed tto be race-free.
+Values are immutable "from the outside": there are no setters that can
+change a Value. This allows Values to be safely accessed from multiple
+threads, avoiding data races. However, some values, more notably streams,
+can change "from the inside": they provide access to dynamically changing
+data. This kind of dynamism does not hurt thread-safety, in general.
 
 Why immutabilty? Immutabile objects provide a simple, fast guarantee
 of consistent data views, avoiding the overhead of using mutex locks.

@@ -32,8 +32,7 @@ namespace opencog
  */
 
 /// The PromiseLink returns the provided atom wrapped with a future.
-/// The three future base classes are StreamValue, LinkStream and
-/// FutureTruthValue.
+/// The future base classes are StreamValue and LinkStream.
 ///
 class PromiseLink : public Link
 {
