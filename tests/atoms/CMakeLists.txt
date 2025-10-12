@@ -13,6 +13,7 @@ ADD_SUBDIRECTORY (flow)
 ADD_SUBDIRECTORY (columnvec)
 ADD_SUBDIRECTORY (pattern)
 ADD_SUBDIRECTORY (foreign)
+ADD_SUBDIRECTORY (grounded)
 
 LINK_LIBRARIES(
    atombase

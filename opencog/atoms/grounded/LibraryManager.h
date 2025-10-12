@@ -54,8 +54,18 @@ namespace opencog
  * setLocalSchema("foo", boo) enables creating GroundedSchemaNode with
  * the name "lib:\\foo", which will call boo on execution of corresponding
  * ExecutionOutputLink.
+ *
+ * Functions can return either Handle* (for Atoms) or ValuePtr* (for Values).
+ * ValuePtr* is more general and preferred for new code.
  */
 void setLocalSchema(std::string funcName,
-                    Handle* (*func)(AtomSpace *, Handle*));
+                    ValuePtr* (*func)(AtomSpace *, Handle*));
+
+// Backward compatibility: Accept Handle*-returning functions
+inline void setLocalSchema(std::string funcName,
+                           Handle* (*func)(AtomSpace *, Handle*))
+{
+	setLocalSchema(funcName, reinterpret_cast<ValuePtr* (*)(AtomSpace *, Handle*)>(func));
+}
 };
 #endif //_OPENCOG_LIBRARAY_MANAGER_H

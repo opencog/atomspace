@@ -72,17 +72,19 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	Handle args(as->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
-	Handle* (*func)(AtomSpace*, Handle*);
-	func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
+	// Functions can return either Handle* or ValuePtr*.
+	// Try ValuePtr* first, as it's more general.
+	ValuePtr* (*func)(AtomSpace*, Handle*);
+	func = reinterpret_cast<ValuePtr* (*)(AtomSpace *, Handle*)>(sym);
 
 	ValuePtr result;
 
 	// Execute the function
-	Handle* res = func(as, &args);
+	ValuePtr* res = func(as, &args);
 	if (nullptr != res)
 	{
 		result = *res;
-		free(res);
+		delete res;
 	}
 
 	if (nullptr == result)

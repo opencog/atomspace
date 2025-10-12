@@ -23,8 +23,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/LibraryManager.h>
+#include <opencog/atoms/grounded/LibraryManager.h>
 #include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 using namespace opencog;
 
@@ -70,12 +71,13 @@ void GroundedSchemaLocalUTest::setUp()
 	as->clear();
 }
 
-Handle* safe_car(AtomSpace* as, Handle* params)
+ValuePtr* safe_car(AtomSpace* as, Handle* params)
 {
-	// it is necessary to allocate memory for Handle
-	return new Handle((*params)->get_type() != LIST_LINK ?
-	                  *params :
-	                  (*params)->getOutgoingAtom(0));
+	// it is necessary to allocate memory for ValuePtr
+	Handle result = (*params)->get_type() != LIST_LINK ?
+	                *params :
+	                (*params)->getOutgoingAtom(0);
+	return new ValuePtr(result);
 }
 
 void GroundedSchemaLocalUTest::test_local_schema()
@@ -119,33 +121,34 @@ void GroundedSchemaLocalUTest::test_local_schema_no_sep()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-TruthValuePtr* is_square(AtomSpace* as, Handle* params)
+ValuePtr* is_square(AtomSpace* as, Handle* params)
 {
 	const HandleSeq& args = (*params)->getOutgoingSet();
 	int val1 = NumberNodeCast(args[0])->get_value();
 	int val2 = NumberNodeCast(args[1])->get_value();
-	// it is necessary to allocate memory for TruthValuePtr*
-	return new TruthValuePtr(val1 == val2 * val2 ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV());
+	// it is necessary to allocate memory for ValuePtr*
+	ValuePtr result = createBoolValue(val1 == val2 * val2);
+	return new ValuePtr(result);
 }
 
 void GroundedSchemaLocalUTest::test_local_predicate()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	setLocalPredicate("is_square", is_square);
+	setLocalSchema("is_square", is_square);
 
-	Handle gpn = N(GROUNDED_PREDICATE_NODE, "lib:\\is_square");
+	Handle gpn = N(GROUNDED_SCHEMA_NODE, "lib:\\is_square");
 	Handle args1 = L(LIST_LINK, N(NUMBER_NODE, "9"), N(NUMBER_NODE, "3"));
 	Handle args2 = L(LIST_LINK, N(NUMBER_NODE, "8"), N(NUMBER_NODE, "3"));
 
-	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
-	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
+	Handle eol1 = L(EXECUTION_OUTPUT_LINK, gpn, args1);
+	Handle eol2 = L(EXECUTION_OUTPUT_LINK, gpn, args2);
 
-	TruthValuePtr result1 = evl1->evaluate(as);
-	TruthValuePtr result2 = evl2->evaluate(as);
+	ValuePtr result1 = eol1->execute(as);
+	ValuePtr result2 = eol2->execute(as);
  	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
-	TruthValuePtr expected1 = TruthValue::TRUE_TV();
-	TruthValuePtr expected2 = TruthValue::FALSE_TV();
+	ValuePtr expected1 = createBoolValue(true);
+	ValuePtr expected2 = createBoolValue(false);
 
 	TS_ASSERT(*expected1 == *result1);
 	TS_ASSERT(*expected2 == *result2);
