@@ -30,7 +30,7 @@ def foo(atom_a, atom_b) :
 
 ; Call the python func defined above.
 (define returned-bool
-	(cog-evaluate!
+	(cog-execute!
 		(Evaluation
 			(GroundedPredicate "py:foo")
 			(List (Concept "fruit") (Concept "banana")))))
@@ -48,7 +48,7 @@ def foo(atom_a, atom_b) :
 	     (< (abs (- 0.69 (cadr (cog-value->list apple-value)))) 0.00001)))
 
 (test-assert "returned boolean is wrong"
-	(equal? (stv 1 1) returned-bool))
+	(equal? (BoolValue #t) returned-bool))
 
 ; Handy-dandy try-catch wrapper
 (define (catch-wrong-args thunk)
@@ -62,9 +62,9 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that the handy-dandy try-catch wrapper is working.
 (test-assert "Threw exception even when given the right number of arguments"
-	(equal? (stv 1 1)
+	(equal? (BoolValue #t)
 		(catch-wrong-args (lambda ()
-			(cog-evaluate!
+			(cog-execute!
 				(Evaluation
 					(GroundedPredicate "py:foo")
 					(List (Concept "fruit") (Concept "banana"))))))))
@@ -72,7 +72,7 @@ def foo(atom_a, atom_b) :
 (test-assert "Failed to throw when given too few arguments"
 	(string=? "woo-hooo!!"
 		(catch-wrong-args (lambda ()
-			(cog-evaluate!
+			(cog-execute!
 				(Evaluation
 					(GroundedPredicate "py:foo")
 					(List (Concept "fruit"))))))))
@@ -80,7 +80,7 @@ def foo(atom_a, atom_b) :
 (test-assert "Failed to throw when given too many arguments"
 	(string=? "woo-hooo!!"
 		(catch-wrong-args (lambda ()
-			(cog-evaluate!
+			(cog-execute!
 				(Evaluation
 					(GroundedPredicate "py:foo")
 					(List

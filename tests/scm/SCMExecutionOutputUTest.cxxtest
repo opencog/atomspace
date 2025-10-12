@@ -335,10 +335,10 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	eval->eval("(define (grab-tv x) #t)");
 	CHKEV(eval);
 
-	// Wrap the procedure, returning a boolean (as stv)
+	// Wrap the procedure, returning a boolean (as BoolValue)
 	eval->eval(
 		"(define (evl-tv x) "
-		"   (cog-evaluate! "
+		"   (cog-execute! "
 		"      (EvaluationLink "
 		"          (GroundedPredicateNode \"scm: grab-tv\") "
 		"          (ListLink x))))"
@@ -372,10 +372,10 @@ void SCMExecutionOutputUTest::test_wrapped_evaluate(void)
 		"    (begin (ConceptNode \"cpy\" (cog-tv x)) #t))");
 	CHKEV(eval);
 
-	// Wrap the procedure, returning a TV
+	// Wrap the procedure, returning a BoolValue
 	eval->eval(
 		"(define (cevl-tv x) "
-		"   (cog-evaluate! "
+		"   (cog-execute! "
 		"      (FalseLink "
 		"          (EvaluationLink "
 		"              (GroundedPredicateNode \"scm: copy-tv\") "
@@ -565,10 +565,10 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 	eval->eval("(define (grab-tv x) #t)");
 	CHKEV(eval);
 
-	// Wrap the procedure, returning a boolean (as stv)
+	// Wrap the procedure, returning a boolean (as BoolValue)
 	eval->eval(
 		"(define (single-arg-evl-tv x) "
-		"   (cog-evaluate! "
+		"   (cog-execute! "
 		"      (EvaluationLink "
 		"          (GroundedPredicateNode \"scm: grab-tv\") "
 		"          x)))"
@@ -643,7 +643,7 @@ void SCMExecutionOutputUTest::test_bad_gpn(void)
 
 	eval->eval(
 	   "(define (call-gpn str)"
-	   "   (cog-evaluate!"
+	   "   (cog-execute!"
 	   "      (EvaluationLink"
 	   "         (GroundedPredicate str)"
 	   "         (Concept \"A\"))))"

@@ -184,7 +184,7 @@
 			(List	(Concept "Ben") (Concept "animal"))))))
 
 (define (bonkers)
-	(cog-evaluate!
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "inf regress")
 			(List	(Concept "Ben") (Concept "foobar")))))
