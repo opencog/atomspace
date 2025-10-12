@@ -27,5 +27,5 @@ IF(HAVE_GUILE)
 
 	ADD_GUILE_TEST(GrantTest grant-test.scm)
 	ADD_GUILE_TEST(PutRecursiveTest put-recursive-test.scm)
-	ADD_GUILE_TEST(PresentTest present-test.scm)
+	ADD_GUILE_TEST(PresentAbsentTest present-absent-test.scm)
 ENDIF(HAVE_GUILE)
