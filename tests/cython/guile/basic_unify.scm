@@ -18,9 +18,9 @@
 (InheritanceLink (ConceptNode "Spaceship") (ConceptNode "machine"))
 
 (define find-animals
-	(BindLink
+	(CollectionOf (Query
 		(VariableNode "$var")
 		(InheritanceLink
 			(VariableNode "$var")
 			(ConceptNode "animal"))
-		(VariableNode "$var")))
+		(VariableNode "$var"))))
