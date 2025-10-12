@@ -275,7 +275,6 @@ void GetLinkUTest::test_not_equal(void)
 
 	Handle P = an(PREDICATE_NODE, "P");
 	Handle Q = an(PREDICATE_NODE, "Q");
-	Q->setValue(truth_key(), SimpleTruthValue::TRUE_TV());
 
 	Handle Qvar = an(VARIABLE_NODE, "$Q");
 	Handle vardecl = al(VARIABLE_LIST,
