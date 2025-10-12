@@ -155,7 +155,7 @@ class BindlinkTest(unittest.TestCase):
                     )
                 )
             )
-        self.assertEqual(result, TruthValue(1, 1))
+        self.assertEqual(result, BoolValue(True))
 
     def test_execute_atom_no_return_value(self):
         result = PutLink(DeleteLink(VariableNode("X")),
