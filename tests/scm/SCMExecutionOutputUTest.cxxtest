@@ -345,10 +345,10 @@ void SCMExecutionOutputUTest::test_evaluate(void)
 	);
 	CHKEV(eval);
 
-	// Check that the predicate returns true (as stv 1 1)
+	// Check that the predicate returns true (as BoolValue true)
 	eval->eval(
 		"(define (chk-tv x) "
-		"  (if (not (equal? (stv 1 1) (evl-tv x))) "
+		"  (if (not (equal? (BoolValue #t) (evl-tv x))) "
 		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
 	);
 	CHKEV(eval);
@@ -575,10 +575,10 @@ void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
 	);
 	CHKEV(eval);
 
-	// Check that the predicate returns true (as stv 1 1)
+	// Check that the predicate returns true (as BoolValue true)
 	eval->eval(
 		"(define (chk-tv x) "
-		"  (if (not (equal? (stv 1 1) (single-arg-evl-tv x))) "
+		"  (if (not (equal? (BoolValue #t) (single-arg-evl-tv x))) "
 		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
 	);
 	CHKEV(eval);
