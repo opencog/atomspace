@@ -23,6 +23,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
+#include <opencog/atoms/value/BoolValue.h>
 using namespace opencog;
 
 class EvaluationUTest: public CxxTest::TestSuite
@@ -307,24 +308,28 @@ void EvaluationUTest::test_lambda(void)
 
 	eval->eval("(load-from-path \"tests/query/eval-lambda.scm\")");
 
-	TruthValuePtr tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
-	printf ("Red light TV: %s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	ValuePtr vp = eval->eval_v("(cog-execute! is-red-light)");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	printf ("Red light BoolValue: %s\n", bvp->to_string().c_str());
+	TS_ASSERT(bvp->get_bit(0));
 
-	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
-	printf ("Red light (meet): %s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	vp = eval->eval_v("(cog-execute! meet-is-red-light)");
+	bvp = BoolValueCast(vp);
+	printf ("Red light (meet): %s\n", bvp->to_string().c_str());
+	TS_ASSERT(bvp->get_bit(0));
 
 	eval->eval_h(
 		"(State (Concept \"stop light\") (Concept \"green light\"))");
 
-	tvp = eval->eval_tv("(cog-evaluate! is-red-light)");
-	printf ("Green light TV: %s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	vp = eval->eval_v("(cog-execute! is-red-light)");
+	bvp = BoolValueCast(vp);
+	printf ("Green light BoolValue: %s\n", bvp->to_string().c_str());
+	TS_ASSERT(not bvp->get_bit(0));
 
-	tvp = eval->eval_tv("(cog-evaluate! meet-is-red-light)");
-	printf ("Green light (meet): %s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	vp = eval->eval_v("(cog-execute! meet-is-red-light)");
+	bvp = BoolValueCast(vp);
+	printf ("Green light (meet): %s\n", bvp->to_string().c_str());
+	TS_ASSERT(not bvp->get_bit(0));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

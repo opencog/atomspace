@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/Logger.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 using namespace opencog;
 
@@ -85,7 +86,7 @@ void SequenceUTest::test_sequence(void)
 	bool caught_exception = false;
 	try
 	{
-		eval->eval_tv("(cog-evaluate! (off-road))");
+		eval->eval_v("(cog-execute! (off-road))");
 	}
 	catch (const RuntimeException &e)
 	{
@@ -95,8 +96,9 @@ void SequenceUTest::test_sequence(void)
 	logger().set_level(Logger::DEBUG);
 
 	// This should not throw any exceptions.
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (traffic-lights))");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5);
+	ValuePtr vp = eval->eval_v("(cog-execute! (traffic-lights))");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
 	// Check the number of green lights and red lights that were
 	// evaluated. The pattern has two green lights and one red
@@ -110,9 +112,10 @@ void SequenceUTest::test_sequence(void)
 	TS_ASSERT_EQUALS(1, nred);
 
 	// ----------------------------------------------------------
-	// There are two green lights here; the TV should be "true".
-	tv = eval->eval_tv("(cog-evaluate! (all-green))");
-	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());
+	// There are two green lights here; the BoolValue should be "true".
+	vp = eval->eval_v("(cog-execute! (all-green))");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	// Should have seen two more green lights, and no reds.
 	sngreen = eval->eval("num-green");
@@ -126,8 +129,9 @@ void SequenceUTest::test_sequence(void)
 	// There are four green lights here; the third one is wrapped
 	// by a NotLink.  That should halt the pregression, and return
 	// false.
-	tv = eval->eval_tv("(cog-evaluate! (anti-green))");
-	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5);
+	vp = eval->eval_v("(cog-execute! (anti-green))");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
 	// Should have seen three more green lights, and no reds.
 	sngreen = eval->eval("num-green");
@@ -146,8 +150,9 @@ void SequenceUTest::test_presence(void)
 
 	eval->eval("(load-from-path \"tests/query/seq-presence.scm\")");
 
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! empty-sequence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	ValuePtr vp = eval->eval_v("(cog-execute! empty-sequence)");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -162,8 +167,9 @@ void SequenceUTest::test_fallback(void)
 	eval->eval("(load-from-path \"tests/query/sequence.scm\")");
 
 	// This should not throw any exceptions.
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! drag-race)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	ValuePtr vp = eval->eval_v("(cog-execute! drag-race)");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
 	// Check the number of green lights and red lights that were
 	// evaluated. The pattern has two green lights and one red
@@ -185,32 +191,36 @@ void SequenceUTest::test_pass_presence(void)
 
 	eval->eval("(load-from-path \"tests/query/seq-absence.scm\")");
 
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! or-presence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	ValuePtr vp = eval->eval_v("(cog-execute! or-presence)");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	std::string sntrig = eval->eval("trig");
 	int ntrig = atoi(sntrig.c_str());
 	TS_ASSERT_EQUALS(1, ntrig);
 
 	// -------------------------------------------------------
-	tv = eval->eval_tv("(cog-evaluate! and-absence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	vp = eval->eval_v("(cog-execute! and-absence)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
 	TS_ASSERT_EQUALS(2, ntrig);
 
 	// -------------------------------------------------------
-	tv = eval->eval_tv("(cog-evaluate! and-not-present)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	vp = eval->eval_v("(cog-execute! and-not-present)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
 	TS_ASSERT_EQUALS(3, ntrig);
 
 	// -------------------------------------------------------
-	tv = eval->eval_tv("(cog-evaluate! or-not-absent)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	vp = eval->eval_v("(cog-execute! or-not-absent)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
@@ -224,15 +234,17 @@ void SequenceUTest::test_pass_presence(void)
 	int no_change = 4;
 
 	// ----
-	eval->eval_tv("(cog-evaluate! or-presence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean()); // return true
+	vp = eval->eval_v("(cog-execute! or-presence)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0)); // return true
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
 
 	// ----
-	tv = eval->eval_tv("(cog-evaluate! and-absence)");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5);  // return false
+	vp = eval->eval_v("(cog-execute! and-absence)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));  // return false
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
@@ -242,15 +254,17 @@ void SequenceUTest::test_pass_presence(void)
 // pattern matcher fails on these two. Since I'm too lazy to fix,
 // just right now, I'm just gonna stub these out instead.
 	// ----
-	tv = eval->eval_tv("(cog-evaluate! and-not-present)");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5); // return false
+	vp = eval->eval_v("(cog-execute! and-not-present)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0)); // return false
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
 
 	// ----
-	tv = eval->eval_tv("(cog-evaluate! or-not-absent)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean()); // return true
+	vp = eval->eval_v("(cog-execute! or-not-absent)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0)); // return true
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
@@ -299,8 +313,9 @@ void SequenceUTest::test_or_put(void)
 	eval->eval_h(
 		"(EvaluationLink (PredicateNode \"yes-visible\")"
 		"	(ListLink (ConceptNode \"is-vis\")))");
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! or-visible-put)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	ValuePtr vp = eval->eval_v("(cog-execute! or-visible-put)");
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	// Check the state. Should have a list of length 1,
 	// with a variable only; that is, the state was NOT set.
@@ -309,8 +324,9 @@ void SequenceUTest::test_or_put(void)
 	TS_ASSERT_EQUALS(iset, Handle::UNDEFINED);
 
 	// ----
-	tv = eval->eval_tv("(cog-evaluate! or-put)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
+	vp = eval->eval_v("(cog-execute! or-put)");
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	// Check the state.
 	Handle not_viz = eval->eval_h("(ConceptNode \"not-vis\")");
