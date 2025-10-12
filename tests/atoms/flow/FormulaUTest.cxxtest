@@ -11,6 +11,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -135,25 +136,29 @@ void FormulaUTest::test_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	TruthValuePtr tvp = _eval.eval_tv("(cog-evaluate! (its-one atom-a atom-b))");
-	printf("TV for iab=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	ValuePtr vp = _eval.eval_v("(cog-execute! (its-one atom-a atom-b))");
+	printf("Value for iab=%s\n", vp->to_string().c_str());
+	TS_ASSERT_EQUALS(vp->get_type(), BOOL_VALUE);
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
-	tvp = _eval.eval_tv("(cog-evaluate! (its-one atom-b atom-c))");
-	printf("TV for ibc=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	vp = _eval.eval_v("(cog-execute! (its-one atom-b atom-c))");
+	printf("Value for ibc=%s\n", vp->to_string().c_str());
+	TS_ASSERT_EQUALS(vp->get_type(), BOOL_VALUE);
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
-	tvp = _eval.eval_tv("(cog-evaluate! (its-conf atom-a atom-b))");
-	printf("TV for iab=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
-	TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+	vp = _eval.eval_v("(cog-execute! (its-conf atom-a atom-b))");
+	printf("Value for iab=%s\n", vp->to_string().c_str());
+	TS_ASSERT_EQUALS(vp->get_type(), BOOL_VALUE);
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
-	tvp = _eval.eval_tv("(cog-evaluate! (its-conf atom-b atom-c))");
-	printf("TV for ibc=%s\n", tvp->to_string().c_str());
-	TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
-	TS_ASSERT_EQUALS(tvp, TruthValue::FALSE_TV());
+	vp = _eval.eval_v("(cog-execute! (its-conf atom-b atom-c))");
+	printf("Value for ibc=%s\n", vp->to_string().c_str());
+	TS_ASSERT_EQUALS(vp->get_type(), BOOL_VALUE);
+	bvp = BoolValueCast(vp);
+	TS_ASSERT(not bvp->get_bit(0));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -170,10 +175,10 @@ void FormulaUTest::test_defined_true()
 		TS_ASSERT_LESS_THAN(fabs(sum->get_value() - acc), MAXERR);
 
 		ValuePtr vp = _eval.eval_v("(cog-execute! (DefinedPredicate \"inc\"))");
-		TruthValuePtr tvp = TruthValueCast(vp);
-		printf("TV for True=%s\n", tvp->to_string().c_str());
-		TS_ASSERT_EQUALS(tvp->get_type(), SIMPLE_TRUTH_VALUE);
-		TS_ASSERT_EQUALS(tvp, TruthValue::TRUE_TV());
+		BoolValuePtr bvp = BoolValueCast(vp);
+		printf("BoolValue for True=%s\n", bvp->to_string().c_str());
+		TS_ASSERT_EQUALS(bvp->get_type(), BOOL_VALUE);
+		TS_ASSERT(bvp->get_bit(0));
 	}
 
 	logger().info("END TEST: %s", __FUNCTION__);

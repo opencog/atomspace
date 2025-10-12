@@ -37,7 +37,7 @@ class TestExceptions(unittest.TestCase):
 
         # Use `nosetests3 --nocapture` to see this print...
         print(f"The good TV is {str(okay)}")
-        expect = TruthValue(1, 1)
+        expect = BoolValue(True)
         self.assertTrue(okay == expect)
 
     # --------------------------------------------------------------

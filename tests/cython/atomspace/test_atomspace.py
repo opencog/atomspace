@@ -274,12 +274,7 @@ class AtomTest(TestCase):
     def test_strings(self):
         # set up a link and atoms
         a1 = Node("test1")
-        tv = FloatValue([0.5, 0.8])
-        a1.set_value(tvkey, tv)
-
         a2 = Node("test2")
-        a2.set_value(tvkey, FloatValue([0.1, 0.3]))
-
         l = Link(a1, a2)
 
         space_uuid = 0
@@ -287,12 +282,12 @@ class AtomTest(TestCase):
         # test string representation
         a1_expected = "(Node \"test1\") ; [{0}]\n".format(space_uuid)
         a1_expected_long = \
-            "(Node \"test1\" (stv 0.500000 0.800000)) ; [{0}]\n"\
+            "(Node \"test1\") ; [{0}]\n"\
             .format(space_uuid)
 
         a2_expected = "(Node \"test2\") ; [{0}]\n".format(space_uuid)
         a2_expected_long = \
-            "(Node \"test2\" (stv 0.100000 0.300000)) ; [{0}]\n"\
+            "(Node \"test2\") ; [{0}]\n"\
             .format(space_uuid)
 
         l_expected = \

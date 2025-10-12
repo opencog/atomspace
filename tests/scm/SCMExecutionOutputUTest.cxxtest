@@ -27,6 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 using namespace opencog;
 
@@ -380,9 +381,10 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	CHKEV(eval);
 
 	// Evaluate the boolean expreson; it should be true.
-	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! expr)");
+	ValuePtr vp = eval->eval_v("(cog-execute! expr)");
 	CHKEV(eval);
-	TS_ASSERT_LESS_THAN_EQUALS(0.999, tv->get_mean());
+	BoolValuePtr bvp = BoolValueCast(vp);
+	TS_ASSERT(bvp->get_bit(0));
 
 	// Another boolean expression
 	Handle boolex = eval->eval_h(
@@ -545,7 +547,7 @@ void SCMExecutionOutputUTest::test_bad_gpn(void)
 
 	eval->eval(
 	   "(define (call-gpn str)"
-	   "   (cog-evaluate!"
+	   "   (cog-execute!"
 	   "      (EvaluationLink"
 	   "         (GroundedPredicate str)"
 	   "         (Concept \"A\"))))"

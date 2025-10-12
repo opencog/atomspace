@@ -137,7 +137,7 @@
 ;; pattern match first half of implication, if found
 ;; try to check member again.
 
-(cog-evaluate! (DefinedPredicateNode "Does Bill like X?"))
+(cog-execute! (DefinedPredicateNode "Does Bill like X?"))
 
 ;; A quasi-generic rule implicator.
 ;; Searches for all implication links (of a very specific form)

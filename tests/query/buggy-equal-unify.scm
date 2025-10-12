@@ -23,7 +23,7 @@
 				(List (Variable "N") (Concept "name1"))))
 		(Variable "Y")))
 
-; (cog-evaluate! qunify)
+; (cog-execute! qunify)
 
 ; Expected result of above
 (define expected

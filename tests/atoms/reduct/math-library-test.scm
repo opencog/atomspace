@@ -62,7 +62,7 @@
 				(Number 1 1 1 1 1))
 		)))
 
-	(cog-evaluate!
+	(cog-execute!
 		(Equal
 			(Number 1 1 1 1 1)
 			(Plus

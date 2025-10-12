@@ -70,7 +70,7 @@
 				(List (Variable "$x")))
 		)))
 
-(cog-evaluate! empty-sequence)
+(cog-execute! empty-sequence)
 
 ; ------------------------------------------------------
 ;; This variant uses a GetLink to fetch the room-state from the
@@ -106,7 +106,7 @@
 				(List))  ; zero arguments passed to function
 		)))
 
-(cog-evaluate! get-empty-seq)
+(cog-execute! get-empty-seq)
 
 ; ------------------------------------------------------
 ;; This variant uses the traditional QueryLink format to trigger

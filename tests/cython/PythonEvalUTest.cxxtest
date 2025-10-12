@@ -213,7 +213,7 @@ public:
 
 #ifdef HAVE_GUILE
         AtomSpacePtr as = createAtomSpace();
-        // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
+        // Create a scheme evaluator to trigger cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
         scheme->eval("(use-modules (opencog exec))");

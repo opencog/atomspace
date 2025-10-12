@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
@@ -224,17 +225,17 @@ void ArcanaUTest::test_numeric(void)
 	Instantiator(as.get()).execute(sl);
   
 	ValuePtr too_soon = eval->eval_v(
-		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
-	FloatValuePtr fvp_soon = FloatValueCast(too_soon);
+		"(cog-execute! (DefinedPredicateNode \"Time to change expression\"))");
+	BoolValuePtr bvp_soon = BoolValueCast(too_soon);
 
-	TS_ASSERT_LESS_THAN_EQUALS(fvp_soon->value()[0], 0.5);
+	TS_ASSERT(not bvp_soon->get_bit(0));
 
 	// The TV needs to change after 2 seconds.... sleep 4 to be safe.
 	sleep(4);
 	ValuePtr too_late = eval->eval_v(
-		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
-	FloatValuePtr fvp_late = FloatValueCast(too_late);
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, fvp_late->value()[0]);
+		"(cog-execute! (DefinedPredicateNode \"Time to change expression\"))");
+	BoolValuePtr bvp_late = BoolValueCast(too_late);
+	TS_ASSERT(bvp_late->get_bit(0));
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

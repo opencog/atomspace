@@ -20,14 +20,14 @@
 (Inheritance (Concept "Ben") (Concept "human"))
 
 ; ----------
-(test-assert "mamvet" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "mamvet" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(Present (Inheritance (Variable "this") (Variable "that")))
 			(List	(Concept "mammal") (Concept "vertebrate"))))))
 
-(test-assert "foovet" (equal? (stv 0 1)
-	(cog-evaluate!
+(test-assert "foovet" (equal? (BoolValue #f)
+	(cog-execute!
 		(Evaluation
 			(Present (Inheritance (Variable "this") (Variable "that")))
 			(List	(Concept "foobar") (Concept "vertebrate"))))))
@@ -39,14 +39,14 @@
 		(VariableList (Variable "this") (Variable "that"))
 		(Present (Inheritance (Variable "this") (Variable "that")))))
 
-(test-assert "mam-simp" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "mam-simp" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "simple is-a relation")
 			(List	(Concept "mammal") (Concept "vertebrate"))))))
 
-(test-assert "mam-lamb" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "mam-lamb" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(Lambda
 				(VariableList (Variable "this") (Variable "that"))
@@ -54,21 +54,21 @@
 			(List	(Concept "mammal") (Concept "vertebrate"))))))
 
 ; ----------
-(test-assert "foo-abs" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "foo-abs" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(Absent (Inheritance (Variable "this") (Variable "that")))
 			(List	(Concept "foobar") (Concept "vertebrate"))))))
 
-(test-assert "mam-not-abs" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "mam-not-abs" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(Not (Absent (Inheritance (Variable "this") (Variable "that"))))
 			(List	(Concept "mammal") (Concept "vertebrate"))))))
 
 ; ----------
-(test-assert "hum-vert" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "hum-vert" (equal? (BoolValue #t)
+	(cog-execute!
 		(Satisfaction
 			(Present
 				(Inheritance (Concept "human") (Variable "middle"))
@@ -84,14 +84,14 @@
 				(Inheritance (Variable "this") (Variable "middle"))
 				(Inheritance (Variable "middle") (Variable "that"))))))
 
-(test-assert "foo-grand" (equal? (stv 0 1)
-	(cog-evaluate!
+(test-assert "foo-grand" (equal? (BoolValue #f)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "grandparent relation")
 			(List	(Concept "foobar") (Concept "vertebrate"))))))
 
-(test-assert "foo-grand" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "foo-grand" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "grandparent relation")
 			(List	(Concept "human") (Concept "vertebrate"))))))
@@ -114,14 +114,14 @@
 						(DefinedPredicate "recursive relation")
 						(List (Variable "middle") (Variable "that"))))))))
 
-(test-assert "ben-anim" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "ben-anim" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "recursive relation")
 			(List	(Concept "Ben") (Concept "animal"))))))
 
-(test-assert "ben-foo" (equal? (stv 0 1)
-	(cog-evaluate!
+(test-assert "ben-foo" (equal? (BoolValue #f)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "recursive relation")
 			(List	(Concept "Ben") (Concept "foobar"))))))
@@ -153,14 +153,14 @@
 							(DefinedPredicate "inf regress")
 							(List (Variable "middle") (Variable "that")))))))))
 
-(test-assert "cont-ben-anim" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "cont-ben-anim" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "inf regress")
 			(List	(Concept "Ben") (Concept "animal"))))))
 
-(test-assert "cont-ben-foo" (equal? (stv 0 1)
-	(cog-evaluate!
+(test-assert "cont-ben-foo" (equal? (BoolValue #f)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "inf regress")
 			(List	(Concept "Ben") (Concept "foobar"))))))
@@ -177,14 +177,14 @@
 ; The infinite loop case.
 (Inheritance (Concept "thing") (Concept "Ben"))
 
-(test-assert "cont-finite-ben-anim" (equal? (stv 1 1)
-	(cog-evaluate!
+(test-assert "cont-finite-ben-anim" (equal? (BoolValue #t)
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "inf regress")
 			(List	(Concept "Ben") (Concept "animal"))))))
 
 (define (bonkers)
-	(cog-evaluate!
+	(cog-execute!
 		(Evaluation
 			(DefinedPredicate "inf regress")
 			(List	(Concept "Ben") (Concept "foobar")))))
@@ -194,7 +194,7 @@
 (test-assert "cont-inf-loop" throwd)
 
 ; ----------
-(test-assert "exout" (equal? (stv 1 1)
+(test-assert "exout" (equal? (BoolValue #t)
 	(cog-execute!
 		(ExecutionOutput
 			(Lambda
