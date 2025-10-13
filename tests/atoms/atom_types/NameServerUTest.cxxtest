@@ -97,7 +97,6 @@ public:
         TS_ASSERT(CS_UTEST_NODE   == ntypes);
         TS_ASSERT( nameserver().isA(CS_UTEST_NODE, NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, FLOAT_VALUE));
-        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, NUMBER_NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, LINK));
 
@@ -107,7 +106,6 @@ public:
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK, LIST_LINK));
         TS_ASSERT( nameserver().isA(CS_UTEST_LINK, UNORDERED_LINK));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, FLOAT_VALUE));
-        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NODE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NUMBER_NODE));
 
@@ -148,12 +146,10 @@ public:
 
         TS_ASSERT( nameserver().isA(CS_UTEST_VALUE,   VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   FLOAT_VALUE));
-        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   ATOM));
 
         TS_ASSERT( nameserver().isA(CS_UTEST_FVALUE,  VALUE));
         TS_ASSERT( nameserver().isA(CS_UTEST_FVALUE,  FLOAT_VALUE));
-        TS_ASSERT(!nameserver().isA(CS_UTEST_VALUE,   TRUTH_VALUE));
         TS_ASSERT(!nameserver().isA(CS_UTEST_FVALUE,  ATOM));
 
         // Total number of types is unchanged from before.
