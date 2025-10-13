@@ -362,13 +362,13 @@ jobs:
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
-  spacetime:
+  sensory:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
         user: root
         environment:
           CCACHE_DIR: /ws/ccache
-    working_directory: /ws/spacetime
+    working_directory: /ws/sensory
     steps:
       - attach_workspace:
           at: /ws/
@@ -379,10 +379,10 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
-          name: Checkout SpaceTime
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/spacetime .
+          name: Checkout Sensory
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/sensory .
       - run:
-          name: CMake Configure
+          name: CMake Config Sensory
           command: mkdir build && cd build && cmake ..
       - run:
           name: Build
@@ -394,7 +394,7 @@ jobs:
           name: Run tests
           command: cd build && make -j2 check ARGS=-j2
       - run:
-          name: Install spacetime
+          name: Install Sensory
           command: cd build && make -j2 install && ldconfig
       - run:
           name: Print test log
@@ -403,7 +403,7 @@ jobs:
       - persist_to_workspace:
           root: /ws/
           paths:
-            - spacetime
+            - sensory
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
@@ -603,7 +603,7 @@ workflows:
           requires:
             - atomspace
             - atomspace-rocks
-      - spacetime:
+      - sensory:
           requires:
             - atomspace
       - unify:
@@ -627,6 +627,7 @@ workflows:
             - atomspace-storage
             - cogserver
             - matrix
+            - sensory
             - unify
           filters:
             branches:
