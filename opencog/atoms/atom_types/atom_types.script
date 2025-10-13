@@ -95,27 +95,6 @@ UNISET_VALUE <- CONTAINER_VALUE
 FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 
 // ===========================================================
-// TruthValues are an older concept in Atomese. They are deprecated and
-// are in a slow process of being removed, in favor of the more flexible
-// and more general Value concept.
-//
-// TruthValues are the subobject classifiers for Atomese; they are used
-// to generalize the notion of a subset (in exactly the same way that
-// a subobject classifier does so in an arbitrary topos.) In some cases,
-// these will be probabilities; in other cases, these are probabilities
-// with additional evidence associated to them. In yet other cases,
-// these resemble the truth values of "fuzzy logic", and so on.
-// (FuzzyTruthValue, etc has been removed.)
-//
-// Many Atoms and operations on Atoms explicitly require TruthValues
-// -- for example, PredicateNodes and EvaluationLinks -- and so these
-// remain important for the core infrastructure.
-//
-TRUTH_VALUE                <- FLOAT_VALUE
-SIMPLE_TRUTH_VALUE         <- TRUTH_VALUE
-COUNT_TRUTH_VALUE          <- TRUTH_VALUE
-
-// ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
 // guarantees that uniqueness. They are persistent; the AtomSpace
 // provides persistence. They are immutable (unchangeable); links and
