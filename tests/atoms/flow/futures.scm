@@ -7,11 +7,13 @@
 ; Below is a toy pair-counting framework.  It increments counts
 ; on pairs, as well as on marginals.
 
+(define tvp (PredicateNode "*-TruthValueKey-*"))
+
 (define (incr-counts THING-A THING-B)
-	(cog-inc-count! (List THING-A THING-B) 1.0)
-	(cog-inc-count! (List (AnyNode "left wildcard") THING-B) 1.0)
-	(cog-inc-count! (List THING-A (AnyNode "right wildcard")) 1.0)
-	(cog-inc-count! (AnyNode "grand total") 1.0))
+	(cog-inc-value! (List THING-A THING-B) tvp 1.0 2)
+	(cog-inc-value! (List (AnyNode "left wildcard") THING-B) tvp 1.0 2)
+	(cog-inc-value! (List THING-A (AnyNode "right wildcard")) tvp 1.0 2)
+	(cog-inc-value! (AnyNode "grand total") tvp 1.0 2))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".
@@ -29,8 +31,6 @@
 ; Set up the pipeline.
 
 ; Counts are located in the third slot of the TV predicate.
-(define tvp (PredicateNode "*-TruthValueKey-*"))
-
 ; We will use the formula MI(a,b) = log_2 N(a,b) N(*,*) / N(a,*) N(*,b)
 ; to compute the MI of a pair.
 (DefineLink
