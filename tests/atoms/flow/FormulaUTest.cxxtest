@@ -51,8 +51,8 @@ void FormulaUTest::test_strength_of()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	_eval.eval("(cog-set-value! atom-a tvkey (SimpleTruthValue 0.8 1.0))");
-	_eval.eval("(cog-set-value! atom-b tvkey (SimpleTruthValue 0.6 0.9))");
+	_eval.eval("(cog-set-value! atom-a tvkey (FloatValue 0.8 1.0))");
+	_eval.eval("(cog-set-value! atom-b tvkey (FloatValue 0.6 0.9))");
 
 	ValuePtr sof = _eval.eval_v("(cog-execute! (strength-of (Concept \"A\")))");
 	printf("Get strength_of=%s\n", sof->to_string().c_str());
@@ -108,8 +108,8 @@ void FormulaUTest::test_define()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// --------------
-	_eval.eval("(cog-set-value! atom-a tvkey (SimpleTruthValue 0.3 0.5))");
-	_eval.eval("(cog-set-value! atom-b tvkey (SimpleTruthValue 0.4 0.5))");
+	_eval.eval("(cog-set-value! atom-a tvkey (FloatValue 0.3 0.5))");
+	_eval.eval("(cog-set-value! atom-b tvkey (FloatValue 0.4 0.5))");
 
 	ValuePtr tvp = _eval.eval_v("(cog-execute! red-form)");
 	printf("New red-form=%s\n", tvp->to_string().c_str());
@@ -119,8 +119,8 @@ void FormulaUTest::test_define()
 	TS_ASSERT_LESS_THAN(fabs(fvp->value()[1] - 0.25), MAXERR);
 
 	// --------------
-	_eval.eval("(cog-set-value! atom-a tvkey (SimpleTruthValue 0.2 0.98))");
-	_eval.eval("(cog-set-value! atom-b tvkey (SimpleTruthValue 0.2 0.98))");
+	_eval.eval("(cog-set-value! atom-a tvkey (FloatValue 0.2 0.98))");
+	_eval.eval("(cog-set-value! atom-b tvkey (FloatValue 0.2 0.98))");
 
 	tvp = _eval.eval_v("(cog-execute! red-form)");
 	printf("New red-form=%s\n", tvp->to_string().c_str());
