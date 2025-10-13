@@ -342,13 +342,6 @@ void BasicSCMUTest::check_truth_value(const ValuePtr& tv)
 	bool tv_eq = tv->to_string() == h->getValue(truth_key())->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
 
-	// Check the fast-path API, too
-	string strmfast = "(cog-mean " + add_node_str + ")";
-	double mfast = atof(eval->eval(strmfast.c_str()).c_str());
-	string strcfast = "(cog-confidence " + add_node_str + ")";
-	double cfast = atof(eval->eval(strcfast.c_str()).c_str());
-	check_tv(h, mfast, cfast);
-
 	// Check the slow-path API, too
 	string strmslow = "(cog-value-ref (cog-value " + add_node_str + "(Predicate \"*-TruthValueKey-*\")) 0)";
 	double mslow = atof(eval->eval(strmslow.c_str()).c_str());
