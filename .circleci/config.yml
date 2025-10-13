@@ -505,59 +505,6 @@ jobs:
             - as-moses
             - ccache
 
-  attention:
-    docker:
-      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
-        user: root
-        environment:
-          CCACHE_DIR: /ws/ccache
-    working_directory: /ws/attention
-    steps:
-      - attach_workspace:
-          at: /ws
-      - run:
-          name: Set number of make jobs
-          command: echo "export MAKEFLAGS=-j2" >> $BASH_ENV
-      - run:
-          name: Install CogUtil
-          command: cd /ws/cogutil/build && make install && ldconfig
-      - run:
-          name: Install AtomSpace
-          command: cd /ws/atomspace/build && make install && ldconfig
-      - run:
-          name: Install AtomSpaceStorage
-          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
-      - run:
-          name: Install CogServer
-          command: cd /ws/cogserver/build && make install && ldconfig
-      - run:
-          name: Checkout Attention
-          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/attention .
-      - run:
-          name: CMake Configure
-          command: mkdir build && cd build && cmake ..
-      - run:
-          name: Build
-          command: cd build && make
-      - run:
-          name: Build tests
-          command: cd build && make tests
-      - run:
-          name: Run tests
-          command: cd build && make check ARGS="$MAKEFLAGS"
-      - run:
-          name: Install Attention
-          command: cd build && make install && ldconfig
-      - run:
-          name: Print test log
-          command: cat build/tests/Testing/Temporary/LastTest.log
-          when: always
-      - persist_to_workspace:
-          root: /ws/
-          paths:
-            - attention
-            - ccache
-
   package: #Place holder
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -615,10 +562,6 @@ workflows:
 #      - as-moses:
 #          requires:
 #            - atomspace
-      - attention:
-          requires:
-            - atomspace
-            - cogserver
       - package:
           requires:
             - atomspace
