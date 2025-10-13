@@ -38,7 +38,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 #include "SchemeEval.h"

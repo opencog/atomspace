@@ -49,7 +49,6 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
 
@@ -178,14 +177,6 @@ class PythonEval : public GenericEval
         Handle apply(AtomSpace * as, const std::string& func,
                      Handle varargs)
         { return HandleCast(apply_v(as, func, varargs)); }
-
-        /**
-         * Calls the Python function passed in `func`, passing it
-         * the `varargs` as an argument, returning a TruthValuePtr.
-         */
-        TruthValuePtr apply_tv(AtomSpace *as,
-                               const std::string& func, Handle varargs)
-        { return TruthValueCast(apply_v(as, func, varargs)); }
 
         /**
          * Calls the Python function passed in `func`, passing it

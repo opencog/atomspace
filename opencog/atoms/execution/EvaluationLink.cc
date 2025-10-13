@@ -32,8 +32,6 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
-#include <opencog/atoms/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
