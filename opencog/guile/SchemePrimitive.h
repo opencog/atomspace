@@ -36,7 +36,6 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 namespace opencog {
@@ -139,11 +138,6 @@ protected:
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_atomspace(arg, scheme_name, idx);
-	}
-	TruthValuePtr scm_to(SCM args, size_t idx, const TruthValuePtr) const
-	{
-		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_tv(arg, scheme_name, idx);
 	}
 	ValuePtr scm_to(SCM args, size_t idx, const ValuePtr) const
 	{
@@ -324,10 +318,6 @@ protected:
 			rc = scm_cons(rcTemp, rc);
 		}
 		return rc;
-	}
-	SCM scm_from(const TruthValuePtr& tv)
-	{
-		return SchemeSmob::protom_to_scm(ValueCast(tv));
 	}
 	SCM scm_from(const ValuePtr& pa)
 	{

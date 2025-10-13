@@ -470,10 +470,6 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 		if (nullptr == h) return handle_to_scm(h);
 
-		// Look for "stv" and so on.
-		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-		if (tv) h = asp->set_value(h, truth_key(), tv);
-
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
 		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
@@ -520,10 +516,6 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	// Now, look for the actual node... in the actual atom space.
 	Handle h(asp->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_EOL;
-
-	// If there was a truth value, change it.
-	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h = asp->set_value(h, truth_key(), tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -727,10 +719,6 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 		if (nullptr == h) return handle_to_scm(h);
 
-		// Look for "stv" and so on.
-		const TruthValuePtr tv(get_tv_from_list(satom_list));
-		if (tv) h = atomspace->set_value(h, truth_key(), tv);
-
 		// Are there any keys?
 		// Expecting an association list of key-value pairs, e.g.
 		//    (alist (cons (Predicate "p") (FloatValue 1 2 3)))
@@ -775,10 +763,6 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
 	if (nullptr == h) return SCM_EOL;
-
-	// If there was a truth value, change it.
-	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) h = atomspace->set_value(h, truth_key(), tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
