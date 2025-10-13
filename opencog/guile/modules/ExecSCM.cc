@@ -44,25 +44,11 @@ static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
-#if LATER
-	if (pap == h)
-	{
-		return ValueCast(EvaluationLink::do_evaluate(atomspace, h));
-	}
-#endif
 	if (pap and pap->is_atom())
 	{
 		pap = atomspace->add_atom(HandleCast(pap));
 	}
 	return pap;
-}
-
-/**
- * cog-evaluate! evaluates an EvaluationLink with a GPN in it.
- */
-static ValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
-{
-	return EvaluationLink::do_evaluate(atomspace, h);
 }
 
 // ========================================================
@@ -86,9 +72,6 @@ void ExecSCM::init(void)
 	_binders = new std::vector<FunctionWrap*>();
 	_binders->push_back(new FunctionWrap(ss_execute,
 	                   "cog-execute!", "exec"));
-
-	_binders->push_back(new FunctionWrap(ss_evaluate,
-	                   "cog-evaluate!", "exec"));
 }
 
 ExecSCM::~ExecSCM()

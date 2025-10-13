@@ -59,16 +59,6 @@ std::string SchemeSmob::protom_to_server_string(SCM node)
 
 	if (not pa->is_atom())
 	{
-		// Print high-precision simple truth values.
-		if (nameserver().isA(pa->get_type(), FLOAT_VALUE))
-		{
-			// The FloatValue to_string() print prints out a
-			// high-precision form of the value, as compared
-			// to SimpleTruthValue, which only prints 6 digits
-			// and breaks distributed-storage unit tests.
-			FloatValuePtr fv(FloatValueCast(pa));
-			return fv->FloatValue::to_string();
-		}
 		return pa->to_string();
 	}
 

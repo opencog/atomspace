@@ -38,8 +38,6 @@
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/atom_types/types.h>
 
-#include <opencog/atoms/truthvalue/TruthValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
@@ -184,7 +182,6 @@ private:
 	static std::string protom_to_string(SCM);
 	static std::string protom_to_server_string(SCM);
 	static std::string misc_to_string(SCM);
-	static TruthValuePtr get_tv_from_list(SCM);
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
@@ -205,7 +202,6 @@ private:
 	static Type verify_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ValuePtr verify_protom(SCM, const char *, int pos = 1);
-	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list_msg (SCM, const char*,
 	                                         int, const char*,  const char*);
 	static HandleSeq verify_handle_list (SCM, const char *,

@@ -41,13 +41,6 @@ FunctionWrap::FunctionWrap(Handle (f)(AtomSpace*, const Handle&, size_t),
 	define_scheme_primitive(_name, &FunctionWrap::as_wrapper_h_hz, this, modname);
 }
 
-FunctionWrap::FunctionWrap(TruthValuePtr (p)(AtomSpace*, const Handle&),
-                           const char* funcname, const char* modname)
-	: _pred_ah(p), _name(funcname)
-{
-	define_scheme_primitive(_name, &FunctionWrap::as_wrapper_p_h, this, modname);
-}
-
 FunctionWrap::FunctionWrap(ValuePtr (p)(AtomSpace*, const Handle&),
                            const char* funcname, const char* modname)
 	: _proto_ah(p), _name(funcname)
@@ -69,14 +62,6 @@ Handle FunctionWrap::as_wrapper_h_hz(Handle h, size_t sz)
 	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
 	AtomSpace* as = asp.get();
 	return _func_h_ahz(as, h, sz);
-}
-
-TruthValuePtr FunctionWrap::as_wrapper_p_h(Handle h)
-{
-	// XXX we should also allow opt-args to be a list of handles
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as(_name);
-	AtomSpace* as = asp.get();
-	return _pred_ah(as, h);
 }
 
 ValuePtr FunctionWrap::as_wrapper_v_h(Handle h)
