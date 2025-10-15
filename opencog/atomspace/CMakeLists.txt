@@ -35,7 +35,6 @@ TARGET_LINK_LIBRARIES(atomspace
 	atomflow
 	atomcore
 	atombase
-	truthvalue
 	${COGUTIL_LIBRARY}
 )
 

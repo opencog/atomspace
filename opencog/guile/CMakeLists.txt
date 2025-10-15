@@ -38,7 +38,6 @@ TARGET_LINK_LIBRARIES(smob
 	atomcore
 	foreign
 	atombase
-	truthvalue
 	atomspace
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}

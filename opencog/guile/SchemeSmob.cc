@@ -283,7 +283,6 @@ void SchemeSmob::module_init(void*)
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/tv.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/file-utils.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));

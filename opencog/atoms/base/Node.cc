@@ -114,20 +114,6 @@ std::string Node::to_short_string(const std::string& indent) const
     }
     answer += '\"';
 
-    // Print the TV only if it is the SimpleTV
-    // and is also not the default. This is for
-    // backwards-compat; in the long run, should
-    // simply not print this at all.
-    {
-        KVP_SHARED_LOCK;
-        auto pr = _values.find(truth_key());
-        if (_values.end() != pr and
-            SIMPLE_TRUTH_VALUE == pr->second->get_type())
-        {
-            answer += ' ' + pr->second->to_string();
-        }
-    }
-
     answer += ')';
     return answer;
 }

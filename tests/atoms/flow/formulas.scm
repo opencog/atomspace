@@ -10,8 +10,8 @@
 
 (define atom-a (Concept "A"))
 (define atom-b (Concept "B"))
-(cog-set-value! atom-a tvkey (SimpleTruthValue  0.8 1.0))
-(cog-set-value! atom-b tvkey (SimpleTruthValue  0.6 0.9))
+(cog-set-value! atom-a tvkey (FloatValue  0.8 1.0))
+(cog-set-value! atom-b tvkey (FloatValue  0.6 0.9))
 
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
 (define (confidence-of ATOM) (ElementOf (Number 1) (ValueOf ATOM tvkey)))
@@ -48,8 +48,8 @@
 ; One can also use DefinedPredicates, to give the formula a name.
 (DefineLink (DefinedProcedure "has a reddish color") my-formula)
 
-(cog-set-value! (Concept "A") tvkey (SimpleTruthValue 0.9 0.98))
-(cog-set-value! (Concept "B") tvkey (SimpleTruthValue 0.9 0.98))
+(cog-set-value! (Concept "A") tvkey (FloatValue 0.9 0.98))
+(cog-set-value! (Concept "B") tvkey (FloatValue 0.9 0.98))
 
 ; The will cause the formula to evaluate.
 (define red-form
@@ -59,16 +59,16 @@
 
 ; --------------------------------------------------
 
-(cog-set-value! atom-a tvkey (SimpleTruthValue 0.8 1.0))
-(cog-set-value! atom-b tvkey (SimpleTruthValue 0.6 0.9))
+(cog-set-value! atom-a tvkey (FloatValue 0.8 1.0))
+(cog-set-value! atom-b tvkey (FloatValue 0.6 0.9))
 (define atom-c (Concept "C"))
 
 (define key (Predicate "key"))
 
 (define iab (Inheritance atom-a atom-b))
 (define ibc (Inheritance atom-b atom-c))
-(cog-set-value! iab tvkey (SimpleTruthValue  0.8 0.8))
-(cog-set-value! ibc tvkey (SimpleTruthValue  0.3 0.3))
+(cog-set-value! iab tvkey (FloatValue  0.8 0.8))
+(cog-set-value! ibc tvkey (FloatValue  0.3 0.3))
 
 (cog-set-value! iab key (FloatValue 1 2 3))
 (cog-set-value! ibc key (FloatValue 4 5 6))

@@ -16,7 +16,6 @@ ADD_GUILE_MODULE (FILES
 	opencog/base/debug-trace.scm
 	opencog/base/file-utils.scm
 	opencog/base/repl-shell.scm
-	opencog/base/tv.scm
 	opencog/base/types.scm
 	opencog/base/utilities.scm
 	DEPENDS opencog_atom_types smob

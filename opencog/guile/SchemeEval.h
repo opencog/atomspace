@@ -34,7 +34,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
-#include <opencog/atoms/truthvalue/TruthValue.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -190,10 +189,6 @@ class SchemeEval : public GenericEval
 		// Evaluate expression, returning handle.
 		Handle eval_h(const std::string& str) { return HandleCast(eval_v(str)); }
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
-
-		// Evaluate expression, returning TV.
-		TruthValuePtr eval_tv(const std::string& str) { return TruthValueCast(eval_v(str)); }
-		TruthValuePtr eval_tv(const std::stringstream& ss) { return eval_tv(ss.str()); }
 
 		// Evaluate expression, returning AtomSpace.
 		AtomSpacePtr eval_as(const std::string&);
