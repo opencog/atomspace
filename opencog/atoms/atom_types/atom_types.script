@@ -1102,6 +1102,12 @@ VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_LINK
 // into multiple strings, according to whitespace.
 SPLIT_LINK <- COLLECTION_OF_LINK
 
+// JsonSplitLink will take a StringValue, holding a json string, and
+// parse it into a nested structure composed of LinkValues and
+// StringValues. The key-value pairs in json become pairs of StringValue,
+// wrapped in a LinkValue.
+JSON_SPLIT_LINK <- COLLECTION_OF_LINK
+
 // -----------
 // Similar to ValueOfLink, but this returns a promise to return a Value
 // sometime in the future. This is accomplished by returning a either

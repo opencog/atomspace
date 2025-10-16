@@ -1,5 +1,5 @@
 ;
-; split-test.scm -- Verify that SplitLin works.
+; split-test.scm -- Verify that SplitLink works.
 ;
 
 (use-modules (opencog) (opencog exec))
