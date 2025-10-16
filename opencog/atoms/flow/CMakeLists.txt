@@ -8,6 +8,7 @@ ADD_LIBRARY (atomflow
 	FilterLink.cc
 	IncomingOfLink.cc
 	IncrementValueLink.cc
+	JsonSplitLink.cc
 	KeysOfLink.cc
 	LinkSignatureLink.cc
 	MessagesOfLink.cc
@@ -42,6 +43,7 @@ INSTALL (FILES
 	FilterLink.h
 	IncomingOfLink.h
 	IncrementValueLink.h
+	JsonSplitLink.h
 	KeysOfLink.h
 	LinkSignatureLink.h
 	MessagesOfLink.h
