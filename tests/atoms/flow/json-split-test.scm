@@ -81,7 +81,7 @@
 ; Test 5: JSON with escaped strings
 
 (define json-escaped
-	(JsonSplit (Node "{\"message\":\"Hello\\nWorld\",\"path\":\"C:\\\\\\\\Users\"}")))
+	(JsonSplit (Node "{\"message\":\"Hello\\nWorld\",\"path\":\"C:\\\\Users\"}")))
 
 (define result5 (cog-execute! json-escaped))
 (format #t "JSON escaped strings: ~A\n" result5)
