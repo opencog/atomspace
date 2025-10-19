@@ -9,11 +9,6 @@ include:
 -- debug.scm
    + debugger/backtrace support.
 
--- file-utils.scm
-   + list files in directory
-   + load scheme code from file
-   + execute scheme code from a string or a port.
-
 -- utilities.scm
    + delete an OpenCog hypergraph, from the top-node downwards
    + get all atoms of a certain given type

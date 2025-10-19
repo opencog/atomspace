@@ -149,10 +149,7 @@ cog-value-type
 (include-from-path "opencog/base/atom-docs.scm")
 (include-from-path "opencog/base/utilities.scm")
 (include-from-path "opencog/base/atom-cache.scm")
-(include-from-path "opencog/base/apply.scm")
 (include-from-path "opencog/base/types.scm")
-(include-from-path "opencog/base/file-utils.scm")
-(include-from-path "opencog/base/debug-trace.scm")
 
 ; Obsolete functions
 (define-public (cog-undefined-handle) "obsolete function" '())
