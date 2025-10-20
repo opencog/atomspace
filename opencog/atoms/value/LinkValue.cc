@@ -87,6 +87,22 @@ bool LinkValue::operator==(const Value& other) const
 	return true;
 }
 
+bool LinkValue::operator<(const Value& other) const
+{
+	// Compare by type name.
+	if (_type != other.get_type())
+		return nameserver().getTypeName(_type) < nameserver().getTypeName(other.get_type());
+
+	// Compare by vector length.
+	const LinkValue* lov = (const LinkValue*) &other;
+	if (_value.size() != lov->_value.size())
+		return _value.size() < lov->_value.size();
+
+	// Compare individual values lexicographically.
+	// This works because std::less<ValuePtr> is specialized to compare content.
+	return _value < lov->_value;
+}
+
 // ==============================================================
 
 std::string LinkValue::to_string(const std::string& indent) const

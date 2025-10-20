@@ -129,6 +129,21 @@ bool FloatValue::operator==(const Value& other) const
 	return true;
 }
 
+bool FloatValue::operator<(const Value& other) const
+{
+	// Compare by type name.
+	if (_type != other.get_type())
+		return nameserver().getTypeName(_type) < nameserver().getTypeName(other.get_type());
+
+	// Compare by vector length.
+	const FloatValue* fov = (const FloatValue*) &other;
+	if (_value.size() != fov->_value.size())
+		return _value.size() < fov->_value.size();
+
+	// Compare individual floats lexicographically.
+	return _value < fov->_value;
+}
+
 // ==============================================================
 
 std::string FloatValue::to_string(const std::string& indent, Type t) const

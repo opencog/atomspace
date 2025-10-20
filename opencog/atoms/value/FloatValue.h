@@ -70,6 +70,10 @@ public:
 
 	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
+
+	/** Optimized less-than comparison for FloatValue.
+	 * Compares by type name first, then vector length, then individual floats. */
+	virtual bool operator<(const Value& other) const;
 };
 
 VALUE_PTR_DECL(FloatValue);

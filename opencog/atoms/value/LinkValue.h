@@ -99,6 +99,10 @@ public:
 
 	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const Value&) const;
+
+	/** Optimized less-than comparison for LinkValue.
+	 * Compares by type name first, then vector length, then individual values. */
+	virtual bool operator<(const Value& other) const;
 };
 
 VALUE_PTR_DECL(LinkValue);
