@@ -392,10 +392,15 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_EQUALS(va->get_type(), STRING_VALUE);
 
 	//------------
+	// The ret-float-value function returns identical FloatValue(0.6, 0.3)
+	// for all matches. With proper content-based comparison, these should
+	// deduplicate to 1 unique result (even though there were 3 matches).
+	// This is expected behavior - see commit 658c9688a "One more bug-fix
+	// for grouping" which explicitly documents result collapsing.
 	result = eval.eval_v("(cog-execute! exec-query-float-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
-	TS_ASSERT_EQUALS(vals.size(), 3);
+	TS_ASSERT_EQUALS(vals.size(), 1);  // 3 matches collapse to 1 unique result
 	for (const ValuePtr& va : vals)
 	{
 		TS_ASSERT_EQUALS(va->get_type(), FLOAT_VALUE);
