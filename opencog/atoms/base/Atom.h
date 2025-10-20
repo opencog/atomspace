@@ -654,6 +654,7 @@ public:
     }
 
     /** Ordering operator for Atoms. */
+    using Value::operator<;  // Bring base class operator< into scope
     virtual bool operator<(const Atom&) const = 0;
 };
 
