@@ -103,8 +103,8 @@ public:
 
 	/**
 	 * Returns whether this value is less than another.
-	 * Used for ordering values in sets and maps.
-	 * Compares by string representation.
+	 * Used for ordering values in sets and maps, and specifically
+	 * for deduplication in UnisetValue.
 	 *
 	 * @return true if this value is less than other, false otherwise.
 	 */
