@@ -42,8 +42,8 @@ StreamValueOfLink::StreamValueOfLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return a sample from the stream at the
-/// indicated key.
+/// When executed, this will return a single sample from the stream
+/// at the indicated key.
 ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
