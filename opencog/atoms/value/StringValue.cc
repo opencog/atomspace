@@ -41,6 +41,21 @@ bool StringValue::operator==(const Value& other) const
 	return true;
 }
 
+bool StringValue::operator<(const Value& other) const
+{
+	// Compare by type name.
+	if (_type != other.get_type())
+		return nameserver().getTypeName(_type) < nameserver().getTypeName(other.get_type());
+
+	// Compare by vector length.
+	const StringValue* sov = (const StringValue*) &other;
+	if (_value.size() != sov->_value.size())
+		return _value.size() < sov->_value.size();
+
+	// Compare individual strings lexicographically.
+	return _value < sov->_value;
+}
+
 // ==============================================================
 
 /// Print the StringValue. Escape any quotes in the strings when

@@ -64,6 +64,11 @@ public:
 
 	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const Value&) const;
+
+	/** Optimized less-than comparison for StringValue.
+	 * Compares by type first, then vector length, then individual strings.
+	 * Much faster than the base class to_string() comparison. */
+	virtual bool operator<(const Value& other) const;
 };
 
 VALUE_PTR_DECL(StringValue);
