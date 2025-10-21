@@ -106,7 +106,22 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	}
 
 	ValuePtr pap = ah->getValue(ak);
-	if (pap) return pap;
+	if (pap)
+	{
+		if (not pap->is_atom())
+			return pap;
+
+		Handle aval(HandleCast(pap));
+		if (not aval->is_executable())
+			return pap;
+
+		// Do it again!
+		aval = as->add_atom(aval);
+		ValuePtr pval(aval->execute(as, silent));
+		if (pval)
+			return pval;
+		return pap;
+	}
 
 	// If we are here, then no Value was found. If there is a
 	// third Atom, then it specifies a default to use instead.
