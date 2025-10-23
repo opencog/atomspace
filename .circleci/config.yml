@@ -306,6 +306,51 @@ jobs:
             # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
             # - ccache
 
+  lg-atomese:
+    docker:
+      - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/lg-atomese
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Install CogUtil
+          command: cd /ws/cogutil/build && make -j2 install && ldconfig
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j2 install && ldconfig
+      - run:
+          name: Checkout LG-Atomese system
+          command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/lg-atomese .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j2
+      - run:
+          name: Build tests
+          command: cd build && make -j2 tests
+      - run:
+          name: Run tests
+          command: cd build && make check
+      - run:
+          name: Install LG-Atomese
+          command: cd build && make -j2 install && ldconfig
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - lg-atomese
+            # See https://github.com/opencog/cogutil/commit/da53c4079c3972904857a365a7761ac5923e4e92
+            # - ccache
+
   matrix:
     docker:
       - image: $CIRCLE_PROJECT_USERNAME/opencog-deps
@@ -541,6 +586,9 @@ workflows:
             - atomspace
             - atomspace-storage
             - cogserver
+      - lg-atomese:
+          requires:
+            - atomspace
       - matrix:
           requires:
             - atomspace
@@ -564,6 +612,7 @@ workflows:
             - atomspace-rocks
             - atomspace-storage
             - cogserver
+            - lg-atomese
             - matrix
             - sensory
             - unify
