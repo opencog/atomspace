@@ -64,7 +64,7 @@ void LocalQuoteUTest::setUp()
 	Q = an(PREDICATE_NODE, "Q");
 	P_X = al(EVALUATION_LINK, P, X);
 	Q_X = al(EVALUATION_LINK, Q, X);
-	forall = al(EDGE_LINK, X, P_X);
+	forall = al(LAMBDA_LINK, X, P_X);
 	VT = an(TYPE_NODE, "VariableNode");
 	vardecl_var = an(VARIABLE_NODE, "$vardecl");
 	body_var = an(VARIABLE_NODE, "$body");
@@ -72,7 +72,7 @@ void LocalQuoteUTest::setUp()
 	vardecl = al(VARIABLE_LIST,
 	             al(TYPED_VARIABLE_LINK, vardecl_var, VT),
 	             body_var);
-	forall_pattern = al(EDGE_LINK, vardecl_var, body_var);
+	forall_pattern = al(LAMBDA_LINK, vardecl_var, body_var);
 	forall_get = al(COLLECTION_OF_LINK, {al(MEET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern))});
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
@@ -85,7 +85,7 @@ void LocalQuoteUTest::tearDown()
 }
 
 /**
- * LocalQuoteLink unit test on a ForAll pattern query using Get
+ * LocalQuoteLink unit test on a ScopeLink pattern query using Meet
  */
 void LocalQuoteUTest::test_get()
 {
