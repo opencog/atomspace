@@ -108,7 +108,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	Handle res(HandleCast(vp));
 	if (not (SET_LINK == res->get_type()))
 	{
-		while (res->is_executable())
+		if (res->is_executable())
 		{
 			vp = res->execute(as, silent);
 			if (not vp->is_atom()) return vp;
@@ -124,7 +124,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	HandleSeq elts;
 	for (Handle elt: res->getOutgoingSet())
 	{
-		while (elt->is_executable())
+		if (elt->is_executable())
 		{
 			elt = as->add_atom(elt);
 			vp = elt->execute(as, silent);
