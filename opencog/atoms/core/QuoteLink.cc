@@ -1,0 +1,66 @@
+/*
+ * QuoteLink.cc
+ *
+ * Copyright (C) 2025 OpenCog Foundation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the
+ * exceptions at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include "QuoteLink.h"
+
+using namespace opencog;
+
+QuoteLink::QuoteLink(const HandleSeq&& oset, Type t)
+	: Link(std::move(oset), t)
+{
+	// Type must be as expected
+	if (not nameserver().isA(t, QUOTE_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a QuoteLink, got %s", tname.c_str());
+	}
+
+	if (1 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+			"QuoteLink expects only one argument");
+}
+
+// ---------------------------------------------------------------
+
+/// Execute the QuoteLink by returning its wrapped content.
+/// If the content is an UnquoteLink, apply the involution rule:
+/// (Quote (Unquote X)) -> X
+ValuePtr QuoteLink::execute(AtomSpace* as, bool silent)
+{
+	Handle content = _outgoing[0];
+
+	// Check for the involution pattern: (Quote (Unquote X)) -> X
+	if (content->get_type() == UNQUOTE_LINK)
+	{
+		// Return the content of the UnquoteLink, removing both Quote and Unquote
+		const HandleSeq& unquote_oset = content->getOutgoingSet();
+		if (1 == unquote_oset.size())
+			return unquote_oset[0];
+	}
+
+	// Otherwise, just return the quoted content
+	return content;
+}
+
+DEFINE_LINK_FACTORY(QuoteLink, QUOTE_LINK)
+
+/* ===================== END OF FILE ===================== */

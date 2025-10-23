@@ -20,6 +20,7 @@ ADD_LIBRARY (atomcore
 	PresentLink.cc
 	PutLink.cc
 	Quotation.cc
+	QuoteLink.cc
 	RandomChoice.cc
 	Replacement.cc
 	RewriteLink.cc
@@ -68,6 +69,7 @@ INSTALL (FILES
 	PresentLink.h
 	PutLink.h
 	Quotation.h
+	QuoteLink.h
 	RandomChoice.h
 	Replacement.h
 	RewriteLink.h
