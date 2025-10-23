@@ -40,13 +40,14 @@ QuoteLink::QuoteLink(const HandleSeq&& oset, Type t)
 /// Execute the QuoteLink by returning its wrapped content.
 /// If the content is an UnquoteLink, apply the involution rule:
 /// (Quote (Unquote X)) -> X
+/// For multiple arguments, return self (do nothing).
 ValuePtr QuoteLink::execute(AtomSpace* as, bool silent)
 {
 	// Handle empty QuoteLink
 	if (0 == _outgoing.size())
 		return Handle::UNDEFINED;
 
-	// Single argument case
+	// Single argument case: unwrap it
 	if (1 == _outgoing.size())
 	{
 		Handle content = _outgoing[0];
@@ -62,27 +63,8 @@ ValuePtr QuoteLink::execute(AtomSpace* as, bool silent)
 		return content;
 	}
 
-	// Multiple arguments case: process each one
-	HandleSeq results;
-	for (const Handle& h : _outgoing)
-	{
-		// Check for involution on each argument
-		if (h->get_type() == UNQUOTE_LINK)
-		{
-			const HandleSeq& unquote_oset = h->getOutgoingSet();
-			if (1 == unquote_oset.size())
-				results.push_back(unquote_oset[0]);
-			else
-				results.push_back(h);
-		}
-		else
-		{
-			results.push_back(h);
-		}
-	}
-
-	// Return as a Link to preserve structure
-	return createLink(std::move(results), LIST_LINK);
+	// Multiple arguments case: return self (do nothing)
+	return get_handle();
 }
 
 DEFINE_LINK_FACTORY(QuoteLink, QUOTE_LINK)
