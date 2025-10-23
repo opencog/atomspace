@@ -52,8 +52,11 @@ ValuePtr AtomSpaceOfLink::execute(AtomSpace* as, bool silent)
 	Handle base(_outgoing[0]);
 	if (base->is_executable())
 	{
-		base = HandleCast(base->execute(as, silent));
-		if (nullptr == base) return Handle::UNDEFINED;
+		ValuePtr result = base->execute(as, silent);
+		Handle executed = HandleCast(result);
+		// If execution returned an Atom, use it; otherwise keep original
+		if (nullptr != executed)
+			base = executed;
 	}
 
 	// Get the AtomSpace that this atom belongs to
