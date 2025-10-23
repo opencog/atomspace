@@ -590,6 +590,7 @@ workflows:
             - atomspace-storage
             - cogserver
 # Disable until the opencog-deps docker container gets LG in it.
+# When uncommenting, also uncomment below.
 #      - lg-atomese:
 #          requires:
 #            - atomspace
@@ -605,7 +606,7 @@ workflows:
           requires:
             - atomspace
 # Disable as-moses Apr 2024 Works fine, AtomSpace unlikely to break it,
-# takes wayy too long to run, and the debug message logs overflow
+# takes wayyy too long to run, and the debug message logs overflow
 # circle-ci and so cirle-ci complains. So just disable.
 #      - as-moses:
 #          requires:
@@ -617,7 +618,7 @@ workflows:
             - atomspace-rocks
             - atomspace-storage
             - cogserver
-            - lg-atomese
+#            - lg-atomese
             - matrix
             - sensory
             - unify
