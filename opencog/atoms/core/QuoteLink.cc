@@ -33,10 +33,6 @@ QuoteLink::QuoteLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a QuoteLink, got %s", tname.c_str());
 	}
-
-	if (1 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-			"QuoteLink expects only one argument");
 }
 
 // ---------------------------------------------------------------
@@ -46,19 +42,47 @@ QuoteLink::QuoteLink(const HandleSeq&& oset, Type t)
 /// (Quote (Unquote X)) -> X
 ValuePtr QuoteLink::execute(AtomSpace* as, bool silent)
 {
-	Handle content = _outgoing[0];
+	// Handle empty QuoteLink
+	if (0 == _outgoing.size())
+		return Handle::UNDEFINED;
 
-	// Check for the involution pattern: (Quote (Unquote X)) -> X
-	if (content->get_type() == UNQUOTE_LINK)
+	// Single argument case
+	if (1 == _outgoing.size())
 	{
-		// Return the content of the UnquoteLink, removing both Quote and Unquote
-		const HandleSeq& unquote_oset = content->getOutgoingSet();
-		if (1 == unquote_oset.size())
-			return unquote_oset[0];
+		Handle content = _outgoing[0];
+
+		// Check for the involution pattern: (Quote (Unquote X)) -> X
+		if (content->get_type() == UNQUOTE_LINK)
+		{
+			const HandleSeq& unquote_oset = content->getOutgoingSet();
+			if (1 == unquote_oset.size())
+				return unquote_oset[0];
+		}
+
+		return content;
 	}
 
-	// Otherwise, just return the quoted content
-	return content;
+	// Multiple arguments case: process each one
+	HandleSeq results;
+	for (const Handle& h : _outgoing)
+	{
+		// Check for involution on each argument
+		if (h->get_type() == UNQUOTE_LINK)
+		{
+			const HandleSeq& unquote_oset = h->getOutgoingSet();
+			if (1 == unquote_oset.size())
+				results.push_back(unquote_oset[0]);
+			else
+				results.push_back(h);
+		}
+		else
+		{
+			results.push_back(h);
+		}
+	}
+
+	// Return as a Link to preserve structure
+	return createLink(std::move(results), LIST_LINK);
 }
 
 DEFINE_LINK_FACTORY(QuoteLink, QUOTE_LINK)
