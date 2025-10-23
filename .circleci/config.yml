@@ -323,6 +323,9 @@ jobs:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j2 install && ldconfig
       - run:
+          name: Install AtomSpace Storage
+          command: cd /ws/atomspace-storage/build && make -j2 install && ldconfig
+      - run:
           name: Checkout LG-Atomese system
           command: git clone --depth 1 https://github.com/$CIRCLE_PROJECT_USERNAME/lg-atomese .
       - run:
@@ -589,6 +592,7 @@ workflows:
       - lg-atomese:
           requires:
             - atomspace
+            - atomspace-storage
       - matrix:
           requires:
             - atomspace
