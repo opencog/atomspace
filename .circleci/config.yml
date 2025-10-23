@@ -589,10 +589,11 @@ workflows:
             - atomspace
             - atomspace-storage
             - cogserver
-      - lg-atomese:
-          requires:
-            - atomspace
-            - atomspace-storage
+# Disable until the opencog-deps docker container gets LG in it.
+#      - lg-atomese:
+#          requires:
+#            - atomspace
+#            - atomspace-storage
       - matrix:
           requires:
             - atomspace
