@@ -311,12 +311,14 @@ PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
 ABSENT_LINK <- PRESENT_LINK
 
 // The other adjoint.
-// Exists == left adjoint to the pullback functor of a relation.
-//           where PresentLink is `Exists` for the pattern matcher.
-// ForAll == right adjoint to the pullback functor of a relation.
-//           We invent AlwaysLink, since `ForAll` is already taken
-//           up by PLN.
-// This is used in the pattern matcher, to implement an "always the
+// Exists == left adjoint to the pullback functor of the set-membership
+//           relation. The PresentLink is the unscoped variant of
+//           `ExistsLink`, implemented in the pattern matcher.
+// ForAll == right adjoint to the pullback functor of the set-membership
+//           relation. We call it AlwaysLink, since `ForAll` is already
+//           taken up by PLN (and is used in a scoped, contextualized
+//           setting.)
+// This is implemented in the pattern matcher, to provide an "always the
 // case" condition during matching. It's a kind-of `ForAll`, just like
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
@@ -1295,31 +1297,9 @@ DIRECTLY_EVALUATABLE_LINK <- LINK
 IMPLICATION_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 
-// Logical quantifiers (adjoints to pullbacks of relations). Both are
-// scoped.
+// ------------------------------------------------------------
+// FIXME .. Delete these, they are unused/obsolete.
 //
-// Exists == left adjoint to the pullback functor of a relation. (The
-//           set-membership relation.) Note that PRESENT_LINK above is
-//           the unscoped variant of this, used in the pattern matcher.
-// ForAll == right adjoint to the pullback functor of a relation. (The
-//           set-membership relation.) Note that ALWAYS_LINK below is
-//           the unscoped variant of this, used in the pattern matcher.
-//
-// At least, that's the fancy definition. It's not used anywhere. The
-// plain definition is just the conventional first-order-logic definition.
-// Since they have a conventional and well-known meaning, I guess they
-// can stay in the core AtomSpace, as a part of the set of links useful
-// for knowledge representation.
-//
-// In reality, its a mish-mash. Currently, these are used only in unit
-// tests.  They're somewhat poorly defined. They are currently defined
-// to inherit from CollectionLink, thus allowing them to be set-valued,
-// and used in probabilistic contexts.
-//
-// XXX FIXME Unused, have no meaning. Probably should be deleted.
-FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK,COLLECTION_LINK
-
 // These are used only in unit tests, at this point.
 // No clear role assigned, other than that there is some "association"
 // Perhaps this should be a base type for ... some knowledge
