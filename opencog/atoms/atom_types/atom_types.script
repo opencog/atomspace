@@ -1031,6 +1031,9 @@ BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,BOOLEAN_OUTPUT_LINK
 FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
 STREAM_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
 
+// Return the AtomSpace that the wrapped Atom is in.
+ATOM_SPACE_OF_LINK <- VALUE_OF_LINK
+
 // Return size of the wrapped link. If it's a NumberNode
 // or a Value, return the length of the underlying vector.
 SIZE_OF_LINK <- FLOAT_VALUE_OF_LINK
