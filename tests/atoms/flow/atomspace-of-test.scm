@@ -67,6 +67,15 @@
 (test-assert "link-child-as"
 	(equal? link-child-result child-as))
 
+; Since ValueOf might return an atom, AtomSpaceOf should handle it
+; If ValueOf returns an undefined value (no such key), AtomSpaceOf should return undefined
+; Let's test with a simpler executable
+(define noexec-atom (DontExec test-atom))
+(define noexec-result (cog-execute! (AtomSpaceOf noexec-atom)))
+; DontExec is executable and returns test-atom, so result should be main-as
+(test-assert "executable-argument"
+	(equal? noexec-result main-as))
+
 ;;; ; Since ValueOf might return an atom, AtomSpaceOf should handle it
 ;;; ; If ValueOf returns an undefined value (no such key), AtomSpaceOf should return undefined
 ;;; ; Let's test with a simpler executable
