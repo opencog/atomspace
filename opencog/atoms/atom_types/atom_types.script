@@ -225,16 +225,6 @@ LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
 // Unordered multi-set (Classical Set-Theory set)
 SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 
-// Measure-theoretic (probabilistic) versions of AND_LINK, OR_LINK
-// These use probabilistic formulas to compute TruthValues.
-// See issue opencog/atomspace#2814 for a discussion.
-// XXX OBSOLETE -- These are unused, unimplemented, and are candidates
-// for removal.
-UNION_LINK <- UNORDERED_LINK,COLLECTION_LINK
-INTERSECTION_LINK <- UNORDERED_LINK,COLLECTION_LINK
-COMPLEMENT_LINK <- UNORDERED_LINK,COLLECTION_LINK
-SET_DIFFERENCE_LINK <- ORDERED_LINK,COLLECTION_LINK
-
 // Set membership. Declaration: individual belongs to set.
 // See also the section of relation-links below (including equality,
 // etc.) Perhaps the definition of MemberLink and SubsetLink should
@@ -247,6 +237,8 @@ SUBSET_LINK <- ORDERED_LINK
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
 // the probability.
+// Unused and probably obsolete. Wiki documentation says some
+// interesting things, but nothing works that way.
 CONTEXT_LINK <- ORDERED_LINK
 
 // Binary-valued (0/1, T/F) Boolean algebra operations and logical
@@ -1323,6 +1315,8 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 // tests.  They're somewhat poorly defined. They are currently defined
 // to inherit from CollectionLink, thus allowing them to be set-valued,
 // and used in probabilistic contexts.
+//
+// XXX FIXME Unused, have no meaning. Probably should be deleted.
 FORALL_LINK <- SCOPE_LINK,COLLECTION_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK,COLLECTION_LINK
 
