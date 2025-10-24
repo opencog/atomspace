@@ -181,6 +181,13 @@ public:
 	 *     (GroundedPredicate "gpn")
 	 *     (Unquote (Variable "$X"))))
 	 *
+	 * XXX FIXME: I don't get it: why not remove the Quote and both
+	 * of the Unquotes, above? The entire quoted region is closed!
+	 * The case here seems to be identical to case 3. below, in which
+	 * everything is removed. I think the answer here is that some of
+	 * the code uses QuoteLink when it should have used DontExecLink,
+	 * using the Quote to halt execution. I think that's a bug.
+	 *
 	 * 2. Remove obvious involutions such as
 	 *
 	 * (Quote
@@ -195,10 +202,6 @@ public:
 	 *     (Lambda (Variable "$X") (Variable "$X"))
 	 *     (Concept "A")))
 	 *
-	 * Note that the root Quote cannot be removed otherwise it would
-	 * change the semantics of the hypergraph (as the quotation
-	 * prevents the PutLink from being executing).
-	 *
 	 * 3. Remove quotations around a fully substituted scope, for
 	 * instance
 	 *
@@ -207,17 +210,34 @@ public:
 	 *     (Unquote (TypedVariable (Variable "$X") (Type "ConceptNode")))
 	 *     (Unquote (And (Concept "A") (Variable "$X")))))
 	 *
-	 * all quotations can be remove (in fact keeping them would be
+	 * all quotations can be removed (in fact, keeping them would be
 	 * harmful because the variable $X would be interpreted as not
-	 * being bound to this Lambda, to make sure it is should be bound
-	 * to the lambda as opposed to be bound to a parent scope, a
-	 * Variables object is passed in argument representing the
+	 * being bound to this Lambda. To make sure it is bound
+	 * to the lambda, as opposed to a parent scope, a
+	 * Variables object is passed in the argument representing the
 	 * variable declaration of that parent scope. Thus, assuming $X
-	 * isn't in the variables object, the above would result into
+	 * isn't in the variables object, the above would result in
 	 *
 	 * (Lambda
 	 *   (TypedVariable (Variable "$X") (Type "ConceptNode"))
 	 *   (And (Concept "A") (Variable "$X")))
+	 *
+	 * TODO: Refactor all of this code. The implementation seems
+	 * aggresively complicated, and I suspect everything would be
+	 * much simpler if there was a QuoteLink C++ class whose ctor
+	 * just examined these cases, and prevented them in the first
+	 * place. So, Case 3. would simply not be constructable. The
+	 * class factory would just return the naked, unwrapped contents.
+	 * The class ctor would throw. Case 2. would be handled by the
+	 * factory just returning the "naked" part, while Case 1. seems
+	 * to be identical to Case 3, except the user incorrectly used
+	 * QuoteLink instead of DontExecLink, and this failure would
+	 * expose bugs in code that is using QuoteLink incorrectly.
+	 * I beleive that such a refactoring would massively reduce the
+	 * complixity here. However, its a bit pointless now: the main
+	 * "consumer" of quotations is PLN, and the old PLN code no longer
+	 * compiles. As of 2025, nothing else in the code base uses
+	 * quotations, so all of this is moot.
 	 */
 	Handle consume_quotations() const;
 	static Handle consume_quotations(const Variables& variables, const Handle& h,
