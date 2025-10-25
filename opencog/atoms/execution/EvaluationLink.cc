@@ -180,44 +180,6 @@ static bool is_outgoing_closed(const Handle& h)
 	                   [](const Handle& o) { return is_closed(o); });
 }
 
-/// Perform the IsTrueLink check
-/// XXX FIXME, several problems here.
-/// (1) isn't this the same as evaluating AndLink?
-/// (2) Shouldn't we evaluation, before gathering the results?
-static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
-{
-	// Truth values are always relative to the AtomSpace the Atom is in.
-	// So make sure that the Atom is in the AtomSpace.
-	Handle hs(scratch->add_atom(h));
-	const HandleSeq& oset = hs->getOutgoingSet();
-	return std::all_of(oset.begin(), oset.end(),
-		[](const Handle& o) {
-			ValuePtr tvp(o->getValue(truth_key()));
-			if (nullptr == tvp) return false;
-			if (not tvp->is_type(BOOL_VALUE)) return false;
-
-			return BoolValueCast(tvp)->get_bit(0); });
-}
-
-/// Perform the IsFalseLink check
-/// XXX FIXME, several problems here.
-/// (1) isn't this the same as evaluating (Not (OrLink))?
-/// (2) Shouldn't we evaluation, before gathering the results?
-static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
-{
-	// Truth values are always relative to the AtomSpace the Atom is in.
-	// So make sure that the Atom is in the AtomSpace.
-	Handle hs(scratch->add_atom(h));
-	const HandleSeq& oset = hs->getOutgoingSet();
-	return std::all_of(oset.begin(), oset.end(),
-		[](const Handle& o) {
-			ValuePtr tvp(o->getValue(truth_key()));
-			if (nullptr == tvp) return false;
-			if (not tvp->is_type(BOOL_VALUE)) return false;
-
-			return not BoolValueCast(tvp)->get_bit(0); });
-}
-
 static ValuePtr exec_or_eval(AtomSpace* as,
                              const Handle& term,
                              AtomSpace* scratch,
@@ -731,8 +693,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);
 	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
-	if (IS_TRUE_LINK == t) return is_outgoing_true(scratch, evelnk);
-	if (IS_FALSE_LINK == t) return is_outgoing_false(scratch, evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
