@@ -9,8 +9,9 @@
 (define tname "or-link-test")
 (test-begin tname)
 
-; Initial data. The IsTrueLink looks at the BooValue directly.
+; Initial data. The is-true looks at the BooValue directly.
 (define tvkey (Predicate "*-TruthValueKey-*"))
+(define (is-true x) (BoolValueOf x tvkey))
 
 (State (Concept "you") (Concept "thirsty"))
 (State (Concept "me") (Concept "hungry"))
@@ -36,7 +37,7 @@
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
 				(Present (Evaluation (Predicate "cold") (Variable "someone")))
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
+				(is-true (Evaluation (Predicate "cold") (Variable "someone"))))))))
 
 
 (test-assert "thirsty or cold"
@@ -49,7 +50,7 @@
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
+				(is-true (Evaluation (Predicate "cold") (Variable "someone"))))))))
 
 (test-assert "thirsty or cold"
 	(equal? (cog-execute! qr5) (Set (Concept "you") (Concept "me"))))
@@ -59,8 +60,8 @@
 	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
-			(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))
-			(IsTrue (Evaluation (Predicate "tired") (Variable "someone")))))))
+			(is-true (Evaluation (Predicate "cold") (Variable "someone")))
+			(is-true (Evaluation (Predicate "tired") (Variable "someone")))))))
 
 (cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
 	tvkey (BoolValue #f))
