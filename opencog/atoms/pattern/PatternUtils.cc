@@ -52,6 +52,9 @@ bool can_evaluate(const Handle& clause)
 		      or nameserver().isA(clause->getOutgoingAtom(0)->get_type(),
 		                          EVALUATABLE_LINK)))
 
+		// BoolValueOfLink can be evaluated in boolean contexts
+		or nameserver().isA(ct, BOOL_VALUE_OF_LINK)
+
 		// XXX FIXME Are the below needed?
 		or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
 		or contains_atomtype(clause, DEFINED_SCHEMA_NODE)

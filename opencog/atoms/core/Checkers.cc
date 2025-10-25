@@ -98,7 +98,12 @@ static bool check_evaluatable(const Handle& bool_atom)
 		// This is used by PLN to avoid type-checking.
 		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
-		if (not h->is_type(EVALUATABLE_LINK)) return false;
+		// Accept both EVALUATABLE_LINK and BOOLEAN_OUTPUT_LINK.
+		// CRISP_OUTPUT_LINK inherits from both, so crisp boolean
+		// operations can work with either evaluatable expressions
+		// or boolean value expressions (like BoolValueOfLink).
+		if (not h->is_type(EVALUATABLE_LINK) and
+		    not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
 	}
 	return true;
 }
