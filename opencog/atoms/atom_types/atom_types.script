@@ -174,21 +174,22 @@ EVALUATABLE_LINK <- VALUABLE_LINK
 // correctly.
 EXECUTABLE_LINK <- VALUABLE_LINK
 
-// Crisp (scalar-valued) boolean-input link.  This link type forces
-// type-checking on it's "inputs" (it's outgoing set): they must be
-// EvaluatableLinks.
-CRISP_INPUT_LINK <- LINK
-
-// Crisp binary true/false output. Link types that, when evaluated,
-// naturally yield a singular true/false value (and not a vector of
-// bools)
-CRISP_OUTPUT_LINK <- EVALUATABLE_LINK
-
 // Boolean-input link. Accepts BoolValues (vectors of bools).
 BOOLEAN_INPUT_LINK <- LINK
 
 // Boolean-output link. Generates BoolValues upon execution.
 BOOLEAN_OUTPUT_LINK <- VALUABLE_LINK
+
+// Crisp (scalar-valued) boolean-input link.  This link type forces
+// type-checking on it's "inputs" (it's outgoing set): they must be
+// EvaluatableLinks. XXX We're doing away with this; everything will
+// get vectorized. We're in an ugly transition period right now.
+CRISP_INPUT_LINK <- BOOLEAN_INPUT_LINK
+
+// Crisp binary true/false output. Link types that, when evaluated,
+// naturally yield a singular true/false value (and not a vector of
+// bools). This will eventually go away ...
+CRISP_OUTPUT_LINK <- EVALUATABLE_LINK,BOOLEAN_OUTPUT_LINK
 
 // Numeric-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be NumberNodes, or things
@@ -859,13 +860,9 @@ VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 
-// Test whether all outgoing Atoms are closed, that is do not contain
-// any free variable.
+// Test whether all outgoing Atoms are closed, that is, if the
+// they do not contain any free variables.
 IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
-
-// Test whether all outgoing Atoms have a TRUE_TV (resp. FALSE_TV).
-IS_TRUE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
-IS_FALSE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it is true only if both sides are the same Atom.
