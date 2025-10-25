@@ -5,6 +5,7 @@ ADD_LIBRARY (value
 	BoolValue.cc
 	ContainerValue.cc
 	Float32Value.cc
+	FlatStream.cc
 	FloatValue.cc
 	FormulaStream.cc
 	FutureStream.cc
@@ -33,6 +34,7 @@ INSTALL (TARGETS value EXPORT AtomSpaceTargets
 INSTALL (FILES
 	BoolValue.h
 	ContainerValue.h
+	FlatStream.h
 	Float32Value.h
 	FloatValue.h
 	FormulaStream.h
