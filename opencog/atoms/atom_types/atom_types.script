@@ -860,14 +860,9 @@ VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 
-// Test whether all outgoing Atoms are closed, that is do not contain
-// any free variable.
+// Test whether all outgoing Atoms are closed, that is, if the
+// they do not contain any free variables.
 IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
-
-// Test whether all outgoing Atoms have a TRUE_TV (resp. FALSE_TV).
-// XXX I think this is obsolete, and should be removed. WTF.
-IS_TRUE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
-IS_FALSE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it is true only if both sides are the same Atom.
