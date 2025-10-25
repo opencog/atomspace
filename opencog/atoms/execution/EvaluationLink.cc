@@ -776,6 +776,17 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		if (nullptr == pap)
 			return false;
 
+		// If it's a BoolValue, extract the boolean directly
+		if (pap->is_type(BOOL_VALUE))
+		{
+			BoolValuePtr bvp = BoolValueCast(pap);
+			std::vector<bool> bvals = bvp->value();
+			if (bvals.empty())
+				return false;
+			// Use first boolean value
+			return bvals[0];
+		}
+
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
 			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
