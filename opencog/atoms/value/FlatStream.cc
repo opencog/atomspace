@@ -32,7 +32,8 @@ using namespace opencog;
 // ==============================================================
 
 FlatStream::FlatStream(const Handle& h) :
-	LinkValue(FLAT_STREAM), _source(h), _as(h->getAtomSpace())
+	LinkValue(FLAT_STREAM), _source(h), _as(h->getAtomSpace()),
+	_current_stream(nullptr), _current_index(0)
 {
 	init();
 }
@@ -53,7 +54,48 @@ void FlatStream::init(void)
 
 void FlatStream::update() const
 {
-	// Empty for now - to be implemented later
+	// Are we done yet?
+	if (_current_stream and 0 == _value.size()) return;
+
+	// Flatten
+	if (_current_stream and _current_index < _current_stream->_value.size())
+	{
+		const ValuePtr& vp = _current_stream->_value[_current_index];
+		if (not vp->is_type(LINK_VALUE))
+			throw RuntimeException(TRACE_INFO,
+				"Expecting a LinkValue, got %s",
+				vp->to_string().c_str());
+
+		ValueSeq vsq = LinkValueCast(vp)->value();
+		_value.swap(vsq);
+		_current_index++;
+		return;
+	}
+
+	// Get the next list that needs flattening.
+	ValuePtr result = _source->execute(_as);
+
+	// Check for end of stream
+	if (nullptr == result or result->get_type() == VOID_VALUE)
+	{
+		std::vector<ValuePtr> empty;
+		_value.swap(empty);
+		return;
+	}
+
+	if (result->get_type() != LINK_VALUE)
+	{
+		std::vector<ValuePtr> unary({result});
+		_value.swap(unary);
+		return;
+	}
+
+	// Cast to LinkValue
+	_current_stream = LinkValueCast(result);
+	_current_index = 0;
+
+	// We've queued it up; take it from the top.
+	update();
 }
 
 // ==============================================================

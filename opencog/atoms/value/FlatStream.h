@@ -49,6 +49,8 @@ protected:
 	virtual void update() const;
 	Handle _source;
 	AtomSpace* _as;
+	mutable LinkValuePtr _current_stream;
+	mutable size_t _current_index;
 
 public:
 	FlatStream(const Handle&);
