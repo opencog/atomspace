@@ -181,6 +181,9 @@ static bool is_outgoing_closed(const Handle& h)
 }
 
 /// Perform the IsTrueLink check
+/// XXX FIXME, several problems here.
+/// (1) isn't this the same as evaluating AndLink?
+/// (2) Shouldn't we evaluation, before gathering the results?
 static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
 {
 	// Truth values are always relative to the AtomSpace the Atom is in.
@@ -197,6 +200,9 @@ static bool is_outgoing_true(AtomSpace* scratch, const Handle& h)
 }
 
 /// Perform the IsFalseLink check
+/// XXX FIXME, several problems here.
+/// (1) isn't this the same as evaluating (Not (OrLink))?
+/// (2) Shouldn't we evaluation, before gathering the results?
 static bool is_outgoing_false(AtomSpace* scratch, const Handle& h)
 {
 	// Truth values are always relative to the AtomSpace the Atom is in.
