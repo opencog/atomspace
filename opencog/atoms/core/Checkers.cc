@@ -50,9 +50,10 @@ static inline void check_null(const Handle& h)
 /// Check to see if every input atom is of Evaluatable type.
 static bool check_evaluatable(const Handle& bool_atom)
 {
-	// Make an exception for AndLink, its used in pattern matcher
-	// in an unseemly way.
-	if (bool_atom->get_type() == AND_LINK) return true;
+	// Make an exception for boolean logic links (And, Or, Not).
+	// They are used in pattern matcher in unseemly ways.
+	Type t = bool_atom->get_type();
+	if (t == AND_LINK or t == OR_LINK or t == NOT_LINK) return true;
 
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
