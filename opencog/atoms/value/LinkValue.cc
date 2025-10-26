@@ -105,10 +105,10 @@ bool LinkValue::operator<(const Value& other) const
 
 // ==============================================================
 
-std::string LinkValue::to_string(const std::string& indent) const
+std::string LinkValue::to_string(const std::string& indent, Type t) const
 {
 	std::string more_indent = indent + "  "; // two spaces, same as Link
-	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
+	std::string rv = indent + "(" + nameserver().getTypeName(t) + "\n";
 
 	SAFE_UPDATE(rv,
 	{
