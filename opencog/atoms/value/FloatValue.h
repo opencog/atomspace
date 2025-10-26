@@ -46,6 +46,7 @@ protected:
 	mutable std::vector<double> _value;
 
 	virtual void update() const {}
+	std::string to_string(const std::string&, Type) const;
 
 	FloatValue(Type t) : Value(t) {}
 public:
@@ -66,7 +67,6 @@ public:
 	/** Returns a string representation of the value. */
 	virtual std::string to_string(const std::string& indent = "") const
 	{ return to_string(indent, _type); }
-	std::string to_string(const std::string& indent, Type) const;
 
 	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;

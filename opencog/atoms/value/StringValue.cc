@@ -62,10 +62,10 @@ bool StringValue::operator<(const Value& other) const
 /// printing. This is needed for readability, since this is an
 /// array of strings, and without the escapes, we can't tell where
 /// strings start and end.
-std::string StringValue::to_string(const std::string& indent) const
+std::string StringValue::to_string(const std::string& indent, Type t) const
 {
 	std::stringstream ss;
-	ss << indent << "(" << nameserver().getTypeName(_type);
+	ss << indent << "(" << nameserver().getTypeName(t);
 	for (const std::string& v :_value)
 		ss << " " << std::quoted(v);
 	ss << ")";
