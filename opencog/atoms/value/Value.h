@@ -75,6 +75,9 @@ public:
 
 	/**
 	 * Returns a string representation of the value.
+	 * The short string is used as a globally unique identifier, used
+	 * by StorageNodes as the UUID for Atoms, and plain UID for Values.
+	 * It should not contain any newlines or useless whitespace.
 	 */
 	virtual std::string to_string(const std::string& indent) const = 0;
 	virtual std::string to_short_string(const std::string& indent) const
