@@ -43,6 +43,9 @@
 (test-assert "second-access-match" (equal? fs second-item))
 
 ; Third access - should wrap around to first item
+; It wraps because after the second item, the end of the LinkValue
+; is reached, so FlatStream calls the ValueOf to get "the next list".
+; It gets the next list, and then cycles like this, forever.
 (format #t "Stream third access: ~A\n" fs)
 (test-assert "third-access-match" (equal? fs first-item))
 
