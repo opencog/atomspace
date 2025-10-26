@@ -55,7 +55,7 @@ void FlatStream::init(void)
 void FlatStream::update() const
 {
 	// Are we done yet?
-	if (_current_stream and 0 == _value.size()) return;
+	if (_current_stream and 0 < _current_index and 0 == _value.size()) return;
 
 	// Flatten
 	if (_current_stream and _current_index < _current_stream->_value.size())
