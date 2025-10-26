@@ -39,7 +39,7 @@ FlatStream::FlatStream(const Handle& h) :
 }
 
 FlatStream::FlatStream(const HandleSeq&& oset) :
-   LinkValue(FLAT_STREAM)
+	LinkValue(FLAT_STREAM)
 {
 	// XXX FIXME I guess we could flatten more than one
 	// stream at a time. So it would be like sucking off
@@ -55,6 +55,21 @@ FlatStream::FlatStream(const HandleSeq&& oset) :
 	_as = oset[0]->getAtomSpace();
 
 	init();
+}
+
+// A pseudo copy constructor. Just copies in some existing Link Value.
+FlatStream::FlatStream(const ValuePtr& vp) :
+	LinkValue(FLAT_STREAM),
+	_source(nullptr),
+	_as(nullptr),
+	_current_index(0)
+{
+	if (not vp->is_type(LINK_VALUE))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a LinkValue, got %s",
+			vp->to_string().c_str());
+
+	_current_stream = LinkValueCast(vp);
 }
 
 void FlatStream::init(void)

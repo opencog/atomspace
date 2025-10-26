@@ -55,6 +55,7 @@ protected:
 public:
 	FlatStream(const Handle&);
 	FlatStream(const HandleSeq&&);
+	FlatStream(const ValuePtr&);  // copy ctor-like thing.
 	virtual ~FlatStream() {}
 
 	/** Returns a string representation of the value.  */
