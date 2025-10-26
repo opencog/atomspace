@@ -99,7 +99,7 @@ FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 // to get the next token. For example, given the stream
 //   ((a b) (c d e) (f) (g h i j k) ...)
 // it delivers (a b c d e f g h i ...) one at a time, as a stream.
-FLAT_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
+FLAT_STREAM <- STREAM_VALUE,HANDLE_ARG
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
