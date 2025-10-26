@@ -58,10 +58,8 @@ public:
 	FlatStream(const ValuePtr&);  // copy ctor-like thing.
 	virtual ~FlatStream() {}
 
-	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;
 
-	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
 };
 
