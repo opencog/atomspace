@@ -57,10 +57,10 @@ LINK_VALUE <- VALUE,VALUE_VEC_ARG         // vector of Values ("Link")
 
 // StreamValue is used in Sensory and other projects to distinguish
 // between LinkValues that are static and serve to package together
-// a bunch of other things (i.e. function like a "struct") and
+// a bunch of other things (i.e. behave like a "struct") and
 // LinkValues that represent time-varying streams of Values.
-// (.. and items in that stream are typically static LinkValues.)
-STREAM_VALUE <- LINK_VALUE            // volatile steam of Values
+// (... and the streamed items are typically static LinkValues.)
+STREAM_VALUE <- LINK_VALUE            // volatile stream of Values
 
 // Same thing as Section, but the Value variant thereof.
 // Currently used experimentally in atomese-simd to specify GPU kernels.
