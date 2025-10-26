@@ -145,16 +145,6 @@ std::string FlatStream::to_string(const std::string& indent) const
 
 // ==============================================================
 
-bool FlatStream::operator==(const Value& other) const
-{
-	if (FLAT_STREAM != other.get_type()) return false;
-
-	const FlatStream* eso = (const FlatStream*) &other;
-	return eso->_source == _source;
-}
-
-// ==============================================================
-
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const Handle&)
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const HandleSeq&&)

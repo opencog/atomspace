@@ -59,8 +59,6 @@ public:
 	virtual ~FlatStream() {}
 
 	virtual std::string to_string(const std::string& indent = "") const;
-
-	virtual bool operator==(const Value&) const;
 };
 
 VALUE_PTR_DECL(FlatStream);
