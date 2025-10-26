@@ -43,6 +43,7 @@ class LinkValue
 	: public Value
 {
 	friend class TransposeColumn;
+	friend class FlatStream;
 
 protected:
 	mutable std::vector<ValuePtr> _value;

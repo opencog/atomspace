@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/value/FlatStream.h>
 #include <opencog/atoms/value/FormulaStream.h>
 #include <opencog/atoms/value/FutureStream.h>
 #include "PromiseLink.h"
@@ -82,7 +83,10 @@ void PromiseLink::init(void)
 	if (NOTYPE == _future_type)
 		_future_type = FORMULA_STREAM;
 
-	if (not ((FORMULA_STREAM == _future_type) or (FUTURE_STREAM == _future_type)))
+	// Do we need a common base class here?
+	if (not ((FORMULA_STREAM == _future_type) or
+	         (FUTURE_STREAM == _future_type) or
+	         (FLAT_STREAM == _future_type)))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a Stream of some kind!");
 
@@ -105,6 +109,9 @@ ValuePtr PromiseLink::execute(AtomSpace* as, bool silent)
 
 	if (FORMULA_STREAM == _future_type)
 		return createFormulaStream(std::move(oset));
+
+	if (FLAT_STREAM == _future_type)
+		return createFlatStream(std::move(oset));
 
 	return createFutureStream(std::move(oset));
 }
