@@ -43,7 +43,8 @@ std::string oc_to_string(const ValueSeq& vs, const std::string& indent)
 	size_t i = 0;
 	for (const ValuePtr& vp : vs) {
 		ss << indent << "value[" << i << "]:" << std::endl
-		   << oc_to_string(vp, indent + oc_to_string_indent);
+		   << oc_to_string(vp, indent + oc_to_string_indent)
+		   << std::endl;
 		i++;
 	}
 	return ss.str();
@@ -56,9 +57,10 @@ std::string oc_to_string(const ValueMap& vmap, const std::string& indent)
 	int i = 0;
 	for (const auto& p : vmap) {
 		ss << std::endl << indent << "key[" << i << "]:" << std::endl
-			<< oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
-			<< indent << "value[" << i << "]:" << std::endl
-			<< oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT) << std::endl
+		   << indent << "value[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT)
+		   << std::endl;
 		i++;
 	}
 	return ss.str();
