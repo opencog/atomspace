@@ -48,7 +48,7 @@ FutureStream::FutureStream(const HandleSeq&& oset) :
 	init();
 }
 
-// Same as above, but Handles as a ValueSeq. The Sexper decoder
+// Same as above, but Handles as a ValueSeq. The sexpr decoder
 // will create these when it deserializes FutureStreams.
 FutureStream::FutureStream(const ValueSeq& voset) :
 	LinkValue(FUTURE_STREAM)

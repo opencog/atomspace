@@ -248,7 +248,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  *    implemented for the C++ types, this seems plausible. However,
  *    actually writing code to do this, and making it run as a plug
  *    in module for other scheme modules not in the git repo... ouch.
- *    Seems complicated, and I could not thik of a good way of doing
+ *    Seems complicated, and I could not think of a good way of doing
  *    this. So punt on the factory idea.
  *
  * Option B)
