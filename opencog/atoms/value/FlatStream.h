@@ -54,6 +54,7 @@ protected:
 
 public:
 	FlatStream(const Handle&);
+	FlatStream(const HandleSeq&&);
 	virtual ~FlatStream() {}
 
 	/** Returns a string representation of the value.  */

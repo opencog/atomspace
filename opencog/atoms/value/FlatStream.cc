@@ -38,6 +38,25 @@ FlatStream::FlatStream(const Handle& h) :
 	init();
 }
 
+FlatStream::FlatStream(const HandleSeq&& oset) :
+   LinkValue(FLAT_STREAM)
+{
+	// XXX FIXME I guess we could flatten more than one
+	// stream at a time. So it would be like sucking off
+	// a row of stuff from a matrix of columns. I suppose
+	// that's a plausible thing to do, but right now it is
+	// not needed, so doing this is a future extension for
+	// that day when it might be needed.
+	if (1 != oset.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting just one atom!");
+
+	_source = oset[0];
+	_as = oset[0]->getAtomSpace();
+
+	init();
+}
+
 void FlatStream::init(void)
 {
 	// Verify that we've got valid stuff.
@@ -122,3 +141,4 @@ bool FlatStream::operator==(const Value& other) const
 
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const Handle&)
+DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const HandleSeq&&)
