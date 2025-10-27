@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "CollectionOfLink.h"
 
@@ -92,14 +93,14 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 	{
 		if (_out_is_link)
 			return as->add_link(_out_type, {base});
-		return createLinkValue(_out_type, ValueSeq({base}));
+		return valueserver().create(_out_type, ValueSeq({base}));
 	}
 
 	if (_out_is_link)
 		return as->add_link(_out_type,
 			HandleSeq(base->getOutgoingSet()));
 
-	return createLinkValue(_out_type, base->getOutgoingSet());
+	return valueserver().create(_out_type, base->getOutgoingSet());
 }
 
 // ---------------------------------------------------------------
@@ -122,7 +123,7 @@ ValuePtr CollectionOfLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 	if (vp->get_type() == _out_type)
 		return vp;
 
-	return createLinkValue(_out_type, lvp->value());
+	return valueserver().create(_out_type, lvp->value());
 }
 
 // ---------------------------------------------------------------
@@ -144,11 +145,11 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 
 	// Hmmm. FilterLink returns null pointer when the filter
 	// is empty. Is this a bug in FilterLink? Not sure any more.
-	if (nullptr == vp)
+	if (nullptr == vp) // or VOID_VALUE == vp->get_type()) ???
 	{
 		if (_out_is_link)
 			return createLink(_out_type);
-		return createLinkValue(_out_type, ValueSeq({}));
+		return valueserver().create(_out_type, ValueSeq({}));
 	}
 
 	if (vp->is_atom())
