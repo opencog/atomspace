@@ -45,6 +45,8 @@ class StringValue
 
 protected:
 	mutable std::vector<std::string> _value;
+
+	virtual void update() const {}
 	std::string to_string(const std::string&, Type) const;
 
 public:
@@ -57,8 +59,8 @@ public:
 
 	virtual ~StringValue() {}
 
-	const std::vector<std::string>& value() const { return _value; }
-	size_t size() const {return _value.size(); }
+	const std::vector<std::string>& value() const { update(); return _value; }
+	size_t size() const { return _value.size(); }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const
