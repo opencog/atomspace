@@ -18,7 +18,7 @@
 ; want a full-featured file interface, use the `RocksStorageNode`.
 ;
 ; This demo shows how to dump and read in the entire AtomSpace, and how
-; to store individual Atoms and Values. The `persistance.scm` demo shows
+; to store individual Atoms and Values. The `persistence.scm` demo shows
 ; how to use additional `StorageNode` API interfaces to read individual
 ; Atoms and perform queries. (The flat-file API does not support reading
 ; individual Atoms.)

@@ -63,7 +63,7 @@
 
 ; A utility to install the above formula on a pair.
 ; The PromiseLink is used to promise that the formula will be executed,
-; whenever the (Predicate "MI Key") is accessed. This implements dyanmic
+; whenever the (Predicate "MI Key") is accessed. This implements dynamic
 ; update of the MI, so that looking at it always returns the correct
 ; value at that given time..
 (define (install-formula THING-A THING-B)

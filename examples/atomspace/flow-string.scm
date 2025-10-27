@@ -71,7 +71,7 @@
 ; AtomSpace acts as a kind of "sink" for the stream, where the flow
 ; terminates by turning into Nodes. Alternately, the flow "freezes" or
 ; stops, leaving behind Nodes as the frozen artifact of the data that
-; came trhough.
+; came through.
 ;
 (cog-set-value! (Anchor "anch") (Predicate "flokey")
 	(LinkValue

@@ -78,7 +78,7 @@
 ; hypergraphs.  There is a huge freedom in doing this, and it is up
 ; to you, the user, as to how to do that mapping. The AtomSpace does
 ; come with a large variety of conventional mappings, but none of these
-; are manditory; you can do them in other ways.
+; are mandatory; you can do them in other ways.
 ;
 ; The below takes a simple example, taken from natural language
 ; processing.

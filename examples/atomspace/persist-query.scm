@@ -30,7 +30,7 @@
 ;
 (use-modules (opencog) (opencog persist))
 
-; If you are using the PosgreSQL backend, do this:
+; If you are using the PostgreSql backend, do this:
 (use-modules (opencog persist-sql))
 (define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
 (cog-open psn)

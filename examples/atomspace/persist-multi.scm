@@ -1,7 +1,7 @@
 ;
 ; persist-multi.scm -- Moving Atoms between multiple databases.
 ;
-; The `persistance.scm` demo shows how to save and restore atoms to
+; The `persistence.scm` demo shows how to save and restore atoms to
 ; one database (or remote server). This demo shows how to work with
 ; multiple databases/servers at the same time.
 ;

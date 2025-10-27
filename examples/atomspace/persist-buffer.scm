@@ -12,7 +12,7 @@
 ; will typically result in some small set of Atoms being written to disk,
 ; over and over, at a very fast rate. This can be a performance bottleneck.
 ;
-; The WriteBufferProxy can be used to eliminate this bottlneck. This is
+; The WriteBufferProxy can be used to eliminate this bottleneck. This is
 ; generally much easier than redesigning an algo to write less often.
 ;
 ; The WriteBufferProxy uses a time-delay mechanism to write out a portion
