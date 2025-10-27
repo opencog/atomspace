@@ -147,5 +147,5 @@ std::string LinkValue::to_short_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(LINK_VALUE,
-                     createLinkValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(LINK_VALUE, createLinkValue, ValueSeq&&)
+DEFINE_VALUE_FACTORY(LINK_VALUE, createLinkValue, const HandleSeq&)
