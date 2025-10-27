@@ -42,7 +42,7 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting LinkSignatureLink with at least one argument");
 
-	if (TYPE_NODE != oset[0]->get_type())
+	if (not oset[0]->is_type(TYPE_NODE))
 		throw InvalidParamException(TRACE_INFO,
 			"LinkSignatureLink only supports TypeNode at this time, got %s",
 			oset[0]->to_string().c_str());
