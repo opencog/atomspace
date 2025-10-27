@@ -100,7 +100,11 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 		return as->add_link(_out_type,
 			HandleSeq(base->getOutgoingSet()));
 
-	return valueserver().create(_out_type, base->getOutgoingSet());
+	ValueSeq vsq;
+	for (const Handle& h : base->getOutgoingSet())
+		vsq.push_back(h);
+
+	return valueserver().create(_out_type, std::move(vsq));
 }
 
 // ---------------------------------------------------------------
