@@ -60,7 +60,7 @@ void PromiseLink::init(void)
 
 	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting at least one executable Atom!");
+			"Expecting at least one Atom!");
 
 	_future_type = NOTYPE;
 
@@ -74,7 +74,7 @@ void PromiseLink::init(void)
 				_future_type = tnp->get_kind();
 			else
 				throw SyntaxException(TRACE_INFO,
-					"Expecting at most one Type specification");
+					"Expecting no more than one Type specification");
 			continue;
 		}
 		_args.push_back(h);
@@ -89,6 +89,11 @@ void PromiseLink::init(void)
 	         (FLAT_STREAM == _future_type)))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a Stream of some kind!");
+
+	// FlatStreams can wrap just plain Atoms; so we are done.
+	// FutureStreams and Formulas wrap Atoms that MUST be executable,
+	// that gets checked next.
+	if (FLAT_STREAM == _future_type) return;
 
 	// Unwrap a ListLink, if that's what we got.
 	if (1 == _args.size() and LIST_LINK == _args[0]->get_type())
