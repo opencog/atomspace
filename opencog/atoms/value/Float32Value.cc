@@ -40,7 +40,7 @@ ValuePtr Float32Value::incrementCount(const std::vector<float>& v) const
 		new_vect[idx] += v[idx];
 
 	// Return a brand new value of the same type.
-	return createFloat32Value(_type, std::move(new_vect));
+	return valueserver().create(_type, std::move(new_vect));
 }
 
 bool Float32Value::operator==(const Value& other) const

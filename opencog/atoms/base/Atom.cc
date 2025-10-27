@@ -165,7 +165,7 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 
 	// If we are here, an existing value was not found.
 	// Create a brand new float.
-	ValuePtr nv = createFloatValue(FLOAT_VALUE, count);
+	ValuePtr nv = createFloatValue(count);
 
 	_values[key] = nv;
 	return nv;
@@ -201,7 +201,7 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	new_vect.resize(idx+1, 0.0);
 	new_vect[idx] += count;
 
-	ValuePtr nv = createFloatValue(FLOAT_VALUE, new_vect);
+	ValuePtr nv = createFloatValue(new_vect);
 
 	_values[key] = nv;
 	return nv;

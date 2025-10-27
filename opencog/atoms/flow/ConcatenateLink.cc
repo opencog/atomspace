@@ -23,6 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "ConcatenateLink.h"
 
@@ -67,7 +68,7 @@ ValuePtr ConcatenateLink::rewrap_h(AtomSpace* as, const Handle& base)
 	if (not _have_typespec) _out_type = base->get_type();
 	if (_out_is_link)
 		return as->add_link(_out_type, std::move(oset));
-	return createLinkValue(_out_type, std::move(oset));
+	return valueserver().create(_out_type, std::move(oset));
 }
 
 // ---------------------------------------------------------------
@@ -91,7 +92,7 @@ ValuePtr ConcatenateLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 		else
 			vseq.push_back(vli);
 	}
-	return createLinkValue(_out_type, std::move(vseq));
+	return valueserver().create(_out_type, std::move(vseq));
 }
 
 // ---------------------------------------------------------------

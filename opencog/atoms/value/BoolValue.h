@@ -57,10 +57,10 @@ protected:
 	void pack_vector(const std::vector<bool>& v);
 	std::vector<bool> unpack_vector() const;
 
+	BoolValue(Type t, const std::vector<bool>& v);
 public:
 	BoolValue(bool v);
 	BoolValue(const std::vector<bool>& v);
-	BoolValue(Type t, const std::vector<bool>& v);
 	virtual ~BoolValue() {}
 
 	bool get_bit(size_t index) const;

@@ -501,14 +501,14 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<float> v = Float32ValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = (float) verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloat32Value(t, v);
+		nvp = valueserver().create(t, v);
 	}
 	else if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		std::vector<double> v = FloatValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloatValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, BOOL_VALUE))
@@ -516,7 +516,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<bool> v = BoolValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
-		nvp = createBoolValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))
@@ -524,7 +524,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<std::string> v = StringValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
-		nvp = createStringValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
@@ -532,7 +532,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = createLinkValue(t, std::move(v));
+		nvp = valueserver().create(t, std::move(v));
 	}
 
 	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");

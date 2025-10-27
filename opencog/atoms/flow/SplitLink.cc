@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "SplitLink.h"
 
@@ -78,7 +79,7 @@ ValuePtr SplitLink::rewrap_h(AtomSpace* as, const Handle& base)
 
 	if (_out_is_link)
 		return as->add_link(_out_type, std::move(hsq));
-	return createLinkValue(_out_type, std::move(hsq));
+	return valueserver().create(_out_type, std::move(hsq));
 }
 
 // ---------------------------------------------------------------
@@ -96,7 +97,7 @@ ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 		for (const ValuePtr& lvo : lvsq)
 			vsq.push_back(rewrap_v(as, lvo));
 
-		return createLinkValue(_out_type, std::move(vsq));
+		return valueserver().create(_out_type, std::move(vsq));
 	}
 
 	if (not vp->is_type(STRING_VALUE))
@@ -124,7 +125,7 @@ ValuePtr SplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 		}
 	}
 
-	return createLinkValue(_out_type, std::move(vsq));
+	return valueserver().create(_out_type, std::move(vsq));
 }
 
 // ---------------------------------------------------------------

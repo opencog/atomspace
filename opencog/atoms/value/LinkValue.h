@@ -64,6 +64,7 @@ public:
 	LinkValue(ValueSeq&& vlist)
 		: Value(LINK_VALUE), _value(std::move(vlist)) {}
 
+protected:
 	LinkValue(Type t, const ValueSeq& vlist)
 		: Value(t), _value(vlist) {}
 
@@ -79,6 +80,7 @@ public:
 	LinkValue(Type t, const HandleSet& hset)
 		: Value(t), _value(hset.begin(), hset.end()) {}
 
+public:
 	LinkValue(const ValueSet& vset)
 		: Value(LINK_VALUE), _value(vset.begin(), vset.end()) {}
 

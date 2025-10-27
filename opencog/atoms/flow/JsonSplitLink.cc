@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "JsonSplitLink.h"
 
@@ -246,7 +247,7 @@ ValuePtr JsonSplitLink::parse_json_array(const std::string& str, size_t& pos)
 	if (pos < str.length() && str[pos] == ']')
 	{
 		pos++;
-		return createLinkValue(_out_type, std::move(values));
+		return valueserver().create(_out_type, std::move(values));
 	}
 
 	while (pos < str.length())
@@ -262,7 +263,7 @@ ValuePtr JsonSplitLink::parse_json_array(const std::string& str, size_t& pos)
 		if (str[pos] == ']')
 		{
 			pos++;
-			return createLinkValue(_out_type, std::move(values));
+			return valueserver().create(_out_type, std::move(values));
 		}
 		else if (str[pos] == ',')
 		{
@@ -296,7 +297,7 @@ ValuePtr JsonSplitLink::parse_json_object(const std::string& str, size_t& pos)
 	if (pos < str.length() && str[pos] == '}')
 	{
 		pos++;
-		return createLinkValue(_out_type, std::move(pairs));
+		return valueserver().create(_out_type, std::move(pairs));
 	}
 
 	while (pos < str.length())
@@ -326,7 +327,7 @@ ValuePtr JsonSplitLink::parse_json_object(const std::string& str, size_t& pos)
 		ValueSeq pair;
 		pair.push_back(createStringValue(key));
 		pair.push_back(value);
-		pairs.push_back(createLinkValue(_out_type, std::move(pair)));
+		pairs.push_back(valueserver().create(_out_type, std::move(pair)));
 
 		skip_whitespace(str, pos);
 
@@ -337,7 +338,7 @@ ValuePtr JsonSplitLink::parse_json_object(const std::string& str, size_t& pos)
 		if (str[pos] == '}')
 		{
 			pos++;
-			return createLinkValue(_out_type, std::move(pairs));
+			return valueserver().create(_out_type, std::move(pairs));
 		}
 		else if (str[pos] == ',')
 		{
@@ -421,7 +422,7 @@ ValuePtr JsonSplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 		for (const ValuePtr& lvo : lvsq)
 			vsq.push_back(rewrap_v(as, lvo));
 
-		return createLinkValue(_out_type, std::move(vsq));
+		return valueserver().create(_out_type, std::move(vsq));
 	}
 
 	if (not vp->is_type(STRING_VALUE))
@@ -449,7 +450,7 @@ ValuePtr JsonSplitLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 	if (vsq.size() == 1)
 		return vsq[0];
 
-	return createLinkValue(_out_type, std::move(vsq));
+	return valueserver().create(_out_type, std::move(vsq));
 }
 
 // ---------------------------------------------------------------

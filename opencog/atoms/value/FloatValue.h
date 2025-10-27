@@ -49,8 +49,8 @@ protected:
 	std::string to_string(const std::string&, Type) const;
 
 	FloatValue(Type t) : Value(t) {}
-public:
 	FloatValue(Type t, const std::vector<double>& v) : Value(t), _value(v) {}
+public:
 	FloatValue(double v) : Value(FLOAT_VALUE) { _value.push_back(v); }
 	FloatValue(const std::vector<double>& v)
 		: Value(FLOAT_VALUE), _value(v) {}
