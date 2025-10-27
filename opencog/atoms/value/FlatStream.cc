@@ -102,7 +102,14 @@ void FlatStream::update() const
 		// one.
 		if (vp->is_type(ATOM))
 		{
-			ValueSeq vsq({vp});
+			ValueSeq vsq;
+
+			const Handle& h(HandleCast(vp));
+			if (h->is_executable())
+				vsq = ValueSeq({h->execute(_as)});
+			else
+				vsq = ValueSeq({vp});
+
 			_value.swap(vsq);
 			_current_index++;
 			return;
