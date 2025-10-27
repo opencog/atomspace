@@ -56,6 +56,7 @@ public:
 	FlatStream(const Handle&);
 	FlatStream(const HandleSeq&&);
 	FlatStream(const ValuePtr&);  // copy ctor-like thing.
+	FlatStream(const ValueSeq&&); // Another weird copy-ctor-like thing.
 	virtual ~FlatStream() {}
 
 	virtual std::string to_string(const std::string& indent = "") const;

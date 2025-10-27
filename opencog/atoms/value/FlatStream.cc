@@ -72,6 +72,16 @@ FlatStream::FlatStream(const ValuePtr& vp) :
 	_current_stream = LinkValueCast(vp);
 }
 
+// A pseudo copy constructor. Just copies in some existing ValueSeq
+FlatStream::FlatStream(const ValueSeq&& vsq) :
+	LinkValue(FLAT_STREAM),
+	_source(nullptr),
+	_as(nullptr),
+	_current_index(0)
+{
+	_current_stream = createLinkValue(std::move(vsq));
+}
+
 void FlatStream::init(void)
 {
 	// Nothing, actually ...
@@ -134,6 +144,10 @@ void FlatStream::update() const
 	// (Re-)Start at the begining.
 	_current_index = 0;
 
+	// End-file-file condition.
+	if (nullptr == _source or VOID_VALUE == _source->get_type())
+		return;
+
 	// Get the next list that needs flattening.
 	// Normally, the source is executable, and executing it returns a list
 	// of items that we will iterate over.
@@ -191,3 +205,5 @@ std::string FlatStream::to_string(const std::string& indent) const
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const Handle&)
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const HandleSeq&&)
+DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const ValuePtr&)
+DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const ValueSeq&&)
