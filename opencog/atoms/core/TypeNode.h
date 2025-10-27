@@ -85,6 +85,7 @@ public:
 	TypeNode& operator=(const TypeNode&) = delete;
 
 	Type get_kind(void) const { return _kind; }
+	bool is_kind(Type) const;
 
 	static Handle factory(const Handle&);
 };

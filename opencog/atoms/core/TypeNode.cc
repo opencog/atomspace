@@ -24,4 +24,23 @@
 
 using namespace opencog;
 
+/// Return true, if Type t is of the kind specified in this TypeNode.
+bool TypeNode::is_kind(Type t) const
+{
+	if (TYPE_NODE == _type)
+		return t == _kind;
+
+	if (TYPE_INH_NODE == _type)
+		return nameserver().isA(t, _kind);
+
+	if (TYPE_CO_INH_NODE == _type)
+		return nameserver().isA(_kind, t);
+
+	throw RuntimeException(TRACE_INFO,
+		"Support for %s not implemented!\n",
+		nameserver().getTypeName(_type).c_str());
+
+	return false;
+}
+
 DEFINE_NODE_FACTORY(TypeNode, TYPE_NODE)
