@@ -388,13 +388,21 @@ bool FilterLink::extract(const Handle& termpat,
 	if (not termpat->is_link())
 		return (termpat == vgnd);
 
-	// Type of LinkSig is encoded in the first atom.
-	Type lit = t;
+	// Pattern is a LinkSig. LinkSigs have a typespec. Does the type
+	// of the proposed grounding agree with the LinkSig typespec?
+	// If not, bounce out.
+	// The LinkSig typespec might be TypeNode, TypeInhNode or TypeCoInhNode
+	// The TypeNode::is_kind() handles all three cases.
 	if (LINK_SIGNATURE_LINK == t)
-		lit = LinkSignatureLinkCast(termpat)->get_kind();
+	{
+		// Type of LinkSig is encoded in the first atom.
+		Handle ts = LinkSignatureLinkCast(termpat)->get_typespec();
+		if (not TypeNodeCast(ts)->is_kind(vgnd->get_type()))
+			return false;
+	}
 
-	// Whatever they are, the type must agree.
-	if (lit != vgnd->get_type()) return false;
+	// Else straight-up see if pattern and grounding types agree.
+	else if (t != vgnd->get_type()) return false;
 
 	// From here on out, we prepare to compare Links.
 	const HandleSeq& tlo = termpat->getOutgoingSet();
