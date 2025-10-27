@@ -95,12 +95,14 @@ void FlatStream::update() const
 			_current_index++;
 			return;
 		}
-		if (vp->is_type(LINK))
+
+		// This case is hit when flattening is being done on an ordinary
+		// Link. The _current_stream holds the outgoing set of the Link,
+		// so all we have to do is present each Atom in that oset, one by
+		// one.
+		if (vp->is_type(ATOM))
 		{
-			HandleSeq ho(HandleCast(vp)->getOutgoingSet());
-			ValueSeq vsq;
-			for (const Handle& h : ho)
-				vsq.push_back(h);
+			ValueSeq vsq({vp});
 			_value.swap(vsq);
 			_current_index++;
 			return;
@@ -126,8 +128,10 @@ void FlatStream::update() const
 	_current_index = 0;
 
 	// Get the next list that needs flattening.
-	// Normally, the source is executable.
-	// If its not executable, its a "trivial" case: just get the outgoing set.
+	// Normally, the source is executable, and executing it returns a list
+	// of items that we will iterate over.
+	// But if its a Link Atom , we handle it as a special case, a "trivial" case:
+	// just iterate over the outgoing set of the Link itself.
 	// As currently designed, this will loop forever, but maybe it should halt?
 	if (not _source->is_executable())
 	{
