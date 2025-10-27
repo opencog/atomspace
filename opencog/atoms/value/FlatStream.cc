@@ -74,14 +74,7 @@ FlatStream::FlatStream(const ValuePtr& vp) :
 
 void FlatStream::init(void)
 {
-	// Verify that we've got valid stuff.
-	if (not _source->is_executable() and
-	    not _source->is_evaluatable())
-	{
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable or evaluatable atom, got %s",
-			_source->to_string().c_str());
-	}
+	// Nothing, actually ...
 }
 
 // ==============================================================
@@ -95,38 +88,77 @@ void FlatStream::update() const
 	if (_current_stream and _current_index < _current_stream->_value.size())
 	{
 		const ValuePtr& vp = _current_stream->_value[_current_index];
-		if (not vp->is_type(LINK_VALUE))
-			throw RuntimeException(TRACE_INFO,
-				"Expecting a LinkValue, got %s",
-				vp->to_string().c_str());
+		if (vp->is_type(LINK_VALUE))
+		{
+			ValueSeq vsq(LinkValueCast(vp)->value());
+			_value.swap(vsq);
+			_current_index++;
+			return;
+		}
+		if (vp->is_type(LINK))
+		{
+			HandleSeq ho(HandleCast(vp)->getOutgoingSet());
+			ValueSeq vsq;
+			for (const Handle& h : ho)
+				vsq.push_back(h);
+			_value.swap(vsq);
+			_current_index++;
+			return;
+		}
 
-		ValueSeq vsq = LinkValueCast(vp)->value();
-		_value.swap(vsq);
-		_current_index++;
+		// XXX A weird stupid computer trick here would be to iterate
+		// over an entire AtomSpace. At the moment, this is awkward,
+		// because it would require making a copy of all of the Handles.
+		// That, plus nothing needs this ability. That, plus maybe
+		// there should be some distinct way of stuffing an entire
+		// AtomSpace into a distinct LinkValue. That, plus maybe there
+		// should be a way of following AtomSpace changes. That, plus
+		// the fact that ProxyNodes are intended for this kind of stuff.
+		// So we don't handle the case of an AtomSpace, here.
+
+		throw RuntimeException(TRACE_INFO,
+			"Expecting a LinkValue or Link, got %s",
+			vp->to_string().c_str());
+
+	}
+
+	// (Re-)Start at the begining.
+	_current_index = 0;
+
+	// Get the next list that needs flattening.
+	// Normally, the source is executable.
+	// If its not executable, its a "trivial" case: just get the outgoing set.
+	// As currently designed, this will loop forever, but maybe it should halt?
+	if (not _source->is_executable())
+	{
+		ValueSeq hov;
+		HandleSeq ho(_source->getOutgoingSet());
+		for (const Handle& h : ho)
+			hov.push_back(h);
+		_current_stream = createLinkValue(std::move(hov));
+		update(); // Loop around.
 		return;
 	}
 
-	// Get the next list that needs flattening.
 	ValuePtr result = _source->execute(_as);
 
 	// Check for end of stream
 	if (nullptr == result or result->get_type() == VOID_VALUE)
 	{
-		std::vector<ValuePtr> empty;
+		ValueSeq empty;
 		_value.swap(empty);
 		return;
 	}
 
 	if (result->get_type() != LINK_VALUE)
 	{
-		std::vector<ValuePtr> unary({result});
+		ValueSeq unary({result});
 		_value.swap(unary);
 		return;
 	}
 
 	// Cast to LinkValue
 	_current_stream = LinkValueCast(result);
-	_current_index = 0;
 
 	// We've queued it up; take it from the top.
 	update();
