@@ -37,8 +37,9 @@
 ; references, advancing the stream.
 (display fs)
 (display fs)
-(display fs)
-(display fs)
+(cog-value->list fs)
+(cog-value->list fs)
+(cog-value->list fs)
 (display fs)
 (display fs)
 
