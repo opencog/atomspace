@@ -78,7 +78,12 @@ void CollectionOfLink::check_typespec(void)
 	_out_type = TypeNodeCast(_outgoing[0])->get_kind();
 
 	_out_is_link = nameserver().isLink(_out_type);
-	if (not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE))
+
+	// Normally, we'd re-write only into LinkValues, only.
+	// But FormulaStream inherits from FloatValue, and we
+	// want to allow FormulaStream rewrites. So support that.
+	if ((not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE)) and
+	    (not _out_is_link and not nameserver().isA(_out_type, FLOAT_VALUE)))
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting type to be a Link or LinkValue, got %s for %s",
 				nameserver().getTypeName(_out_type).c_str(),
