@@ -1110,13 +1110,6 @@ SPLIT_LINK <- COLLECTION_OF_LINK
 JSON_SPLIT_LINK <- COLLECTION_OF_LINK
 
 // -----------
-// Similar to ValueOfLink, but this returns a promise to return a Value
-// sometime in the future. This is accomplished by returning a either
-// a FutureStream or a FormulaStream when executed. This stream will
-// then cough up the actual Value later on, when interrogated. Used to
-// create dynamically executable computation chains.
-PROMISE_LINK <- VALUABLE_LINK,EXECUTABLE_LINK
-
 // FilterLink was called MapLink (but this name was wrong) or
 // FilterMapLink or UnPutLink.  UnPut, because it undoes a beta-
 // reduction, by extracting Values for a given set of variables.
