@@ -121,10 +121,12 @@
 ; that A implied B, and the formula above models the truth of
 ; this implication.
 ;
-; An automatic update can be accomplished with the PromiseLink.
-; The PromiseLink can wrap any executable Atom, anything that can
-; produce a Value, and provides a promise that it will be executed
-; in the future.
+; An automatic update can be accomplished by attaching the formula
+; to a specific Atom at some specific key. This can be done by using
+; the cog-set-value! function. Unfortunately, this requires writing
+; scheme code, and we would rather not do that. Limiting ourselves
+; to using cog-execute! only, this can be done by re-writing with
+; the CollectionOfLink.
 ;
 ; In this example, when the SetValueLink is executed, whatever was
 ; wrapped is unwrapped and placed into a FormulaStream, which will
@@ -134,10 +136,10 @@
 
 (cog-execute!
 	(SetValue a-implies-b tvkey
-		(Promise
+		(CollectionOf (Type 'FormulaStream) (OrderedLink
 			(ExecutionOutput
 				(DefinedProcedure "has a reddish color")
-				(List (Concept "A") (Concept "B"))))))
+				(List (Concept "A") (Concept "B")))))))
 
 ; Lets take a look at the TV, now.
 (cog-value a-implies-b tvkey)
