@@ -34,6 +34,9 @@ public:
 	void test_copy();
 	void test_square();
 	void test_triangle();
+	void test_copy_on();
+	void test_square_on();
+	void test_triangle_on();
 };
 
 SetValueUTest::SetValueUTest(void) : _asp(createAtomSpace()), _eval(_asp)
@@ -131,6 +134,79 @@ void SetValueUTest::test_triangle()
 	printf("result cog-val: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Test SetValueOn - returns Atom instead of Value
+// ====================================================================
+
+// SetValueOn basic copy - should return baz Atom
+void SetValueUTest::test_copy_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn - should return the Atom (baz), not the Value
+	ValuePtr result = _eval.eval_v("(cog-execute! set-value-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval.eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the value was actually set on baz
+	ValuePtr stored_value = _eval.eval_v("(cog-value baz kee)");
+	ValuePtr expected = _eval.eval_v("seq");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT_EQUALS(stored_value, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// SetValueOn with math - should return baz Atom
+void SetValueUTest::test_square_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn with math - should return the Atom (baz)
+	ValuePtr result = _eval.eval_v("(cog-execute! square-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval.eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the squared value was set
+	ValuePtr stored_value = _eval.eval_v("(cog-value baz kay)");
+	ValuePtr expected = _eval.eval_v("squ");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT(*stored_value == *expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// SetValueOn with formula - should return baz Atom
+void SetValueUTest::test_triangle_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn with formula - should return the Atom (baz)
+	ValuePtr result = _eval.eval_v("(cog-execute! triangle-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval.eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the triangle numbers were set
+	ValuePtr stored_value = _eval.eval_v("(cog-value baz kay)");
+	ValuePtr expected = _eval.eval_v("tri");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT(*stored_value == *expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
