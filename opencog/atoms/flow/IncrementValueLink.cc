@@ -52,6 +52,8 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 /// increment the FloatValue at the indicated key on the indicated
 /// first argument. The updated value is returned.
 ///
+/// The IncrementValueOnLink returns the Atom instead of the FloatValue.
+///
 /// If there is no Value at the indicated key, a new FloatValue is
 /// created (assuming an initial value of all zeros.) If there is an
 /// existing Value, and its not a Float, then no increment is performed.
@@ -75,12 +77,16 @@ ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 	if (vp->is_type(FLOAT_VALUE))
 	{
 		ah = as->increment_count(ah, ak, FloatValueCast(vp)->value());
+		if (INCREMENT_VALUE_ON_LINK == get_type())
+			return ah;
 		return ah->getValue(ak);
 	}
 
 	if (vp->is_type(NUMBER_NODE))
 	{
 		ah = as->increment_count(ah, ak, NumberNodeCast(vp)->value());
+		if (INCREMENT_VALUE_ON_LINK == get_type())
+			return ah;
 		return ah->getValue(ak);
 	}
 

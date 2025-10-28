@@ -1081,11 +1081,17 @@ STRING_OF_LINK <- FUNCTION_LINK
 
 // Opposite of the ValueOfLink; attach a Value to an Atom.
 // Verb: "to set", and not noun "a set (collection)"
+// When executed, SetValue returns the value; and SetValueOn returns
+// the Atom on which it was set. Thus, SetValueOn can be called in
+// RuleLinks, while SetValue cannot (because the Rule wants Atoms,
+// not Values.)
 SET_VALUE_LINK <- FUNCTION_LINK
+SET_VALUE_ON_LINK <- SET_VALUE_LINK
 
 // Numeric increment. Combined (SetValue (Plus (FloatValueOf ...)))
 // Its atomic, so thread-safe.
 INCREMENT_VALUE_LINK <- FUNCTION_LINK
+INCREMENT_VALUE_ON_LINK <- INCREMENT_VALUE_LINK
 
 // Internal-use-only wrapper for Values. Older code for function
 // application and beta reduction only works with Atoms, not Values.
