@@ -49,15 +49,16 @@
 
 ; The attachment above works, but it is not "pure Atomese", it
 ; requires a call to `cog-set-value!` This can be avoided by
-; using SetValueLink instead. However, since the stream itself
-; is not an Atom, it cannot be place there directly. For this,
-; a Promise is used: when executed, the promise creates the
-; stream. The `cog-execute!` below results in exactly the same
-; as state as the `cog-set-value!` above; its just "pure Atomese".
+; using SetValueLink instead. However, since the stream itself is
+; not an Atom, it cannot be place there directly. For this, re-wrap
+; the list into a FlatStream, using the CollectionOfLink utility
+; to perform the re-wrap.  When executed, the re-write will create
+; the stream. The `cog-execute!` below results in exactly the
+; structure as the `cog-set-value!` above; its just "pure Atomese".
 
 (cog-execute!
 	(SetValue (Concept "foo") (Predicate "bar")
-		(Promise (Type 'FlatStream) item-list)))
+		(CollectionOf (Type 'FlatStream) (OrderedLink item-list))))
 
 ; Streams can be referenced with ValueOfLink
 (define ostream (ValueOf (Concept "foo") (Predicate "bar")))
@@ -75,7 +76,7 @@
 (define junk
 	(cog-execute!
 		(SetValue (Concept "foo") (Predicate "bar")
-			(Promise (Type 'FlatStream) item-list))))
+			(CollectionOf (Type 'FlatStream) (OrderedLink item-list)))))
 
 ; Verify the stream really does start at the start.
 (cog-execute! ostream)
