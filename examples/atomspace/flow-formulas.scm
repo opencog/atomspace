@@ -123,7 +123,7 @@
 ;
 ; An automatic update can be accomplished with the PromiseLink.
 ; The PromiseLink can wrap any executable Atom, anything that can
-;  produce a Value, and provides a promise that it will be executed
+; produce a Value, and provides a promise that it will be executed
 ; in the future.
 ;
 ; In this example, when the SetValueLink is executed, whatever was
@@ -147,8 +147,10 @@
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.1 0.9))
 
 ; And take another look.
+(define (get-mean ATM) (cog-value-ref ATM tvkey 0))
+(define (get-confidence ATM) (cog-value-ref ATM tvkey 1))
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
-	(cog-mean a-implies-b) (cog-confidence a-implies-b))
+	(get-mean a-implies-b) (get-confidence a-implies-b))
 
 ; And again, for good luck.
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.2 0.8))
