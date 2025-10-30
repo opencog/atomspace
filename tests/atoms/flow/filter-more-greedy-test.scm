@@ -133,15 +133,13 @@
 
 (define result-interval (cog-execute! pattern-interval-glob))
 
-; XXX FIXME this fails but should pass
-;(test-assert "interval-glob-matches-adjacent-bonds"
-;	(not (equal? result-interval empty-result)))
+(test-assert "interval-glob-matches-adjacent-bonds"
+	(not (equal? result-interval empty-result)))
 
 ;;; Also verify the result contains the expected extraction
 (define result-list (cog-value->list result-interval))
 
-; XXX FIXME this fails but should pass
-;(test-assert "result-contains-extraction"
-;	(> (length result-list) 0))
+(test-assert "result-contains-extraction"
+	(> (length result-list) 0))
 
 (test-end tname)
