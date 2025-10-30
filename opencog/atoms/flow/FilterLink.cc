@@ -333,65 +333,41 @@ bool FilterLink::extract(const Handle& termpat,
 	// the HandleSeq and ValueSeq variants are effectively identical.
 	_recursive_glob = true;
 
-	if (vgnd->is_link())
+	// Helper lambda to perform glob matching for a given ground sequence type
+	auto do_glob_match = [&]<typename GroundSeq>(const GroundSeq& glo) -> bool
 	{
-		const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
-
-		// Create callbacks for glob_match
-		GlobValidateCallback<HandleSeq> validate =
+		// Validation callback - delegates to extract()
+		GlobValidateCallback<GroundSeq> validate =
 			[&](const Handle& pattern_elem,
-			    const Handle& ground_elem,
+			    const typename GroundSeq::value_type& ground_elem,
 			    ValueMap& bindings) -> bool {
 				return this->extract(pattern_elem, ground_elem, bindings,
 				                     scratch, silent, quotation);
 			};
 
-		GlobMakeValueCallback<HandleSeq> make_value =
-			[](const HandleSeq& matched_seq) -> ValuePtr {
+		// Value creation callback - creates appropriate container type
+		GlobMakeValueCallback<GroundSeq> make_value;
+		if constexpr (std::is_same_v<GroundSeq, HandleSeq>)
+			make_value = [](const HandleSeq& matched_seq) -> ValuePtr {
 				return createLink(HandleSeq(matched_seq), LIST_LINK);
 			};
-
-		return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
-	}
-
-	if (vgnd->is_type(LINK_VALUE))
-	{
-		const ValueSeq& glo = LinkValueCast(vgnd)->value();
-
-		// Create callbacks for glob_match
-		GlobValidateCallback<ValueSeq> validate =
-			[&](const Handle& pattern_elem,
-			    const ValuePtr& ground_elem,
-			    ValueMap& bindings) -> bool {
-				return this->extract(pattern_elem, ground_elem, bindings,
-				                     scratch, silent, quotation);
-			};
-
-		GlobMakeValueCallback<ValueSeq> make_value =
-			[](const ValueSeq& matched_seq) -> ValuePtr {
+		else
+			make_value = [](const ValueSeq& matched_seq) -> ValuePtr {
 				return createLinkValue(ValueSeq(matched_seq));
 			};
 
 		return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
-	}
+	};
+
+	// Handle different ground value types
+	if (vgnd->is_link())
+		return do_glob_match(HandleCast(vgnd)->getOutgoingSet());
+
+	if (vgnd->is_type(LINK_VALUE))
+		return do_glob_match(LinkValueCast(vgnd)->value());
 
 	// Single value case
-	const ValueSeq glo({vgnd});
-
-	GlobValidateCallback<ValueSeq> validate =
-		[&](const Handle& pattern_elem,
-		    const ValuePtr& ground_elem,
-		    ValueMap& bindings) -> bool {
-			return this->extract(pattern_elem, ground_elem, bindings,
-			                     scratch, silent, quotation);
-		};
-
-	GlobMakeValueCallback<ValueSeq> make_value =
-		[](const ValueSeq& matched_seq) -> ValuePtr {
-			return createLinkValue(ValueSeq(matched_seq));
-		};
-
-	return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
+	return do_glob_match(ValueSeq({vgnd}));
 }
 
 // ====================================================================
