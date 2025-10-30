@@ -213,8 +213,7 @@
 		"no-middle"))
 
 (format #t "dbl-zero-match ~A\n" dbl-zero-match)
-; XXX FIXME ... this should have worked, but its failing.
-; (test-assert "dbl-zero-match" (equal? dbl-zero-match simple-pair))
+(test-assert "dbl-zero-match" (equal? dbl-zero-match simple-pair))
 
 ;-----------------
 ;; Typed Glob; requires zero or more matches

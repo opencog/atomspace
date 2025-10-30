@@ -112,9 +112,7 @@ bool glob_match(
 	while (ip < pattern_end)
 	{
 		if (exhausted)
-		{
 			return false;
-		}
 
 		const Handle& pattern_elem = pattern[ip];
 
@@ -281,17 +279,15 @@ bool glob_match(
 				// when each element is validated during the matching process
 
 				// Check if this would leave the pattern/ground unbalanced
-				size_t pattern_remaining = pattern_end - (ip + 1);
+				// Note: We could do a sophisticated check here counting minimum requirements,
+				// but the Variables object may not return correct intervals for TypedVariable globs,
+				// so we rely on backtracking instead. Only check the simple case where this is
+				// the last pattern element.
 				size_t ground_after = ground.size() - (jg + size);
-
-				// Check if we have enough ground left for remaining pattern elements
-				// Each remaining pattern element needs at least 1 ground element
-				if (ground_after < pattern_remaining)
-					continue;  // Try next smaller size
 
 				// Special case: if this is the last pattern element,
 				// we must consume exactly all remaining ground
-				if (pattern_remaining == 0 && ground_after != 0)
+				if (ip + 1 == pattern_end && ground_after != 0)
 					continue;  // Try next smaller size
 
 				// This size works! Record the match
