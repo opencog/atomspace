@@ -277,23 +277,17 @@ bool glob_match(
 					matched_seq.push_back(ground[jg + i]);
 				}
 
-				// Validate each element against glob's type constraints
-				bool all_valid = true;
-				for (size_t i = 0; i < size; i++)
-				{
-					if (!variables->is_type(glob, ground[jg + i]))
-					{
-						all_valid = false;
-						break;
-					}
-				}
-
-				if (!all_valid)
-					continue;  // Try next smaller size
+				// Type validation is handled by FilterLink::extract() via _recursive_glob
+				// when each element is validated during the matching process
 
 				// Check if this would leave the pattern/ground unbalanced
 				size_t pattern_remaining = pattern_end - (ip + 1);
 				size_t ground_after = ground.size() - (jg + size);
+
+				// Check if we have enough ground left for remaining pattern elements
+				// Each remaining pattern element needs at least 1 ground element
+				if (ground_after < pattern_remaining)
+					continue;  // Try next smaller size
 
 				// Special case: if this is the last pattern element,
 				// we must consume exactly all remaining ground
