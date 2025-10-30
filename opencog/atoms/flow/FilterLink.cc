@@ -139,6 +139,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 
 	// The vector to match has to be at least as long as the template.
 	// Not true: the template might have a length-zero glob!
+	// Not worth the CPU cost/complexity to find out if that's the case.
 	// if (gsz < tsz) return false;
 
 	_recursive_glob = true;
@@ -173,18 +174,22 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 		}
 
 		// Match as many as the minimum bound specifies.
-		bool tc = true;
 		for (size_t lobnd = 0; lobnd < bounds.first; lobnd++)
 		{
-			tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
+			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
 			jg++;
+
+			if (jg > gsz) return false;
 		}
 
 		// Can we match more?
-		while (tc and jg<gsz)
+		bool tc = true;
+		size_t greedy = 0;
+		const size_t maxi = bounds.second - bounds.first;
+		while (tc and jg<gsz and greedy < maxi)
 		{
 			if (have_post)
 			{
@@ -195,12 +200,11 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 			tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 			if (tc) glob_seq.push_back(glo[jg]);
 			jg ++;
+			greedy ++;
 		}
 		jg --;
 		if (not tc)
-		{
 			return false;
-		}
 
 		// If we already have a value, the value must be identical.
 		auto val = valmap.find(glob);
