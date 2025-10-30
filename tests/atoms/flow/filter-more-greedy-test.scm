@@ -112,7 +112,8 @@
 				(TypedVariable (Glob "$mid")	; IntervalLink allows 0+ matches
 					(Interval (Number 0) (Number -1)))
 				(TypedVariable (Variable "$obj") (Type 'Item))
-				(Glob "$b2"))
+				(TypedVariable (Glob "$b2")	; IntervalLink allows 0+ matches
+					(Interval (Number 0) (Number -1))))
 
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$words")
