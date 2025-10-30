@@ -159,7 +159,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 		// If we are here, we are comparing to a glob.
 		VECT glob_seq;
 		Handle glob(tlo[ip]);
-		const GlobInterval& interval = _mvars->get_interval(glob);
+		// const GlobInterval& interval = _mvars->get_interval(glob);
 
 		// Globs at the end are handled differently than globs
 		// which are followed by other stuff. So, is there
