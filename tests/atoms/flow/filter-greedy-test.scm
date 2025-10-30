@@ -98,8 +98,7 @@
 	(harness (Glob "$middle") (Glob "$middle") "fat-middle"))
 
 (format #t "fat-match ~A\n" fat-match)
-; XXX this should pass but is broken right now FIXME
-; (test-assert "fat-match" (equal? fat-match simple-pair))
+(test-assert "fat-match" (equal? fat-match simple-pair))
 
 ;-----------------
 ;; Typed Glob; requires zero or more matches
@@ -123,8 +122,7 @@
 		(Glob "$middle") "have-middle"))
 
 (format #t "type-middle-match ~A\n" type-middle-match)
-; XXX this should pass but is broken right now FIXME
-; (test-assert "type-middle-match" (equal? type-middle-match simple-pair))
+(test-assert "type-middle-match" (equal? type-middle-match simple-pair))
 
 ;-----------------
 ;; Typed Glob; requires no more than two matches
