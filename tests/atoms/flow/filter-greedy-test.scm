@@ -136,6 +136,117 @@
 (format #t "type-fat-match ~A\n" type-fat-match)
 (test-assert "type-fat-match" (equal? type-fat-match empty))
 
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
+; -----------------------------------------------------------------
+; Cut-n-paste of above, but now with two globs
+
+;-----------------
+;; Untyped Glob; requires one or more matches
+(format #t "================================== dbl-mid-mis-match\n")
+(define dbl-mid-mis-match
+	(harness
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"no-middle"))
+
+(format #t "dbl-mid-mis-match ~A\n" dbl-mid-mis-match)
+(test-assert "dbl-mid-mis-match" (equal? dbl-mid-mis-match empty))
+
+;-----------------
+;; Untyped Glob; requires one or more matches
+;; Should be empty cause two globs one middle
+(format #t "================================== dbl-middle-match\n")
+(define dbl-middle-match
+	(harness
+		 (list (Glob "$mid-a") (Glob "$mid-b"))
+		 (list (Glob "$mid-a") (Glob "$mid-b"))
+		 "have-middle"))
+
+(format #t "dbl-middle-match ~A\n" dbl-middle-match)
+(test-assert "dbl-middle-match" (equal? dbl-middle-match empty))
+
+;-----------------
+;; Untyped Glob; requires one or more matches
+(format #t "================================== dbl-fat-match\n")
+(define dbl-fat-match
+	(harness
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"fat-middle"))
+
+(format #t "dbl-fat-match ~A\n" fat-match)
+(test-assert "dbl-fat-match" (equal? dbl-fat-match simple-pair))
+
+;-----------------
+;; Typed Glob; requires zero or more matches
+; Should be emppty, the second glob has nothing to match
+(format #t "================================== type-zero-match\n")
+(define dbl-type-zero-match
+	(harness
+		(list
+			(TypedVariable
+				(Glob "$mid-a")
+				(Interval (Number 0) (Number -1))) ; Allow 0+ matches
+ 			(Glob "$mid-b"))
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"no-middle"))
+
+(format #t "dbl-type-zero-match ~A\n" dbl-type-zero-match)
+(test-assert "dbl-type-zero-match" (equal? dbl-type-zero-match empty))
+
+;-----------------
+;; Typed Glob; requires zero or more matches
+;
+(format #t "================================== type-zero-match\n")
+(define dbl-zero-match
+	(harness
+		(list
+			(TypedVariable
+				(Glob "$mid-a")
+				(Interval (Number 0) (Number -1))) ; Allow 0+ matches
+			(TypedVariable
+				(Glob "$mid-b")
+				(Interval (Number 0) (Number -1))) ; Allow 0+ matches
+		)
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"no-middle"))
+
+(format #t "dbl-zero-match ~A\n" dbl-zero-match)
+; XXX FIXME ... this should have worked, but its failing.
+; (test-assert "dbl-zero-match" (equal? dbl-zero-match simple-pair))
+
+;-----------------
+;; Typed Glob; requires zero or more matches
+(format #t "================================== dbl-type-middle-match\n")
+(define dbl-type-middle-match
+	(harness
+		(list
+			(TypedVariable (Glob "$mid-a")
+				(Interval (Number 0) (Number -1))) ; Allow 0+ matches
+			(Glob "$mid-b"))
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"have-middle"))
+
+(format #t "dbl-type-middle-match ~A\n" dbl-type-middle-match)
+(test-assert "dbl-type-middle-match" (equal? dbl-type-middle-match simple-pair))
+
+;-----------------
+;; Typed Glob; requires no more than two matches
+; The second glob gets th rest
+(format #t "================================== dbl-type-fat-match\n")
+(define dbl-type-fat-match
+	(harness
+		(list
+			(TypedVariable (Glob "$mid-a")
+				(Interval (Number 0) (Number 2))) ; Allow no more than two matches
+			(Glob "$mid-b"))
+		(list (Glob "$mid-a") (Glob "$mid-b"))
+		"fat-middle"))
+
+(format #t "dbl-type-fat-match ~A\n" dbl-type-fat-match)
+(test-assert "dbl-type-fat-match" (equal? dbl-type-fat-match simple-pair))
+
 ;-----------------
 (test-end tname)
 
