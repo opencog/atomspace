@@ -125,142 +125,6 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
-/// Direct side-by-side compare, for VECT being either
-/// std::vector<Handle> or std::vector<Value>
-template<typename VECT>
-bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
-                              ValueMap& valmap,
-                              AtomSpace* scratch, bool silent,
-                              Quotation quotation,
-                              ValuePtr (*makeval)(const VECT&&),
-                              size_t tsz, size_t off) const
-{
-	size_t gsz = glo.size();
-
-	// The vector to match has to be at least as long as the template.
-	// Not true: the template might have a length-zero glob!
-	// Not worth the CPU cost/complexity to find out if that's the case.
-	// if (gsz < tsz) return false;
-
-	_recursive_glob = true;
-	// If we are here, there is a glob node in the pattern.  A glob can
-	// match one or more atoms in a row. Thus, we have a more
-	// complicated search ...
-	size_t ip=off, jg=0;
-	for (ip=off, jg=0; ip<tsz+off and jg<gsz; ip++, jg++)
-	{
-		Type ptype = tlo[ip]->get_type();
-		if (GLOB_NODE != ptype)
-		{
-			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
-				return false;
-			continue;
-		}
-
-		// If we are here, we are comparing to a glob.
-		VECT glob_seq;
-		Handle glob(tlo[ip]);
-		const GlobInterval& bounds = _mvars->get_interval(glob);
-
-		// Globs at the end are handled differently than globs
-		// which are followed by other stuff. So, is there
-		// anything after the glob?
-		Handle post_glob;
-		bool have_post = false;
-		if (ip+1 < tsz+off)
-		{
-			have_post = true;
-			post_glob = tlo[ip+1];
-		}
-
-		// Match as many as the minimum bound specifies.
-		for (size_t lobnd = 0; lobnd < bounds.first; lobnd++)
-		{
-			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-			if (not tc) return false;
-
-			glob_seq.push_back(glo[jg]);
-			jg++;
-
-			if (jg > gsz) return false;
-		}
-
-		// Can we match more?
-		bool tc = true;
-		size_t greedy = 0;
-		const size_t maxi = bounds.second - bounds.first;
-		while (tc and jg<gsz and greedy < maxi)
-		{
-			if (have_post)
-			{
-				// If the atom after the glob matches, then we are done.
-				tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
-				if (tc) break;
-			}
-			tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-			if (tc) glob_seq.push_back(glo[jg]);
-			jg ++;
-			greedy ++;
-		}
-		jg --;
-		if (not tc)
-			return false;
-
-		// If we already have a value, the value must be identical.
-		auto val = valmap.find(glob);
-		if (valmap.end() != val)
-		{
-			// Have to have same arity and contents.
-			if (val->second->is_atom())
-			{
-				const Handle& already = HandleCast(val->second);
-				const HandleSeq& alo = already->getOutgoingSet();
-				size_t asz = alo.size();
-				if (asz != glob_seq.size()) return false;
-				for (size_t i=0; i< asz; i++)
-				{
-					if (glob_seq[i] != alo[i]) return false;
-				}
-				return true;
-			}
-			else
-				throw RuntimeException(TRACE_INFO,
-					"Globbing for Values not implemented! FIXME!");
-		}
-
-		// Handle glp(createLink(std::move(glob_seq), LIST_LINK));
-		ValuePtr glp(makeval(std::move(glob_seq)));
-		valmap.emplace(std::make_pair(glob, glp));
-	}
-	return (ip == tsz+off) and (jg == gsz);
-}
-
-template
-bool FilterLink::glob_compare<HandleSeq>
-                    (const HandleSeq&, const HandleSeq&,
-                     ValueMap&, AtomSpace*, bool, Quotation,
-                     ValuePtr (*)(const HandleSeq&&),
-                     size_t, size_t) const;
-
-template
-bool FilterLink::glob_compare<ValueSeq>
-                    (const HandleSeq&, const ValueSeq&,
-                     ValueMap&, AtomSpace*, bool, Quotation,
-                     ValuePtr (*)(const ValueSeq&&),
-                     size_t, size_t) const;
-
-static ValuePtr make_list(const HandleSeq&& v)
-{
-	return createLink(std::move(v), LIST_LINK);
-}
-
-static ValuePtr make_lnkv(const ValueSeq&& v)
-{
-	return createLinkValue(std::move(v));
-}
-
-// ===============================================================
-
 /// Recursive tree-compare-and-extract grounding values.
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
@@ -467,21 +331,67 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// If we are here, then there's a glob to be matched. As just above,
 	// the HandleSeq and ValueSeq variants are effectively identical.
+	_recursive_glob = true;
+
 	if (vgnd->is_link())
 	{
 		const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
-		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
-		                    make_list, tsz, off);
+
+		// Create callbacks for glob_match
+		GlobValidateCallback<HandleSeq> validate =
+			[&](const Handle& pattern_elem,
+			    const Handle& ground_elem,
+			    ValueMap& bindings) -> bool {
+				return this->extract(pattern_elem, ground_elem, bindings,
+				                     scratch, silent, quotation);
+			};
+
+		GlobMakeValueCallback<HandleSeq> make_value =
+			[](const HandleSeq& matched_seq) -> ValuePtr {
+				return createLink(HandleSeq(matched_seq), LIST_LINK);
+			};
+
+		return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
 	}
+
 	if (vgnd->is_type(LINK_VALUE))
 	{
 		const ValueSeq& glo = LinkValueCast(vgnd)->value();
-		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
-		                    make_lnkv, tsz, off);
+
+		// Create callbacks for glob_match
+		GlobValidateCallback<ValueSeq> validate =
+			[&](const Handle& pattern_elem,
+			    const ValuePtr& ground_elem,
+			    ValueMap& bindings) -> bool {
+				return this->extract(pattern_elem, ground_elem, bindings,
+				                     scratch, silent, quotation);
+			};
+
+		GlobMakeValueCallback<ValueSeq> make_value =
+			[](const ValueSeq& matched_seq) -> ValuePtr {
+				return createLinkValue(ValueSeq(matched_seq));
+			};
+
+		return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
 	}
 
-	return glob_compare(tlo, ValueSeq({vgnd}), valmap, scratch, silent, quotation,
-	                    make_lnkv, tsz, off);
+	// Single value case
+	const ValueSeq glo({vgnd});
+
+	GlobValidateCallback<ValueSeq> validate =
+		[&](const Handle& pattern_elem,
+		    const ValuePtr& ground_elem,
+		    ValueMap& bindings) -> bool {
+			return this->extract(pattern_elem, ground_elem, bindings,
+			                     scratch, silent, quotation);
+		};
+
+	GlobMakeValueCallback<ValueSeq> make_value =
+		[](const ValueSeq& matched_seq) -> ValuePtr {
+			return createLinkValue(ValueSeq(matched_seq));
+		};
+
+	return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
 }
 
 // ====================================================================

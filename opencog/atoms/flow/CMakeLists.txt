@@ -7,6 +7,7 @@ ADD_LIBRARY (atomflow
 	CollectionOfLink.cc
 	ConcatenateLink.cc
 	FilterLink.cc
+	GlobMatch.cc
 	IncomingOfLink.cc
 	IncrementValueLink.cc
 	JsonSplitLink.cc
@@ -42,6 +43,7 @@ INSTALL (FILES
 	CollectionOfLink.h
 	ConcatenateLink.h
 	FilterLink.h
+	GlobMatch.h
 	IncomingOfLink.h
 	IncrementValueLink.h
 	JsonSplitLink.h
