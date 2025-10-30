@@ -159,7 +159,7 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 		// If we are here, we are comparing to a glob.
 		VECT glob_seq;
 		Handle glob(tlo[ip]);
-		// const GlobInterval& interval = _mvars->get_interval(glob);
+		const GlobInterval& bounds = _mvars->get_interval(glob);
 
 		// Globs at the end are handled differently than globs
 		// which are followed by other stuff. So, is there
@@ -172,12 +172,16 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 			post_glob = tlo[ip+1];
 		}
 
-		// Match at least one.
-		bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-		if (not tc) return false;
+		// Match as many as the minimum bound specifies.
+		bool tc = true;
+		for (size_t lobnd = 0; lobnd < bounds.first; lobnd++)
+		{
+			tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
+			if (not tc) return false;
 
-		glob_seq.push_back(glo[jg]);
-		jg++;
+			glob_seq.push_back(glo[jg]);
+			jg++;
+		}
 
 		// Can we match more?
 		while (tc and jg<gsz)
