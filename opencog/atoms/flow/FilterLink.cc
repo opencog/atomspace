@@ -138,7 +138,9 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 	size_t gsz = glo.size();
 
 	// The vector to match has to be at least as long as the template.
-	if (gsz < tsz) return false;
+	// Not true: the template might have a length-zero glob!
+	// Not worth the CPU cost/complexity to find out if that's the case.
+	// if (gsz < tsz) return false;
 
 	_recursive_glob = true;
 	// If we are here, there is a glob node in the pattern.  A glob can
@@ -148,81 +150,87 @@ bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
 	for (ip=off, jg=0; ip<tsz+off and jg<gsz; ip++, jg++)
 	{
 		Type ptype = tlo[ip]->get_type();
-		if (GLOB_NODE == ptype)
+		if (GLOB_NODE != ptype)
 		{
-			VECT glob_seq;
-			Handle glob(tlo[ip]);
-			// Globs at the end are handled differently than globs
-			// which are followed by other stuff. So, is there
-			// anything after the glob?
-			Handle post_glob;
-			bool have_post = false;
-			if (ip+1 < tsz+off)
-			{
-				have_post = true;
-				post_glob = tlo[ip+1];
-			}
+			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
+				return false;
+			continue;
+		}
 
-			// Match at least one.
+		// If we are here, we are comparing to a glob.
+		VECT glob_seq;
+		Handle glob(tlo[ip]);
+		const GlobInterval& bounds = _mvars->get_interval(glob);
+
+		// Globs at the end are handled differently than globs
+		// which are followed by other stuff. So, is there
+		// anything after the glob?
+		Handle post_glob;
+		bool have_post = false;
+		if (ip+1 < tsz+off)
+		{
+			have_post = true;
+			post_glob = tlo[ip+1];
+		}
+
+		// Match as many as the minimum bound specifies.
+		for (size_t lobnd = 0; lobnd < bounds.first; lobnd++)
+		{
 			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
 			jg++;
 
-			// Can we match more?
-			while (tc and jg<gsz)
-			{
-				if (have_post)
-				{
-					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
-					if (tc) break;
-				}
-				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-				if (tc) glob_seq.push_back(glo[jg]);
-				jg ++;
-			}
-			jg --;
-			if (not tc)
-			{
-				return false;
-			}
-
-			// If we already have a value, the value must be identical.
-			auto val = valmap.find(glob);
-			if (valmap.end() != val)
-			{
-				// Have to have same arity and contents.
-				if (val->second->is_atom())
-				{
-					const Handle& already = HandleCast(val->second);
-					const HandleSeq& alo = already->getOutgoingSet();
-					size_t asz = alo.size();
-					if (asz != glob_seq.size()) return false;
-					for (size_t i=0; i< asz; i++)
-					{
-						if (glob_seq[i] != alo[i]) return false;
-					}
-					return true;
-				}
-				else
-				{
-					throw RuntimeException(TRACE_INFO,
-						"Globbing for Values not implemented! FIXME!");
-				}
-			}
-
-//			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
-			ValuePtr glp(makeval(std::move(glob_seq)));
-			valmap.emplace(std::make_pair(glob, glp));
+			if (jg > gsz) return false;
 		}
-		else
+
+		// Can we match more?
+		bool tc = true;
+		size_t greedy = 0;
+		const size_t maxi = bounds.second - bounds.first;
+		while (tc and jg<gsz and greedy < maxi)
 		{
-			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
-				return false;
+			if (have_post)
+			{
+				// If the atom after the glob matches, then we are done.
+				tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
+				if (tc) break;
+			}
+			tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
+			if (tc) glob_seq.push_back(glo[jg]);
+			jg ++;
+			greedy ++;
 		}
+		jg --;
+		if (not tc)
+			return false;
+
+		// If we already have a value, the value must be identical.
+		auto val = valmap.find(glob);
+		if (valmap.end() != val)
+		{
+			// Have to have same arity and contents.
+			if (val->second->is_atom())
+			{
+				const Handle& already = HandleCast(val->second);
+				const HandleSeq& alo = already->getOutgoingSet();
+				size_t asz = alo.size();
+				if (asz != glob_seq.size()) return false;
+				for (size_t i=0; i< asz; i++)
+				{
+					if (glob_seq[i] != alo[i]) return false;
+				}
+				return true;
+			}
+			else
+				throw RuntimeException(TRACE_INFO,
+					"Globbing for Values not implemented! FIXME!");
+		}
+
+		// Handle glp(createLink(std::move(glob_seq), LIST_LINK));
+		ValuePtr glp(makeval(std::move(glob_seq)));
+		valmap.emplace(std::make_pair(glob, glp));
 	}
 	return (ip == tsz+off) and (jg == gsz);
 }

@@ -22,6 +22,8 @@ IF (HAVE_GUILE)
 
 	ADD_GUILE_TEST(IncrementValueTest increment-value-test.scm)
 	ADD_GUILE_TEST(FilterGlobTest filter-glob-test.scm)
+	ADD_GUILE_TEST(FilterGreedyTest filter-greedy-test.scm)
+	ADD_GUILE_TEST(FilterMoreGreedyTest filter-more-greedy-test.scm)
 	ADD_GUILE_TEST(FilterValueTest filter-value-test.scm)
 	ADD_GUILE_TEST(FilterFloatTest filter-float-test.scm)
 	ADD_GUILE_TEST(FilterRuleTest filter-rule-test.scm)
