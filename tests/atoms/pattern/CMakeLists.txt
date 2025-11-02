@@ -4,6 +4,6 @@ LINK_LIBRARIES(
 	atomspace
 )
 
-ADD_CXXTEST(BindLinkUTest)
+ADD_CXXTEST(QueryLinkUTest)
 ADD_CXXTEST(SatisfactionLinkUTest)
 ADD_CXXTEST(PatternUtilsUTest)

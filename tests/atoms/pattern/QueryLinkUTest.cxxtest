@@ -1,5 +1,5 @@
 /*
- * tests/atoms/pattern/BindLinkUTest.cxxtest
+ * tests/atoms/pattern/QueryLinkUTest.cxxtest
  *
  * Copyright (C) 2019 SingularityNET Foundation
  * All Rights Reserved
@@ -24,21 +24,21 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
 
-// Test BindLink
+// Test QueryLink
 //
-class BindLinkUTest: public CxxTest::TestSuite
+class QueryLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 
 public:
-	BindLinkUTest()
+	QueryLinkUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::INFO);
@@ -56,11 +56,11 @@ public:
 #define AL _as.add_link
 
 /**
- * Test quoted bind link, where vardecl, body and rewrite terms are
+ * Test quoted query link, where vardecl, body and rewrite terms are
  * unquoted variables. Just make sure that it doesn't crash or throw
  * exception.
  */
-void BindLinkUTest::test_full_quotation()
+void QueryLinkUTest::test_full_quotation()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -69,7 +69,7 @@ void BindLinkUTest::test_full_quotation()
 	Handle unquoted_rewrite = AL(UNQUOTE_LINK, AN(VARIABLE_NODE, "$rewrite"));
 
 	TS_ASSERT_THROWS_NOTHING(AL(QUOTE_LINK,
-	                           AL(BIND_LINK,
+	                           AL(QUERY_LINK,
 	                              unquoted_vardecl,
 	                              unquoted_body,
 	                              unquoted_rewrite)));
