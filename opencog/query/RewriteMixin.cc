@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/pattern/BindLink.h>
 
 #include "RewriteMixin.h"
 
