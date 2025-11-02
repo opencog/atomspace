@@ -91,12 +91,12 @@ IF (HAVE_NOSETESTS)
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
 	ADD_TEST(CythonBindlink ${NOSETESTS_EXECUTABLE} -vs
-			${CMAKE_SOURCE_DIR}/tests/cython/bindlink/)
+			${CMAKE_SOURCE_DIR}/tests/cython/querylink/)
 	SET_PROPERTY(TEST CythonBindlink
-		PROPERTY DEPENDS atomspace_cython bindlink_cython)
+		PROPERTY DEPENDS atomspace_cython querylink_cython)
 	SET_PROPERTY(TEST CythonBindlink
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 	SET_PROPERTY(TEST CythonBindlink
-		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
+		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/querylink")
 
 ENDIF (HAVE_NOSETESTS)
