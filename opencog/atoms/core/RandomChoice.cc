@@ -110,6 +110,12 @@ RandomChoiceLink::RandomChoiceLink(const HandleSeq&& oset, Type t)
 
 // XXX FIXME - fix this so it can also choose a single value
 // out of a vector of values.
+//
+// XXX ULTRA FIXME the unwrapping and jiggering of LIST_LINK
+// LINK_VALUE and SET_LINK is ugly and duplicated code and needs
+// some clean rewrite to make it less nasty. I've done it fairly
+// cleanly in other place, like in the reduct directory, with 
+// numeric values. Need to redo that here.
 ValuePtr RandomChoiceLink::execute(AtomSpace* as, bool silent)
 {
 	size_t ary = _outgoing.size();
@@ -132,23 +138,48 @@ ValuePtr RandomChoiceLink::execute(AtomSpace* as, bool silent)
 			std::vector<double> weights;
 			for (const ValuePtr& v : lv->value())
 			{
-				Handle h = HandleCast(v);
-				if (nullptr == h or LIST_LINK != h->get_type()) goto uniform_lv;
+				// Handle both ListLink (Atom) and LinkValue cases
+				if (v->is_type(LINK_VALUE))
+				{
+					// LinkValue case: each element is LinkValue(weight, choice)
+					LinkValuePtr lv_pair = LinkValueCast(v);
+					if (2 != lv_pair->value().size()) goto uniform_lv;
 
-				const HandleSeq& oset = h->getOutgoingSet();
-				if (2 != oset.size()) goto uniform_lv;
+					// Extract weight (should be a NumberNode Handle)
+					Handle hw = HandleCast(lv_pair->value()[0]);
+					if (hw && hw->is_executable())
+						hw = HandleCast(hw->execute(as, silent));
 
-				Handle hw(oset[0]);
-				if (hw->is_executable())
-					hw = HandleCast(hw->execute(as, silent));
+					NumberNodePtr nn(NumberNodeCast(hw));
+					if (nullptr == nn)
+						throw SyntaxException(TRACE_INFO,
+						       "Expecting a NumberNode");
+					weights.push_back(nn->get_value());
 
-				// XXX TODO if execute() above returns FloatValue, use that!
-				NumberNodePtr nn(NumberNodeCast(hw));
-				if (nullptr == nn) // goto uniform_lv;
-					throw SyntaxException(TRACE_INFO,
-					       "Expecting a NumberNode");
-				weights.push_back(nn->get_value());
-				choices.push_back(oset[1]);
+					// Extract choice (second element)
+					choices.push_back(HandleCast(lv_pair->value()[1]));
+				}
+				else
+				{
+					// ListLink (Atom) case
+					Handle h = HandleCast(v);
+					if (nullptr == h or LIST_LINK != h->get_type()) goto uniform_lv;
+
+					const HandleSeq& oset = h->getOutgoingSet();
+					if (2 != oset.size()) goto uniform_lv;
+
+					Handle hw(oset[0]);
+					if (hw->is_executable())
+						hw = HandleCast(hw->execute(as, silent));
+
+					// XXX TODO if execute() above returns FloatValue, use that!
+					NumberNodePtr nn(NumberNodeCast(hw));
+					if (nullptr == nn) // goto uniform_lv;
+						throw SyntaxException(TRACE_INFO,
+						       "Expecting a NumberNode");
+					weights.push_back(nn->get_value());
+					choices.push_back(oset[1]);
+				}
 			}
 
 			if (0 == weights.size())
