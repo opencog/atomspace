@@ -9,20 +9,18 @@
 (Inheritance (Concept "Sparky") (Concept "dog"))
 
 (define is-human
-	(CollectionOf
 	(Meet
-		(Present (Inheritance (Variable "$H") (Concept "human"))))))
+		(Present (Inheritance (Variable "$H") (Concept "human")))))
 
 ; (cog-execute! is-human)
 
 ;; Two variables, including type restrictions
 (define is-something
-	(CollectionOf
 	(Meet
 		(And
 			(Present (Inheritance (Variable "$A") (Variable "$B")))
 			(TypedVariable (Variable "$A") (Type 'Concept))
-		))))
+		)))
 
 ; (cog-execute! is-something)
 
@@ -31,32 +29,30 @@
 ;;   (TypeChoice (Type 'Notype))
 ;; See https://github.com/opencog/atomspace/issues/2490
 (define is-nothing
-	(CollectionOf
-		(Meet
-			(And
-				(Present (Inheritance (Variable "$H") (Concept "human")))
-				(TypedVariable (Variable "$H") (TypeChoice))
-			))))
+	(Meet
+		(And
+			(Present (Inheritance (Variable "$H") (Concept "human")))
+			(TypedVariable (Variable "$H") (TypeChoice))
+		)))
 
 ; (cog-execute! is-nothing)
 
 ;; --------------------------------------------------------------
 
 (define g-take-contain
-	(CollectionOf
-		(Meet
-			(And
-				(Present
-					(Evaluation
-						(Predicate "take")
-						(List (Variable "$X") (Concept "treatment-1"))))
-				(TypedVariable (Variable "$X") (Type "Concept"))
-				(Present
-					(Evaluation
-						(Predicate "contain")
-						(List (Concept "treatment-1") (Variable "$Z"))))
-				(TypedVariable (Variable "$Z") (Type "Concept"))
-		))))
+	(Meet
+		(And
+			(Present
+				(Evaluation
+					(Predicate "take")
+					(List (Variable "$X") (Concept "treatment-1"))))
+			(TypedVariable (Variable "$X") (Type "Concept"))
+			(Present
+				(Evaluation
+					(Predicate "contain")
+					(List (Concept "treatment-1") (Variable "$Z"))))
+			(TypedVariable (Variable "$Z") (Type "Concept"))
+		)))
 
 ; (cog-execute! g-take-contain)
 

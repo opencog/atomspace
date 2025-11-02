@@ -101,7 +101,7 @@ void MeetLinkUTest::test_unary_get(void)
 
 	ValuePtr vgnd = eval->eval_v("(cog-execute! is-human)");
 	ValuePtr vans = eval->eval_v(
-		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+		"(UnisetValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
 
 	printf("Expected this: %s\n", vans->to_string().c_str());
 	printf("Found this answer: %s\n", vgnd->to_string().c_str());
@@ -330,15 +330,15 @@ void MeetLinkUTest::test_plus_pattern_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-exec-pattern.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! plus-pattern)");
-	Handle hans = eval->eval_h(
-			"(SetLink "
-					"(ListLink (NumberNode 3) (NumberNode 5)))");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! plus-pattern)");
+	ValuePtr vans = eval->eval_v(
+			"(LinkValue "
+					"(LinkValue (NumberNode 3) (NumberNode 5)))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -353,17 +353,17 @@ void MeetLinkUTest::test_glob_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! basic-get)");
-	Handle hans =
-			eval->eval_h("(SetLink"
-			             "  (ListLink"
+	ValuePtr vgnd = eval->eval_v("(cog-execute! basic-get)");
+	ValuePtr vans =
+			eval->eval_v("(LinkValue"
+			             "  (List"
 			             "    (ConceptNode \"glib\")"
 			             "    (PredicateNode \"blab\")))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -378,13 +378,13 @@ void MeetLinkUTest::test_typed_glob_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! typed-get)");
-	Handle hans = eval->eval_h("(SetLink )");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! typed-get)");
+	ValuePtr vans = eval->eval_v("(LinkValue)");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -399,17 +399,17 @@ void MeetLinkUTest::test_type_choice_glob_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! type-choice-get)");
-	Handle hans =
-			eval->eval_h("(SetLink"
-			             "  (ListLink"
+	ValuePtr vgnd = eval->eval_v("(cog-execute! type-choice-get)");
+	ValuePtr vans =
+			eval->eval_v("(LinkValue"
+			             "  (List"
 			             "    (ConceptNode \"glib\")"
 			             "    (PredicateNode \"blab\")))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd)
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -425,51 +425,51 @@ void MeetLinkUTest::test_embed_vardels(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-embed.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
-	Handle hans = eval->eval_h(
-		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-human)");
+	ValuePtr vans = eval->eval_v(
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	// ----------------------
-	hgnd = eval->eval_h("(cog-execute! is-something)");
+	vgnd = eval->eval_v("(cog-execute! is-something)");
 
 #define REVERSE 1
 #if REVERSE
 	// Oh dear ... the embedded declarations end up unordered, which
 	// hoses the Getlink we are testing. Whatever, hack around this.
-	hans = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"human\") (ConceptNode \"Ben\"))"
-		"(ListLink (ConceptNode \"human\") (ConceptNode \"Linas\"))"
-		"(ListLink (ConceptNode \"dog\") (ConceptNode \"Sparky\")))");
+	vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"human\") (ConceptNode \"Ben\"))"
+		"(LinkValue (ConceptNode \"human\") (ConceptNode \"Linas\"))"
+		"(LinkValue (ConceptNode \"dog\") (ConceptNode \"Sparky\")))");
 #else
-	hans = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+	vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
 #endif
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
-
-	// ----------------------
-	hgnd = eval->eval_h("(cog-execute! is-nothing)");
-	hans = eval->eval_h("(SetLink )");
-
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
-
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	// ----------------------
-	hgnd = eval->eval_h("(cog-execute! g-take-contain)");
+	vgnd = eval->eval_v("(cog-execute! is-nothing)");
+	vans = eval->eval_v("(LinkValue)");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	// ----------------------
+	vgnd = eval->eval_v("(cog-execute! g-take-contain)");
 
 	// 32-bit and 64-bit hashes differ because std::hash() returns size_t
 	// As a result, the order is randomly reversed. Hack around this
@@ -477,19 +477,19 @@ void MeetLinkUTest::test_embed_vardels(void)
 	// that appear before SetLink, because the type number is hashed in.
 	// Thus, changing the type hierarchy changes the hash. So, to make
 	// this work, we look for either answer.
-	Handle hans1 = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
-	Handle hans2 = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
+	ValuePtr vans1 = eval->eval_v(
+		"(LinkValue "
+		"(LinkValue (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
+	ValuePtr vans2 = eval->eval_v(
+		"(LinkValue "
+		"(LinkValue (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
 
-	printf("Expected this: %s\n", hans1->to_string().c_str());
-	printf("or maybe this: %s\n", hans2->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans1->to_string().c_str());
+	printf("or maybe this: %s\n", vans2->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding",
-		(hans1 == hgnd) or (hans2 == hgnd));
+		(*vans1 == *vgnd) or (*vans2 == *vgnd));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
