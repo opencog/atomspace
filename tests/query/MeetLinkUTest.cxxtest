@@ -99,14 +99,14 @@ void MeetLinkUTest::test_unary_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
-	Handle hans = eval->eval_h(
-		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-human)");
+	ValuePtr vans = eval->eval_v(
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

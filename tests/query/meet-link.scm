@@ -9,7 +9,7 @@
 (InheritanceLink (ConceptNode "Sparky") (ConceptNode "dog"))
 
 (define is-human
-	(CollectionOf (Meet (InheritanceLink (VariableNode "$H") (ConceptNode "human")))))
+	(Meet (InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
 
 ;; Two variables, including type restrictions
 (define is-something
