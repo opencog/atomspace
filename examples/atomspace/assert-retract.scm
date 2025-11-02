@@ -269,6 +269,6 @@
 ; The Lambda is agnostic, in that it has many special cases: so,
 ; "for all x ...", "there exists x ...", "sum over all n ...",
 ; "integral over all dx ..." are all examples of Lambdas.  In
-; the Atomese type hierarchy, MeetLink, PutLink, BindLink and DeleteLink
+; the Atomese type hierarchy, MeetLink, PutLink, QueryLink and DeleteLink
 ; are all derived from LambdaLink, in that they can all have a header
 ; that defines the collection of variables that will appear in the body.
