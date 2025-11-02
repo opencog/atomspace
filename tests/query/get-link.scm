@@ -44,30 +44,32 @@
 ;; --------------------------------------------------------------
 
 (define g-take-contain
-   (GetLink
-      (VariableList
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (TypedVariableLink
-            (VariableNode "$Z")
-            (TypeNode "ConceptNode")
-         )
-      )
-      (AndLink
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
+   (CollectionOf
+      (Meet
+         (VariableList
+            (TypedVariableLink
                (VariableNode "$X")
-               (ConceptNode "treatment-1")
+               (TypeNode "ConceptNode")
+            )
+            (TypedVariableLink
+               (VariableNode "$Z")
+               (TypeNode "ConceptNode")
             )
          )
-         (EvaluationLink
-            (PredicateNode "contain")
-            (ListLink
-               (ConceptNode "treatment-1")
-               (VariableNode "$Z")
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (VariableNode "$Z")
+               )
             )
          )
       )
