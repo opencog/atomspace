@@ -440,7 +440,7 @@ void MultiAtomSpace::test_pm_scm(void)
 	evaluator->eval("(use-modules (opencog))");
 	evaluator->eval("(use-modules (opencog exec))");
 
-	std::string rs = evaluator->eval("(load-from-path \"tests/scm/pm.scm\")");
+	std::string rs = evaluator->eval("(load-from-path \"tests/scm/multi-atom-space-gc-bug.scm\")");
 	rs.erase(rs.find_last_not_of(" \n\r\t") + 1);
 	std::cout << "rs = >>" << rs << "<<" << std::endl;
 
