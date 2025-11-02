@@ -97,7 +97,7 @@ void MeetLinkUTest::test_unary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
 	Handle hans = eval->eval_h(
@@ -119,7 +119,7 @@ void MeetLinkUTest::test_binary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-something)");
 	Handle hans = eval->eval_h(
@@ -144,7 +144,7 @@ void MeetLinkUTest::test_get_ill_typed(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-nothing)");
 	Handle hans = eval->eval_h("(SetLink )");
@@ -164,7 +164,7 @@ void MeetLinkUTest::test_free_bound(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-query)");
 
@@ -186,7 +186,7 @@ void MeetLinkUTest::test_eval_clause(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-eval.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-eval.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! get)");
 
@@ -214,7 +214,7 @@ void MeetLinkUTest::test_disconnected_binary_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle g_take_contain = eval->eval_h("g-take-contain");
 	Handle hgnd = HandleCast(g_take_contain->execute(as.get()));
@@ -306,7 +306,7 @@ void MeetLinkUTest::test_quote_equal(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-equal.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-equal.scm\")");
 
 	Handle gl = eval->eval_h("gl");
 	Handle result = HandleCast(gl->execute(as.get()));
@@ -328,7 +328,7 @@ void MeetLinkUTest::test_plus_pattern_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/executable-pattern.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-exec-pattern.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! plus-pattern)");
 	Handle hans = eval->eval_h(
@@ -351,7 +351,7 @@ void MeetLinkUTest::test_glob_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! basic-get)");
 	Handle hans =
@@ -376,7 +376,7 @@ void MeetLinkUTest::test_typed_glob_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! typed-get)");
 	Handle hans = eval->eval_h("(SetLink )");
@@ -397,7 +397,7 @@ void MeetLinkUTest::test_type_choice_glob_get(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-glob.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! type-choice-get)");
 	Handle hans =
@@ -423,7 +423,7 @@ void MeetLinkUTest::test_embed_vardels(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link-embed.scm\")");
+	eval->eval("(load-from-path \"tests/query/meet-link-embed.scm\")");
 
 	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
 	Handle hans = eval->eval_h(
