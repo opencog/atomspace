@@ -1,39 +1,39 @@
 ;
-; bindlink.scm - querying and graph re-writing example.
+; querylink.scm - querying and graph re-writing example.
 ;
 ; A common task in knowledge representation systems is searching and
 ; querying for data, and then re-shaping the query results into a new
 ; form. In Atomese, querying and graph-rewriting is done with the
-; BindLink atom. The BindLink uses "pattern matching" to find subgraphs
+; QueryLink atom. The QueryLink uses "pattern matching" to find subgraphs
 ; in the AtomSpace that match the query, and then creates a new graph
 ; with those results in them.
 ;
-; Because BindLink performs graph re-writing, it resembles logical
+; Because QueryLink performs graph re-writing, it resembles logical
 ; implication `P->Q`, that is an if-then statement, `IF P THEN Q`.
 ; However, since it can match a pattern, it is more like an
 ; implication with a variable in it, so: `P(x)->Q(x)`.  Since it
 ; searches all of the AtomSpace, it is effectively adding a "for all x"
 ; to the implication, so that it states `ForAll x, P(x)->Q(x)` (with
-; "x" being a bound variable).  In this way, the BindLink can represent
+; "x" being a bound variable).  In this way, the QueryLink can represent
 ; a very basic form of implication or logical inference.
 ;
-; Although BindLink resembles implication, it is intended for query,
+; Although QueryLink resembles implication, it is intended for query,
 ; not reasoning. If pure logical inference, without the query is needed,
 ; then RuleLink is better suited for that task. This is a practical
-; recommendtation: the BindLink performs some heavyweight and expensive
-; pattern compilation, and caches the results. This makes BindLink
+; recommendtation: the QueryLink performs some heavyweight and expensive
+; pattern compilation, and caches the results. This makes QueryLink
 ; initialization fat and slow, which is OK because it pays for itself
-; during the query. But if the query is never done, then BindLik is
+; during the query. But if the query is never done, then QueryLik is
 ; merely fat and slow. Use RuleLink is you need inference without the
 ; query.
 ;
 ; Unlike most query languages (SQL, etc.) Atomese queries are stored
-; in the AtomSpace itself, as graphs. Thus BindLink is just another
+; in the AtomSpace itself, as graphs. Thus QueryLink is just another
 ; link type. It is stored in the AtomSpace, along with everything else.
 ;
 ; This example places some typical "semantic triple" natural-language
 ; style data in the AtomSpace, and then defines a query, build from
-; BindLink, to perform some "basic inference" on that data.
+; QueryLink, to perform some "basic inference" on that data.
 ;
 ; The example data says that one can "make pottery" and that things
 ; are "made from clay". The resulting inference is that "pottery is
@@ -84,7 +84,7 @@
 ;         make_from(thing, substance)
 ;
 (define make-semantic-triple
-	(BindLink
+	(QueryLink
 		(VariableList   ; Variable declaration (optional)
 			(Variable "$var0")
 			(Variable "$var1")
@@ -129,7 +129,7 @@
 
 ; The following should have been printed:
 ;
-; (SetLink
+; (UnisetValue
 ;     (Evaluation (Predicate "make_from")
 ;         (ListLink (Concept "pottery") (Concept "clay"))))
 ;
