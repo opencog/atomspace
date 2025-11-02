@@ -188,20 +188,20 @@ void MeetLinkUTest::test_eval_clause(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link-eval.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! get)");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! get)");
 
-	Handle hans = eval->eval_h("(SetLink"
-	                           "   (ListLink"
+	ValuePtr vans = eval->eval_v("(LinkValue"
+	                           "   (LinkValue"
 	                           "      (ConceptNode \"glib\")"
 	                           "      (ConceptNode \"blab\")"
 	                           "      (EvaluationLink"
 	                           "         (ConceptNode \"glib\")"
 	                           "         (ConceptNode \"blab\"))))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -219,7 +219,7 @@ void MeetLinkUTest::test_disconnected_binary_get(void)
 	Handle g_take_contain = eval->eval_h("g-take-contain");
 	ValuePtr vgnd = g_take_contain->execute(as.get());
 	ValuePtr vans = eval->eval_v(
-		"(UnisetValue "
+		"(LinkValue "
 		"(LinkValue (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
 
 	printf("Expected this: %s\n", vans->to_string().c_str());
@@ -309,13 +309,13 @@ void MeetLinkUTest::test_quote_equal(void)
 	eval->eval("(load-from-path \"tests/query/meet-link-equal.scm\")");
 
 	Handle gl = eval->eval_h("gl");
-	Handle result = HandleCast(gl->execute(as.get()));
-	Handle expect = eval->eval_h("expect");
+	ValuePtr vgnd = gl->execute(as.get());
+	ValuePtr vans = eval->eval_v("(LinkValue (LinkValue (VariableNode \"$X\") (VariableNode \"$X\")))");
 
-	printf("Expected this: %s\n", expect->to_string().c_str());
-	printf("Found this answer: %s\n", result->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TS_ASSERT_EQUALS(result, expect);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
