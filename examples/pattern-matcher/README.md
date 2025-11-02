@@ -244,11 +244,11 @@ in [srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `FilterLink`
 is particularly interesting: it can be though of as an `UnPutLink`, to
 undo the effects of a `PutLink`, that is, to extract data.
 
-These link types are similar to, but different from `QueryLink`, `GetLink`,
-`BindLink` and related. The `QueryLink` etal. apply their pattern
-operations to the entire AtomSpace, whereas the `FilterLink` applies it
-only to the provided set or vector or stream. So, conceptually related,
-but used in a different way.
+These link types are similar to, but different from `QueryLink` and
+`MeetLink`.  These two apply their pattern operations to the entire
+AtomSpace, whereas the `FilterLink` applies it only to the provided
+set or vector or stream. So, conceptually related, but used in a
+different way.
 
 The code base that implements `FilterLink` is disjoint from that for
 `QueryLink`, and so, although they are conceptually similar, there will be
