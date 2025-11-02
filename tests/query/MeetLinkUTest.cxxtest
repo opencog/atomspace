@@ -146,13 +146,13 @@ void MeetLinkUTest::test_get_ill_typed(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! is-nothing)");
-	Handle hans = eval->eval_h("(SetLink )");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-nothing)");
+	ValuePtr vans = eval->eval_v("(LinkValue)");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -166,14 +166,14 @@ void MeetLinkUTest::test_free_bound(void)
 
 	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! is-query)");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-query)");
 
-	Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
+	ValuePtr vans = eval->eval_v("(LinkValue (ConceptNode \"human\"))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -217,15 +217,15 @@ void MeetLinkUTest::test_disconnected_binary_get(void)
 	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
 	Handle g_take_contain = eval->eval_h("g-take-contain");
-	Handle hgnd = HandleCast(g_take_contain->execute(as.get()));
-	Handle hans = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
+	ValuePtr vgnd = g_take_contain->execute(as.get());
+	ValuePtr vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

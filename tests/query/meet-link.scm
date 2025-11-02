@@ -24,51 +24,47 @@
 ;;    (TypeChoice (Type 'Notype))
 ;; See https://github.com/opencog/atomspace/issues/2490
 (define is-nothing
-	(CollectionOf
-		(Meet
-			(TypedVariableLink (VariableNode "$H") (TypeChoice))
-			(InheritanceLink (VariableNode "$H") (ConceptNode "human")))))
+	(Meet
+		(TypedVariableLink (VariableNode "$H") (TypeChoice))
+		(InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
 
 ;; Look for queries.
 ;; This binds only the second variable, thus, the first variable
 ;; remains free. Running this should results in a grounding to is-human,
 ;; above. That is, it should find
-;; (SetLink (ConceptNode "human"))
+;; (LinkValue (ConceptNode "human"))
 (define is-query
-	(CollectionOf
-		(Meet
-			(VariableNode "$B") ;; bind only the second variable.
-			(InheritanceLink (VariableNode "$H") (VariableNode "$B")))))
+	(Meet
+		(VariableNode "$B") ;; bind only the second variable.
+		(InheritanceLink (VariableNode "$H") (VariableNode "$B"))))
 
 ;; --------------------------------------------------------------
 
 (define g-take-contain
-   (CollectionOf
-      (Meet
-         (VariableList
-            (TypedVariableLink
+   (Meet
+      (VariableList
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+         )
+         (TypedVariableLink
+            (VariableNode "$Z")
+            (TypeNode "ConceptNode")
+         )
+      )
+      (AndLink
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
                (VariableNode "$X")
-               (TypeNode "ConceptNode")
-            )
-            (TypedVariableLink
-               (VariableNode "$Z")
-               (TypeNode "ConceptNode")
+               (ConceptNode "treatment-1")
             )
          )
-         (AndLink
-            (EvaluationLink
-               (PredicateNode "take")
-               (ListLink
-                  (VariableNode "$X")
-                  (ConceptNode "treatment-1")
-               )
-            )
-            (EvaluationLink
-               (PredicateNode "contain")
-               (ListLink
-                  (ConceptNode "treatment-1")
-                  (VariableNode "$Z")
-               )
+         (EvaluationLink
+            (PredicateNode "contain")
+            (ListLink
+               (ConceptNode "treatment-1")
+               (VariableNode "$Z")
             )
          )
       )
