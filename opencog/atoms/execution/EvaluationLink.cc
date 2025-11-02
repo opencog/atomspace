@@ -124,6 +124,12 @@ static double get_numeric_value(AtomSpace* as, bool silent,
 	ValuePtr pap(NumericFunctionLink::get_value(as, silent, h));
 	Type t = pap->get_type();
 
+	if (nameserver().isA(t, LINK_VALUE))
+	{
+		pap = LinkValueCast(pap)->value()[0];
+		t = pap->get_type();
+	}
+
 	if (NUMBER_NODE == t)
 	{
 		NumberNodePtr n(NumberNodeCast(pap));
