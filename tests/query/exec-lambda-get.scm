@@ -33,7 +33,7 @@
 (State (List (Concept "qwerty") (Predicate "truthiness"))
 	(Number 0.6))
 
-; The getter cane be abstracted away, so that the use of the StateLink
+; The getter can be abstracted away, so that the use of the StateLink
 ; is hidden from view.  Below, the DefineLink is used to define a schema
 ; called "get property", which takes two arguments: an atom name, and
 ; the property.  When executed, the schema returns the property value.
@@ -41,11 +41,11 @@
 	(DefinedSchema "get property")
 	(Lambda
 		(VariableList (Variable "$atom") (Variable "$property"))
-		(Get
+		(CollectionOf (Meet
 			(Variable "$n")
 			(State (List (Variable "$atom") (Variable "$property"))
 				(Variable "$n"))
-			)))
+			))))
 
 ; Call the schema defined above.  It should return 0.6 as the value.
 (define exo
