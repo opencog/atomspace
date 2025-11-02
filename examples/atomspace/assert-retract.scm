@@ -14,7 +14,7 @@
 ; with knowledge-snippets themselves. That is, the tools for maintaining
 ; the data can be a part of the data itself.
 ;
-; The GetLink and PutLink, from the `get-put.scm` example, provide the
+; The MeetLink and PutLink, from the `get-put.scm` example, provide the
 ; tools needed to work with facts being deduced on the fly. They allow
 ; facts to be asserted and retracted, even though their specific present
 ; form is not yet known.
@@ -75,15 +75,15 @@
 ; Take a look again:
 (show-eval-links)
 
-; Whatever the PutLink does, the GetLink can un-do.  The GetLink
+; Whatever the PutLink does, the MeetLink can un-do.  The MeetLink
 ; below has a satisfying set that corresponds to the PutLink above.
-; (This means that Get and Put are "adjoint functors".)
+; (This means that Meet and Put are "adjoint functors".)
 
 (define get-property
-	(Get (Evaluation (Predicate "some property") (Variable "$x"))))
+	(Meet (Evaluation (Predicate "some property") (Variable "$x"))))
 
-; The cog-execute! function will return the set of all atoms that
-; the GetLink finds.
+; The cog-execute! function will return the UnisetValue of all atoms that
+; the MeetLink finds.
 (cog-execute! get-property)
 
 ; The PutLink below causes the PutLink above to be un-done.
@@ -125,8 +125,8 @@
 
 ; It is also useful to generically remove any atom matching
 ; a pattern description. This can be done by combining the
-; PutLink with a GetLink performing a query. The below uses
-; the GetLink to find groundings for the variable $x, and then
+; PutLink with a MeetLink performing a query. The below uses
+; the MeetLink to find groundings for the variable $x, and then
 ; passes those groundings to the PutLink/DeleteLink combination,
 ; which removes them.
 ;
@@ -136,7 +136,7 @@
 			(EvaluationLink
 				(PredicateNode "some property")
 				(VariableNode "$x")))
-		(GetLink
+		(MeetLink
 			(EvaluationLink
 				(PredicateNode "some property")
 				(VariableNode "$x")))))
@@ -184,7 +184,7 @@
 		(ConceptNode "alternative B")))
 
 (define get-state
-	(GetLink
+	(MeetLink
 		(StateLink
 			(PredicateNode "some property")
 			(VariableNode "$x"))))
@@ -269,6 +269,6 @@
 ; The Lambda is agnostic, in that it has many special cases: so,
 ; "for all x ...", "there exists x ...", "sum over all n ...",
 ; "integral over all dx ..." are all examples of Lambdas.  In
-; the Atomese type hierarchy, GetLink, PutLink, BindLink and DeleteLink
+; the Atomese type hierarchy, MeetLink, PutLink, BindLink and DeleteLink
 ; are all derived from LambdaLink, in that they can all have a header
 ; that defines the collection of variables that will appear in the body.
