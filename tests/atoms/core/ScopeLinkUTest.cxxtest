@@ -445,7 +445,7 @@ void ScopeLinkUTest::test_names_alpha_conversion()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Like test_names_alpha_conversion() but using a BindLink instead of
+// Like test_names_alpha_conversion() but using a QueryLink instead of
 // a ScopeLink
 void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
 {
