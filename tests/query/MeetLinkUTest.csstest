@@ -1,5 +1,5 @@
 /*
- * tests/query/GetLinkUTest.cxxtest
+ * tests/query/MeetLinkUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * Copyright (C) 2019 Kasimebrahim
@@ -31,14 +31,14 @@ using namespace opencog;
 #define al as->add_link
 #define an as->add_node
 
-class GetLinkUTest: public CxxTest::TestSuite
+class MeetLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr as;
 	SchemeEval* eval;
 
 public:
-	GetLinkUTest(void)
+	MeetLinkUTest(void)
 	{
 		// logger().set_level(Logger::FINE);
 		logger().set_level(Logger::DEBUG);
@@ -53,7 +53,7 @@ public:
 
 	}
 
-	~GetLinkUTest()
+	~MeetLinkUTest()
 	{
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -81,18 +81,18 @@ public:
 	void test_embed_vardels(void);
 };
 
-void GetLinkUTest::tearDown(void)
+void MeetLinkUTest::tearDown(void)
 {
 }
 
-void GetLinkUTest::setUp(void)
+void MeetLinkUTest::setUp(void)
 {
 }
 
 /*
- * Basic single-variable GetLink unit test.
+ * Basic single-variable MeetLink unit test.
  */
-void GetLinkUTest::test_unary_get(void)
+void MeetLinkUTest::test_unary_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -112,9 +112,9 @@ void GetLinkUTest::test_unary_get(void)
 }
 
 /*
- * Two-variable GetLink unit test.
+ * Two-variable MeetLink unit test.
  */
-void GetLinkUTest::test_binary_get(void)
+void MeetLinkUTest::test_binary_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -137,9 +137,9 @@ void GetLinkUTest::test_binary_get(void)
 }
 
 /*
- * Basic bottom_type GetLink unit test.
+ * Basic bottom_type MeetLink unit test.
  */
-void GetLinkUTest::test_get_ill_typed(void)
+void MeetLinkUTest::test_get_ill_typed(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -158,9 +158,9 @@ void GetLinkUTest::test_get_ill_typed(void)
 }
 
 /*
- * Two-variable GetLink unit test; one is free one is bound.
+ * Two-variable MeetLink unit test; one is free one is bound.
  */
-void GetLinkUTest::test_free_bound(void)
+void MeetLinkUTest::test_free_bound(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -179,9 +179,9 @@ void GetLinkUTest::test_free_bound(void)
 }
 
 /*
- * Evaluatable clause GetLink unit test;
+ * Evaluatable clause MeetLink unit test;
  */
-void GetLinkUTest::test_eval_clause(void)
+void MeetLinkUTest::test_eval_clause(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -207,9 +207,9 @@ void GetLinkUTest::test_eval_clause(void)
 }
 
 /*
- * Two-variable GetLink unit test
+ * Two-variable MeetLink unit test
  */
-void GetLinkUTest::test_disconnected_binary_get(void)
+void MeetLinkUTest::test_disconnected_binary_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -236,7 +236,7 @@ void GetLinkUTest::test_disconnected_binary_get(void)
  * component with no solution, no need to explore the second
  * component.
  */
-void GetLinkUTest::test_disconnected_empty(void) {
+void MeetLinkUTest::test_disconnected_empty(void) {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
@@ -267,7 +267,7 @@ void GetLinkUTest::test_disconnected_empty(void) {
  * Test the not-equal predicate.  We want all solutions not equal
  * to a particular atom.
  */
-void GetLinkUTest::test_not_equal(void)
+void MeetLinkUTest::test_not_equal(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -301,7 +301,7 @@ void GetLinkUTest::test_not_equal(void)
  * Make sure that quotation is properly consumed before testing for
  * equality.
  */
-void GetLinkUTest::test_quote_equal(void)
+void MeetLinkUTest::test_quote_equal(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -321,9 +321,9 @@ void GetLinkUTest::test_quote_equal(void)
 }
 
 /*
- * Basic PlusLink pattern with GetLink unit test.
+ * Basic PlusLink pattern with MeetLink unit test.
  */
-void GetLinkUTest::test_plus_pattern_get(void)
+void MeetLinkUTest::test_plus_pattern_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -344,9 +344,9 @@ void GetLinkUTest::test_plus_pattern_get(void)
 }
 
 /*
- * Basic GlobNode with GetLink unit test.
+ * Basic GlobNode with MeetLink unit test.
  */
-void GetLinkUTest::test_glob_get(void)
+void MeetLinkUTest::test_glob_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -369,9 +369,9 @@ void GetLinkUTest::test_glob_get(void)
 }
 
 /*
- * Type restricted GlobNode with GetLink unit test.
+ * Type restricted GlobNode with MeetLink unit test.
  */
-void GetLinkUTest::test_typed_glob_get(void)
+void MeetLinkUTest::test_typed_glob_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -390,9 +390,9 @@ void GetLinkUTest::test_typed_glob_get(void)
 }
 
 /*
- * Typed GlobNode with GetLink unit test.
+ * Typed GlobNode with MeetLink unit test.
  */
-void GetLinkUTest::test_type_choice_glob_get(void)
+void MeetLinkUTest::test_type_choice_glob_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -418,7 +418,7 @@ void GetLinkUTest::test_type_choice_glob_get(void)
  * Same as test_unary_get(), test_binary_get(), test_get_ill_typed(),
  * and test_free_bound() except that the variable decls are embedded.
  */
-void GetLinkUTest::test_embed_vardels(void)
+void MeetLinkUTest::test_embed_vardels(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
