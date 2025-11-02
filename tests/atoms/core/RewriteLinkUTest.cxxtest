@@ -176,7 +176,7 @@ void RewriteLinkUTest::test_consume_quotations_1()
 	// Test simple RewriteLink
 	Handle
 		gpn = createNode(GROUNDED_PREDICATE_NODE, "scm: dummy"),
-		gl = createLink(GET_LINK, X,
+		gl = createLink(MEET_LINK, X,
 		                createLink(QUOTE_LINK,
 		                           createLink(EVALUATION_LINK,
 		                                      createLink(UNQUOTE_LINK, gpn),
@@ -187,7 +187,7 @@ void RewriteLinkUTest::test_consume_quotations_1()
 	// gpn is evaluatable
 	RewriteLinkPtr sc(RewriteLinkCast(gl));
 	Handle result = sc->consume_quotations(),
-		expected = createLink(GET_LINK, X,
+		expected = createLink(MEET_LINK, X,
 		                      createLink(QUOTE_LINK,
 		                                 createLink(EVALUATION_LINK, gpn,
 		                                            createLink(UNQUOTE_LINK, X))));
