@@ -46,14 +46,14 @@
 
 ; Define a query that will look for all Concepts
 (define get-concepts
-	(Get (TypedVariable (Variable "$x") (Type 'Concept))
+	(Meet (TypedVariable (Variable "$x") (Type 'Concept))
 		(Variable "$x")))
 
 ; Take a look.
 (cog-prt-atomspace)
 
 ; Run the query. It should find both Concepts. This is, it should
-; print out a `SetLink` containing both of the above Concepts.
+; print out a `UnisetValue` containing both of the above Concepts.
 (cog-execute! get-concepts)
 
 ; Take a look.
