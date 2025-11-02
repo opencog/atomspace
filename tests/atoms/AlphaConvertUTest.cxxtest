@@ -23,7 +23,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 
 using namespace opencog;
 
@@ -265,14 +265,14 @@ void AlphaConvertUTest::test_atomspace()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test is_equal for BindLink.
+// Test is_equal for QueryLink.
 void AlphaConvertUTest::test_bindlink()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Create BindLink
+	// Create QueryLink
 	Handle hscox =
-	LA(BIND_LINK,
+	LA(QUERY_LINK,
 		NA(VARIABLE_NODE, "$X"),
 		LA(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
@@ -282,7 +282,7 @@ void AlphaConvertUTest::test_bindlink()
 
 	_asb.clear();
 	Handle hscoy =
-	LB(BIND_LINK,
+	LB(QUERY_LINK,
 		NB(VARIABLE_NODE, "$X"),
 		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
@@ -292,7 +292,7 @@ void AlphaConvertUTest::test_bindlink()
 
 	_asb.clear();
 	hscoy =
-	LB(BIND_LINK,
+	LB(QUERY_LINK,
 		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
 
@@ -301,7 +301,7 @@ void AlphaConvertUTest::test_bindlink()
 
 	_asb.clear();
 	hscoy =
-	LB(BIND_LINK,
+	LB(QUERY_LINK,
 		NB(VARIABLE_NODE, "$X"),
 		LB(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
 		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")));
@@ -313,7 +313,7 @@ void AlphaConvertUTest::test_bindlink()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test is_equal for BindLink where the implicand is ordered
+// Test is_equal for QueryLink where the implicand is ordered
 void AlphaConvertUTest::test_bindlink_ordered()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -328,9 +328,9 @@ void AlphaConvertUTest::test_bindlink_ordered()
 	Handle X = NA(VARIABLE_NODE, "$X");
 	Handle Y = NA(VARIABLE_NODE, "$Y");
 
-	// Create BindLink
+	// Create QueryLink
 	Handle hscox =
-	LA(BIND_LINK,
+	LA(QUERY_LINK,
 	   LA(PRESENT_LINK, X, Y),
 	   LA(LIST_LINK, X, Y));
 
@@ -339,7 +339,7 @@ void AlphaConvertUTest::test_bindlink_ordered()
 
 	_asb.clear();
 	Handle hscoy =
-	LB(BIND_LINK,
+	LB(QUERY_LINK,
 	   LB(PRESENT_LINK, X, Y),
 	   LB(LIST_LINK, Y, X));
 
@@ -348,7 +348,7 @@ void AlphaConvertUTest::test_bindlink_ordered()
 
 	_asb.clear();
 	Handle hscoz =
-	LB(BIND_LINK,
+	LB(QUERY_LINK,
 	   LB(VARIABLE_SET, X, Y),
 	   LB(PRESENT_LINK, X, Y),
 	   LB(LIST_LINK, Y, X));
@@ -440,7 +440,7 @@ void AlphaConvertUTest::test_inner_scope()
 	TS_ASSERT(sc1->is_equal(h2));
 }
 
-// Test alpha equivalence between 2 get links.
+// Test alpha equivalence between 2 meet links.
 void AlphaConvertUTest::test_getlink()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -452,10 +452,10 @@ void AlphaConvertUTest::test_getlink()
 
 	// h1 and h2 are alpha-equivalent, indeed renaming X->Y and Y->X in
 	// h1 yields h2.
-	Handle h1 = LA(GET_LINK, LA(PRESENT_LINK,
+	Handle h1 = LA(MEET_LINK, LA(PRESENT_LINK,
 	                            LA(INHERITANCE_LINK, X, A),
 	                            LA(INHERITANCE_LINK, Y, B)));
-	Handle h2 = LA(GET_LINK, LA(PRESENT_LINK,
+	Handle h2 = LA(MEET_LINK, LA(PRESENT_LINK,
 	                            LA(INHERITANCE_LINK, Y, A),
 	                            LA(INHERITANCE_LINK, X, B)));
 
