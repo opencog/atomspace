@@ -23,6 +23,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
 
@@ -251,14 +252,15 @@ void MeetLinkUTest::test_disconnected_empty(void) {
 		            an(VARIABLE_NODE, "$X"),
 		            an(VARIABLE_NODE, "$Y")),
 		pat = al(AND_LINK, comp_1, comp_2),
-		gl = al(GET_LINK, pat),
-		result = HandleCast(gl->execute(as.get())),
-		expect = al(SET_LINK, HandleSeq());
+		gl = al(MEET_LINK, pat);
+
+	ValuePtr result = gl->execute(as.get());
+	ValuePtr expect = createLinkValue(HandleSeq());
 
 	printf("Expected this: %s\n", expect->to_string().c_str());
 	printf("Found this answer: %s\n", result->to_string().c_str());
 
-	TS_ASSERT_EQUALS(result, expect);
+	TS_ASSERT(*result == *expect);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -284,15 +286,15 @@ void MeetLinkUTest::test_not_equal(void)
 	Handle body = al(AND_LINK,
 	                 al(NOT_LINK, al(EQUAL_LINK, P, Qvar)),
 	                 al(PRESENT_LINK, Qvar));
-	Handle gl = al(GET_LINK, vardecl, body);
+	Handle gl = al(MEET_LINK, vardecl, body);
 
-	Handle result = HandleCast(gl->execute(as.get()));
-	Handle expect = al(SET_LINK, Q);
+	ValuePtr result = gl->execute(as.get());
+	ValuePtr expect = createLinkValue(HandleSeq{Q});
 
 	printf("Expected this: %s\n", expect->to_string().c_str());
 	printf("Found this answer: %s\n", result->to_string().c_str());
 
-	TS_ASSERT_EQUALS(result, expect);
+	TS_ASSERT(*result == *expect);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -440,7 +442,7 @@ void MeetLinkUTest::test_embed_vardels(void)
 #define REVERSE 1
 #if REVERSE
 	// Oh dear ... the embedded declarations end up unordered, which
-	// hoses the Getlink we are testing. Whatever, hack around this.
+	// hoses the Meetlink we are testing. Whatever, hack around this.
 	vans = eval->eval_v(
 		"(UnisetValue "
 		"(LinkValue (ConceptNode \"human\") (ConceptNode \"Ben\"))"
