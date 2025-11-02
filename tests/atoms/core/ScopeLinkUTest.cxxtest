@@ -26,7 +26,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -445,24 +445,24 @@ void ScopeLinkUTest::test_names_alpha_conversion()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Like test_names_alpha_conversion() but using a BindLink instead of
+// Like test_names_alpha_conversion() but using a QueryLink instead of
 // a ScopeLink
 void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test simple BindLink
+	// Test simple QueryLink
 	Handle X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
 		CT = an(TYPE_NODE, "ConceptNode"),
 		Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT),
-		hbl = al(BIND_LINK, al(AND_LINK, X), al(OR_LINK, X)),
-		expected_wo_vardecl = al(BIND_LINK,
+		hbl = al(QUERY_LINK, al(AND_LINK, X), al(OR_LINK, X)),
+		expected_wo_vardecl = al(QUERY_LINK,
 		                         al(AND_LINK, Y), al(OR_LINK, Y)),
-		expected = al(BIND_LINK, Y_vardecl,
+		expected = al(QUERY_LINK, Y_vardecl,
 		              al(AND_LINK, Y), al(OR_LINK, Y));
 
-	BindLinkPtr bl(BindLinkCast(hbl));
+	QueryLinkPtr bl(QueryLinkCast(hbl));
 	Handle result_wo_vardecl = _asp->add_atom(bl->alpha_convert({Y}));
 
 	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);

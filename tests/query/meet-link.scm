@@ -1,5 +1,5 @@
 ;
-; Data and tests for GetLink
+; Data and tests for MeetLink
 ;
 
 (use-modules ((opencog exec)))
@@ -9,11 +9,11 @@
 (InheritanceLink (ConceptNode "Sparky") (ConceptNode "dog"))
 
 (define is-human
-	(GetLink (InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
+	(Meet (InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
 
 ;; Two variables, including type restrictions
 (define is-something
-	(GetLink
+	(Meet
 		(VariableList
 			(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
 			(VariableNode "$B"))
@@ -24,7 +24,7 @@
 ;;    (TypeChoice (Type 'Notype))
 ;; See https://github.com/opencog/atomspace/issues/2490
 (define is-nothing
-	(GetLink
+	(Meet
 		(TypedVariableLink (VariableNode "$H") (TypeChoice))
 		(InheritanceLink (VariableNode "$H") (ConceptNode "human"))))
 
@@ -32,16 +32,16 @@
 ;; This binds only the second variable, thus, the first variable
 ;; remains free. Running this should results in a grounding to is-human,
 ;; above. That is, it should find
-;; (SetLink (ConceptNode "human"))
+;; (LinkValue (ConceptNode "human"))
 (define is-query
-	(GetLink
+	(Meet
 		(VariableNode "$B") ;; bind only the second variable.
 		(InheritanceLink (VariableNode "$H") (VariableNode "$B"))))
 
 ;; --------------------------------------------------------------
 
 (define g-take-contain
-   (GetLink
+   (Meet
       (VariableList
          (TypedVariableLink
             (VariableNode "$X")

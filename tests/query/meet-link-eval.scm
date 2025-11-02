@@ -12,7 +12,7 @@
    (ConceptNode "blab"))
 
 (define get
-(GetLink
+(Meet
    (VariableList (VariableNode "$a") (VariableNode "$b")
       (TypedVariableLink (VariableNode "$lnk")
           (TypeNode "EvaluationLink")))

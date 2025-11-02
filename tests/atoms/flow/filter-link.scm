@@ -536,34 +536,34 @@
     (Rule
       (TypedVariable (Variable "x") (Type "ConceptNode"))
       (Variable "x")
-      (DontExec (Get (And
-        (Evaluation (GroundedPredicate "scm:filter") (Variable "x"))))))
+      (DontExec (CollectionOf (Meet (And
+        (Evaluation (GroundedPredicate "scm:filter") (Variable "x")))))))
     (Set (Concept "a") (Concept "b"))
   ))
 
 ; (cog-execute! dont-exec)
 
-; (Variable "x") is bound in the Get; it cannot be substituted.
+; (Variable "x") is bound in the CollectionOf/Meet; it cannot be substituted.
 (define dont-expected
   (Set
-    (Get
+    (CollectionOf (Meet
       (And
         (Evaluation
           (GroundedPredicate "scm:filter")
-          (Variable "x"))))
-    (Get
+          (Variable "x")))))
+    (CollectionOf (Meet
       (And
         (Evaluation
           (GroundedPredicate "scm:filter")
-          (Variable "x"))))))
+          (Variable "x")))))))
 
 (define quote-get
   (Filter
     (Rule
       (TypedVariable (Variable "x") (Type "ConceptNode"))
       (Variable "x")
-      (LocalQuote (Get (And
-        (Evaluation (GroundedPredicate "scm:filter") (Variable "x"))))))
+      (Quote (CollectionOf (Meet (Unquote (And
+        (Evaluation (GroundedPredicate "scm:filter") (Variable "x"))))))))
     (Set (Concept "a") (Concept "b"))
   ))
 
@@ -572,16 +572,16 @@
 ; The (Variable "x") is free, because the quote unbound it.
 (define quote-expected
   (Set
-    (Get
+    (CollectionOf (Meet
       (And
         (Evaluation
           (GroundedPredicate "scm:filter")
-          (Concept "a"))))
-    (Get
+          (Concept "a")))))
+    (CollectionOf (Meet
       (And
         (Evaluation
           (GroundedPredicate "scm:filter")
-          (Concept "b"))))))
+          (Concept "b")))))))
 
 
 ; ----------------------------------------------------------

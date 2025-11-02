@@ -35,7 +35,7 @@ class BindlinkTest(unittest.TestCase):
 
         # Define a graph search query
         self.bindlink_atom =  \
-                BindLink(
+                QueryLink(
                     # The variable node to be grounded.
                     VariableNode("$var"),
 
@@ -47,12 +47,12 @@ class BindlinkTest(unittest.TestCase):
 
                     # The grounding to be returned.
                     VariableNode("$var")
-                # bindlink needs a handle
+                # querylink needs a handle
                 )
 
         # Define a pattern to be grounded
         self.getlink_atom =  \
-            GetLink(
+            MeetLink(
                 InheritanceLink(
                     VariableNode("$var"),
                     ConceptNode("animal")
@@ -73,27 +73,29 @@ class BindlinkTest(unittest.TestCase):
         # finalize_opencog()
         # del self.atomspace
 
-    def _check_result_setlink(self, atom, expected_arity):
+    def _check_result_setlink(self, value, expected_arity):
 
-        # Check if the atom is a SetLink
-        self.assertTrue(atom is not None)
-        self.assertEqual(atom.type, types.SetLink)
+        # Check if the value is a UnisetValue
+        self.assertTrue(value is not None)
+        # UnisetValue is returned as a Value, check it has content
+        value_list = value.to_list()
+        self.assertTrue(isinstance(value_list, list))
 
-        # Check the ending atomspace size, it should have added one SetLink.
+        # Check the ending atomspace size, it should be unchanged (no SetLink created)
         ending_size = self.atomspace.size()
-        self.assertEqual(ending_size, self.starting_size + 1)
+        self.assertEqual(ending_size, self.starting_size)
 
-        # The SetLink should have expected_arity items in it.
-        self.assertEqual(atom.arity, expected_arity)
+        # The UnisetValue should have expected_arity items in it.
+        self.assertEqual(len(value_list), expected_arity)
 
     def test_bindlink(self):
-        atom = self.bindlink_atom.execute()
-        print(f"Bindlink found: {str(atom)}")
-        self._check_result_setlink(atom, 3)
+        value = self.bindlink_atom.execute()
+        print(f"QueryLink found: {str(value)}")
+        self._check_result_setlink(value, 3)
 
     def test_satisfying_set(self):
-        atom = self.getlink_atom.execute()
-        self._check_result_setlink(atom, 3)
+        value = self.getlink_atom.execute()
+        self._check_result_setlink(value, 3)
 
     def test_satisfy(self):
         satisfaction_atom = SatisfactionLink(
@@ -165,7 +167,7 @@ class BindlinkTest(unittest.TestCase):
     def test_tmp_atomspace(self):
         ListLink(ConceptNode("foo"), ConceptNode("bar"))
 
-        get = GetLink(VariableNode("x"),
+        get = MeetLink(VariableNode("x"),
                 AndLink(
                     PresentLink(ListLink (ConceptNode("foo"),
                                           (VariableNode("x")))),
@@ -174,11 +176,11 @@ class BindlinkTest(unittest.TestCase):
                    EvaluationLink(GroundedPredicateNode( "py: test_functions.func_two"),
                    ListLink (VariableNode ("x")))))
         result = get.execute()
-        self.assertFalse(result.out)
+        self.assertFalse(result.to_list())
         self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
         test_functions.func_one_result = FloatValue([1,1,1])
         result = get.execute()
-        self.assertTrue(result.out)
+        self.assertTrue(result.to_list())
         # still should not be in the current namespace
         self.assertFalse(self.atomspace.is_node_in_atomspace(types.ConceptNode, 'barleycorn'))
 

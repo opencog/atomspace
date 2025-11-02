@@ -18,7 +18,7 @@
   #t)
 
 (define query
-(Bind
+(Query
    (TypedVariable (Variable "$X") (TypeNode "ConceptNode"))
    (AndLink
       (Evaluation ;; <--- bug

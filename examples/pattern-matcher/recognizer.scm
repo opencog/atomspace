@@ -30,9 +30,9 @@
 ; this grounding.
 ;
 ; The Atomese construct for accomplishing this is the DualLink. It is
-; roughly the opposite of the GetLink, "opposite" in the cat-theory
+; roughly the opposite of the MeetLink, "opposite" in the cat-theory
 ; sense of reversing arrows.  Its "rough", in that the type constraints
-; that are possible in GetLink are ignored by the DualLink.
+; that are possible in MeetLink are ignored by the DualLink.
 ;
 ; The example below is based on an AIML-like search, simply because
 ; this is easy to explain and demonstrate. Note that all AIML chatbots
@@ -50,13 +50,13 @@
 ;    I * you   --> I * you too
 ;    I love *  --> I like * a lot!
 ;
-(BindLink
+(QueryLink
 	(ListLink
 		(Concept "I") (Glob "$star") (Concept "you"))
 	(ListLink
 		(Concept "I") (Glob "$star") (Concept "you") (Concept "too")))
 
-(BindLink
+(QueryLink
 	(ListLink
 		(Concept "I")
 		(Concept "love")
@@ -78,7 +78,7 @@
 (cog-execute! (DualLink sent))
 
 ;; The above should return the below.  Note how fragments of the above
-;; BindLink's are matched.
+;; QueryLink's are matched.
 (SetLink
 	(ListLink
 		(Concept "I")
@@ -137,9 +137,9 @@
 
 	; Accept only consequents that are ListLink's
 	(cog-execute!
-		(GetLink
+		(MeetLink
 			(TypedVariable (Variable "$consequent") (Type "ListLink"))
-			(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
+			(Quote (QueryLink ANTECEDENT (Unquote (Variable "$consequent"))))
 		)
 	)
 )
@@ -148,7 +148,7 @@
 ; (get-consequents (List (Concept "I") (Glob "$star") (Concept "you")))
 
 ; ------------------
-; The below takes the above GetLink, and uses it to generate values
+; The below takes the above MeetLink, and uses it to generate values
 ; that are then installed in place by a PutLink. That is, the PutLink
 ; re-assembles the rule from the antecedent and the consequent.
 
@@ -160,20 +160,20 @@
   Example usage:
      (get-rules-for-ante (List (Concept \"I\") (Glob \"$star\") (Concept \"you\")))
 "
-	; The GetLink below returns all of the consequents.
+	; The MeetLink below returns all of the consequents.
 	; The TypedVariable filters out and rejects all consequents that
 	;   are not ListLinks.
 	; The PutLink reconstructs the rule, out of the antecedent and
 	;   the consequent.
-	; The Quotes are used to avoid accidentally running the BindLink
+	; The Quotes are used to avoid accidentally running the QueryLink
 	;   that is being assembled.
 	(cog-execute!
 		(Put
 			(TypedVariable (Variable "$list") (Type "ListLink"))
-			(Quote (Bind ANTECEDENT (Unquote (Variable "$list"))))
-			(Get
+			(Quote (Query ANTECEDENT (Unquote (Variable "$list"))))
+			(Meet
 				(Variable "$consequent")
-				(Quote (BindLink ANTECEDENT (Unquote (Variable "$consequent"))))
+				(Quote (QueryLink ANTECEDENT (Unquote (Variable "$consequent"))))
 			)
 		)
 	)
@@ -201,13 +201,13 @@
 			(TypedVariable (Variable "$ante") (Type "ListLink"))
 			(Put
 				(TypedVariable (Variable "$list") (Type "ListLink"))
-				(Quote (BindLink
+				(Quote (QueryLink
 					(Unquote (Variable "$ante"))
 					(Unquote (Variable "$list"))
 				))
-				(GetLink
+				(MeetLink
 					(Variable "$consequent")
-					(Quote (BindLink
+					(Quote (QueryLink
 						(Unquote (Variable "$ante"))
 						(Unquote (Variable "$consequent"))))
 				))
@@ -254,7 +254,7 @@
 ; created above.  We really want them to only pick up on the "sentences"
 ; (strings of Concepts).
 (define a-love-b
-	(BindLink
+	(QueryLink
 		(VariableList
 			(TypedVariable (Glob "$A") (Type "ConceptNode"))
 			(TypedVariable (Glob "$B") (Type "ConceptNode")))
@@ -286,9 +286,9 @@
 
 ; Utility, from which the other parts are made. Similar to
 ; `get-consequents`, above, except that the `cog-execute!` step
-; is skipped. So, this only defines a GetLink.
+; is skipped. So, this only defines a MeetLink.
 (define (pattern-getter ANTECEDENT)
-	(GetLink
+	(MeetLink
 		(VariableList
 			(TypedVariable (Variable "$vardecl")
 				(TypeChoice  ; three different kinds of typedecls are possible.
@@ -296,7 +296,7 @@
 					(Type "TypedVariableLink")
 					(Type "VariableList")))
 			(TypedVariable (Variable "$consequent") (Type "ListLink")))
-		(Quote (BindLink
+		(Quote (QueryLink
 				(Unquote (Variable "$vardecl"))
 				ANTECEDENT
 				(Unquote (Variable "$consequent"))))
@@ -322,18 +322,18 @@
 ; The below is just like `get-rules-for-ante`, except that its for typed rules.
 
 (define (rule-getter ANTECEDENT)
-	; The GetLink returns all of the vardecls and consequents.
+	; The MeetLink returns all of the vardecls and consequents.
 	; The TypedVariable filters out and rejects all consequents that
 	;   are not ListLinks.
 	; The PutLink reconstructs the rule, out of the antecedent and
 	;   the consequent.
-	; The Quotes are used to avoid accidentally running the BindLink
+	; The Quotes are used to avoid accidentally running the QueryLink
 	;   that is being assembled.
 	(Put
 		(VariableList
 			(Variable "$decls")
 			(Variable "$sequent"))
-		(Quote (Bind
+		(Quote (Query
 				(Unquote (Variable "$decls"))
 				ANTECEDENT
 				(Unquote (Variable "$sequent"))))

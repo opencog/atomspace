@@ -19,7 +19,7 @@ class TestExceptions(unittest.TestCase):
     def test_bogus_get(self):
         atom1 = Concept("atom1")
         try:
-            Get(atom1, atom1, atom1)
+            Meet(atom1, atom1, atom1)
             self.assertFalse("call should fail")
         except RuntimeError as e:
                    # Use `nosetests3 --nocapture` to see this print...

@@ -32,7 +32,6 @@
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "BindLink.h"
 #include "DualLink.h"
 #include "PatternLink.h"
 #include "PatternUtils.h"

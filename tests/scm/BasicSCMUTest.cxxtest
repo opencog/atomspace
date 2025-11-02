@@ -205,7 +205,7 @@ void BasicSCMUTest::test_single_atom(void)
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval->eval("(add-to-load-path \"../..\")");
 
-	std::string rs = eval->eval("(load-from-path \"tests/scm/typedefs.scm\")");
+	std::string rs = eval->eval("(load-from-path \"tests/scm/basic-scm-typedefs.scm\")");
 	eval_err = eval->eval_error();
 	if (eval_err)
 		printf("Ohh noooo! %s\n", rs.c_str());

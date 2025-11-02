@@ -124,7 +124,7 @@
 			(State (Anchor "sum") (Variable "$x"))
 			(Plus (Number 1) (Meet (State (Anchor "sum") (Variable "$y")))))))
 
-; GetLink returns a SetLink. Unwrap it to get the NumberNode.
+; MeetLink returns a UnisetValue. Unwrap it to get the NumberNode.
 (define (get-sum)
 	(cog-value-ref (cog-execute!
 		(Meet (State (Anchor "sum") (Variable "$x"))))

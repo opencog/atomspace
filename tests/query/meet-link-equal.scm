@@ -69,7 +69,7 @@
 )
 
 (define gl
-  (GetLink
+  (Meet
     (VariableList
       (VariableNode "$vardecl")
       (VariableNode "$body"))

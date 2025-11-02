@@ -3,21 +3,15 @@
 ;
 ; QueryLink usage example.
 ;
-; The QueryLink and the BindLink are both very similar; both search
-; the AtomSpace for groundings of the query pattern, and then perform
-; a re-write, based on the results. The only difference between the two
-; is that the BindLink returns a SetLink containing the results, whereas
-; the QueryLink returns a LinkValue containing the results. This makes
-; the QueryLink a bit nicer, because it does not pollute the AtomSpace
-; with nearly-useless SetLinks.
+; The QueryLink searches the AtomSpace for groundings of the query
+; pattern, and then perform a re-write, based on the results.
 ;
-; Although both can be run in parallel (i.e. run in different threads),
-; there's almost no point to doing so for the BindLink, since you have
-; to wait for it to complete, and provide you with the resulting
-; SetLink. By contrast, the QueryLink can drop off results at a
-; "well-known location" in the AtomSpace, as they appear, so that
-; processing can happen in parallel: processing can start on some
-; results, even while others are still being found.
+; An interesting use case is for long-running (complex) queries is
+; running them in distinct threads. The QueryLink deposits query
+; results into a UnisetValue as they arrive. This is a thread-safe
+; subtype of CollectionValue; other threads can wait (block) for
+; query results to arrive. This can offer significant parallelism
+; for complex queries.
 ;
 ; This example uses an AnchorNode to establish a "well-known location",
 ; a QueryLink to attach them there, and a DeleteLink to detach results

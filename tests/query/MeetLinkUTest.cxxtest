@@ -1,0 +1,500 @@
+/*
+ * tests/query/MeetLinkUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2019 Kasimebrahim
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class MeetLinkUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr as;
+	SchemeEval* eval;
+
+public:
+	MeetLinkUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_level(Logger::DEBUG);
+		logger().set_sync_flag(true);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+
+		as = createAtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec))");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	}
+
+	~MeetLinkUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_unary_get(void);
+	void test_get_ill_typed(void);
+	void test_binary_get(void);
+	void test_free_bound(void);
+	void test_eval_clause(void);
+	void test_disconnected_binary_get(void);
+	void test_disconnected_empty(void);
+	void test_not_equal(void);
+	void test_quote_equal(void);
+	void test_plus_pattern_get(void);
+
+	void test_glob_get(void);
+	void test_typed_glob_get(void);
+	void test_type_choice_glob_get(void);
+
+	void test_embed_vardels(void);
+};
+
+void MeetLinkUTest::tearDown(void)
+{
+}
+
+void MeetLinkUTest::setUp(void)
+{
+}
+
+/*
+ * Basic single-variable MeetLink unit test.
+ */
+void MeetLinkUTest::test_unary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-human)");
+	ValuePtr vans = eval->eval_v(
+		"(UnisetValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable MeetLink unit test.
+ */
+void MeetLinkUTest::test_binary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-something)");
+	ValuePtr vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic bottom_type MeetLink unit test.
+ */
+void MeetLinkUTest::test_get_ill_typed(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-nothing)");
+	ValuePtr vans = eval->eval_v("(LinkValue)");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable MeetLink unit test; one is free one is bound.
+ */
+void MeetLinkUTest::test_free_bound(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-query)");
+
+	ValuePtr vans = eval->eval_v("(LinkValue (ConceptNode \"human\"))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Evaluatable clause MeetLink unit test;
+ */
+void MeetLinkUTest::test_eval_clause(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-eval.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! get)");
+
+	ValuePtr vans = eval->eval_v("(LinkValue"
+	                           "   (LinkValue"
+	                           "      (ConceptNode \"glib\")"
+	                           "      (ConceptNode \"blab\")"
+	                           "      (EvaluationLink"
+	                           "         (ConceptNode \"glib\")"
+	                           "         (ConceptNode \"blab\"))))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two-variable MeetLink unit test
+ */
+void MeetLinkUTest::test_disconnected_binary_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
+
+	Handle g_take_contain = eval->eval_h("g-take-contain");
+	ValuePtr vgnd = g_take_contain->execute(as.get());
+	ValuePtr vans = eval->eval_v(
+		"(LinkValue "
+		"(LinkValue (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Two disconnected components, only one of them has a solution, so
+ * the whole request has no solution. It should stop at the first
+ * component with no solution, no need to explore the second
+ * component.
+ */
+void MeetLinkUTest::test_disconnected_empty(void) {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	Handle inh_ground = al(INHERITANCE_LINK,
+	                       an(CONCEPT_NODE, "A"),
+	                       an(CONCEPT_NODE, "B")),
+		comp_1 = al(INHERITANCE_LINK,
+		            an(VARIABLE_NODE, "$A"),
+		            an(VARIABLE_NODE, "$B")),
+		comp_2 = al(IMPLICATION_LINK,
+		            an(VARIABLE_NODE, "$X"),
+		            an(VARIABLE_NODE, "$Y")),
+		pat = al(AND_LINK, comp_1, comp_2),
+		gl = al(MEET_LINK, pat);
+
+	ValuePtr result = gl->execute(as.get());
+	ValuePtr expect = createLinkValue(HandleSeq());
+
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*result == *expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test the not-equal predicate.  We want all solutions not equal
+ * to a particular atom.
+ */
+void MeetLinkUTest::test_not_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+
+	Handle P = an(PREDICATE_NODE, "P");
+	Handle Q = an(PREDICATE_NODE, "Q");
+
+	Handle Qvar = an(VARIABLE_NODE, "$Q");
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK,
+	                       Qvar,
+                          an(TYPE_NODE, "PredicateNode")));
+	Handle body = al(AND_LINK,
+	                 al(NOT_LINK, al(EQUAL_LINK, P, Qvar)),
+	                 al(PRESENT_LINK, Qvar));
+	Handle gl = al(MEET_LINK, vardecl, body);
+
+	ValuePtr result = gl->execute(as.get());
+	ValuePtr expect = createLinkValue(HandleSeq{Q});
+
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*result == *expect);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Make sure that quotation is properly consumed before testing for
+ * equality.
+ */
+void MeetLinkUTest::test_quote_equal(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-equal.scm\")");
+
+	Handle gl = eval->eval_h("gl");
+	ValuePtr vgnd = gl->execute(as.get());
+	ValuePtr vans = eval->eval_v("(LinkValue (LinkValue (VariableNode \"$X\") (VariableNode \"$X\")))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic PlusLink pattern with MeetLink unit test.
+ */
+void MeetLinkUTest::test_plus_pattern_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-exec-pattern.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! plus-pattern)");
+	ValuePtr vans = eval->eval_v(
+			"(LinkValue "
+					"(LinkValue (NumberNode 3) (NumberNode 5)))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Basic GlobNode with MeetLink unit test.
+ */
+void MeetLinkUTest::test_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! basic-get)");
+	ValuePtr vans =
+			eval->eval_v("(LinkValue"
+			             "  (List"
+			             "    (ConceptNode \"glib\")"
+			             "    (PredicateNode \"blab\")))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Type restricted GlobNode with MeetLink unit test.
+ */
+void MeetLinkUTest::test_typed_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! typed-get)");
+	ValuePtr vans = eval->eval_v("(LinkValue)");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Typed GlobNode with MeetLink unit test.
+ */
+void MeetLinkUTest::test_type_choice_glob_get(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-glob.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! type-choice-get)");
+	ValuePtr vans =
+			eval->eval_v("(LinkValue"
+			             "  (List"
+			             "    (ConceptNode \"glib\")"
+			             "    (PredicateNode \"blab\")))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Same as test_unary_get(), test_binary_get(), test_get_ill_typed(),
+ * and test_free_bound() except that the variable decls are embedded.
+ */
+void MeetLinkUTest::test_embed_vardels(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/meet-link-embed.scm\")");
+
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-human)");
+	ValuePtr vans = eval->eval_v(
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	// ----------------------
+	vgnd = eval->eval_v("(cog-execute! is-something)");
+
+#define REVERSE 1
+#if REVERSE
+	// Oh dear ... the embedded declarations end up unordered, which
+	// hoses the Meetlink we are testing. Whatever, hack around this.
+	vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"human\") (ConceptNode \"Ben\"))"
+		"(LinkValue (ConceptNode \"human\") (ConceptNode \"Linas\"))"
+		"(LinkValue (ConceptNode \"dog\") (ConceptNode \"Sparky\")))");
+#else
+	vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+#endif
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	// ----------------------
+	vgnd = eval->eval_v("(cog-execute! is-nothing)");
+	vans = eval->eval_v("(LinkValue)");
+
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
+
+	// ----------------------
+	vgnd = eval->eval_v("(cog-execute! g-take-contain)");
+
+	// 32-bit and 64-bit hashes differ because std::hash() returns size_t
+	// As a result, the order is randomly reversed. Hack around this
+	// inconsistency. Also: the hash depends on the the number of types
+	// that appear before SetLink, because the type number is hashed in.
+	// Thus, changing the type hierarchy changes the hash. So, to make
+	// this work, we look for either answer.
+	ValuePtr vans1 = eval->eval_v(
+		"(LinkValue "
+		"(LinkValue (ConceptNode \"compound-A\") (ConceptNode \"John\")))");
+	ValuePtr vans2 = eval->eval_v(
+		"(LinkValue "
+		"(LinkValue (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
+
+	printf("Expected this: %s\n", vans1->to_string().c_str());
+	printf("or maybe this: %s\n", vans2->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding",
+		(*vans1 == *vgnd) or (*vans2 == *vgnd));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

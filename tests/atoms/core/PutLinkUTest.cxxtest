@@ -2154,7 +2154,7 @@ void PutLinkUTest::test_quoted_lambda()
  *    (ListLink
  *    (VariableNode "x")
  *     (VariableNode "A"))))
- *  (GetLink
+ *  (MeetLink
  *   (Inheritance (Variable "$X") (Concept "Parent"))))
  *
  * which should return
@@ -2206,7 +2206,7 @@ void PutLinkUTest::test_get()
  *    (ListLink
  *    (VariableNode "x")
  *     (VariableNode "A"))))
- *  (GetLink
+ *  (MeetLink
  *   (Inheritance (Variable "$X") (Concept "Parent"))))
  *
  * which should return

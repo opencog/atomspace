@@ -7,7 +7,7 @@
 (PlusLink (NumberNode 3) (NumberNode 5))
 
 (define plus-pattern
-	(GetLink
+	(Meet
 		(VariableList
 			(TypedVariableLink (VariableNode "$A") (TypeNode "NumberNode"))
 			(TypedVariableLink (VariableNode "$B") (TypeNode "NumberNode")))

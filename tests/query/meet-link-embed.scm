@@ -1,5 +1,5 @@
 ;
-; Data and tests for GetLink with embedded variable decls.
+; Data and tests for MeetLink with embedded variable decls.
 ;
 
 (use-modules (opencog) (opencog exec))
@@ -9,14 +9,14 @@
 (Inheritance (Concept "Sparky") (Concept "dog"))
 
 (define is-human
-	(GetLink
+	(Meet
 		(Present (Inheritance (Variable "$H") (Concept "human")))))
 
 ; (cog-execute! is-human)
 
 ;; Two variables, including type restrictions
 (define is-something
-	(GetLink
+	(Meet
 		(And
 			(Present (Inheritance (Variable "$A") (Variable "$B")))
 			(TypedVariable (Variable "$A") (Type 'Concept))
@@ -26,10 +26,10 @@
 
 ;; An empty TypeChoice means the variable can have no type at all.
 ;; This is the same as the bottom type. It's also the same as
-;;    (TypeChoice (Type 'Notype))
+;;   (TypeChoice (Type 'Notype))
 ;; See https://github.com/opencog/atomspace/issues/2490
 (define is-nothing
-	(GetLink
+	(Meet
 		(And
 			(Present (Inheritance (Variable "$H") (Concept "human")))
 			(TypedVariable (Variable "$H") (TypeChoice))
@@ -40,26 +40,26 @@
 ;; --------------------------------------------------------------
 
 (define g-take-contain
-   (Get
-      (And
+	(Meet
+		(And
 			(Present
-         	(Evaluation
-            	(Predicate "take")
-            	(List (Variable "$X") (Concept "treatment-1"))))
-         (TypedVariable (Variable "$X") (Type "Concept"))
+				(Evaluation
+					(Predicate "take")
+					(List (Variable "$X") (Concept "treatment-1"))))
+			(TypedVariable (Variable "$X") (Type "Concept"))
 			(Present
-         	(Evaluation
-            	(Predicate "contain")
-            	(List (Concept "treatment-1") (Variable "$Z"))))
-         (TypedVariable (Variable "$Z") (Type "Concept"))
-      )))
+				(Evaluation
+					(Predicate "contain")
+					(List (Concept "treatment-1") (Variable "$Z"))))
+			(TypedVariable (Variable "$Z") (Type "Concept"))
+		)))
 
 ; (cog-execute! g-take-contain)
 
 (Evaluation
-   (Predicate "take")
-   (List (Concept "John") (Concept "treatment-1")))
+	(Predicate "take")
+	(List (Concept "John") (Concept "treatment-1")))
 
 (Evaluation
-   (Predicate "contain")
-   (List (Concept "treatment-1") (Concept "compound-A")))
+	(Predicate "contain")
+	(List (Concept "treatment-1") (Concept "compound-A")))

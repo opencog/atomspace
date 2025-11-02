@@ -8,8 +8,9 @@
     (ListLink
      (VariableNode "x")
      (ConceptNode "A")))
-  (GetLink
-   (Inheritance (Variable "$X") (Concept "Parent")))))
+  (CollectionOf
+   (MeetLink
+    (Inheritance (Variable "$X") (Concept "Parent"))))))
 
 (define expected-put-get
  (SetLink

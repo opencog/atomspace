@@ -51,9 +51,10 @@
 	(DefinedSchemaNode "get-the-tail")
 	(Lambda
 		(Variable "$head")
-		(GetLink
-			(TypedVariable (Variable "$tail") (Type 'ConceptNode))
-			get-form)))
+		(CollectionOf
+			(MeetLink
+				(TypedVariable (Variable "$tail") (Type 'ConceptNode))
+				get-form))))
 
 ; Does it work as expected? Yes.
 ;(cog-execute!
@@ -180,11 +181,11 @@
 	(Lambda
 		(VariableList (Variable "$set"))
 		(Cond
-			(Equal (Set) (Bind (Glob "$elts")
+			(Equal (Set) (CollectionOf (Query (Glob "$elts")
 				(Equal (Variable "$set") (Set (Glob "$elts")))
-				(List (Glob "$elts"))))
+				(List (Glob "$elts")))))
 			(Variable "$set")
-			(Bind (Glob "$elts")
+			(Query (Glob "$elts")
 				(Equal (Variable "$set") (Set (Glob "$elts")))
 				(List (Glob "$elts"))))))
 
@@ -202,7 +203,7 @@
 (define unwrap-natural
 	(ExecutionOutput
 		(DefinedSchema "unwrap")
-		(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+		(Meet (TypedVariable (Variable "$x") (Type 'ConceptNode))
 				(Inheritance (Concept "B") (Variable "$x")))))
 
 ; A defined Lambda, in atomese.
@@ -230,7 +231,7 @@
 	(ExecutionOutput
 		(DefinedSchemaNode "make-a-tree")
 		(List (Concept "B")
-			(Get (TypedVariable (Variable "$x") (Type 'ConceptNode))
+			(Meet (TypedVariable (Variable "$x") (Type 'ConceptNode))
 				(Inheritance (Concept "B") (Variable "$x"))))))
 
 

@@ -26,8 +26,6 @@
   See https://wiki.opencog.org/w/QueryLink for more info.
 
   See also:
-     BindLink -- same as above, results placed in SetLink
-     GetLink -- no rewrite, results placed in SetLink
      MeetLink -- no rewrite, results place in QueueValue
      SatisfactionLink -- return true, if there are any results at all.
      DualLink -- pattern recognition instead of pattern matching
@@ -39,18 +37,6 @@
 
 ; ---------------------------------------------------------------
 ; XXX FIXME replace below by real docs.
-(set-procedure-property! BindLink 'documentation
-	(procedure-property QueryLink 'documentation))
-
-(set-procedure-property! BindLink 'documentation
-	(procedure-property QueryLink 'documentation))
-
-(set-procedure-property! GetLink 'documentation
-	(procedure-property QueryLink 'documentation))
-
-(set-procedure-property! Get 'documentation
-	(procedure-property QueryLink 'documentation))
-
 (set-procedure-property! MeetLink 'documentation
 	(procedure-property QueryLink 'documentation))
 
