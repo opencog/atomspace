@@ -157,13 +157,11 @@ void UnisetValue::clear()
 
 bool UnisetValue::operator==(const Value& other) const
 {
-	// Derived classes use this, so use get_type()
-	if (get_type() != other.get_type()) return false;
-
 	if (this == &other) return true;
 
 	if (not is_closed()) return false;
-	if (not ((const UnisetValue*) &other)->is_closed()) return false;
+	if (other.is_type(UNISET_VALUE) and
+	    not ((const UnisetValue*) &other)->is_closed()) return false;
 
 	return LinkValue::operator==(other);
 }
