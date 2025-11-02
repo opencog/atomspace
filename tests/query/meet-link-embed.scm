@@ -1,5 +1,5 @@
 ;
-; Data and tests for GetLink with embedded variable decls.
+; Data and tests for MeetLink with embedded variable decls.
 ;
 
 (use-modules (opencog) (opencog exec))

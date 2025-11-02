@@ -1,5 +1,5 @@
 ;
-; Data and tests for GetLink
+; Data and tests for MeetLink
 ;
 
 (use-modules ((opencog exec)))
