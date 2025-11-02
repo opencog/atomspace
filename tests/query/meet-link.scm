@@ -13,12 +13,11 @@
 
 ;; Two variables, including type restrictions
 (define is-something
-	(CollectionOf
-		(Meet
-			(VariableList
-				(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
-				(VariableNode "$B"))
-			(InheritanceLink (VariableNode "$A") (VariableNode "$B")))))
+	(Meet
+		(VariableList
+			(TypedVariableLink (VariableNode "$A") (TypeNode "ConceptNode"))
+			(VariableNode "$B"))
+		(InheritanceLink (VariableNode "$A") (VariableNode "$B"))))
 
 ;; An empty TypeChoice means the variable can have no type at all.
 ;; This is the same as the bottom type. It's also the same as

@@ -121,17 +121,17 @@ void MeetLinkUTest::test_binary_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/meet-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-execute! is-something)");
-	Handle hans = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+	ValuePtr vgnd = eval->eval_v("(cog-execute! is-something)");
+	ValuePtr vans = eval->eval_v(
+		"(UnisetValue "
+		"(LinkValue (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(LinkValue (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
 
-	printf("Expected this: %s\n", hans->to_string().c_str());
-	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+	printf("Expected this: %s\n", vans->to_string().c_str());
+	printf("Found this answer: %s\n", vgnd->to_string().c_str());
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	TSM_ASSERT("Didn't get the expected grounding", *vans == *vgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
