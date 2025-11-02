@@ -23,6 +23,7 @@
 
 #include <opencog/util/mt19937ar.h>
 
+#include <opencog/atoms/value/LinkValue.h>
 #include "FunctionLink.h"
 #include "NumberNode.h"
 #include "RandomChoice.h"
@@ -114,15 +115,64 @@ ValuePtr RandomChoiceLink::execute(AtomSpace* as, bool silent)
 	size_t ary = _outgoing.size();
 	if (0 == ary) return ValuePtr();
 
-	Handle ofirst(_outgoing[0]);
-
 	// We need to have our first arg to be a set or a list or
 	// something of that sort.
-	if (ofirst->is_executable())
-		ofirst = HandleCast(ofirst->execute(as, silent));
+	ValuePtr vfirst = _outgoing[0];
+	if (_outgoing[0]->is_executable())
+		vfirst = _outgoing[0]->execute(as, silent);
+
+	// Handle LinkValue case (e.g., from MeetLink)
+	if (vfirst->is_type(LINK_VALUE))
+	{
+		LinkValuePtr lv = LinkValueCast(vfirst);
+		if (1 == ary)
+		{
+			// Search for ListLink pairs, w/car of pair a number.
+			HandleSeq choices;
+			std::vector<double> weights;
+			for (const ValuePtr& v : lv->value())
+			{
+				Handle h = HandleCast(v);
+				if (nullptr == h or LIST_LINK != h->get_type()) goto uniform_lv;
+
+				const HandleSeq& oset = h->getOutgoingSet();
+				if (2 != oset.size()) goto uniform_lv;
+
+				Handle hw(oset[0]);
+				if (hw->is_executable())
+					hw = HandleCast(hw->execute(as, silent));
+
+				// XXX TODO if execute() above returns FloatValue, use that!
+				NumberNodePtr nn(NumberNodeCast(hw));
+				if (nullptr == nn) // goto uniform_lv;
+					throw SyntaxException(TRACE_INFO,
+					       "Expecting a NumberNode");
+				weights.push_back(nn->get_value());
+				choices.push_back(oset[1]);
+			}
+
+			if (0 == weights.size())
+				throw RuntimeException(TRACE_INFO,
+					"Asked to choose element from empty set!");
+			return choices[randy.rand_discrete(weights)];
+
+uniform_lv:
+			size_t lv_ary = lv->value().size();
+			if (0 == lv_ary)
+				throw RuntimeException(TRACE_INFO,
+					"Asked to choose element from empty set!");
+			return lv->value()[randy.randint(lv_ary)];
+		}
+	}
+
+	if (not vfirst->is_atom())
+		throw RuntimeException(TRACE_INFO,
+			"Expecting SetLink or ListLink, got %s\n",
+			vfirst->to_string().c_str());
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
+	Handle ofirst(HandleCast(vfirst));
 	Type ot = ofirst->get_type();
 	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
