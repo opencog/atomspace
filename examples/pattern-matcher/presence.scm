@@ -73,20 +73,20 @@
 (cog-execute! empty-sequence)
 
 ; ------------------------------------------------------
-;; This variant uses a GetLink to fetch the room-state from the
+;; This variant uses a MeetLink to fetch the room-state from the
 ;; AtomSpace, and then uses EqualLink to see if it is in the desired
 ;; state. Note that this results in *two* invocations of the pattern
-;; matcher; the GetLink being the inner one.  Note also that the
-;; GetLink returns it's results in a SetLink, so comparison must
-;; use a SetLink as well.
+;; matcher; the MeetLink being the inner one.  Note also that the
+;; MeetLink returns it's results in a UnisetValue, which is wrapped
+;; by CollectionOf to convert it to a SetLink for the equality comparison.
 ;;
-;; In this example, the variable $x is bound by the GetLink, and
-;; is thus not available outside of the GetLink.  Thus, the grounding
+;; In this example, the variable $x is bound by the MeetLink, and
+;; is thus not available outside of the MeetLink.  Thus, the grounding
 ;; for that variable cannot be given to the print-message routine.
 ;;
 ;; Unlike the previous example, this one will explicitly fail if there
 ;; are other atoms linked to the Anchor.  That is, the equality
-;; check is making sure that the SetLink has one and only one element
+;; check is making sure that the UnisetValue has one and only one element
 ;; in it, which effectively blocks other anchored atoms.  This may be
 ;; an advantage, or a disadvantage, depending on the situation.
 
@@ -98,7 +98,7 @@
 			(Equal
 				(Set room-empty)
 				;; Retrieve the room state; place it into a SetLink
-				(Get (List room-state (Variable "$x"))))
+				(CollectionOf (Meet (List room-state (Variable "$x")))))
 
 			;; If the EqualLink evaluated to TRUE, then print the message.
 			(Evaluation
@@ -139,19 +139,19 @@
 (cog-execute! bind-empty)
 
 ; ------------------------------------------------------
-;; This variant uses a PutLink-GetLink combination. It is functionally
+;; This variant uses a PutLink-MeetLink combination. It is functionally
 ;; identical to the QueryLink; merely, the order in which the action
 ;; is done is reversed w.r.t. the test.
 ;;
 (define put-empty-atom
 	(Put
-		;; Replace the value of $x by whatever the GetLink returns.
+		;; Replace the value of $x by whatever the MeetLink returns.
 		(ExecutionOutput
 				(GroundedSchema "scm: atom-print-atom")
 				(List (Variable "$x")))
-		(Get
-			;; The variable $y is automatically bound by the GetLink;
-			;; it does not escape the scope of the GetLink.
+		(Meet
+			;; The variable $y is automatically bound by the MeetLink;
+			;; it does not escape the scope of the MeetLink.
 			(And
 				;; Search for presence
 				(List room-state (Variable "$y"))
