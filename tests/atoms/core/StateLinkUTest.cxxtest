@@ -25,6 +25,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 using namespace opencog;
 
@@ -177,23 +178,25 @@ void StateLinkUTest::test_setting()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test to make sure GetLink works.
+// Test to make sure MeetLink works.
 void StateLinkUTest::test_getting()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle empty_get =
-		L(GET_LINK,
+		L(MEET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
 	Instantiator inst(&_as);
-	Handle gotten = HandleCast(inst.execute(empty_get));
-	printf("Got %s\n", gotten->to_string().c_str());
+	ValuePtr vgotten = inst.execute(empty_get);
+	printf("Got %s\n", vgotten->to_string().c_str());
 
-	Handle empty_set = L(SET_LINK, HandleSeq());
+	// MeetLink returns empty LinkValue for no results
+	ValuePtr empty_result = createLinkValue(HandleSeq());
 
-	// The result of the get should be correct.
-	TS_ASSERT_EQUALS(gotten, empty_set);
+	// The result of the meet should be correct.
+	TS_ASSERT(*empty_result == *vgotten);
+	TS_ASSERT(*vgotten == *empty_result);
 
 	// Set the state to apple.
 	Handle fruit, apple, bananna;
@@ -204,16 +207,18 @@ void StateLinkUTest::test_getting()
 	bananna = N(CONCEPT_NODE, "bananna");
 
 	Handle get =
-		L(GET_LINK,
+		L(MEET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
-	gotten = HandleCast(inst.execute(get));
-	printf("Got %s\n", gotten->to_string().c_str());
+	vgotten = inst.execute(get);
+	printf("Got %s\n", vgotten->to_string().c_str());
 
-	Handle apple_set = L(SET_LINK, N(CONCEPT_NODE, "apple"));
+	// MeetLink returns LinkValue containing the apple
+	ValuePtr apple_result = createLinkValue(HandleSeq{N(CONCEPT_NODE, "apple")});
 
-	// The result of the get should be correct.
-	TS_ASSERT_EQUALS(gotten, apple_set);
+	// The result of the meet should be correct.
+	TS_ASSERT(*apple_result == *vgotten);
+	TS_ASSERT(*vgotten == *apple_result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -379,7 +384,7 @@ void StateLinkUTest::test_list()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test correct scoping of GetLink (issue #1576)
+// Test correct scoping of MeetLink (issue #1576)
 void StateLinkUTest::test_scope()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -395,18 +400,18 @@ void StateLinkUTest::test_scope()
 
 	// This should NOT find the above!
 	Handle free_get =
-		L(GET_LINK,
+		L(MEET_LINK,
 			L(TYPED_VARIABLE_LINK,
 				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "ImplicationLink")),
 			L(STATE_LINK, N(ANCHOR_NODE, "rule"), N(VARIABLE_NODE, "$x")));
 
-	Handle gotten = HandleCast(inst.execute(free_get));
-	printf("Free Got %s\n", gotten->to_string().c_str());
+	ValuePtr vgotten = inst.execute(free_get);
+	printf("Free Got %s\n", vgotten->to_string().c_str());
 
-	Handle empty_set = L(SET_LINK, HandleSeq());
+	ValuePtr empty_result = createLinkValue(HandleSeq());
 
-	// The result of the get should be correct.
-	TS_ASSERT_EQUALS(gotten, empty_set);
+	// The result of the meet should be correct.
+	TS_ASSERT(*vgotten == *empty_result);
 
 	// -------------------------------------------
 	// Alternate data
@@ -419,27 +424,29 @@ void StateLinkUTest::test_scope()
 	L(STATE_LINK, N(ANCHOR_NODE, "rule"), scoped);
 
 	Handle scoped_get =
-		L(GET_LINK,
+		L(MEET_LINK,
 			L(TYPED_VARIABLE_LINK,
 				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "RuleLink")),
 			L(STATE_LINK, N(ANCHOR_NODE, "rule"), N(VARIABLE_NODE, "$x")));
 
-	Handle sgotten = HandleCast(inst.execute(scoped_get));
-	printf("Scoped Got %s\n", sgotten->to_string().c_str());
+	ValuePtr vsgotten = inst.execute(scoped_get);
+	printf("Scoped Got %s\n", vsgotten->to_string().c_str());
 
-	Handle scope_set = L(SET_LINK, scoped);
+	ValuePtr scope_result = createLinkValue(HandleSeq{scoped});
 
-	// The result of the get should be correct.
-	TS_ASSERT_EQUALS(sgotten, scope_set);
+	// The result of the meet should be correct.
+	TS_ASSERT(*scope_result == *vsgotten);
+	TS_ASSERT(*vsgotten == *scope_result);
 
 	// -------------------------------------------
 	// Repeating the free-var get should still NOT find the above!
 
-	Handle regotten = HandleCast(inst.execute(free_get));
-	printf("Re-Free Got %s\n", regotten->to_string().c_str());
+	ValuePtr vregotten = inst.execute(free_get);
+	printf("Re-Free Got %s\n", vregotten->to_string().c_str());
 
-	// The result of the get should be correct.
-	TS_ASSERT_EQUALS(regotten, empty_set);
+	// The result of the meet should be correct (still empty).
+	TS_ASSERT(*empty_result == *vregotten);
+	TS_ASSERT(*vregotten == *empty_result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
