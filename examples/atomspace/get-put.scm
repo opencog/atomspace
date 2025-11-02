@@ -1,22 +1,22 @@
 ;
 ; get-put.scm -- The two halves of a query.
 ;
-; The BindLink example showed how one can create a query, run it, and
+; The QueryLink example showed how one can create a query, run it, and
 ; simultaneously use the query results to create new data in the
 ; AtomSpace. In fact, this process can be split into two: a "Get"
 ; part that performs the query, and a "Put" part that performs the
 ; graph re-writing.
 ;
-; The BindLink can be thought of as logical implication:
+; The QueryLink can be thought of as logical implication:
 ;	 For all x, P(x) implies Q(x)
-; The GetLink is the first half:
+; The MeetLink is the first half:
 ;	 For all x, P(x) implies a set {all x that satisfy P(x)}
 ; The PutLink is the second half:
 ;	 Create the set {Q(x)} given some other set {x}
 ; The PutLink is a form of "beta-reduction" or "substitution" or
 ; "pasting": for each `x` in the set {x} it just pastes `x` into `Q(x)`.
 ;
-; Every BindLink is equivalent to a Get-Put pair. This example
+; Every QueryLink is equivalent to a Meet-Put pair. This example
 ; demonstrates this explicitly.
 ;
 ; Splitting a query into a satisfying set, followed by a beta-reduction
@@ -30,7 +30,7 @@
 (use-modules (opencog) (opencog exec))
 
 ; Place some data into the atomspace. This is the same as in the
-; BindLink example.
+; QueryLink example.
 ;
 (Evaluation (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
 (Evaluation (Predicate "_obj") (List (Concept "make") (Concept "statue")))
@@ -145,6 +145,6 @@
 (cog-execute! find-and-rewrite-rule)
 
 ; The results reported by this rule are *identical* to the results
-; that the BindLink rule, from the BindLink example would report.
-; This Get-Put combination behaves in an identical fashion to a
-; single BindLink.  It just split up the operation into parts.
+; that the QueryLink rule, from the QueryLink example would report.
+; This Meet-Put combination behaves in an identical fashion to a
+; single QueryLink.  It just split up the operation into parts.
