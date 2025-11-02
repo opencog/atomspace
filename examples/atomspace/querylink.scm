@@ -39,12 +39,12 @@
 ; are "made from clay". The resulting inference is that "pottery is
 ; made from clay":
 ;
-; (SetLink
+; (UnisetValue
 ;     (Evaluation (Predicate "make_from")
 ;         (ListLink (Concept "pottery") (Concept "clay"))))
 ;
-; The SetLink wraps the collection of results; there is only one result,
-; in this case.
+; The UnisetValue wraps the collection of results; there is only one
+; result, in this case.
 
 
 (use-modules (opencog) (opencog exec))
