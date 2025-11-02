@@ -3,9 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (pattern
-	BindLink.cc
 	DualLink.cc
-	GetLink.cc
 	MeetLink.cc
 	PatternJit.cc
 	PatternLink.cc
@@ -34,9 +32,7 @@ INSTALL (TARGETS pattern EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	BindLink.h
 	DualLink.h
-	GetLink.h
 	MeetLink.h
 	PatternLink.h
 	Pattern.h

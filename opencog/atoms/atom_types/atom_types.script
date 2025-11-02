@@ -710,9 +710,7 @@ SATISFYING_LINK <- PATTERN_LINK,EXECUTABLE_LINK
 // QueryLink is identical to BindLink, except it returns a LinkValue
 // holding the result, instead of a SetLink. (Less AtomSpace pollution).
 MEET_LINK <- SATISFYING_LINK       // Finds all groundings, returns them
-GET_LINK <- MEET_LINK              // Finds all groundings, returns them
 QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
-BIND_LINK <- QUERY_LINK            // Finds all groundings, substitutes.
 
 // Adjoint to the GetLink. This is "adjoint" in the sense that the roles
 // of the pattern and the grounding are reversed: given a grounding, the
