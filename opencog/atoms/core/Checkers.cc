@@ -61,7 +61,6 @@ static bool check_evaluatable(const Handle& bool_atom)
 		// PutLinks and GetLinks cannot be type-checked statically.
 		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
-		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
 		if (GLOB_NODE == t) continue;
 		if (DEFINED_PREDICATE_NODE == t) continue;
