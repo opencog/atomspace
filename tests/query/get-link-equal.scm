@@ -69,24 +69,25 @@
 )
 
 (define gl
-  (GetLink
-    (VariableList
-      (VariableNode "$vardecl")
-      (VariableNode "$body"))
-    (AndLink
-      (QuoteLink
-        (LambdaLink
-          (UnquoteLink
-            (VariableNode "$vardecl"))
-          (UnquoteLink
-            (VariableNode "$body"))))
-      (top?
+  (CollectionOf
+    (Meet
+      (VariableList
+        (VariableNode "$vardecl")
+        (VariableNode "$body"))
+      (AndLink
         (QuoteLink
           (LambdaLink
             (UnquoteLink
               (VariableNode "$vardecl"))
             (UnquoteLink
-              (VariableNode "$body")))))))
+              (VariableNode "$body"))))
+        (top?
+          (QuoteLink
+            (LambdaLink
+              (UnquoteLink
+                (VariableNode "$vardecl"))
+              (UnquoteLink
+                (VariableNode "$body"))))))))
 )
 
 ; (cog-execute! gl)

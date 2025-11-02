@@ -7,24 +7,27 @@
   (PredicateNode "blab"))
 
 (define basic-get
-(GetLink
+(CollectionOf
+(Meet
   (ListLink
-    (GlobNode "$x"))))
+    (GlobNode "$x")))))
 
 (define typed-get
-  (GetLink
-    (TypedVariableLink
-      (GlobNode "$x")
-      (TypeNode "ConceptNode"))
-    (ListLink
-      (GlobNode "$x"))))
+  (CollectionOf
+    (Meet
+      (TypedVariableLink
+        (GlobNode "$x")
+        (TypeNode "ConceptNode"))
+      (ListLink
+        (GlobNode "$x")))))
 
 (define type-choice-get
-  (GetLink
-    (TypedVariableLink
-      (GlobNode "$x")
-      (TypeChoice
-        (TypeNode "ConceptNode")
-        (TypeNode "PredicateNode")))
-    (ListLink
-      (GlobNode "$x"))))
+  (CollectionOf
+    (Meet
+      (TypedVariableLink
+        (GlobNode "$x")
+        (TypeChoice
+          (TypeNode "ConceptNode")
+          (TypeNode "PredicateNode")))
+      (ListLink
+        (GlobNode "$x")))))
