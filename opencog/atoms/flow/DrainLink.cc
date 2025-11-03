@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/value/VoidValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include "DrainLink.h"
 
@@ -37,10 +38,15 @@ DrainLink::DrainLink(const HandleSeq&& oset, Type t)
 			"Expecting a DrainLink, got %s", tname.c_str());
 	}
 
-	if (1 != _outgoing.size() or
-		not _outgoing[0]->is_executable())
+	if (0 == _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting exactly one executable argument!");
+			"Expecting at least one executable argument!");
+
+	for (const Handle& ho : _outgoing)
+		if (not ho->is_executable())
+			throw SyntaxException(TRACE_INFO,
+				"Expecting an executable argument; got %s",
+				ho->to_string().c_str());
 }
 
 // ---------------------------------------------------------------
@@ -50,11 +56,17 @@ ValuePtr DrainLink::execute(AtomSpace* as, bool silent)
 {
 	while (true)
 	{
-		ValuePtr vp = _outgoing[0]->execute(as, silent);
-		if (nullptr == vp)
-			return createVoidValue();
-		if (VOID_VALUE == vp->get_type())
-			return vp;
+		for (const Handle& ho : _outgoing)
+		{
+			ValuePtr vp = ho->execute(as, silent);
+			if (nullptr == vp)
+				return createVoidValue();
+			if (VOID_VALUE == vp->get_type())
+				return vp;
+			if (LINK_VALUE == vp->get_type() and
+		      LinkValueCast(vp)->size() == 0)
+				return vp;
+		}
 	}
 	return nullptr; // Not reached.
 }
