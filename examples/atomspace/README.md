@@ -56,6 +56,7 @@ first).
 * [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
 * [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
 * [`flow-flat.scm`](flow-flat.scm)           -- Deserializing lists into streams.
+* [`flow-drain.scm`](flow-drain.scm)         -- Run a stream until it is empty.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
