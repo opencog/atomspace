@@ -36,6 +36,11 @@ DrainLink::DrainLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a DrainLink, got %s", tname.c_str());
 	}
+
+	if (1 != _outgoing.size() or
+		not _outgoing[0]->is_executable())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting exactly one executable argument!");
 }
 
 // ---------------------------------------------------------------
