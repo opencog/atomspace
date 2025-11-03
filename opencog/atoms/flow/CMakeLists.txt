@@ -6,6 +6,7 @@ ADD_LIBRARY (atomflow
 	AtomSpaceOfLink.cc
 	CollectionOfLink.cc
 	ConcatenateLink.cc
+	DrainLink.cc
 	FilterLink.cc
 	GlobMatch.cc
 	IncomingOfLink.cc
@@ -42,6 +43,7 @@ INSTALL (FILES
 	AtomSpaceOfLink.h
 	CollectionOfLink.h
 	ConcatenateLink.h
+	DrainLink.h
 	FilterLink.h
 	GlobMatch.h
 	IncomingOfLink.h
