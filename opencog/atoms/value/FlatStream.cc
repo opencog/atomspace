@@ -125,6 +125,14 @@ void FlatStream::update() const
 			return;
 		}
 
+		// End-of-stream marker.
+		if (vp->is_type(VOID_VALUE))
+		{
+			_value.clear(); // Set sequence size to zero...
+			_current_index++;
+			return;
+		}
+
 		// XXX A weird stupid computer trick here would be to iterate
 		// over an entire AtomSpace. At the moment, this is awkward,
 		// because it would require making a copy of all of the Handles.
