@@ -125,6 +125,14 @@ void FlatStream::update() const
 			return;
 		}
 
+		// End-of-stream marker.
+		if (vp->is_type(VOID_VALUE))
+		{
+			_value.clear(); // Set sequence size to zero...
+			_current_index++;
+			return;
+		}
+
 		// XXX A weird stupid computer trick here would be to iterate
 		// over an entire AtomSpace. At the moment, this is awkward,
 		// because it would require making a copy of all of the Handles.
@@ -194,7 +202,12 @@ void FlatStream::update() const
 std::string FlatStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	rv += "\n" + _source->to_short_string(indent + "   ") + ")\n";
+	rv += "\n";
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	else if (_current_stream)
+		rv += _current_stream->to_short_string(indent + "   ");
+	rv += ")\n";
 	rv += indent + "; Currently:\n";
 	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
 	return rv;
