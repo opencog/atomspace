@@ -194,7 +194,12 @@ void FlatStream::update() const
 std::string FlatStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	rv += "\n" + _source->to_short_string(indent + "   ") + ")\n";
+	rv += "\n";
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	else if (_current_stream)
+		rv += _current_stream->to_short_string(indent + "   ");
+	rv += ")\n";
 	rv += indent + "; Currently:\n";
 	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
 	return rv;
