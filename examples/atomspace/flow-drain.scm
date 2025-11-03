@@ -105,7 +105,16 @@
 ; Execute the DrainLink - this should process all 5 items.
 ; Actually, only four, because the demo setup accidentally
 ; unqueued (at least) one item, already.
-(cog-execute! drainer)
+; (cog-execute! drainer)
+
+; The above should finish instantly. For infinite streams,
+; you will want to use ParallelLink, which will run the drainer
+; in it's own thread, like so:
+(cog-execute! (ParallelLink drainer))
+
+; Umm, well give the above thread a chance to run, before
+; trying to look at the results!
+(sleep 1)
 
 ; ------------------------------------------------------------
 ; Verify the counts
