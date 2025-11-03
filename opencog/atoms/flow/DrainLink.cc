@@ -48,8 +48,15 @@ DrainLink::DrainLink(const HandleSeq&& oset, Type t)
 /// Execute the drain operation.
 ValuePtr DrainLink::execute(AtomSpace* as, bool silent)
 {
-	// TODO: Implement stream draining logic
-	return ValueCast(createVoidValue());
+	while (true)
+	{
+		ValuePtr vp = _outgoing[0]->execute(as, silent);
+		if (nullptr == vp)
+			return createVoidValue();
+		if (VOID_VALUE == vp->get_type())
+			return vp;
+	}
+	return nullptr; // Not reached.
 }
 
 DEFINE_LINK_FACTORY(DrainLink, DRAIN_LINK)
