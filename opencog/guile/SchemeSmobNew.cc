@@ -178,11 +178,8 @@ SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
-		return SCM_BOOL_F;
-
-	if (not pa->is_atom())
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
@@ -193,11 +190,11 @@ SCM SchemeSmob::ss_atom_p (SCM s)
 
 SCM SchemeSmob::ss_node_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (pa->is_node()) return SCM_BOOL_T;
+	if (h->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -207,11 +204,11 @@ SCM SchemeSmob::ss_node_p (SCM s)
 
 SCM SchemeSmob::ss_link_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (pa->is_link()) return SCM_BOOL_T;
+	if (h->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 

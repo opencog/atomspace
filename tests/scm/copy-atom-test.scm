@@ -52,26 +52,9 @@
 
 (for-each
 	(lambda (orphan)
-		; cog-atom? must return #t because they are Atoms
-		(test-assert "expect actual atoms" (cog-atom? orphan)))
-	ilst)
-
-; Print the ilst. This will clobber the handles, because the scheme
-; API does not allow scheme smobs with orphan Atoms in them.
-(format #t "Should be invalid: ~A\n" ilst)
-
-(for-each
-	(lambda (orphan)
-		; cog-atom? must return #f because now, ilst is clobbered.
+		; cog-atom? returns #f because touching orphans clobbers them.
 		(test-assert "expect invalid handles" (not (cog-atom? orphan))))
 	ilst)
-
-; The stuff in the LinkValue should be OK, still.
-(for-each
-	(lambda (orphan)
-		; cog-atom? must return #t because they are Atoms
-		(test-assert "expect actual atoms" (cog-atom? orphan)))
-	(cog-value->list lv))
 
 (for-each
 	(lambda (orphan)

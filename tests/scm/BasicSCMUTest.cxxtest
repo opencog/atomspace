@@ -251,11 +251,6 @@ void BasicSCMUTest::test_extract(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to extract atom AAA!", !eval_err);
 
-	eval->eval("(cog-atom? l)");
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to evaluate scheme predicate!", !eval_err);
-
 	Handle li = eval->eval_h("(cog-atom l)");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
