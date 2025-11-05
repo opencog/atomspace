@@ -172,6 +172,12 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 // In this thread, create a bunch of atoms.
 // Use same atomsapce as all the other threads.
 // Use a unique evaluator for this thread.
+//
+// Use (let ((thing))) instead of (define thing) to avoid having
+// races with the defintion of 'thing'. The problem is that the
+// (define thing) will define the symbol in the 'guile-user module',
+// which will race across threads. The (let) will do thread-local
+// creation and binding of the symbol.
 void MultiThreadUTest::threadedAdd(int thread_id, int N)
 {
 	SchemeEval* ev = new SchemeEval(as);
@@ -181,12 +187,11 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 		double confidence = 0.8 * ((double) N-i) / ((double) N);
 
 		std::ostringstream oss;
-		oss << "(begin "
-		    << "(define node (cog-new-node 'ConceptNode \""
-		    << "thread " << thread_id << " node " << counter
-		    << "\")) "
-		    << "(cog-set-value! node (Predicate \"*-TruthValueKey-*\") (FloatValue " << strength << " " << confidence << ")) "
-		    << "node)";
+		oss << "(let ((per-thread-node (cog-new-node 'ConceptNode \""
+		    << "thread= " << thread_id << " node= " << counter
+		    << "\"))) "
+		    << "(cog-set-value! per-thread-node (Predicate \"*-TruthValueKey-*\") (FloatValue " << strength << " " << confidence << ")) "
+		    << "per-thread-node)";
 		counter ++;
 
 		Handle h = ev->eval_h(oss.str());
