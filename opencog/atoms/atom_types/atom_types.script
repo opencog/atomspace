@@ -338,7 +338,7 @@ ALWAYS_LINK <- PRESENT_LINK
 // results will be presented disjointly.
 //
 // The inheritance from AlwaysLink is meant to indicate that the
-// grouping behave like an AlwaysLink, in that every member of the
+// grouping behaves like an AlwaysLink, in that every member of the
 // grouping always has the same groundings.
 GROUP_LINK <- ALWAYS_LINK
 
