@@ -91,7 +91,8 @@ QUEUE_VALUE <- CONTAINER_VALUE
 UNISET_VALUE <- CONTAINER_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
-SORTED_VALUE <- CONTAINER_VALUE
+// Inherits from UnisetValue to minimize c++ duplication.
+SORTED_VALUE <- UNISET_VALUE
 
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
