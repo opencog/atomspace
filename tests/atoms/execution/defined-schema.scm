@@ -134,16 +134,16 @@
 			(Variable "$out")
 			(ExecutionOutput
 				(DefinedSchemaNode "reversive-rewrite")
-					(List
-						(ExecutionOutputLink
-							(DefinedSchema "get-the-tail")
-							(List
-								(Variable "$hd")))
-						(ExecutionOutput
-							(DefinedSchemaNode "make-an-edge")
-							(List
-								(Variable "$hd")
-								(Variable "$out"))))))))
+				(List
+					(ExecutionOutputLink
+						(DefinedSchema "get-the-tail")
+						(List
+							(Variable "$hd")))
+					(ExecutionOutput
+						(DefinedSchemaNode "make-an-edge")
+						(List
+							(Variable "$hd")
+							(Variable "$out"))))))))
 
 
 ; (cog-execute!
@@ -217,7 +217,7 @@
 			(List (Variable "$h")
 				(ExecutionOutput
 					(DefinedSchema "unwrap")
-						(Variable "$set"))))))
+					(Variable "$set"))))))
 
 ; Lets try it out. Does it work? Yes.
 ; (cog-execute!
@@ -249,8 +249,8 @@
 			(Equal (Set)
 				(ExecutionOutputLink
 					(DefinedSchema "get-the-tail")
-						(List
-							(Variable "$hd"))))
+					(List
+						(Variable "$hd"))))
 			(Variable "$hd")
 
 			; Else make an edge connecting head and tail.
