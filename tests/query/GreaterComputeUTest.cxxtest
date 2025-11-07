@@ -79,21 +79,21 @@ void GreaterComputeUTest::test_computation(void)
 
     Handle try_out = eval->eval_h("(threshold)");
 
-    Handle crash_b = HandleCast(try_out->execute(as.get()));
+    ValuePtr crash_b = try_out->execute(as.get());
 
     std::cout << "Answer: " << crash_b->to_string() << std::endl;
-    TS_ASSERT_EQUALS(1, getarity(crash_b));
+    TS_ASSERT_EQUALS(1, crash_b->size());
 
     // Create the expected answer, and compare
-    Handle expected = eval->eval_h(
-    "(SetLink "
+    ValuePtr expected = eval->eval_v(
+    "(LinkValue "
     "   (Edge "
     "      (Predicate \"power\")"
     "      (ListLink "
     "         (Concept \"Ken\")"
     "         (Number 1000))))");
 
-    TS_ASSERT_EQUALS(crash_b, expected);
+    TS_ASSERT(*crash_b == *expected);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

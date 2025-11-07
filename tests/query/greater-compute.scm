@@ -64,7 +64,6 @@
 )
 
 (define (threshold)
-	(CollectionOf
 	(QueryLink
 		(VariableList
 			(VariableNode "$who")
@@ -107,6 +106,5 @@
 				(VariableNode "$how_much")
 			)
 		)
-	)
 	)
 )
