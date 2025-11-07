@@ -84,19 +84,8 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		}
 
 		// No AtomSpace provided. Use a temporary.
-		// Avoid transient memory space leak. Well, there's no actual
-		// leak, because the pool deals with it; it just prints a nasty
-		// warning message, and we want to hide that message.
-		AtomSpace* tas = grab_transient_atomspace(as);
-		std::exception_ptr eptr;
-		try {
-			vseq.push_back(h->execute(tas, silent));
-		}
-		catch(...) {
-			eptr = std::current_exception();
-		}
-		release_transient_atomspace(tas);
-		if (eptr) std::rethrow_exception(eptr);
+		Transient scratch(as);
+		vseq.push_back(h->execute(scratch.tmp, silent));
 	}
 
 	return createLinkValue(std::move(vseq));

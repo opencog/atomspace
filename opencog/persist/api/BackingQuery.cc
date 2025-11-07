@@ -232,12 +232,11 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingImplicator impl(this, tas, cvp);
+		Transient scratch(as);
+		BackingImplicator impl(this, scratch.tmp, cvp);
 		impl.satisfy(qlp);
 
 		qv = svp;
-		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, MEET_LINK))
 	{
@@ -245,32 +244,28 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingSatisfyingSet sater(this, tas, cvp);
+		Transient scratch(as);
+		BackingSatisfyingSet sater(this, scratch.tmp, cvp);
 		sater.satisfy(PatternLinkCast(query));
 
 		qv = svp;
-		release_transient_atomspace(tas);
 	}
 	else if (nameserver().isA(qt, JOIN_LINK))
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		BackingJoinCallback rjcb(this, tas);
+		Transient scratch(as);
+		BackingJoinCallback rjcb(this, scratch.tmp);
 
-		qv = JoinLinkCast(query)->execute_cb(tas, &rjcb);
-		release_transient_atomspace(tas);
+		qv = JoinLinkCast(query)->execute_cb(scratch.tmp, &rjcb);
 	}
 	else if (query->is_executable())
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		qv = query->execute(tas);
-		release_transient_atomspace(tas);
+		Transient scratch(as);
+		qv = query->execute(scratch.tmp);
 	}
 	else if (query->is_evaluatable())
 	{
-		AtomSpace* tas = grab_transient_atomspace(as);
-		qv = query->evaluate(tas);
-		release_transient_atomspace(tas);
+		Transient scratch(as);
+		qv = query->evaluate(scratch.tmp);
 	}
 	else
 	{

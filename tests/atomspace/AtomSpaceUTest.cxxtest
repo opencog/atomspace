@@ -265,7 +265,8 @@ class AtomSpaceUTest :  public CxxTest::TestSuite
 {
 private:
 
-    static AtomSpace *atomSpace;
+    AtomSpacePtr asp;
+    AtomSpace* atomSpace;
 
 public:
     AtomSpaceUTest() {
@@ -275,11 +276,11 @@ public:
     }
 
     void setUp() {
-        atomSpace = new AtomSpace();
+        asp = createAtomSpace();
+        atomSpace = asp.get();
     }
 
     void tearDown() {
-        delete atomSpace;
     }
 
     struct mean : public HandlePredicate {
@@ -678,5 +679,3 @@ public:
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
 };
-
-AtomSpace *AtomSpaceUTest::atomSpace = nullptr;

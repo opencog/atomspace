@@ -325,10 +325,11 @@ protected:
     #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
 #else
-    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
+    #define _MTX _mtx
+    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
+    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
+    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
 #endif
 
     // Packed flas. Single byte per atom.

@@ -32,7 +32,7 @@ using namespace opencog;
 class HashMixUTest :  public CxxTest::TestSuite
 {
 private:
-	AtomSpace* as;
+	AtomSpacePtr as;
 
 public:
 	HashMixUTest()
@@ -41,12 +41,11 @@ public:
 
 	void setUp()
 	{
-		as = new AtomSpace();
+		as = createAtomSpace();
 	}
 
 	void tearDown()
 	{
-		delete as;
 	}
 
 	void HashMixer(int num_atoms, int width)

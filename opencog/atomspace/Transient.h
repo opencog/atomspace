@@ -31,6 +31,14 @@ class AtomSpace;
 AtomSpace* grab_transient_atomspace(AtomSpace*);
 void release_transient_atomspace(AtomSpace*);
 
+// Handy wrapper to provide RAII when exceptions gt thrown.
+struct Transient
+{
+	AtomSpace* tmp;
+	Transient(AtomSpace* as) : tmp(grab_transient_atomspace(as)) {}
+	~Transient() { release_transient_atomspace(tmp); }
+};
+
 } //namespace opencog
 
 #endif // _OPENCOG_TRANSIENT_H

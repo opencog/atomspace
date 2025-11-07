@@ -255,35 +255,6 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 	return _outgoing[n];
 }
 
-void AtomSpace::setAtomSpace(AtomSpace* as)
-{
-	if (as == _atom_space) return;
-
-	// This is identical to the code in Atom::setAtomSpace() except that
-	// we print a different error message. I see nothing wrong with
-	// having one AtomSpace be placed as a member into many others,
-	// except that we don't have any viable mechanisms for such multiple
-	// membership, and so I don't know how to treat this right now.
-	// Fixme maybe later someday, if/when this is needed.
-	//
-	// Note, however, weird stuff can happen. Just now, Claude tried to
-	// do this:
-	//     (define main-as (cog-atomspace))
-	//     (define child-as (cog-new-atomspace main-as))
-	//     (cog-set-atomspace! main-as)
-	//     (cog-execute! (AtomSpaceOf child-as))
-	// This would have caused the chiled to be placed in a Link being held
-	// in the main AS, which is not exactly circular, but fringes onto it.
-	// The wisdom of allowing something like this is unclear.
-	if (not (nullptr == _atom_space or as == nullptr))
-		throw RuntimeException(TRACE_INFO,
-			"At this time, an AtomSpace can only be placed in one other\n"
-			"AtomSpace. If you are reading this error message and you don't\n"
-			"like it, please open a bug report\n");
-
-	_atom_space = as;
-}
-
 // ====================================================================
 // XXX FIXME -- The recursive design of the depth() routine below makes
 // it into a bottleneck, when the stack of AtomSpaces exceeds a few

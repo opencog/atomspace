@@ -24,6 +24,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Transient.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -41,6 +42,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 
 	Type st = schema->get_type();
 	if ((not schema->is_type(FUNCTION_LINK)) and
+	    (not schema->is_type(VIRTUAL_LINK)) and
 	    LAMBDA_LINK != st and
 	    RULE_LINK != st and
 	    (not schema->is_type(PROCEDURE_NODE)) and
@@ -95,7 +97,9 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 ///
 ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vp(execute_once(as, silent));
+	Transient scratch(as);
+
+	ValuePtr vp(execute_once(as, scratch.tmp, silent));
 
 	// Should never happen. But it can happen if the API implementation
 	// is screwed up. Since nothing should ever be screwed up, this can't
@@ -107,23 +111,23 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 
 	if (not vp->is_atom()) return vp;
 
-	Handle res(as->add_atom(HandleCast(vp)));
+	Handle res(scratch.tmp->add_atom(HandleCast(vp)));
 	if (res->is_executable())
-		return res->execute(as, silent);
+		vp = res->execute(scratch.tmp, silent);
 
 	// Need to handle constructions such as
 	// (ExecutionOutput
 	//    (Lambda
 	//        (VariableList (Variable "$A") (Variable "$B"))
 	//        (LessThan (Variable "$A") (Variable "$B")))
-	if (res->is_type(EVALUATABLE_LINK))
+	else if (res->is_type(EVALUATABLE_LINK))
 	{
-		Instantiator inst(as);
-		ValuePtr pap(inst.execute(res));
-		if (pap and pap->is_atom())
-			return as->add_atom(HandleCast(pap));
-		return pap;
+		Instantiator inst(scratch.tmp);
+		vp = inst.execute(res);
 	}
+
+	if (vp and vp->is_atom())
+		return as->add_atom(HandleCast(vp));
 
 	return vp;
 }
@@ -134,7 +138,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 /// how to execute itself correctly. Much like PutLink, this also tries
 /// to deal with multiple arguments that are sets (so that a SetLink
 /// has the semantics of "apply to all members of the set")
-static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
+static inline HandleSeq execute_argseq(AtomSpace* scratch, HandleSeq args,
                                        bool silent)
 {
 	HandleSeq exargs;
@@ -148,7 +152,7 @@ static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
 		}
 
 		// If we are here, the argument is executable.
-		ValuePtr vp = h->execute(as, silent);
+		ValuePtr vp = h->execute(scratch, silent);
 		if (vp->is_atom())
 		{
 			exargs.push_back(HandleCast(vp));
@@ -173,7 +177,7 @@ static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
 	return exargs;
 }
 
-ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
+ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bool silent)
 {
 	Handle sn(_outgoing[0]);
 	Handle args(_outgoing[1]);
@@ -197,9 +201,31 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const FreeVariables& vars = flp->get_vars();
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
-		Handle reduct = vars.substitute_nocheck(sn, oset, silent);
-		ValuePtr vp = reduct->execute(as, silent);
+
+		Handle reduct;
+		if (0 < vars.size())
+			reduct = vars.substitute_nocheck(sn, oset, silent);
+		else
+		{
+			HandleSeq vfun = sn->getOutgoingSet();
+			vfun.insert(vfun.end(), oset.begin(), oset.end());
+			reduct = scratch->add_link(sn->get_type(), std::move(vfun));
+		}
+		ValuePtr vp = reduct->execute(scratch, silent);
 		return vp;
+	}
+
+	if (sn->is_type(VIRTUAL_LINK))
+	{
+		HandleSeq vrel = sn->getOutgoingSet();
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+			args->getOutgoingSet(): HandleSeq{args});
+		vrel.insert(vrel.end(), oset.begin(), oset.end());
+
+		Handle reduct = scratch->add_link(sn->get_type(), std::move(vrel));
+
+		Instantiator inst(scratch);
+		return inst.execute(reduct);
 	}
 
 	Type st = sn->get_type();
@@ -213,9 +239,8 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
-		HandleSeq xargs(execute_argseq(as, oset, silent));
-
-		return as->add_atom(vars.substitute_nocheck(body, xargs));
+		HandleSeq xargs(execute_argseq(scratch, oset, silent));
+		return vars.substitute_nocheck(body, xargs);
 	}
 
 	return get_handle();
