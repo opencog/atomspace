@@ -41,7 +41,7 @@ class UseCountUTest :  public CxxTest::TestSuite
 {
 private:
 
-    AtomSpace *atomSpace;
+    AtomSpacePtr atomSpace;
     Handle anchor;
 
     // Counters must be atomic; we are incrementing them inside threads
@@ -71,12 +71,11 @@ public:
 
     void setUp()
     {
-        atomSpace = new AtomSpace();
+        atomSpace = createAtomSpace();
     }
 
     void tearDown()
     {
-        delete atomSpace;
     }
 
     // =================================================================
