@@ -69,7 +69,6 @@ void SortedValueUTest::test_basic_sorted(void)
 	)");
 
 	TS_ASSERT(sorted_val != nullptr);
-	printf("Created SortedValue: %s\n", sorted_val->to_string().c_str());
 
 	// Cast to SortedValuePtr
 	SortedValuePtr svp = SortedValueCast(sorted_val);
@@ -90,6 +89,10 @@ void SortedValueUTest::test_basic_sorted(void)
 	// Get the sorted contents
 	const ValueSeq& contents = svp->value();
 
+	// Verify we got 3 items
+	TS_ASSERT_EQUALS(contents.size(), 3);
+
+	// Print the sorted contents
 	printf("SortedValue contents (%zu items):\n", contents.size());
 	for (size_t i = 0; i < contents.size(); i++)
 	{
