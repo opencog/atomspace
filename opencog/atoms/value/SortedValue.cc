@@ -28,7 +28,7 @@ using namespace opencog;
 // ==============================================================
 
 SortedValue::SortedValue(const Handle& h)
-	: UnisetValue(SORTED_VALUE), _handle(h)
+	: UnisetValue(SORTED_VALUE), _schema(h)
 {
 	// Set remains open for adding values
 }
