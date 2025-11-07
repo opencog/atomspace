@@ -473,7 +473,7 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 
 	eval->eval(
 	   "(define (single-arg-fun x)"
-	   "   (And (Concept \"A\") x))"
+	   "   (List (Concept \"A\") x))"
 	);
 	CHKEV(eval);
 
@@ -486,7 +486,7 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 	CHKEV(eval);
 
 	Handle expect =
-		eval->eval_h("(And (Concept \"A\") (Concept \"B\"))");
+		eval->eval_h("(List (Concept \"A\") (Concept \"B\"))");
 	std::cout << "Expression is " << result->to_string() << std::endl;
 	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);

@@ -26,9 +26,11 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include "ExecutionOutputLink.h"
 #include "GroundedProcedureNode.h"
+#include "Instantiator.h"
 
 using namespace opencog;
 
@@ -57,7 +59,7 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq&& oset, Type t)
 {
 	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
-		                      "Exception an ExecutionOutputLink!");
+		                      "Not an ExecutionOutputLink!");
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
@@ -105,46 +107,35 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 
 	if (not vp->is_atom()) return vp;
 
-	Handle res(HandleCast(vp));
-	if (not (SET_LINK == res->get_type()))
+	Handle res(as->add_atom(HandleCast(vp)));
+	if (res->is_executable())
+		return res->execute(as, silent);
+
+	// Need to handle constructions such as
+	// (ExecutionOutput
+	//    (Lambda
+	//        (VariableList (Variable "$A") (Variable "$B"))
+	//        (LessThan (Variable "$A") (Variable "$B")))
+	if (res->is_type(EVALUATABLE_LINK))
 	{
-		if (res->is_executable())
-		{
-			vp = res->execute(as, silent);
-			if (not vp->is_atom()) return vp;
-			res = HandleCast(vp);
-		}
-		return vp;
+		Instantiator inst(as);
+		ValuePtr pap(inst.execute(res));
+		if (pap and pap->is_atom())
+			return as->add_atom(HandleCast(pap));
+		return pap;
 	}
 
-	// If we are here, then its a SetLink; unwrap it, execute,
-	// and re-wrap it. Basically, we distribute over the contents
-	// of a Set.  This is very much like how PutLink works.
-	// Is there a better way? I don't know.
-	HandleSeq elts;
-	for (Handle elt: res->getOutgoingSet())
-	{
-		if (elt->is_executable())
-		{
-			elt = as->add_atom(elt);
-			vp = elt->execute(as, silent);
-			if (not vp->is_atom()) break;
-			elt = HandleCast(vp);
-		}
-		elts.push_back(elt);
-	}
-
-	return createLink(std::move(elts), SET_LINK);
+	return vp;
 }
 
 /// execute_argseq -- execute a seq of arguments, return a seq of results.
 ///
 /// Somewhat like force_execute(), but assumes that each atom knows
-/// how to behave itself correctly. Much like PutLink, this also tries
+/// how to execute itself correctly. Much like PutLink, this also tries
 /// to deal with multiple arguments that are sets (so that a SetLink
 /// has the semantics of "apply to all members of the set")
 static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
-                                       bool silent, bool& have_set)
+                                       bool silent)
 {
 	HandleSeq exargs;
 	for (const Handle& h: args)
@@ -158,22 +149,26 @@ static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
 
 		// If we are here, the argument is executable.
 		ValuePtr vp = h->execute(as, silent);
-		if (not vp->is_atom()) // Yuck!
-			exargs.push_back(h);
-		else
+		if (vp->is_atom())
 		{
-			Handle hex(HandleCast(vp));
-			if (SET_LINK == hex->get_type())
-			{
-				size_t sz = hex->get_arity();
-				// Unwrap SetLink singletons.
-				if (1 == sz)
-					hex = hex->getOutgoingAtom(0);
-				else if (1 < sz)
-					have_set = true;
-			}
-			exargs.push_back(hex);
+			exargs.push_back(HandleCast(vp));
+			continue;
 		}
+
+		// A kind of ugly hack for now. We need to deal
+		// with vectors of Atoms or something, I dunno.
+		// But this works, for now.
+		if (not (vp->is_type(LINK_VALUE) and 1 == vp->size()))
+		{
+			exargs.push_back(h);
+			continue;
+		}
+
+		ValuePtr v0 = LinkValueCast(vp)->value()[0];
+		if (v0->is_atom())
+			exargs.push_back(HandleCast(v0));
+		else
+			exargs.push_back(h);
 	}
 	return exargs;
 }
@@ -218,49 +213,9 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
-		// If one of the arguments is a SetLink, then apply the
-		// lambda expression to each of the mebers in the set.
-		// This is also how PutLink works. It's needed to handle
-		// the case where GetLink returns a set of multiple results;
-		// we want to emulate that set passing through the processing
-		// pipeline. (XXX Is there a better way of doing this?)
-		// If there is more than one SetLink, then this won't work,
-		// and we need to make a Cartesian product of them, instead.
-		bool have_set = false;
-		HandleSeq xargs(execute_argseq(as, oset, silent, have_set));
+		HandleSeq xargs(execute_argseq(as, oset, silent));
 
-		if (not have_set)
-			return as->add_atom(vars.substitute_nocheck(body, xargs));
-
-		// Ugh. First, find the SetLink.
-		size_t nargs = xargs.size();
-		size_t set_idx = 0;
-		for (size_t i=0; i<nargs; i++)
-		{
-			if (SET_LINK == xargs[i]->get_type())
-			{
-				set_idx = i;
-				break;
-			}
-		}
-
-		// Next, get the SetLink arity, and loop over it.
-		size_t num_elts = xargs[set_idx]->get_arity();
-		HandleSeq results;
-		for (size_t n=0; n<num_elts; n++)
-		{
-			HandleSeq yargs;
-			for (size_t i=0; i<nargs; i++)
-			{
-				if (i != set_idx)
-					yargs.push_back(xargs[i]);
-				else
-					yargs.push_back(xargs[set_idx]->getOutgoingAtom(n));
-			}
-			results.push_back(vars.substitute_nocheck(body, yargs));
-		}
-
-		return createLink(std::move(results), SET_LINK);
+		return as->add_atom(vars.substitute_nocheck(body, xargs));
 	}
 
 	return get_handle();

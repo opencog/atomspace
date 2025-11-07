@@ -1,7 +1,6 @@
 (define (dummy x) x)
 
 (define bl
-   (CollectionOf
    (QueryLink
       (VariableList
          (TypedVariableLink
@@ -10,7 +9,7 @@
          )
          (TypedVariableLink
             (VariableNode "$B")
-            (TypeNode "EvaluationLink")
+            (TypeNode "EdgeLink")
          )
       )
       (AndLink
@@ -33,7 +32,6 @@
          )
       )
    )
-   )
 )
 
-(Evaluation (Predicate "P") (Concept "A"))
+(Edge (Predicate "P") (Concept "A"))

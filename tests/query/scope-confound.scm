@@ -19,7 +19,7 @@
                 (TypeNode "PredicateNode")))
 
         ; pattern
-        (EvaluationLink
+        (EdgeLink
             (VariableNode "$D")
             (ListLink
                 (VariableNode "$A")
@@ -33,7 +33,7 @@
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
@@ -43,12 +43,12 @@
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
                                     (VariableNode "$Y")))))
-                    (EvaluationLink
+                    (EdgeLink
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")
@@ -73,7 +73,7 @@
                 (TypeNode "PredicateNode")))
 
         ; pattern
-        (EvaluationLink
+        (EdgeLink
             (VariableNode "$D")
             (ListLink
                 (VariableNode "$A")
@@ -87,7 +87,7 @@
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
@@ -97,12 +97,12 @@
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
                                     (VariableNode "$Y")))))
-                    (EvaluationLink
+                    (EdgeLink
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")
