@@ -145,31 +145,23 @@ void ExecutionOutputUTest::test_exec(void)
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
-			hcapital = an(CONCEPT_NODE, "capital")
-		)
-	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
+			hcapital = an(CONCEPT_NODE, "capital")));
 
 	Handle hprep;
 	al(EVALUATION_LINK,
 		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
-			an(CONCEPT_NODE, "Spain")
-		)
-	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
+			an(CONCEPT_NODE, "Spain")));
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
-	"	(cog-new-link 'EvaluationLink \n"
-	"		(cog-new-node 'ConceptNode \n"
-	"			(string-append (cog-name verb) \"_\" (cog-name prep)) \n"
-	"		) \n"
-	"		(cog-new-link 'ListLink \n"
-	"			(cog-new-node 'ConceptNode (cog-name verb)) \n"
-	"			(cog-new-node 'PredicateNode (cog-name prep)) \n"
-	"		) \n"
-	"	) \n"
-	")";
+	"	(Evaluation \n"
+	"		(Concept \n"
+	"			(string-append (cog-name verb) \"_\" (cog-name prep))) \n"
+	"		(List\n"
+	"			(Concept (cog-name verb)) \n"
+	"			(Predicate (cog-name prep)))))\n";
 	eval.eval(str);
 
 	// Result should be a ListLink
