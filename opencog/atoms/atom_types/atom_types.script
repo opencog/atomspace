@@ -861,6 +861,11 @@ SIMILARITY_LINK <- UNORDERED_LINK
 //
 // In mathematics nomenclature, VirtualLinks are "relations": they are
 // terms that evaluate to crisp true/false values.
+//
+// XXX FIXME Should probably be renamed to RELATION_LINK. Got called
+// "virtual" because it is impossible to enumerate all greater-than
+// relations and store them in the AtomSpae as real objects; these
+// exist only "virtually".
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK

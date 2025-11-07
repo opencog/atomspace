@@ -41,6 +41,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 
 	Type st = schema->get_type();
 	if ((not schema->is_type(FUNCTION_LINK)) and
+	    (not schema->is_type(VIRTUAL_LINK)) and
 	    LAMBDA_LINK != st and
 	    RULE_LINK != st and
 	    (not schema->is_type(PROCEDURE_NODE)) and
@@ -197,9 +198,33 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const FreeVariables& vars = flp->get_vars();
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
-		Handle reduct = vars.substitute_nocheck(sn, oset, silent);
+
+		Handle reduct;
+		if (0 < vars.size())
+			reduct = vars.substitute_nocheck(sn, oset, silent);
+		else
+		{
+			HandleSeq vfun = sn->getOutgoingSet();
+			vfun.insert(vfun.end(), oset.begin(), oset.end());
+			reduct = as->add_link(sn->get_type(), std::move(vfun));
+		}
 		ValuePtr vp = reduct->execute(as, silent);
 		return vp;
+	}
+
+	if (sn->is_type(VIRTUAL_LINK))
+	{
+		HandleSeq vrel = sn->getOutgoingSet();
+		const HandleSeq& oset(LIST_LINK == args->get_type() ?
+			args->getOutgoingSet(): HandleSeq{args});
+		vrel.insert(vrel.end(), oset.begin(), oset.end());
+		Handle reduct = as->add_link(sn->get_type(), std::move(vrel));
+
+		Instantiator inst(as);
+		ValuePtr pap(inst.execute(reduct));
+		if (pap and pap->is_atom())
+			return as->add_atom(HandleCast(pap));
+		return pap;
 	}
 
 	Type st = sn->get_type();
