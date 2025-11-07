@@ -14,6 +14,8 @@
 (define tname "exec-eval-test")
 (test-begin tname)
 
+; ------------------------------------
+
 (define exec-plus
 	(ExecutionOutput
 		(Lambda
@@ -23,6 +25,16 @@
 
 (test-assert "Exec Plus"
 	(equal? (cog-execute! exec-plus) (Number 5)))
+
+; ------------------------------------
+
+(define exec-plus-bare
+	(ExecutionOutput
+		(Plus)
+		(List (Number 2) (Number 3))))
+
+(test-assert "Exec Plus Bare"
+	(equal? (cog-execute! exec-plus-bare) (Number 5)))
 
 ; ------------------------------------
 
@@ -60,6 +72,27 @@
 (test-assert "Exec Less False"
 	(equal? (cog-execute! exec-less-false) (BoolValue #f)))
 
-(test-end tname)
+; ------------------------------------
 
+(define exec-less-bare-true
+	(ExecutionOutput
+		(LessThan)
+		(List (Number 6) (Number 7))))
+
+(test-assert "Exec Less Bare True"
+	(equal? (cog-execute! exec-less-bare-true) (BoolValue #t)))
+
+; ------------------------------------
+
+(define exec-less-bare-false
+	(ExecutionOutput
+		(LessThan)
+		(List (Number 9) (Number 7))))
+
+(test-assert "Exec Less Bare False"
+	(equal? (cog-execute! exec-less-bare-false) (BoolValue #f)))
+
+; ------------------------------------
+
+(test-end tname)
 (opencog-test-end)
