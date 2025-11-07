@@ -55,35 +55,30 @@ Frame::~Frame()
 
 void Frame::setAtomSpace(AtomSpace* as)
 {
+	// Under a lock, because ThreadedUTest races in the
+	// creation of scratch spaces, which causes issues,'
+	// if not protected.
 	std::unique_lock<std::shared_mutex> lck(_MTX);
 	if (nullptr == _atom_space)
 		_atom_space = as;
 
-	if (nullptr == as)
+	else if (nullptr == as)
 		_atom_space = nullptr;
+
+	else if (as != _atom_space)
+		throw RuntimeException(TRACE_INFO,
+			"AtomSpace is already set!\n");
 }
 
 /// Place `this` into the incoming set of each outgoing frame.
 void Frame::install()
 {
-	Handle llc(get_handle());
-	OC_ASSERT(llc->is_type(ATOM_SPACE),
+	OC_ASSERT(is_type(ATOM_SPACE),
 		"Can't deal with anything else right now");
 
-	AtomSpace* self = AtomSpaceCast(llc).get();
-
+	Handle llc(get_handle());
 	for (Handle& h : _outgoing)
-	{
-#if TOCTOU_BUG
-		// This is a time-of-check, time-of-use race condition.
-		// Avoid this by doing it in Frame::setAtomSpace() above,
-		// under a lock.
-		if (nullptr == h->getAtomSpace())
-			h->setAtomSpace(self);
-#endif
-
 		h->insert_atom(llc);
-	}
 }
 
 void Frame::remove()
