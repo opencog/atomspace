@@ -83,11 +83,11 @@ void DefinedSchemaUTest::test_make_edge(void)
 	Handle result = eval->eval_h("(cog-execute! mk-edge)");
 
 	Handle edge = eval->eval_h(
-	"	(EvaluationLink"
-	"		(PredicateNode \"yikes\")"
-	"		(ListLink"
-	"			(ConceptNode \"X\")"
-	"			(ConceptNode \"Y\")))"
+	"	(Edge"
+	"		(Predicate \"yikes\")"
+	"		(List"
+	"			(Concept \"X\")"
+	"			(Concept \"Y\")))"
 	);
 
 	printf("got %s\n", result->to_string().c_str());
@@ -121,11 +121,11 @@ void DefinedSchemaUTest::test_compose(void)
 	Handle result = eval->eval_h("(cog-execute! rw-one)");
 
 	Handle edge = eval->eval_h(
-	"	(EvaluationLink"
-	"		(PredicateNode \"yikes\")"
-	"		(ListLink"
-	"			(ConceptNode \"A\")"
-	"			(ConceptNode \"B\")))"
+	"	(Edge"
+	"		(Predicate \"yikes\")"
+	"		(List"
+	"			(Concept \"A\")"
+	"			(Concept \"B\")))"
 	);
 
 	printf("got %s\n", result->to_string().c_str());
@@ -143,13 +143,13 @@ void DefinedSchemaUTest::test_nest(void)
 	Handle result = eval->eval_h("(cog-execute! nest)");
 
 	Handle edge = eval->eval_h(
-	"(ListLink"
-	"	(ConceptNode \"B\")"
-	"	(EvaluationLink"
-	"		(PredicateNode \"yikes\")"
-	"		(ListLink"
-	"			(ConceptNode \"A\")"
-	"			(ConceptNode \"root\"))))"
+	"(List"
+	"	(Concept \"B\")"
+	"	(Edge"
+	"		(Predicate \"yikes\")"
+	"		(List"
+	"			(Concept \"A\")"
+	"			(Concept \"root\"))))"
 	);
 
 	printf("got %s\n", result->to_string().c_str());

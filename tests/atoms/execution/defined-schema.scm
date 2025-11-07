@@ -20,7 +20,7 @@
 
 ; The re-written DAG edges will look like this:
 (define into-form
-	(Evaluation (Predicate "yikes")
+	(Edge (Predicate "yikes")
 		(ListLink (Variable "$head") (Variable "$tail"))))
 
 ; A defined Lambda, in atomese.
@@ -155,20 +155,20 @@
 ; What the above generates, when executed.
 (define reversive-result
 	(SetLink
-		(EvaluationLink (PredicateNode "yikes") (ListLink
+		(EdgeLink (PredicateNode "yikes") (ListLink
 			(ConceptNode "F")
-			(EvaluationLink (PredicateNode "yikes") (ListLink
+			(EdgeLink (PredicateNode "yikes") (ListLink
 				(ConceptNode "B")
-				(EvaluationLink (PredicateNode "yikes") (ListLink
+				(EdgeLink (PredicateNode "yikes") (ListLink
 					(ConceptNode "A")
 					(ConceptNode "root")))))))
-		(EvaluationLink (PredicateNode "yikes") (ListLink
+		(EdgeLink (PredicateNode "yikes") (ListLink
 			(ConceptNode "D")
-			(EvaluationLink (PredicateNode "yikes") (ListLink
+			(EdgeLink (PredicateNode "yikes") (ListLink
 				(ConceptNode "C")
-				(EvaluationLink (PredicateNode "yikes") (ListLink
+				(EdgeLink (PredicateNode "yikes") (ListLink
 					(ConceptNode "B")
-					(EvaluationLink (PredicateNode "yikes") (ListLink
+					(EdgeLink (PredicateNode "yikes") (ListLink
 						(ConceptNode "A")
 						(ConceptNode "root"))))))))))
 )
