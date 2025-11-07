@@ -107,35 +107,10 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	if (not vp->is_atom()) return vp;
 
 	Handle res(HandleCast(vp));
-	if (not (SET_LINK == res->get_type()))
-	{
-		if (res->is_executable())
-		{
-			vp = res->execute(as, silent);
-			if (not vp->is_atom()) return vp;
-			res = HandleCast(vp);
-		}
-		return vp;
-	}
+	if (res->is_executable())
+		return res->execute(as, silent);
 
-	// If we are here, then its a SetLink; unwrap it, execute,
-	// and re-wrap it. Basically, we distribute over the contents
-	// of a Set.  This is very much like how PutLink works.
-	// Is there a better way? I don't know.
-	HandleSeq elts;
-	for (Handle elt: res->getOutgoingSet())
-	{
-		if (elt->is_executable())
-		{
-			elt = as->add_atom(elt);
-			vp = elt->execute(as, silent);
-			if (not vp->is_atom()) break;
-			elt = HandleCast(vp);
-		}
-		elts.push_back(elt);
-	}
-
-	return createLink(std::move(elts), SET_LINK);
+	return vp;
 }
 
 /// execute_argseq -- execute a seq of arguments, return a seq of results.
