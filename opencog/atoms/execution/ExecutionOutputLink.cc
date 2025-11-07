@@ -99,7 +99,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
 	Transient scratch(as);
 
-	ValuePtr vp(execute_once(scratch.tmp, silent));
+	ValuePtr vp(execute_once(as, scratch.tmp, silent));
 
 	// Should never happen. But it can happen if the API implementation
 	// is screwed up. Since nothing should ever be screwed up, this can't
@@ -113,7 +113,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 
 	Handle res(scratch.tmp->add_atom(HandleCast(vp)));
 	if (res->is_executable())
-		vp = res->execute(as, silent);
+		vp = res->execute(scratch.tmp, silent);
 
 	// Need to handle constructions such as
 	// (ExecutionOutput
@@ -177,7 +177,7 @@ static inline HandleSeq execute_argseq(AtomSpace* scratch, HandleSeq args,
 	return exargs;
 }
 
-ValuePtr ExecutionOutputLink::execute_once(AtomSpace* scratch, bool silent)
+ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bool silent)
 {
 	Handle sn(_outgoing[0]);
 	Handle args(_outgoing[1]);
@@ -189,7 +189,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* scratch, bool silent)
 				"ExecutionOutputLink: Cannot use naked %s",
 				sn->to_string().c_str());
 
-		return gsn->execute_args(scratch, args, silent);
+		return gsn->execute_args(as, args, silent);
 	}
 
 	if (sn->is_type(DEFINED_PROCEDURE_NODE))
