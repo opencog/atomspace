@@ -129,7 +129,7 @@
 	(Lambda
 		(VariableList (Variable "$hd") (Variable "$out"))
 		(Cond
-			(Equal (Variable "$hd") (Set))
+			(Equal (SizeOf (Variable "$hd")) (Number 0))
 			(Variable "$out")
 			(ExecutionOutput
 				(DefinedSchemaNode "reversive-rewrite")
@@ -180,7 +180,7 @@
 	(Lambda
 		(VariableList (Variable "$set"))
 		(Cond
-			(Equal (Set) (CollectionOf (Query (Glob "$elts")
+			(Equal (Number 0) (SizeOf (Query (Glob "$elts")
 				(Equal (Variable "$set") (Set (Glob "$elts")))
 				(List (Glob "$elts")))))
 			(Variable "$set")
