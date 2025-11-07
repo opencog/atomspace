@@ -87,11 +87,11 @@ void GreaterComputeUTest::test_computation(void)
     // Create the expected answer, and compare
     Handle expected = eval->eval_h(
     "(SetLink "
-    "   (EvaluationLink "
-    "      (PredicateNode \"power\")"
+    "   (Edge "
+    "      (Predicate \"power\")"
     "      (ListLink "
-    "         (ConceptNode \"Ken\")"
-    "         (NumberNode 1000))))");
+    "         (Concept \"Ken\")"
+    "         (Number 1000))))");
 
     TS_ASSERT_EQUALS(crash_b, expected);
 
