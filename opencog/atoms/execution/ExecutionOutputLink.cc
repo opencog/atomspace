@@ -24,6 +24,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Transient.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -218,10 +219,14 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 		vrel.insert(vrel.end(), oset.begin(), oset.end());
-		Handle reduct = as->add_link(sn->get_type(), std::move(vrel));
 
-		Instantiator inst(as);
+		// Don't pollute the main AtomSpace with crud; use a scartch space.
+		Transient scratch(as);
+		Handle reduct = scratch.tmp->add_link(sn->get_type(), std::move(vrel));
+
+		Instantiator inst(scratch.tmp);
 		ValuePtr pap(inst.execute(reduct));
+
 		if (pap and pap->is_atom())
 			return as->add_atom(HandleCast(pap));
 		return pap;
