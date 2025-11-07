@@ -115,14 +115,14 @@ void ExecutionOutputUTest::test_exec(void)
 	 */
 	Handle clauses =
 		al(AND_LINK,
-			al(EVALUATION_LINK,
+			al(EDGE_LINK,
 				an(PREDICATE_NODE, "_obj"),
 				al(LIST_LINK,
 					an(CONCEPT_NODE, "be"),
 					an(VARIABLE_NODE, "$var1")
 				)
 			),
-			al(EVALUATION_LINK,
+			al(EDGE_LINK,
 				an(VARIABLE_NODE, "$prep"),
 				al(LIST_LINK,
 					an(VARIABLE_NODE, "$var1"),
@@ -141,14 +141,14 @@ void ExecutionOutputUTest::test_exec(void)
 
 	Handle hcapital;
 	// Create data on which the above pattern should match
-	al(EVALUATION_LINK,
+	al(EDGE_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
 			hcapital = an(CONCEPT_NODE, "capital")));
 
 	Handle hprep;
-	al(EVALUATION_LINK,
+	al(EDGE_LINK,
 		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
@@ -472,18 +472,18 @@ void ExecutionOutputUTest::test_lambda(void)
 	Handle bl = eval.eval_h("bl");
 
 	Instantiator inst(as.get());
-	Handle result = HandleCast(inst.execute(bl));
-	Handle expect = al(SET_LINK, {
-	                   al(LAMBDA_LINK, {
-	                      an(VARIABLE_NODE, "$X"),
-	                      al(EVALUATION_LINK, {
-	                         an(PREDICATE_NODE, "P"),
-	                         an(CONCEPT_NODE, "A")})})});
+	ValuePtr result = inst.execute(bl);
+	Handle lamb = al(LAMBDA_LINK, {
+	                  an(VARIABLE_NODE, "$X"),
+	                  al(EDGE_LINK, {
+	                     an(PREDICATE_NODE, "P"),
+	                     an(CONCEPT_NODE, "A")})});
+	ValuePtr expect = createLinkValue(ValueSeq({lamb}));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(expect, result);
+	TS_ASSERT(*expect == *result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
