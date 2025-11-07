@@ -30,6 +30,7 @@
 
 #include "ExecutionOutputLink.h"
 #include "GroundedProcedureNode.h"
+#include "Instantiator.h"
 
 using namespace opencog;
 
@@ -106,9 +107,23 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 
 	if (not vp->is_atom()) return vp;
 
-	Handle res(HandleCast(vp));
+	Handle res(as->add_atom(HandleCast(vp)));
 	if (res->is_executable())
 		return res->execute(as, silent);
+
+	// Need to handle constructions such as
+	// (ExecutionOutput
+	//    (Lambda
+	//        (VariableList (Variable "$A") (Variable "$B"))
+	//        (LessThan (Variable "$A") (Variable "$B")))
+	if (res->is_type(EVALUATABLE_LINK))
+	{
+		Instantiator inst(as);
+		ValuePtr pap(inst.execute(res));
+		if (pap and pap->is_atom())
+			return as->add_atom(HandleCast(pap));
+		return pap;
+	}
 
 	return vp;
 }
