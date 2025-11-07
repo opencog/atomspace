@@ -38,6 +38,14 @@ SortedValue::SortedValue(const Handle& h)
 	_left_shim = createValueShimLink();
 	_right_shim = createValueShimLink();
 
+	// The ExecutionOutputLink provides us with general machinery
+	// that can run the schema on the pair to be compared. The
+	// only gotcha here is that the shims cannot be placed in any
+	// AtomSpace, and thus theExOutLink can't be, either. So far,
+	// That's OK. There's also an annoying meta-issue: the schema
+	// can't be applied without beta-reduction, which is ...
+	// annoying. But that's the best we can do with the current
+	// architecture. For now.
 	_exout =
 		createLink(HandleSeq({
 			_schema,
@@ -46,6 +54,10 @@ SortedValue::SortedValue(const Handle& h)
 				HandleCast(_right_shim)}),
 				LIST_LINK)}),
 			EXECUTION_OUTPUT_LINK);
+
+	// Scratch space in which temproaries are evaluated. This
+	// overlays the AtomSpace in which the schema sits, and thus,
+	// the schema can use this for context.
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
 }
 
@@ -56,6 +68,7 @@ SortedValue::~SortedValue()
 
 // ==============================================================
 
+// Use the provided schema to perform pair-wise compare.
 bool SortedValue::less(const Value& lhs, const Value& rhs) const
 {
 	// Ugly casts. But so it goes.
@@ -64,14 +77,13 @@ bool SortedValue::less(const Value& lhs, const Value& rhs) const
 
 	ValuePtr result = _exout->execute(_scratch);
 
-	// Print the result for debugging
-	printf("SortedValue::less() comparing:\n");
-	printf("  lhs: %s\n", lhs.to_short_string().c_str());
-	printf("  rhs: %s\n", rhs.to_short_string().c_str());
-	printf("  result: %s\n", result->to_string().c_str());
+	if (not result->is_type(BOOL_VALUE))
+		throw RuntimeException(TRACE_INFO,
+			"Expecting BoolValue compare; got %s\n",
+			vp->to_string().c_str());
 
-	// For now, fall back to default comparison
-	return UnisetValue::less(lhs, rhs);
+	BoolValuePtr bv = BoolValueCast(result);
+	return bv->value()[0];
 }
 
 // ==============================================================
