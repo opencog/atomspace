@@ -156,7 +156,7 @@ void ExecutionOutputUTest::test_exec(void)
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
-	"	(Evaluation \n"
+	"	(Edge \n"
 	"		(Concept \n"
 	"			(string-append (cog-name verb) \"_\" (cog-name prep))) \n"
 	"		(List\n"
