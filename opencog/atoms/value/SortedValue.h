@@ -44,6 +44,9 @@ class SortedValue
 {
 protected:
 	Handle _schema;
+	Handle _left_shim;
+	Handle _right_shim;
+	Handle _exout;
 
 	SortedValue(Type t, const Handle& h) : UnisetValue(t), _schema(h) {}
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
