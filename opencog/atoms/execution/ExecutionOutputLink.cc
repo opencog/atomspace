@@ -57,7 +57,7 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq&& oset, Type t)
 {
 	if (!nameserver().isA(t, EXECUTION_OUTPUT_LINK))
 		throw SyntaxException(TRACE_INFO,
-		                      "Exception an ExecutionOutputLink!");
+		                      "Not an ExecutionOutputLink!");
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
@@ -140,7 +140,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 /// execute_argseq -- execute a seq of arguments, return a seq of results.
 ///
 /// Somewhat like force_execute(), but assumes that each atom knows
-/// how to behave itself correctly. Much like PutLink, this also tries
+/// how to execute itself correctly. Much like PutLink, this also tries
 /// to deal with multiple arguments that are sets (so that a SetLink
 /// has the semantics of "apply to all members of the set")
 static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
