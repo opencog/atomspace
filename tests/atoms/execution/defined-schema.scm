@@ -51,10 +51,9 @@
 	(DefinedSchemaNode "get-the-tail")
 	(Lambda
 		(Variable "$head")
-		(CollectionOf
-			(MeetLink
-				(TypedVariable (Variable "$tail") (Type 'ConceptNode))
-				get-form))))
+		(MeetLink
+			(TypedVariable (Variable "$tail") (Type 'ConceptNode))
+			get-form)))
 
 ; Does it work as expected? Yes.
 ;(cog-execute!
