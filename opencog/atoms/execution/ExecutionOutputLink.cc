@@ -129,7 +129,7 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 		return pap;
 	}
 
-	return vp;
+	return as->add_atom(res);
 }
 
 /// execute_argseq -- execute a seq of arguments, return a seq of results.
