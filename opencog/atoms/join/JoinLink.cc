@@ -357,10 +357,9 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	AtomSpace* temp = grab_transient_atomspace(as);
-	Handle meet = temp->add_atom(_meet);
+	Transient scratch(as);
+	Handle meet = scratch.tmp->add_atom(_meet);
 	ValuePtr vp = meet->execute();
-	release_transient_atomspace(temp);
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
