@@ -61,16 +61,12 @@ void SortedValueUTest::test_basic_sorted(void)
 	SchemeEval eval(_asp);
 
 	// Create a SortedValue with a Lambda that compares two variables
-	eval.eval(R"(
-		(define sorted-lambda
-			(SortedValue
-				(Lambda
-					(VariableList (Variable "$A") (Variable "$B"))
-					(LessThan (Variable "$A") (Variable "$B")))))
+	ValuePtr sorted_val = eval.eval_v(R"(
+		(SortedValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(LessThan (Variable "$A") (Variable "$B"))))
 	)");
-
-	// Get the ValuePtr
-	ValuePtr sorted_val = eval.eval_v("sorted-lambda");
 
 	TS_ASSERT(sorted_val != nullptr);
 	printf("Created SortedValue: %s\n", sorted_val->to_string().c_str());
