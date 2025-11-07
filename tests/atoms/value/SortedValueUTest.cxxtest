@@ -21,13 +21,60 @@
  */
 
 #include <opencog/atoms/value/SortedValue.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
 
 using namespace opencog;
 
 class SortedValueUTest : public CxxTest::TestSuite
 {
+private:
+	AtomSpacePtr _asp;
+
 public:
+	SortedValueUTest(void);
 
-	// Test methods will be added here
-
+	void setUp(void);
+	void test_basic_sorted(void);
 };
+
+SortedValueUTest::SortedValueUTest(void)
+	: _asp(createAtomSpace())
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_sync_flag(true);
+	logger().set_timestamp_flag(false);
+}
+
+void SortedValueUTest::setUp(void)
+{
+}
+
+void SortedValueUTest::test_basic_sorted(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(_asp);
+
+	// Create a SortedValue with a Lambda that compares two variables
+	eval.eval(R"(
+		(define sorted-lambda
+			(SortedValue
+				(Lambda
+					(VariableList (Variable "$A") (Variable "$B"))
+					(LessThan (Variable "$A") (Variable "$B")))))
+	)");
+
+	// Get the ValuePtr
+	ValuePtr sorted_val = eval.eval_v("sorted-lambda");
+
+	TS_ASSERT(sorted_val != nullptr);
+	printf("Created SortedValue: %s\n", sorted_val->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
