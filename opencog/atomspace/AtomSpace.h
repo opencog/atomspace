@@ -217,7 +217,6 @@ public:
     virtual size_t size() const { return get_arity(); }
     virtual const HandleSeq& getOutgoingSet() const { return _outgoing; }
     virtual Handle getOutgoingAtom(Arity) const;
-    virtual void setAtomSpace(AtomSpace *);
 
     const std::vector<AtomSpacePtr>& getEnviron() const { return _environ; }
 
