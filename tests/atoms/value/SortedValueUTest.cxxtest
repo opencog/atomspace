@@ -60,24 +60,23 @@ void SortedValueUTest::test_basic_sorted(void)
 
 	SchemeEval eval(_asp);
 
-	// Create a SortedValue with a Lambda that compares two variables
+	// Perform numerical compare. The default sort order that's
+	// built into Handles will sort this smallest first; so use
+	// GreaterThanLink to swap the order.
 	ValuePtr sorted_val = eval.eval_v(R"(
 		(SortedValue
 			(Lambda
 				(VariableList (Variable "$A") (Variable "$B"))
-				(LessThan (Variable "$A") (Variable "$B"))))
+				(GreaterThan (Variable "$A") (Variable "$B"))))
 	)");
 
-	TS_ASSERT(sorted_val != nullptr);
-
-	// Cast to SortedValuePtr
 	SortedValuePtr svp = SortedValueCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
 	// Add numbers in unsorted order: 3, 2, 4
-	Handle num3 = eval.eval_h("(Number 3)");
-	Handle num2 = eval.eval_h("(Number 2)");
-	Handle num4 = eval.eval_h("(Number 4)");
+	Handle num3 = eval.eval_h("(Number 3 3 3)");
+	Handle num2 = eval.eval_h("(Number 2 2)");
+	Handle num4 = eval.eval_h("(Number 4 4 4 4)");
 
 	svp->add(num3);
 	svp->add(num2);
