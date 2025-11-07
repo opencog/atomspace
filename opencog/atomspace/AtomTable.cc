@@ -264,7 +264,7 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     // If this is a transient atomspace, then just grab any version
     // we find. This alters the behavior of glob matching in the
     // MinerUTest (specifically, test_glob and test_typed_glob).
-    // I'm not sure what the deal is, though, why we need to check.
+    // I'm not sure what the deal is, though, why we need to check?
     if (_transient)
         return lookupHandle(orig);
 
