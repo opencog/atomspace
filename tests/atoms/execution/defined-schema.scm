@@ -124,6 +124,22 @@
 ; Define a recursive tree-walker. It not only recurses, it reverses,
 ; tracing a path from each leaf, back up to the root. The return is
 ; a set-link, each element a path from leaf to root.
+;
+; This used to work, but is now broken/sabotaged. The reason for the
+; sabotage is an attempt to remove all the special-case treatment for
+; SetLink that has long been a thorn in the side: See issue #2911
+; https://github.com/opencog/atomspace/issues/2911
+;
+; The get-tail function above uses MeetLink to return a UnisetValue
+; (instead of the old SetLink) but it gets difficult to flow that
+; value throught this nested recursive definition, as currently
+; designed. Part of this is due to an old, flawed design for the
+; ExecutionOutputLink, and the other part is the ugly, nasty need
+; to beta-reduce the LambdaLinks, which causes no end of issues.
+; Perhaps the ValueShimLink could be gainfully deployed, I dunno.
+; This is a hard nut to crack, and currently a low priority, so
+; I write this note and leave it at that.
+
 (DefineLink
 	(DefinedSchemaNode "reversive-rewrite")
 	(Lambda

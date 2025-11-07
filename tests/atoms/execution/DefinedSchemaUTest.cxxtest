@@ -164,6 +164,9 @@ void DefinedSchemaUTest::test_nest(void)
 // DefinedSchema is used to define recursive execution.
 // This is called "reversive" because it inverts the tree,
 // upside-down, with a path from each leaf to the root.
+//
+// The test used to work but is now disabled. See the long explanation
+// in defined-schema.scm for details.
 void DefinedSchemaUTest::xtest_reversive(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
