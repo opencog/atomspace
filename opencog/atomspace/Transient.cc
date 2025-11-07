@@ -47,8 +47,9 @@ using namespace opencog;
 /// code, as a historical precedent. But performance measurements should
 /// be done, and if there is no savings, this code should be trashed.
 
+// The SCMExecutionOutputUTest::test_recursive() needs lots of them
+const int MAX_CACHED_TRANSIENTS = 8192;
 const bool TRANSIENT_SPACE = true;
-const int MAX_CACHED_TRANSIENTS = 1024;
 
 // Allocated storage for the transient atomspace cache static variables.
 static std::mutex s_transient_cache_mutex;

@@ -36,7 +36,7 @@ namespace opencog
 class ExecutionOutputLink : public FunctionLink
 {
 private:
-	ValuePtr execute_once(AtomSpace* as, bool silent=false);
+	ValuePtr execute_once(AtomSpace* as, AtomSpace* scratch, bool silent=false);
 
 protected:
 	void check_schema(const Handle& schema) const;
