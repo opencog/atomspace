@@ -10,7 +10,7 @@
 (define forall
 	(LambdaLink
 		(VariableNode "$X")
-		(EvaluationLink (Predicate "P") (VariableNode "$X"))))
+		(EdgeLink (Predicate "P") (VariableNode "$X"))))
 
 ;; This has the same variable name as the above -- and so,
 ;; during pattern matching, this should not be considered to be
@@ -39,7 +39,7 @@
 ;;     (ConceptNode "ChurchOfEngland")
 ;;     (ConceptNode "AnglicanChurch")
 ;;   )
-;;   (EvaluationLink
+;;   (EdgeLink
 ;;     (PredicateNode "subOrganization")
 ;;     (ListLink
 ;;       (ConceptNode "ChurchOfEngland")
@@ -81,7 +81,7 @@
             (VariableNode "?C")
             (ConceptNode "AnglicanChurch")
          )
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "subOrganization")
             (ListLink
                (VariableNode "?C")

@@ -32,7 +32,7 @@
     (TypedVariableLink
       (VariableNode "$Xbee")
       (TypeNode "ConceptNode"))
-    (EvaluationLink
+    (EdgeLink
       (PredicateNode "Q")
       (VariableNode "$Xbee"))))
 

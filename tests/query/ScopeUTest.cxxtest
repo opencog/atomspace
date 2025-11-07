@@ -255,9 +255,9 @@ void ScopeUTest::test_hide_1()
 	TS_ASSERT_EQUALS(1, result->get_arity());
 
 	Handle expected = eval->eval_h(
-		"(SetLink (ListLink"
-				"(VariableNode \"$X\")"
-				"(EvaluationLink (Predicate \"P\") (VariableNode \"$X\"))))"
+		"(SetLink (List"
+				"(Variable \"$X\")"
+				"(Edge (Predicate \"P\") (Variable \"$X\"))))"
 	);
 
 	TS_ASSERT_EQUALS(result, expected);
