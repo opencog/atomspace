@@ -56,6 +56,9 @@ protected:
 public:
 	SortedValue(const Handle&);
 	virtual ~SortedValue();
+
+	virtual void add(const ValuePtr&) override;
+	virtual void add(ValuePtr&&) override;
 };
 
 VALUE_PTR_DECL(SortedValue);
