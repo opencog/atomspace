@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 #include "ExecutionOutputLink.h"
 #include "GroundedProcedureNode.h"
@@ -159,7 +160,21 @@ static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
 		// If we are here, the argument is executable.
 		ValuePtr vp = h->execute(as, silent);
 		if (not vp->is_atom()) // Yuck!
-			exargs.push_back(h);
+		{
+			// A kind of ugly hack for now. We need to deal
+			// with vectors of Atoms or something, I dunno.
+			// But this works, for now.
+			if (vp->is_type(LINK_VALUE) and 1 == vp->size())
+			{
+				ValuePtr v0 = LinkValueCast(vp)->value()[0];
+				if (v0->is_atom())
+					exargs.push_back(HandleCast(v0));
+				else
+					exargs.push_back(h);
+			}
+			else
+				exargs.push_back(h);
+		}
 		else
 		{
 			Handle hex(HandleCast(vp));

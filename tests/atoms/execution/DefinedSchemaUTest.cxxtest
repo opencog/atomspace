@@ -59,7 +59,7 @@ public:
 
 	void test_make_edge(void);
 	void test_get_tail(void);
-	void xtest_compose(void);
+	void test_compose(void);
 	void xtest_nest(void);
 	void xtest_reversive(void);
 	void xtest_recursive(void);
@@ -114,7 +114,7 @@ void DefinedSchemaUTest::test_get_tail(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void DefinedSchemaUTest::xtest_compose(void)
+void DefinedSchemaUTest::test_compose(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
