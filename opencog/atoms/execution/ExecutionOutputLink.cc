@@ -200,6 +200,8 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
+		// Don't pollute the main AtomSpace with crud; use a scartch space.
+		Transient scratch(as);
 		Handle reduct;
 		if (0 < vars.size())
 			reduct = vars.substitute_nocheck(sn, oset, silent);
@@ -207,7 +209,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, bool silent)
 		{
 			HandleSeq vfun = sn->getOutgoingSet();
 			vfun.insert(vfun.end(), oset.begin(), oset.end());
-			reduct = as->add_link(sn->get_type(), std::move(vfun));
+			reduct = scratch.tmp->add_link(sn->get_type(), std::move(vfun));
 		}
 		ValuePtr vp = reduct->execute(as, silent);
 		return vp;
