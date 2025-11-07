@@ -159,22 +159,24 @@ static inline HandleSeq execute_argseq(AtomSpace* as, HandleSeq args,
 
 		// If we are here, the argument is executable.
 		ValuePtr vp = h->execute(as, silent);
-		if (not vp->is_atom()) // Yuck!
+		if (vp->is_atom())
 		{
-			// A kind of ugly hack for now. We need to deal
-			// with vectors of Atoms or something, I dunno.
-			// But this works, for now.
-			if (vp->is_type(LINK_VALUE) and 1 == vp->size())
-			{
-				ValuePtr v0 = LinkValueCast(vp)->value()[0];
-				if (v0->is_atom())
-					exargs.push_back(HandleCast(v0));
-				else
-					exargs.push_back(h);
-			}
-			else
-				exargs.push_back(h);
+			exargs.push_back(HandleCast(vp));
+			continue;
 		}
+
+		// A kind of ugly hack for now. We need to deal
+		// with vectors of Atoms or something, I dunno.
+		// But this works, for now.
+		if (not (vp->is_type(LINK_VALUE) and 1 == vp->size()))
+		{
+			exargs.push_back(h);
+			continue;
+		}
+
+		ValuePtr v0 = LinkValueCast(vp)->value()[0];
+		if (v0->is_atom())
+			exargs.push_back(HandleCast(v0));
 		else
 			exargs.push_back(h);
 	}
