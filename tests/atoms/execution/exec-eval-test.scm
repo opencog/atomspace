@@ -28,8 +28,9 @@
 	(equal? (cog-execute! exec-plus) (Number 5)))
 
 ; The AtomSpace should not have been polluted with scratch results!
-;(test-assert "Exec Plus Size"
-;	(equal? exec-plus-size (count-all)))
+; (plus one for the funal result)
+(test-assert "Exec Plus Size"
+	(equal? (+ exec-plus-size 1) (count-all)))
 
 ; ------------------------------------
 
@@ -62,8 +63,8 @@
 
 ; The AtomSpace should not have been polluted with scratch results!
 ; (plus one for the new number ...)
-;(test-assert "Exec Vec Size"
-;	(equal? exec-vec-size (+ (count-all) 1))
+(test-assert "Exec Vec Size"
+	(equal? (+ exec-vec-size 1) (count-all)))
 
 ; ------------------------------------
 
@@ -79,8 +80,8 @@
 	(equal? (cog-execute! exec-less-true) (BoolValue #t)))
 
 ; The AtomSpace should not have been polluted with scratch results!
-;(test-assert "Exec Less True Size"
-;	(equal? exec-less-true-size (count-all)))
+(test-assert "Exec Less True Size"
+	(equal? exec-less-true-size (count-all)))
 
 ; ------------------------------------
 
@@ -96,8 +97,8 @@
 	(equal? (cog-execute! exec-less-false) (BoolValue #f)))
 
 ; The AtomSpace should not have been polluted with scratch results!
-;(test-assert "Exec Less False Size"
-;	(equal? exec-less-false-size (count-all)))
+(test-assert "Exec Less False Size"
+	(equal? exec-less-false-size (count-all)))
 
 ; ------------------------------------
 
