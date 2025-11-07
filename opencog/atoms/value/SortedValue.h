@@ -23,8 +23,9 @@
 #ifndef _OPENCOG_SORTED_VALUE_H
 #define _OPENCOG_SORTED_VALUE_H
 
-#include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/value/UnisetValue.h>
+#include <opencog/atoms/flow/ValueShimLink.h>
 
 namespace opencog
 {
@@ -44,16 +45,17 @@ class SortedValue
 {
 protected:
 	Handle _schema;
-	Handle _left_shim;
-	Handle _right_shim;
+	ValueShimLinkPtr _left_shim;
+	ValueShimLinkPtr _right_shim;
 	Handle _exout;
+	AtomSpace* _scratch;
 
 	SortedValue(Type t, const Handle& h) : UnisetValue(t), _schema(h) {}
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
 	SortedValue(const Handle&);
-	virtual ~SortedValue() {}
+	virtual ~SortedValue();
 };
 
 VALUE_PTR_DECL(SortedValue);

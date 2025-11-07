@@ -23,8 +23,9 @@
 #include <opencog/atoms/value/SortedValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/value/BoolValue.h>
-#include <opencog/atoms/flow/ValueShimLink.h>
 #include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/Transient.h>
 
 using namespace opencog;
 
@@ -33,31 +34,35 @@ using namespace opencog;
 SortedValue::SortedValue(const Handle& h)
 	: UnisetValue(SORTED_VALUE), _schema(h)
 {
-	// Create ValueShimLinks for left and right comparison arguments
+	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
 	_right_shim = createValueShimLink();
 
-	// Create ExecutionOutputLink: (ExecutionOutput _schema (List _left_shim _right_shim))
-	Handle list_args = createLink(HandleSeq{_left_shim, _right_shim}, LIST_LINK);
-	_exout = createLink(HandleSeq{_schema, list_args}, EXECUTION_OUTPUT_LINK);
+	_exout =
+		createLink(HandleSeq({
+			_schema,
+			createLink(HandleSeq({
+				HandleCast(_left_shim),
+				HandleCast(_right_shim)}),
+				LIST_LINK)}),
+			EXECUTION_OUTPUT_LINK);
+	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
+}
 
-	// Set remains open for adding values
+SortedValue::~SortedValue()
+{
+	release_transient_atomspace(_scratch);
 }
 
 // ==============================================================
 
 bool SortedValue::less(const Value& lhs, const Value& rhs) const
 {
-	// Set the values on the shims
-	ValueShimLinkPtr left_shim = ValueShimLinkCast(_left_shim);
-	ValueShimLinkPtr right_shim = ValueShimLinkCast(_right_shim);
+	// Ugly casts. But so it goes.
+	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
+	_right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
 
-	left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
-	right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
-
-	// Execute the comparison
-	FunctionLinkPtr exout_func = FunctionLinkCast(_exout);
-	ValuePtr result = exout_func->execute();
+	ValuePtr result = _exout->execute(_scratch);
 
 	// Print the result for debugging
 	printf("SortedValue::less() comparing:\n");
