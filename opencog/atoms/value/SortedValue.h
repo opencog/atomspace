@@ -34,32 +34,22 @@ namespace opencog
  */
 
 /**
- * SortedValues provide a thread-safe sorted set of Values with
- * custom comparison logic. They extend UnisetValue by overriding
- * the less() method to provide custom sorting behavior.
- *
- * Elements are deduplicated and maintained in sorted order according
- * to the custom comparison function.
+ * A LinkValue that maintains contents in sorted order.
+ * Sort order is determined by the sort schema.
+ * This must be executable, take exactly two arguments,
+ * and must return a crisp bool value, indicating the order.
  */
 class SortedValue
 	: public UnisetValue
 {
 protected:
-	SortedValue(Type t) : UnisetValue(t) {}
+	Handle _schema;
 
-	/**
-	 * Override the comparison method to provide custom sorting.
-	 * This method determines the ordering of Values in the set.
-	 *
-	 * @param lhs The left-hand side Value to compare
-	 * @param rhs The right-hand side Value to compare
-	 * @return true if lhs should come before rhs in sorted order
-	 */
+	SortedValue(Type t, const Handle& h) : UnisetValue(t), _schema(h) {}
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
-	SortedValue(void) : UnisetValue(SORTED_VALUE) {}
-	SortedValue(const ValueSeq&);
+	SortedValue(const Handle&);
 	virtual ~SortedValue() {}
 };
 

@@ -27,17 +27,10 @@ using namespace opencog;
 
 // ==============================================================
 
-SortedValue::SortedValue(const ValueSeq& vseq)
-	: UnisetValue(SORTED_VALUE)
+SortedValue::SortedValue(const Handle& h)
+	: UnisetValue(SORTED_VALUE), _handle(h)
 {
-	for (const ValuePtr& v: vseq)
-		_set.insert(v);
-
-	// Since this constructor placed stuff on the set,
-	// we also close it, to indicate we are "done" placing
-	// things on the set. If some user needs to add more,
-	// then they need to re-open.
-	close();
+	// Set remains open for adding values
 }
 
 // ==============================================================
@@ -50,5 +43,4 @@ bool SortedValue::less(const Value& lhs, const Value& rhs) const
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(SORTED_VALUE,
-                     createSortedValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(SORTED_VALUE, createSortedValue, const Handle&)
