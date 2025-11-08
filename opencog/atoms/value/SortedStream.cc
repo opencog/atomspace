@@ -32,9 +32,8 @@ using namespace opencog;
 // ==============================================================
 
 SortedStream::SortedStream(const Handle& h)
-	: UnisetValue(SORTED_STREAM), _schema(h), _source(nullptr)
+	: UnisetValue(SORTED_STREAM), _schema(h)
 {
-	init();
 }
 
 SortedStream::SortedStream(const HandleSeq& hs)
@@ -44,11 +43,17 @@ SortedStream::SortedStream(const HandleSeq& hs)
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
 
 	_schema = hs[0];
-	_source = hs[1];
-	init();
+
+	if (hs[1]->is_executable())
+		init_src(hs[1]->execute());
+	else
+		init_src(hs[1]);
 }
 
-void SortedStream::init()
+// Set up the compare op by wrapping the given relation in
+// an ExecutionOutputLink, fed by a pair of ValueShims that
+// will pass the Values into the relation.
+void SortedStream::init_cmp(void)
 {
 	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
@@ -75,6 +80,10 @@ void SortedStream::init()
 	// overlays the AtomSpace in which the schema sits, and thus,
 	// the schema can use this for context.
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
+}
+
+void SortedStream::init_src(const ValuePtr& src)
+{
 }
 
 SortedStream::~SortedStream()

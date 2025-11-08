@@ -48,10 +48,11 @@ protected:
 	ValueShimLinkPtr _left_shim;
 	ValueShimLinkPtr _right_shim;
 	Handle _exout;
-	Handle _source;
+	LinkValuePtr _source;
 	AtomSpace* _scratch;
 
-	void init(void);
+	void init_cmp(void);
+	void init_src(const ValuePtr&);
 	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
