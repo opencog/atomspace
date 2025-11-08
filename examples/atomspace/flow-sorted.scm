@@ -28,10 +28,10 @@
 (use-modules (opencog) (opencog exec))
 
 ; Create a stream that will sort items according to the
-; size of thier outgnoing set, the the largest items coming
+; size of their outgnoing set, the the largest items coming
 ; first. The GreaterThanLink provides the sort order; the
 ; SizeOfLink provides a numerical value that can be ordered.
-; The comparison relation needs to be persented in such a way
+; The comparison relation needs to be presented in such a way
 ; that the two inputs are clear; a LambdaLink is used for that.
 (define order-relation
 	(Lambda

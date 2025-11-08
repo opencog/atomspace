@@ -10,7 +10,7 @@
 ; The demo below moks up a short finite stream, by declaring a
 ; static array, and then doling out from that array, one by one,
 ; via the FlatStream iterator. The items handed out will each
-; have thier use count incremented by one, and a total count
+; have their use count incremented by one, and a total count
 ; incremented as well. That the stream drained to completion can
 ; be checked by looking at these counts at the end.
 ;
@@ -28,7 +28,7 @@
 		(Concept "A")
 		(VoidValue)))
 
-; Acnhor this at a "well-known location".
+; Anchor this at a "well-known location".
 (define data-anchor (Anchor "process-anchor"))
 (cog-set-value! data-anchor (Predicate "test-data") test-data)
 
