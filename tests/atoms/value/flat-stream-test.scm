@@ -44,9 +44,8 @@
 (test-assert "second-access-match" (equal? second-ref second-item))
 
 ; Third access - should be empty.
-(define third-ref (cog-value->list fs))
-(format #t "Stream third access: ~A\n" third-ref)
-(test-assert "third-access-match" (equal? third-ref '()))
+(format #t "Stream third access: ~A\n" fs)
+(test-assert "third-access-match" (equal? fs (LinkValue)))
 
 (test-end tname)
 
@@ -111,9 +110,8 @@
 (test-assert "ordered-tagnode-z" (equal? fs-ref (TagNode "z")))
 
 ; After reaching the end, it should wrap around to the first item
-(set! fs-ref (cog-value->list fs-ordered))
-(format #t "Expect end-of-stream: ~A\n" fs-ref)
-(test-assert "ordered-eof" (equal? fs-ref '()))
+(format #t "Expect end-of-stream: ~A\n" fs-ordered)
+(test-assert "ordered-eof" (equal? fs-ordered (LinkValue)))
 
 (test-end tname-ordered)
 
@@ -148,10 +146,9 @@
 (test-assert "setvalue-first"
 	(equal? stream-ref (Concept "first")))
 
-(set! stream-ref (cog-value-ref stream 0))
-(format #t "SetValue test second: ~A\n" stream-ref)
+(format #t "SetValue test second: ~A\n" stream)
 (test-assert "setvalue-second"
-	(equal? stream-ref (Concept "second")))
+	(equal? stream (LinkValue (Concept "second"))))
 
 (set! stream-ref (cog-value-ref stream 0))
 (format #t "SetValue test third: ~A\n" stream-ref)
@@ -165,10 +162,9 @@
 
 ; Should wrap around.  Why? Because FlatStream recurses on us here;
 ; it treats itself as an infinite stream.
-(set! stream-ref (cog-value-ref stream 0))
-(format #t "SetValue test wrap: ~A\n" (cog-execute! stream-ref))
+(format #t "SetValue test wrap: ~A\n" stream)
 (test-assert "setvalue-wrap-first"
-	(equal? stream-ref (Concept "first")))
+	(equal? stream (LinkValue (Concept "first"))))
 
 (test-end tname-setvalue)
 
