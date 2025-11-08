@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/SortedValue.h
+ * opencog/atoms/value/SortedStream.h
  *
  * Copyright (C) 2025 BrainyBlaze Dynamics, Inc.
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SORTED_VALUE_H
-#define _OPENCOG_SORTED_VALUE_H
+#ifndef _OPENCOG_SORTED_STREAM_H
+#define _OPENCOG_SORTED_STREAM_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/value/UnisetValue.h>
@@ -40,7 +40,7 @@ namespace opencog
  * This must be executable, take exactly two arguments,
  * and must return a crisp bool value, indicating the order.
  */
-class SortedValue
+class SortedStream
 	: public UnisetValue
 {
 protected:
@@ -56,18 +56,18 @@ protected:
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
-	SortedValue(const Handle&);
-	SortedValue(const HandleSeq&);
-	virtual ~SortedValue();
+	SortedStream(const Handle&);
+	SortedStream(const HandleSeq&);
+	virtual ~SortedStream();
 
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
 };
 
-VALUE_PTR_DECL(SortedValue);
-CREATE_VALUE_DECL(SortedValue);
+VALUE_PTR_DECL(SortedStream);
+CREATE_VALUE_DECL(SortedStream);
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_SORTED_VALUE_H
+#endif // _OPENCOG_SORTED_STREAM_H

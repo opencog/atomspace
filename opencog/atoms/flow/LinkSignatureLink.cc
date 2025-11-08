@@ -91,7 +91,7 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 {
 	// The _kind will usually be some LinkValue. One interesting
 	// case is the stream, which takes some Handle argument that
-	// controls the stream operation. Examples include SortedValue
+	// controls the stream operation. Examples include SortedStream
 	// and FlatStream. Pss that directly to the correct factory.
 	if (nameserver().isA(_kind, HANDLE_ARG))
 		return valueserver().create(_kind, _outgoing[1]);

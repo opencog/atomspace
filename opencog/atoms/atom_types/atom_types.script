@@ -96,7 +96,7 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
 // Inherits from UnisetValue to minimize c++ duplication.
-SORTED_VALUE <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
+SORTED_STREAM <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
 
 // Convert calls to `LinkValue::value()` into calls to
 // `Atom::execute()`. Conversion is one-to-one: each touch

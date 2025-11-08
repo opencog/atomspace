@@ -12,8 +12,8 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(StreamUTest)
 	TARGET_LINK_LIBRARIES(StreamUTest smob)
 
-	ADD_CXXTEST(SortedValueUTest)
-	TARGET_LINK_LIBRARIES(SortedValueUTest smob)
+	ADD_CXXTEST(SortedStreamUTest)
+	TARGET_LINK_LIBRARIES(SortedStreamUTest smob)
 
 	ADD_GUILE_TEST(BoolValuePrintTest bool-value-print-test.scm)
 	ADD_GUILE_TEST(CtorArgsTest ctor-args-test.scm)

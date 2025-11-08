@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/SortedValue.cc
+ * opencog/atoms/value/SortedStream.cc
  *
  * Copyright (C) 2025 BrainyBlaze Dynamics, Inc.
  * All Rights Reserved
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/SortedValue.h>
+#include <opencog/atoms/value/SortedStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/core/FunctionLink.h>
@@ -31,14 +31,14 @@ using namespace opencog;
 
 // ==============================================================
 
-SortedValue::SortedValue(const Handle& h)
-	: UnisetValue(SORTED_VALUE), _schema(h), _source(nullptr)
+SortedStream::SortedStream(const Handle& h)
+	: UnisetValue(SORTED_STREAM), _schema(h), _source(nullptr)
 {
 	init();
 }
 
-SortedValue::SortedValue(const HandleSeq& hs)
-	: UnisetValue(SORTED_VALUE)
+SortedStream::SortedStream(const HandleSeq& hs)
+	: UnisetValue(SORTED_STREAM)
 {
 	if (2 != hs.size())
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
@@ -48,7 +48,7 @@ SortedValue::SortedValue(const HandleSeq& hs)
 	init();
 }
 
-void SortedValue::init()
+void SortedStream::init()
 {
 	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
@@ -77,7 +77,7 @@ void SortedValue::init()
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
 }
 
-SortedValue::~SortedValue()
+SortedStream::~SortedStream()
 {
 	release_transient_atomspace(_scratch);
 }
@@ -88,13 +88,13 @@ SortedValue::~SortedValue()
 // AtomSpace always provides accurate context for the schema.
 // We need to do this only once per add, and not once per
 // less(), There will be, in general log(N) calls to less for
-// a SortedValue of size N. Or so one would hope. But the impl
+// a SortedStream of size N. Or so one would hope. But the impl
 // under the covers is std::set<> and it seems to be calling
 // 2x that, because I guess it has no operator==() to work with.
 
 /// Add one item to the stream. If the item is a VoidValue
 /// or an empty LinkValue, the stream closes.
-void SortedValue::add(const ValuePtr& vp)
+void SortedStream::add(const ValuePtr& vp)
 {
 	if ((vp->get_type() == VOID_VALUE) or
 	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
@@ -107,7 +107,7 @@ void SortedValue::add(const ValuePtr& vp)
 	UnisetValue::add(vp);
 }
 
-void SortedValue::add(ValuePtr&& vp)
+void SortedStream::add(ValuePtr&& vp)
 {
 	if ((vp->get_type() == VOID_VALUE) or
 	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
@@ -123,7 +123,7 @@ void SortedValue::add(ValuePtr&& vp)
 // ==============================================================
 
 // Use the provided schema to perform pair-wise compare.
-bool SortedValue::less(const Value& lhs, const Value& rhs) const
+bool SortedStream::less(const Value& lhs, const Value& rhs) const
 {
 	// Ugly casts. But so it goes.
 	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
@@ -144,7 +144,7 @@ bool SortedValue::less(const Value& lhs, const Value& rhs) const
 
 /// Return just ONE item from the stream. If stream is empty, block.
 /// If stream is closed, return empty LinkValue
-void SortedValue::update() const
+void SortedStream::update() const
 {
 	UnisetValue::update();
 }
@@ -152,5 +152,5 @@ void SortedValue::update() const
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(SORTED_VALUE, createSortedValue, const Handle&)
-DEFINE_VALUE_FACTORY(SORTED_VALUE, createSortedValue, const HandleSeq&)
+DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const Handle&)
+DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const HandleSeq&)

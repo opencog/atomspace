@@ -98,7 +98,7 @@ to get the next collection.
 The above three are simple types, and CollectionOfLink works great
 for wrapping up that executable Atom with the StreamValue.
 
-  SortedValue
+  SortedStream
      <lambda defining ordering relation>
      <dataset or source>
 
@@ -159,7 +159,7 @@ wrapped with a FlatStream, which will pull items out one at a time, or
 will block, if the Container is empty and open. Thus, it provides the
 items being added to the Container, without buffering.
 
-The SortedValue works best when it drains its source, that is, keeps
+The SortedStream works best when it drains its source, that is, keeps
 it's source drained and empty, so that it can apply the sort order to
 the buffered contents.
 
@@ -173,11 +173,11 @@ It was invented to be the ultimate pull, the vacuum: it calls the
 execution blocks.
 
 Questions:
- * Why is DrainLink an Atom, and not a Value, like SortedValue, which
+ * Why is DrainLink an Atom, and not a Value, like SortedStream, which
    also drains? A: DrainLink is not a container; it can never fill up.
    A2: Historical accident.
 
- * Should DrainLink and SortedValue automatically launch their own
+ * Should DrainLink and SortedStream automatically launch their own
    threads? Probably yes. There should probably be a centralized
    thread pool, so that these can be managed. Right now, its ad hoc.
 
@@ -362,7 +362,7 @@ So lets recap the issues:
  * Having non-anonymous ObjectNodes that do what Values do might
    simplify the authoring of pipelines.
 
- * We still don't have a good answer for SortedValue vis-a-vis
+ * We still don't have a good answer for SortedStream vis-a-vis
    CollectionOf.
 
  * There's some unresolved tension with the overlapping duties of

@@ -6,13 +6,13 @@
 ; In most conventional usage, it is enough to process a stream in
 ; sequential order, on a first-in, first-out (FIFO) basis. Most
 ; Atomese stream processing will work in this way. There are two
-; main exceptions: UnisetValue, and SortedValue. The UnisetValue
+; main exceptions: UnisetValue, and SortedStream. The UnisetValue
 ; is intended for item deduplication; it will sort items, but in
 ; an opaque fashion (nominally, in lexical order of what would have
 ; been the string, if the item had been printed.)
 ;
-; The SortedValue allows a custom sort order to be applied, with the
-; sorting operation specified in Atomese. The SortedValue is
+; The SortedStream allows a custom sort order to be applied, with the
+; sorting operation specified in Atomese. The SortedStream is
 ; thread-safe buffer: it can be read from and written to simultaneously.
 ; The buffered contents will be kept (and returned) in sorted order.
 ;
@@ -63,7 +63,7 @@
 (define sorted-list
 	(CollectionOf
 		(LinkSignature
-			(Type 'SortedValue)
+			(Type 'SortedStream)
 			order-relation
 			item-list)))
 
