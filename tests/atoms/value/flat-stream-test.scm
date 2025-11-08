@@ -75,14 +75,17 @@
 
 ; Test sequential access - each access should return the next item wrapped in LinkValue
 ; Note: format advances stream, then equal? compares current value
-(format #t "Stream access (Item a): ~A\n" fs-ordered)
-(test-assert "ordered-item-a" (equal? fs-ordered (LinkValue (Item "a"))))
+(define fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item a): ~A\n" fs-ref)
+(test-assert "ordered-item-a" (equal? fs-ref (LinkValue (Item "a"))))
 
-(format #t "Stream access (Item b): ~A\n" fs-ordered)
-(test-assert "ordered-item-b" (equal? fs-ordered (LinkValue (Item "b"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item b): ~A\n" fs-ref)
+(test-assert "ordered-item-b" (equal? fs-ref (LinkValue (Item "b"))))
 
-(format #t "Stream access (Item c): ~A\n" fs-ordered)
-(test-assert "ordered-item-c" (equal? fs-ordered (LinkValue (Item "c"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item c): ~A\n" fs-ref)
+(test-assert "ordered-item-c" (equal? fs-ref (LinkValue (Item "c"))))
 
 ; Next item is an Edge
 (define expected-edge
@@ -90,22 +93,28 @@
 		(Edge
 			(Predicate "relation")
 			(List (Item "d") (Item "e") (Item "f") (Item "g")))))
-(format #t "Stream access (Edge): ~A\n" fs-ordered)
-(test-assert "ordered-edge" (equal? fs-ordered expected-edge))
+
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Edge): ~A\n" fs-ref)
+(test-assert "ordered-edge" (equal? fs-ref expected-edge))
 
 ; Continue with remaining items
-(format #t "Stream access (Item p): ~A\n" fs-ordered)
-(test-assert "ordered-item-p" (equal? fs-ordered (LinkValue (Item "p"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item p): ~A\n" fs-ref)
+(test-assert "ordered-item-p" (equal? fs-ref (LinkValue (Item "p"))))
 
-(format #t "Stream access (Predicate q): ~A\n" fs-ordered)
-(test-assert "ordered-predicate-q" (equal? fs-ordered (LinkValue (Predicate "q"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Predicate q): ~A\n" fs-ref)
+(test-assert "ordered-predicate-q" (equal? fs-ref (LinkValue (Predicate "q"))))
 
-(format #t "Stream access (TagNode z): ~A\n" fs-ordered)
-(test-assert "ordered-tagnode-z" (equal? fs-ordered (LinkValue (TagNode "z"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (TagNode z): ~A\n" fs-ref)
+(test-assert "ordered-tagnode-z" (equal? fs-ref (LinkValue (TagNode "z"))))
 
 ; After reaching the end, it should wrap around to the first item
-(format #t "Stream access (wrap to Item a): ~A\n" fs-ordered)
-(test-assert "ordered-wrap-a" (equal? fs-ordered (LinkValue (Item "a"))))
+(set! fs-ref (cog-value->list fs-ordered))
+(format #t "Expect end-of-stream ~A\n" fs-ref)
+(test-assert "ordered-eof" (equal? fs-ref '()))
 
 (test-end tname-ordered)
 
