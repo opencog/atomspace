@@ -34,25 +34,19 @@
 (define second-item (LinkValue (FloatValue 7 8 9) (FloatValue 10 11 12)))
 
 ; First access - should return first item
-(format #t "Stream first access: ~A\n" fs)
-(test-assert "first-access-match" (equal? fs first-item))
+(define first-ref (cog-value-ref fs 0))
+(format #t "Stream first access: ~A\n" first-ref)
+(test-assert "first-access-match" (equal? first-ref first-item))
 
 ; Second access - should return second item (not equal to first)
-(format #t "Stream second access: ~A\n" fs)
-(test-assert "second-access-nomatch" (not (equal? fs first-item)))
-(test-assert "second-access-match" (equal? fs second-item))
+(define second-ref (cog-value-ref fs 0))
+(format #t "Stream second access: ~A\n" second-ref)
+(test-assert "second-access-match" (equal? second-ref second-item))
 
-; Third access - should wrap around to first item
-; It wraps because after the second item, the end of the LinkValue
-; is reached, so FlatStream calls the ValueOf to get "the next list".
-; It gets the next list, and then cycles like this, forever.
-(format #t "Stream third access: ~A\n" fs)
-(test-assert "third-access-match" (equal? fs first-item))
-
-; Fourth access - should be second item again
-(format #t "Stream fourth access: ~A\n" fs)
-(test-assert "fourth-access-nomatch" (not (equal? fs first-item)))
-(test-assert "fourth-access-match" (equal? fs second-item))
+; Third access - should be empty.
+(define third-ref (cog-value->list fs))
+(format #t "Stream third access: ~A\n" third-ref)
+(test-assert "third-access-match" (equal? third-ref '()))
 
 (test-end tname)
 
