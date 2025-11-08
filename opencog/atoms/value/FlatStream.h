@@ -45,18 +45,15 @@ class FlatStream
 protected:
 	FlatStream(Type t) : LinkValue(t) {}
 
-	void init(void);
+	void init(const ValuePtr&);
 	virtual void update() const;
-	Handle _source;
-	AtomSpace* _as;
+	LinkValuePtr _source;
 	mutable LinkValuePtr _current_stream;
 	mutable size_t _current_index;
 
 public:
 	FlatStream(const Handle&);
-	FlatStream(const HandleSeq&&);
-	FlatStream(const ValuePtr&);  // copy ctor-like thing.
-	FlatStream(const ValueSeq&&); // Another weird copy-ctor-like thing.
+	FlatStream(const ValuePtr&);
 	virtual ~FlatStream() {}
 
 	virtual std::string to_string(const std::string& indent = "") const;
