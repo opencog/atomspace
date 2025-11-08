@@ -85,12 +85,14 @@ return the resulting value. The only difference is that FormulaStream
 is explicitly typed to be numeric.
 
   FlatStream
-     <executable atom returning collection>
+     <stream value of executable atom returning stream>
 
-This one splits up collections into individual parts. Tap it once,
-it executes the <executable atom> and returns the first item from
+This one splits up collections into individual items. The stream is
+assumed to be a stream of collections. A collection can be any Link
+or LinkValue: something that holds a bunch of items.  Tap it once,
+it gets a collection from the stream, and returns the first item from
 that collection.  Tap it again, you get the next item, until the
-current collection goes dry.  Then it executes <executable atom>
+current collection goes dry.  Then it taps it's source stream again,
 to get the next collection.
 
 The above three are simple types, and CollectionOfLink works great
@@ -143,8 +145,7 @@ So we have three of these things. Now for the wicked part.
    That's the promise.
 
  * FlatStream. Resembles a container, but does NOT actually derive from
-   ContainerValue. Derives from FutureStream, unwrapping lists of items
-   from obtained via `Atom::execute()`.
+   ContainerValue. Pulls collections out of it's source stream.
 
  * QueueValue, UnisetValue. Thread-safe containers. Don't stream; they
    block until writer closes, then return one big gulp of everything.
@@ -153,15 +154,10 @@ So we have three of these things. Now for the wicked part.
 There is no FilterStream, because it is easy to set up FutureStream such
 that it pulls from (pulls through) a FilterLink.
 
-Issues:
- * FlatStream behaves like a future, but perhaps it is mis-designed,
-   and should only reference `LinkValue::value()` to get the next
-   collection, instead of calling `Atom::execute()`. XXX FIXME.
-
- * Assuming above change, then FlatStream should be able to pull items
-   one at a time from a running (open) QueueValue. That is, convert the
-   blocking ContainerValue behavior into a non-blocking form, delivering
-   one item at a time, as soon as it is available.
+There is no need for a streaming QueueValue, UnisetValue. These can be
+wrapped with a FlatStream, which will pull items out one at a time, or
+will block, if the Container is empty and open. Thus, it provides the
+items being added to the Container, without buffering.
 
 The SortedValue works best when it drains its source, that is, keeps
 it's source drained and empty, so that it can apply the sort order to
