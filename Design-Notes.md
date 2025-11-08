@@ -127,3 +127,60 @@ the sarch, not at all integrated in any way. Should be sliced off.
 
 So we have three of these things. Now for the wicked part.
 
+ * FilterLink. The Filter's <matching clause> is also a lambda (in the
+   broad sense; not just a LambdaLink, but any one of a variety of
+   funtional Atoms). The lambda is applied to items, one at a time.
+   So, like srfi-1 filter-map.
+
+ * The Sorted/Group/AlwaysValues are containers. The lambda is applied
+   when items are inserted into the container. The container contents
+   are time-varying.
+
+ * FutureStream. Resembles a container, but is always empty, and pulls
+   from upstream, whenever it is pulled from. That's the promise.
+
+ * FlatStream. Resembles a container, but does NOT actually derive from
+   ContainerValue. Pulls only when it needs to.
+
+There is no FilterStream, because it is easy to set up FutureStream such
+that it pulls from (pulls through) a FilterLink.
+
+The SortedValue works best when it drains its source, that is, keeps
+it's source drained and empty, so that it can apply the sort order to
+the buffered contents.
+
+Then we have:
+
+  DrainLink
+     <executable atom returning anything>
+
+It was invented to be the ultimate pull, the vacuum: it calls the
+<executable atom> in an infinite spin loop, pausing only if the
+execution blocks.
+
+Questions:
+ * Why is DrainLink an Atom, and not a Value, like SortedValue, which
+   also drains? A: DrainLink is not a container; it can never fill up.
+   A2: Historical accident.
+
+ * Should DrainLink and SortedValue automatically launch their own
+   threads? Probably yes. There should probably be a centralized
+   thread pool, so that these can be managed. Right now, its ad hoc.
+
+Historically, Atoms are necessarily stateless and immutable; this is
+what allows them to have global uniqueness, thead-safety, etc. This
+has been broken in two ways:
+
+ * Every Atom has a Key-Value store, and this store is dynamic and
+   mutable.
+
+However, the Key-Value mechanism is a push mechanism: one pushes or
+sets Values at a given key. This makes high-speed updates impractical,
+since every update requires a mutex lock.
+
+ * ObjectNodes are Atoms (Nodes) that support *-open-*, *-close-*,
+   *-read-* and *-write-* messages, and sometimes more. These work
+   with time-varying data. ObjectNodes are used primarily for connecting
+   to external systems: StorageNode, for disk and newtwork I/O, and
+   the SensoryNodes, for external (environmental) sensorimotor systems.
+
