@@ -32,8 +32,7 @@ using namespace opencog;
 // ==============================================================
 
 FlatStream::FlatStream(const Handle& h) :
-	LinkValue(FLAT_STREAM),
-	_current_stream(nullptr), _current_index(0)
+	LinkValue(FLAT_STREAM)
 {
 	if (not h->is_executable())
 		throw SyntaxException(TRACE_INFO,
@@ -44,20 +43,42 @@ FlatStream::FlatStream(const Handle& h) :
 }
 
 FlatStream::FlatStream(const ValuePtr& vp) :
-	LinkValue(FLAT_STREAM),
-	_current_stream(nullptr), _current_index(0)
+	LinkValue(FLAT_STREAM)
 {
 	init(vp);
 }
 
+// Set up all finite streams here. Finite streams get copied into
+// the collection once and once only, and that's it.
 void FlatStream::init(const ValuePtr& vp)
 {
-	if (not vp->is_type(LINK_VALUE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a LinkValue, got %s",
-			vp->to_string().c_str());
+	_index = 0;
+	_source = vp;
+	_collection = nullptr;
 
-	_source = LinkValueCast(vp);
+	// Copy Link contents into the collection.
+	if (_source->is_type(LINK))
+	{
+		ValueSeq vsq;
+		for (const Handle& h: HandleCast(_source)->getOutgoingSet())
+			vsq.push_back(h);
+		_collection = createLinkValue(vsq);
+		return;
+	}
+
+	// Everything else is just a collection of size one.
+	// Possible future extensions:
+	// If _source is an ObjectNode, then send *-read-* message ???
+	// If source is a FloatStream or StringStream ... ???
+	if (not _source->is_type(LINK_VALUE))
+	{
+		_collection = createLinkValue(ValueSeq{_source});
+		return;
+	}
+
+	// One-shot, non-streaming finite LinkValue
+	if (not _source->is_type(STREAM_VALUE))
+	_collection = LinkValueCast(_source);
 }
 
 // ==============================================================
@@ -65,29 +86,29 @@ void FlatStream::init(const ValuePtr& vp)
 void FlatStream::update() const
 {
 	// Are we done yet?
-	if (_current_stream and 0 < _current_index and 0 == _value.size()) return;
+	if (_collection and 0 < _index and 0 == _value.size()) return;
 
 	// Flatten
-	if (_current_stream and _current_index < _current_stream->_value.size())
+	if (_collection and _index < _collection->_value.size())
 	{
-		const ValuePtr& vp = _current_stream->_value[_current_index];
+		const ValuePtr& vp = _collection->_value[_index];
 
 		// End-of-stream marker.
 		if (vp->is_type(VOID_VALUE))
 		{
 			_value.clear(); // Set sequence size to zero...
-			_current_index++;
+			_index++;
 			return;
 		}
 
 		ValueSeq vsq({vp});
 		_value.swap(vsq);
-		_current_index++;
+		_index++;
 		return;
 	}
 
 	// (Re-)Start at the begining.
-	_current_index = 0;
+	_index = 0;
 
 	// End-file-file condition.
 	if (nullptr == _source or VOID_VALUE == _source->get_type())
@@ -105,8 +126,8 @@ std::string FlatStream::to_string(const std::string& indent) const
 	rv += "\n";
 	if (_source)
 		rv += _source->to_short_string(indent + "   ");
-	else if (_current_stream)
-		rv += _current_stream->to_short_string(indent + "   ");
+	else if (_collection)
+		rv += _collection->to_short_string(indent + "   ");
 	rv += ")\n";
 	rv += indent + "; Currently:\n";
 	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);

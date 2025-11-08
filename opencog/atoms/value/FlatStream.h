@@ -47,9 +47,9 @@ protected:
 
 	void init(const ValuePtr&);
 	virtual void update() const;
-	LinkValuePtr _source;
-	mutable LinkValuePtr _current_stream;
-	mutable size_t _current_index;
+	ValuePtr _source;
+	mutable LinkValuePtr _collection;
+	mutable size_t _index;
 
 public:
 	FlatStream(const Handle&);
