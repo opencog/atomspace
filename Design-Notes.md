@@ -136,11 +136,13 @@ So we have three of these things. Now for the wicked part.
    when items are inserted into the container. The container contents
    are time-varying.
 
- * FutureStream. Resembles a container, but is always empty, and pulls
-   from upstream, whenever it is pulled from. That's the promise.
+ * FutureStream. Resembles a container, but is always empty. Calls
+   `Atom::execute()` once, every time `FutureStream::value()` is called.
+   That's the promise.
 
  * FlatStream. Resembles a container, but does NOT actually derive from
-   ContainerValue. Pulls only when it needs to.
+   ContainerValue. Derives from FutureStream, unwrapping lists of items
+   from obtained via `Atom::execute()`.
 
  * QueueValue, UnisetValue. Thread-safe containers. Don't stream; they
    block until writer closes, then return one big gulp of everything.
@@ -148,6 +150,11 @@ So we have three of these things. Now for the wicked part.
 
 There is no FilterStream, because it is easy to set up FutureStream such
 that it pulls from (pulls through) a FilterLink.
+
+Issues:
+ * FlatStream behaves like a future, but perhaps it is mis-designed,
+   and should only reference `LinkValue::value()` to get the next
+   collection, instead of calling `Atom::execute()`. XXX FIXME.
 
 The SortedValue works best when it drains its source, that is, keeps
 it's source drained and empty, so that it can apply the sort order to
