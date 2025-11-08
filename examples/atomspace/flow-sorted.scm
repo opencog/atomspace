@@ -25,21 +25,42 @@
 
 (use-modules (opencog) (opencog exec))
 
-; Create a list of items.
+; Create a stream that will sort items according to the
+; size of thier outgnoing set, the the largest items coming
+; first. The GreaterThanLink provides the sort order; the
+; SizeOfLink provides a numerical value that can be ordered.
+; The comparison relation needs to be persented in such a way
+; that the two inputs are clear; a LambdaLink is used for that.
+(define order-relation
+	(Lambda
+		(VariableList (Variable "$left") (Variable "$right"))
+		(GreterThan
+			(SizeOf (Variable "$left"))
+			(SizeOf (Variable "$right")))))
+
+; Create a list of items of varying sizes.
 (define item-list
 	(OrderedLink
 		(Item "a")
 		(Item "b")
-		(Item "c")
 		(Edge
 			(Predicate "relation")
-			(List (Item "d") (Item "e") (Item "f") (Item "g")))
-		(Item "p")
-		(Predicate "q")
-		(TagNode "z")))
+			(List (Item "c") (Item "d")))
+		(Item "e")
+		(Item "f")
+		(Link
+			(Item "p")
+			(Predicate "q")
+			(TagNode "z"))
+		(Edge
+			(Predicate "relation")
+			(List (Item "g") (Item "h")))
+	))
 
-; Wrap the list with the serializer.
-(define fs (FlatStream item-list))
+(define sorted-list
+	(CollectionOf
+		(Type 'SortedValue)
+		x
 
 ; Display it. Note that, at the bottom of the print, the current
 ; sample from the stream is printed. The stream advances every
