@@ -132,31 +132,43 @@
 		(Concept "third")))
 
 ; Use SetValue with CollectionOf to create stream in "pure Atomese"
+; Capture as "junk" to avoid accidental stream deref.
 (define junk
 	(cog-execute!
 		(SetValue (Concept "stream-test") (Predicate "location")
-			(CollectionOf (Type 'FlatStream) (OrderedLink simple-list)))))
+			(LinkSignature (Type 'FlatStream) simple-list))))
 
 ; Create ValueOf reference to the stream
-(define stream-ref (ValueOf (Concept "stream-test") (Predicate "location")))
+(define stream
+	(cog-execute! (ValueOf (Concept "stream-test") (Predicate "location"))))
 
 ; Test that cog-execute! advances the stream (returns FlatStream that wraps LinkValues)
-(format #t "SetValue test first: ~A\n" (cog-execute! stream-ref))
+(define stream-ref (cog-value-ref stream 0))
+(format #t "SetValue test first: ~A\n" stream-ref)
 (test-assert "setvalue-first"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "first"))))
+	(equal? stream-ref (Concept "first")))
 
-(format #t "SetValue test second: ~A\n" (cog-execute! stream-ref))
+(set! stream-ref (cog-value-ref stream 0))
+(format #t "SetValue test second: ~A\n" stream-ref)
 (test-assert "setvalue-second"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "second"))))
+	(equal? stream-ref (Concept "second")))
 
-(format #t "SetValue test third: ~A\n" (cog-execute! stream-ref))
+(set! stream-ref (cog-value-ref stream 0))
+(format #t "SetValue test third: ~A\n" stream-ref)
 (test-assert "setvalue-third"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "third"))))
+	(equal? stream-ref (Concept "third")))
 
-; Should wrap around
+(define stream-end (cog-value->list stream))
+(format #t "SetValue test eof: ~A\n" stream-end)
+(test-assert "setvalue-end"
+	(equal? stream-end '()))
+
+; Should wrap around.  Why? Because FlatStream recurses on us here;
+; it treats itself as an infinite stream.
+(set! stream-ref (cog-value-ref stream 0))
 (format #t "SetValue test wrap: ~A\n" (cog-execute! stream-ref))
 (test-assert "setvalue-wrap-first"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "first"))))
+	(equal? stream-ref (Concept "first")))
 
 (test-end tname-setvalue)
 
