@@ -215,8 +215,70 @@ element. FutureStream converts calls to `value()` into calls to
 `execute()`, and thus is the right tool for creating streams.
 
 How should stream constuctors work?
+ * If the Stream constructor is given a Handle, then make make sure it
+   is executable, call it and get a ValuePtr. That will be the source.
+ * If the Stream constructor is given a ValuePtr, assume that is the
+   source.
 
-So how should SortedStream work? A:
+What is a source? Rather than generalizing, lets examine the
+case-by-case needs. Lets start with a re-designed FlatStream.
+The `FlatStream::update()` method does this:
+
+ * If the source is VoidValue or of size zero, return that.
+
+ * If the source is a Link, then it is taken to be a finite source.
+   The outgoing set is the "current collection", and items are doled
+   out from it, one by one. When there ae no more, VoidValue is returned
+   to indicatte end-of-stream.
+
+ * If the source is a LinkValue, and is NOT a StreamValue, then it
+   is taken to be a finite source, and treated like a Link, above.
+   That is, call `LinkValue::value()` once to get the current collection.
+   Iterate on that collection until empty, and then done.
+
+ * If the source is a StreamValue and is not a ContainerValue, then
+   it is assumed to be a infinite source. In this case, call
+   `LinkValue::value()` to get the current collection. Dole it out,
+   and, when empty, call `LinkValue::value()` again to get the next
+   collection.
+
+ * If the source is a ContainerValue, and the container is open,
+   then call the container dequeue to get one item, and return that.
+   This might block. If the Container is closed, just get everything.
+   If the Container is closed and empty, return end-of-stream VoidValue.
+   That is, a closed Container is taken to be a finite stream.
+
+How about the SortedStream? Well, it seems like it will behave a lot
+like a FlatStream, except it does sorting, and deduplication.
+
+ * If the source is VoidValue or of size zero, return that.
+
+ * If the source is a Link, then it is taken to be a finite source.
+   Grab the entire outgoing set and stuff it into Uniset, so that it
+   is sorted. Dole it out, one by one.
+
+ * If the source is a LinkValue, and is NOT a StreamValue, then it
+   is taken to be a finite source, and treated like a Link, above.
+
+ * If the source is a StreamValue and is not a ContainerValue, then
+   it is assumed to be a infinite source. In this case, a new thread
+   is launched. It will make repeated calls to `LinkValue::value()`
+   and the results will be added to the Uniset, until:
+   -- (a) it blocks
+   -- (b) it's size zero, denoting end-of-stream. Thread will exit.
+   -- (c) a queue high-watermark is reached. Thread blocks until
+          low-watermark is reached. The high-low watermarks are
+          provided natively by cogutils `concurrent_set`.
+
+ * If the source is a ContainerValue, then launch a thread for
+   processing. If the container is open, then call the container
+   dequeue in a loop, to get an item, and move it into the Uniset.
+   This might block. If the Container is closed, just get everything,
+   and close ourselves, too.
+
+ * If we ourselves are closed and empty, return VoidValue.
+
+OK, that sounds like a plan...
 
 
 ObjectNodes
