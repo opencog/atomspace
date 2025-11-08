@@ -42,14 +42,33 @@ namespace opencog
  * so that the set contains only one copy of a given element.
  */
 class UnisetValue
-	: public ContainerValue, protected concurrent_set<ValuePtr>
+	: public ContainerValue
 {
 protected:
-	UnisetValue(Type t) : ContainerValue(t) {}
+	// Provide thunk for ordering the Values in the set.
+	struct ValueComp
+	{
+		UnisetValue* uv;
+		ValueComp(UnisetValue* p) : uv(p) {}
+		bool operator()(const ValuePtr& lhs, const ValuePtr& rhs) const
+		{
+			if (!lhs) return bool(rhs);  // null < non-null
+			if (!rhs) return false;       // non-null >= null
+			return uv->less(*lhs, *rhs);
+		}
+	};
+
+	concurrent_set<ValuePtr, ValueComp> _set;
+
+	UnisetValue(Type t) : ContainerValue(t), _set(ValueComp(this)) {}
 	virtual void update() const;
 
+	// Default ordering inherited from Value::operator<()
+	virtual bool less(const Value& lhs, const Value& rhs) const
+	{ return lhs < rhs; }
+
 public:
-	UnisetValue(void) : ContainerValue(UNISET_VALUE) {}
+	UnisetValue(void) : ContainerValue(UNISET_VALUE), _set(ValueComp(this)) {}
 	UnisetValue(const ValueSeq&);
 	virtual ~UnisetValue() {}
 	virtual void open(void);

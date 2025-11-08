@@ -25,15 +25,13 @@
 
 using namespace opencog;
 
-typedef concurrent_set<ValuePtr> conset;
-
 // ==============================================================
 
 UnisetValue::UnisetValue(const ValueSeq& vseq)
-	: ContainerValue(UNISET_VALUE)
+	: ContainerValue(UNISET_VALUE), _set(ValueComp(this))
 {
 	for (const ValuePtr& v: vseq)
-		conset::insert(v);
+		_set.insert(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -58,7 +56,7 @@ UnisetValue::UnisetValue(const ValueSeq& vseq)
 void UnisetValue::update() const
 {
 	// Do nothing; we don't want to clobber the _value
-	if (is_closed() and 0 == conset::size()) return;
+	if (is_closed() and 0 == _set.size()) return;
 
 	// Reset, to start with.
 	_value.clear();
@@ -69,23 +67,23 @@ void UnisetValue::update() const
 		while (true)
 		{
 			ValuePtr val;
-			const_cast<UnisetValue*>(this) -> get(val);
+			const_cast<UnisetValue*>(this)->_set.get(val);
 			_value.emplace_back(val);
 		}
 	}
-	catch (typename conset::Canceled& e)
+	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
 	{}
 
 	// If we are here, the queue closed up. Reopen it
 	// just long enough to drain any remaining values.
-	const_cast<UnisetValue*>(this) -> cancel_reset();
-	while (not is_empty())
+	const_cast<UnisetValue*>(this)->_set.cancel_reset();
+	while (not _set.is_empty())
 	{
 		ValuePtr val;
-		const_cast<UnisetValue*>(this) -> get(val);
+		const_cast<UnisetValue*>(this)->_set.get(val);
 		_value.emplace_back(val);
 	}
-	const_cast<UnisetValue*>(this) -> cancel();
+	const_cast<UnisetValue*>(this)->_set.cancel();
 }
 
 // ==============================================================
@@ -93,45 +91,45 @@ void UnisetValue::update() const
 void UnisetValue::open()
 {
 	if (not is_closed()) return;
-	conset::open();
+	_set.open();
 }
 
 void UnisetValue::close()
 {
 	if (is_closed()) return;
-	conset::close();
+	_set.close();
 }
 
 bool UnisetValue::is_closed() const
 {
-	return conset::is_closed();
+	return _set.is_closed();
 }
 
 // ==============================================================
 
 void UnisetValue::add(const ValuePtr& vp)
 {
-	conset::insert(vp);
+	_set.insert(vp);
 }
 
 void UnisetValue::add(ValuePtr&& vp)
 {
-	conset::insert(vp);
+	_set.insert(vp);
 }
 
 ValuePtr UnisetValue::remove(void)
 {
-	return conset::value_get();
+	return _set.value_get();
 }
 
 size_t UnisetValue::size(void) const
 {
 	if (is_closed())
 	{
-		if (0 != conset::size()) update();
+		if (0 != _set.size()) update();
 		return _value.size();
 	}
-	return conset::size();
+	return _set.size();
 }
 
 // ==============================================================
@@ -142,15 +140,15 @@ void UnisetValue::clear()
 	_value.clear();
 
 	// Do nothing; we don't want to clobber the _value
-	if (conset::is_closed())
+	if (_set.is_closed())
 	{
-		conset::wait_and_take_all();
+		_set.wait_and_take_all();
 		return;
 	}
 
-	conset::close();
-	conset::wait_and_take_all();
-	conset::open();
+	_set.close();
+	_set.wait_and_take_all();
+	_set.open();
 }
 
 // ==============================================================

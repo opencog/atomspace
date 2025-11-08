@@ -13,6 +13,7 @@ ADD_LIBRARY (value
 	QueueValue.cc
 	RandomStream.cc
 	SectionValue.cc
+	SortedValue.cc
 	StringValue.cc
 	UnisetValue.cc
 	ValueFactory.cc
@@ -43,6 +44,7 @@ INSTALL (FILES
 	QueueValue.h
 	RandomStream.h
 	SectionValue.h
+	SortedValue.h
 	StringValue.h
 	UnisetValue.h
 	Value.h

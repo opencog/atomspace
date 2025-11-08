@@ -90,6 +90,10 @@ QUEUE_VALUE <- CONTAINER_VALUE
 // Note that 'SET_VALUE' already taken by SET_VALUE_LINK
 UNISET_VALUE <- CONTAINER_VALUE
 
+// A thread-safe set of Values that is maintained in sorted order.
+// Inherits from UnisetValue to minimize c++ duplication.
+SORTED_VALUE <- UNISET_VALUE,HANDLE_ARG
+
 // A stream of Values, computed by a function held in the AtomSpace.
 // Just like FormulaStream, but for vectors of Values.
 FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
