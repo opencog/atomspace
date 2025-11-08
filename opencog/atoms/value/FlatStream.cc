@@ -34,12 +34,10 @@ using namespace opencog;
 FlatStream::FlatStream(const Handle& h) :
 	LinkValue(FLAT_STREAM)
 {
-	if (not h->is_executable())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting an executable source, got %s",
-			h->to_string().c_str());
-
-	init(h->execute());
+	if (h->is_executable())
+		init(h->execute());
+	else
+		init(h);
 }
 
 FlatStream::FlatStream(const ValuePtr& vp) :
