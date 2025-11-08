@@ -40,35 +40,35 @@
 
 (use-modules (opencog) (opencog exec))
 
-; A utility function to print all EvaluationLinks in the AtomSpace.
+; A utility function to print all Edges in the AtomSpace.
 ; Very handy to see what is in the AtomSpace. Don't worry about the
 ; scheme code used to implement this: it's just a black box, and is
 ; not really a part of this example. Just know that it prints all
-; EvaluationLinks.
+; Edges.
 (define (show-eval-links)
-	(cog-map-type (lambda (h) (display h) #f) 'EvaluationLink))
+	(cog-map-type (lambda (h) (display h) #f) 'Edge))
 
-; Verify that the AtomSpace contains no EvaluationLinks:
+; Verify that the AtomSpace contains no Edges:
 (show-eval-links)
 
-; Define a beta-reduction, using the PutLink. The EvaluationLink won't
+; Define a beta-reduction, using the PutLink. The Edge won't
 ; be added until this is reduced. When it is reduced, the ListLink will
 ; be substituted for the variable $x, creating the fully-assembled
-; EvaluationLink.
+; Edge.
 ;
 (define to-be-added
 	(Put
-		(Evaluation
+		(Edge
 		    (Predicate "some property") (Variable "$x"))
 		(ListLink
 			(Concept "thing A")
 			(Concept "B-dom-ness"))))
 
-; The AtomSpace now contains one ungrounded EvaluationLink.
+; The AtomSpace now contains one ungrounded Edge.
 ; (Its called "ungrounded" because it has a free variable in it).
 (show-eval-links)
 
-; Now, actually create the EvaluationLink.
+; Now, actually create the Edge.
 (cog-execute! to-be-added)
 
 ; Take a look again:
@@ -79,7 +79,7 @@
 ; (This means that Meet and Put are "adjoint functors".)
 
 (define get-property
-	(Meet (Evaluation (Predicate "some property") (Variable "$x"))))
+	(Meet (Edge (Predicate "some property") (Variable "$x"))))
 
 ; The cog-execute! function will return the UnisetValue of all atoms that
 ; the MeetLink finds.
@@ -99,7 +99,7 @@
 (define remove-thing-ab
 	(Put
 		(Delete
-			(Evaluation (Predicate "some property") (Variable "$x")))
+			(Edge (Predicate "some property") (Variable "$x")))
 		(ListLink (Concept "thing A") (Concept "B-dom-ness"))))
 
 ; Force its removal.
@@ -132,15 +132,15 @@
 (define remove-some-property
 	(PutLink
 		(DeleteLink
-			(EvaluationLink
+			(Edge
 				(PredicateNode "some property")
 				(VariableNode "$x")))
 		(MeetLink
-			(EvaluationLink
+			(Edge
 				(PredicateNode "some property")
 				(VariableNode "$x")))))
 
-; Now, remove the EvaluationLink
+; Now, remove the Edge
 (cog-execute! remove-some-property)
 (cog-execute! get-property)
 
@@ -172,9 +172,9 @@
 ; The StateLink can be thought of as a key-value pair.  For any given
 ; key, there is a corresponding value. It is kind of UniqueLink: the
 ; StateLink can only ever correspond to one value at a time, never two.
-; Compare to EvaluationLink: you can create as many of those as you
+; Compare to Edge: you can create as many of those as you
 ; want; but there can ever be only one state. States are necessarily
-; single-valued. (They are fermions to EvaluationLink's bosons.)
+; single-valued. (They are fermions to Edge's bosons.)
 ;
 (StateLink
 	(PredicateNode "some property")
