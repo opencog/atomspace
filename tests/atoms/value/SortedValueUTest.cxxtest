@@ -39,6 +39,7 @@ public:
 
 	void setUp(void);
 	void test_basic_sorted(void);
+	void test_bare_greater_than(void);
 };
 
 SortedValueUTest::SortedValueUTest(void)
@@ -68,6 +69,53 @@ void SortedValueUTest::test_basic_sorted(void)
 			(Lambda
 				(VariableList (Variable "$A") (Variable "$B"))
 				(GreaterThan (Variable "$A") (Variable "$B"))))
+	)");
+
+	SortedValuePtr svp = SortedValueCast(sorted_val);
+	TS_ASSERT(svp != nullptr);
+
+	// Add numbers in unsorted order: 3, 2, 4
+	Handle num3 = eval.eval_h("(Number 3 3 3)");
+	Handle num2 = eval.eval_h("(Number 2 2)");
+	Handle num4 = eval.eval_h("(Number 4 4 4 4)");
+
+	svp->add(num3);
+	svp->add(num2);
+	svp->add(num4);
+
+	// Close the SortedValue
+	svp->close();
+
+	// Get the sorted contents
+	const ValueSeq& contents = svp->value();
+
+	// Verify we got 3 items
+	TS_ASSERT_EQUALS(contents.size(), 3);
+
+	// Verify sorted order is 4, 3, 2 (descending)
+	TS_ASSERT_EQUALS(contents[0], num4);
+	TS_ASSERT_EQUALS(contents[1], num3);
+	TS_ASSERT_EQUALS(contents[2], num2);
+
+	// Print the sorted contents
+	printf("SortedValue contents (%zu items):\n", contents.size());
+	for (size_t i = 0; i < contents.size(); i++)
+	{
+		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
+	}
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void SortedValueUTest::test_bare_greater_than(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(_asp);
+
+	// Use bare GreaterThan without Lambda wrapper
+	ValuePtr sorted_val = eval.eval_v(R"(
+		(SortedValue (GreaterThan))
 	)");
 
 	SortedValuePtr svp = SortedValueCast(sorted_val);
