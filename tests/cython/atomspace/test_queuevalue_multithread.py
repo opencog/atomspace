@@ -70,23 +70,20 @@ class QueueValueMultithreadTest(unittest.TestCase):
             nonlocal consumer_exception
             try:
                 while True:
-                    try:
-                        val = queue.pop()
-                        consumed_values.append(val)
-                    except RuntimeError as e:
-                        # Expected when queue is closed
-                        if "Cannot pop from closed empty queue" in str(e):
-                            # Reopen the queue to drain remaining values
-                            queue.open()
-                            remaining = len(queue)
-                            for _ in range(remaining):
-                                val = queue.pop()
-                                consumed_values.append(val)
-                            # Close the queue again
-                            queue.close()
-                            break
-                        else:
-                            raise
+                    val = queue.pop()
+                    # Check if we got a VoidValue indicating closed empty queue
+                    if val.type_name == 'VoidValue':
+                        # Reopen the queue to drain remaining values
+                        queue.open()
+                        remaining = len(queue)
+                        for _ in range(remaining):
+                            val = queue.pop()
+                            consumed_values.append(val)
+                        # Close the queue again
+                        queue.close()
+                        break
+
+                    consumed_values.append(val)
 
                     # Occasionally yield to expose race conditions
                     if len(consumed_values) % 100 == 0:
@@ -164,23 +161,20 @@ class QueueValueMultithreadTest(unittest.TestCase):
             nonlocal consumer_exception
             try:
                 while True:
-                    try:
-                        val = queue.pop()
-                        consumed_values.append(val)
-                    except RuntimeError as e:
-                        # Expected when queue is closed
-                        if "Cannot pop from closed empty queue" in str(e):
-                            # Reopen the queue to drain remaining values
-                            queue.open()
-                            remaining = len(queue)
-                            for _ in range(remaining):
-                                val = queue.pop()
-                                consumed_values.append(val)
-                            # Close the queue again
-                            queue.close()
-                            break
-                        else:
-                            raise
+                    val = queue.pop()
+                    # Check if we got a VoidValue indicating closed empty queue
+                    if val.type_name == 'VoidValue':
+                        # Reopen the queue to drain remaining values
+                        queue.open()
+                        remaining = len(queue)
+                        for _ in range(remaining):
+                            val = queue.pop()
+                            consumed_values.append(val)
+                        # Close the queue again
+                        queue.close()
+                        break
+
+                    consumed_values.append(val)
 
             except Exception as e:
                 consumer_exception = e
@@ -259,25 +253,23 @@ class QueueValueMultithreadTest(unittest.TestCase):
             nonlocal read_count
             try:
                 while True:
-                    try:
-                        val = queue.pop()
-                        read_count += 1
-                        # Simulate processing time
-                        if read_count % 500 == 0:
-                            time.sleep(0.001)
-                    except RuntimeError as e:
-                        if "Cannot pop from closed empty queue" in str(e):
-                            # Reopen the queue to drain remaining values
-                            queue.open()
-                            remaining = len(queue)
-                            for _ in range(remaining):
-                                val = queue.pop()
-                                read_count += 1
-                            # Close the queue again
-                            queue.close()
-                            break
-                        else:
-                            raise
+                    val = queue.pop()
+                    # Check if we got a VoidValue indicating closed empty queue
+                    if val.type_name == 'VoidValue':
+                        # Reopen the queue to drain remaining values
+                        queue.open()
+                        remaining = len(queue)
+                        for _ in range(remaining):
+                            val = queue.pop()
+                            read_count += 1
+                        # Close the queue again
+                        queue.close()
+                        break
+
+                    read_count += 1
+                    # Simulate processing time
+                    if read_count % 500 == 0:
+                        time.sleep(0.001)
             except Exception as e:
                 errors.append(f"Reader error: {e}")
 
@@ -332,10 +324,9 @@ class QueueValueMultithreadTest(unittest.TestCase):
         # Verify queue is empty
         self.assertEqual(0, len(queue))
 
-        # Try to pop from closed empty queue - should throw
-        with self.assertRaises(RuntimeError) as cm:
-            queue.pop()
-        self.assertIn("Cannot pop from closed empty queue", str(cm.exception))
+        # Try to pop from closed empty queue - should return VoidValue
+        val = queue.pop()
+        self.assertEqual('VoidValue', val.type_name, "Expected VoidValue when popping from closed empty queue")
 
     def test_stress_many_small_operations(self):
         """Stress test with many threads doing small operations."""
@@ -390,11 +381,11 @@ class QueueValueMultithreadTest(unittest.TestCase):
         queue.close()
         remaining = 0
         while True:
-            try:
-                queue.pop()
-                remaining += 1
-            except RuntimeError:
+            val = queue.pop()
+            # VoidValue indicates closed empty queue
+            if val.type_name == 'VoidValue':
                 break
+            remaining += 1
 
         # We pushed num_threads * (ops_per_thread // 2) values
         # We tried to pop the same amount, but some pops might have failed
