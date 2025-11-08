@@ -209,7 +209,10 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bo
 		{
 			HandleSeq vfun = sn->getOutgoingSet();
 			vfun.insert(vfun.end(), oset.begin(), oset.end());
-			reduct = scratch->add_link(sn->get_type(), std::move(vfun));
+
+			// Do NOT put this in the scratch space! It might
+			// contain ValueShimLinks, which would be deadly.
+			reduct = createLink(std::move(vfun), sn->get_type());
 		}
 		ValuePtr vp = reduct->execute(scratch, silent);
 		return vp;
@@ -222,7 +225,9 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bo
 			args->getOutgoingSet(): HandleSeq{args});
 		vrel.insert(vrel.end(), oset.begin(), oset.end());
 
-		Handle reduct = scratch->add_link(sn->get_type(), std::move(vrel));
+		// Do NOT put this in the scratch space! It might
+		// contain ValueShimLinks, which would be deadly.
+		Handle reduct = createLink(std::move(vrel), sn->get_type());
 
 		Instantiator inst(scratch);
 		return inst.execute(reduct);
