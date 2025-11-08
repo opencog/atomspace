@@ -36,7 +36,7 @@
 ; the items, one by one. This converts the static list above
 ; into an actual stream.
 (define stream-maker
-	(CollectionOfLink (Type 'FlatStream)
+	(LinkSignature (Type 'FlatStream)
 		(ValueOf data-anchor (Predicate "test-data"))))
 
 ; You can test this as follows:
