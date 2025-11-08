@@ -86,30 +86,30 @@
 ; Hang on; apples, bananas and strawberries are all fruit. How can
 ; this be expressed? Why, just as before:
 
-(Evaluation (Predicate "fruit") (List (Concept "apple")))
-(Evaluation (Predicate "fruit") (List (Concept "banana")))
-(Evaluation (Predicate "fruit") (List (Concept "strawberry")))
+(Edge (Predicate "fruit") (List (Concept "apple")))
+(Edge (Predicate "fruit") (List (Concept "banana")))
+(Edge (Predicate "fruit") (List (Concept "strawberry")))
 
 ; By convention, one uses a PredicateNode here, instead of an
 ; AnchorNode. One could do it the other way around, but this is the
 ; current convention. This convention mostly just makes it easier to
 ; understand the atomspace contents.
 ;
-; The message here is that EvaluationLinks are multi-state StateLinks.
+; The message here is that Edges are multi-state StateLinks.
 ; Really. So, for example:
 
-(cog-execute! (Meet (Evaluation (Predicate "fruit") (Variable "$x"))))
+(cog-execute! (Meet (Edge (Predicate "fruit") (Variable "$x"))))
 
 ; ------------------
 ; Only one problem: the above example is a bad example. We should
 ; instead have said "is-a". The whole world knows the "is-a" relation.
 
-(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "apple")))
-(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "banana")))
-(Evaluation (Predicate "Is A") (List (Concept "fruit") (Concept "strawberry")))
+(Edge (Predicate "Is A") (List (Concept "fruit") (Concept "apple")))
+(Edge (Predicate "Is A") (List (Concept "fruit") (Concept "banana")))
+(Edge (Predicate "Is A") (List (Concept "fruit") (Concept "strawberry")))
 
 (cog-execute! (Meet
-	(Evaluation (Predicate "Is A") (List (Concept "fruit") (Variable "$x")))))
+	(Edge (Predicate "Is A") (List (Concept "fruit") (Variable "$x")))))
 
 ; ------------------
 ; The is-a relation is so very special, it gets it's own custom link

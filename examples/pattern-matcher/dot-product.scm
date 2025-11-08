@@ -17,17 +17,17 @@
 ; "has nose" and so on. The numeric value for that basis element is
 ; stored in a FloatValue attached to each.
 ;
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
 
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
 
 ; Define a Query that looks for the basis elements on the "dog" and
 ; "cat" vectors. Once these are found, obtain the counts, and multiply

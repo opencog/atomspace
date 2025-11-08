@@ -39,25 +39,25 @@
 (use-modules (opencog exec))
 
 ; Define three cities
-(Evaluation (Predicate "phone") (List (Concept "Paris") (Number 10)))
-(Evaluation (Predicate "pop") (List (Concept "Paris") (Number 5)))
-(Evaluation (Predicate "org") (List (Concept "Paris") (Concept "city")))
+(Edge (Predicate "phone") (List (Concept "Paris") (Number 10)))
+(Edge (Predicate "pop") (List (Concept "Paris") (Number 5)))
+(Edge (Predicate "org") (List (Concept "Paris") (Concept "city")))
 
-(Evaluation (Predicate "phone") (List (Concept "Berlin") (Number 10)))
-(Evaluation (Predicate "pop") (List (Concept "Berlin") (Number 15)))
-(Evaluation (Predicate "org") (List (Concept "Berlin") (Concept "city")))
+(Edge (Predicate "phone") (List (Concept "Berlin") (Number 10)))
+(Edge (Predicate "pop") (List (Concept "Berlin") (Number 15)))
+(Edge (Predicate "org") (List (Concept "Berlin") (Concept "city")))
 
-(Evaluation (Predicate "phone") (List (Concept "Hong Kong") (Number 10)))
-(Evaluation (Predicate "pop") (List (Concept "Hong Kong") (Number 20)))
-(Evaluation (Predicate "org") (List (Concept "Hong Kong") (Concept "city")))
+(Edge (Predicate "phone") (List (Concept "Hong Kong") (Number 10)))
+(Edge (Predicate "pop") (List (Concept "Hong Kong") (Number 20)))
+(Edge (Predicate "org") (List (Concept "Hong Kong") (Concept "city")))
 
 
 ; Define two countries
-(Evaluation (Predicate "pop") (List (Concept "Barbados") (Number 7)))
-(Evaluation (Predicate "org") (List (Concept "Barbados") (Concept "country")))
+(Edge (Predicate "pop") (List (Concept "Barbados") (Number 7)))
+(Edge (Predicate "org") (List (Concept "Barbados") (Concept "country")))
 
-(Evaluation (Predicate "pop") (List (Concept "Japan") (Number 30)))
-(Evaluation (Predicate "org") (List (Concept "Japan") (Concept "country")))
+(Edge (Predicate "pop") (List (Concept "Japan") (Number 30)))
+(Edge (Predicate "org") (List (Concept "Japan") (Concept "country")))
 
 ; Define a greater-than function. Aside from returning true/false if
 ; the greater-than relation holds or not, it also counts the number of
@@ -73,9 +73,9 @@
 ; A query that looks for cities where there are more phones than people.
 (define phone-inversion
 (Meet (And
-	(Evaluation (Predicate "phone")
+	(Edge (Predicate "phone")
 		 (List (Variable "$city") (Variable "#phone")))
-	(Evaluation (Predicate "pop")
+	(Edge (Predicate "pop")
 		 (List (Variable "$city") (Variable "#pop")))
 	;;(GreaterThan
 	;;	(Variable "#phone") (Variable "#pop"))
@@ -98,13 +98,13 @@ cnt
 ; A query that looks for cities that are larger than countries.
 (define pop-inversion
 (Meet (And
-	(Evaluation (Predicate "org")
+	(Edge (Predicate "org")
 		 (List (Variable "$city") (Concept "city")))
-	(Evaluation (Predicate "pop")
+	(Edge (Predicate "pop")
 		 (List (Variable "$city") (Variable "#city-pop")))
-	(Evaluation (Predicate "org")
+	(Edge (Predicate "org")
 		 (List (Variable "$state") (Concept "country")))
-	(Evaluation (Predicate "pop")
+	(Edge (Predicate "pop")
 		 (List (Variable "$state") (Variable "#state-pop")))
 	(EvaluationLink
 		(GroundedPredicateNode "scm: cmp")

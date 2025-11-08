@@ -43,16 +43,16 @@
 (Member (Concept "ochre ball")    (Concept "yellows basket"))
 
 ; Predicate that tests the colors of the balls
-(Evaluation (Predicate "is red") (Concept "red ball"))
-(Evaluation (Predicate "is red") (Concept "red ball too"))
-(Evaluation (Predicate "is red") (Concept "red ball also"))
-(Evaluation (Predicate "is red") (Concept "a red ball"))
-(Evaluation (Predicate "is red") (Concept "b red ball"))
+(Edge (Predicate "is red") (Concept "red ball"))
+(Edge (Predicate "is red") (Concept "red ball too"))
+(Edge (Predicate "is red") (Concept "red ball also"))
+(Edge (Predicate "is red") (Concept "a red ball"))
+(Edge (Predicate "is red") (Concept "b red ball"))
 
-(Evaluation (Predicate "is green")  (Concept "green ball"))
+(Edge (Predicate "is green")  (Concept "green ball"))
 
-(Evaluation (Predicate "is yellow") (Concept "yellow ball"))
-(Evaluation (Predicate "is yellow") (Concept "ochre ball"))
+(Edge (Predicate "is yellow") (Concept "yellow ball"))
+(Edge (Predicate "is yellow") (Concept "ochre ball"))
 
 ; ---------------------------------------------------------
 ; The query below will search for those baskets that have
@@ -73,7 +73,7 @@
 			; Always means that *every* ball in the basket MUST
 			; be red! Any single failure to satisfy this invalidates
 			; the entire search.
-			(Always (Evaluation (Predicate "is red") (Variable "ball")))
+			(Always (Edge (Predicate "is red") (Variable "ball")))
 		)
 
 		; Report the basket which has only red balls in it.
@@ -144,7 +144,7 @@
 						; ... the ball is not red. That is, the clause
 						; below cannot be found in the AtomSpace.
 						(Absent
-							(Evaluation (Predicate "is red") (Variable "ball")))
+							(Edge (Predicate "is red") (Variable "ball")))
 						; So, the SatisfactionLink evaluates to "true" if
 						; if the basket contains some ball (any ball) that
 						; is not red.

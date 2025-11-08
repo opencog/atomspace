@@ -100,7 +100,7 @@
 ; There is no need to write this on five lines, nor to indent:
 ; you can write it on just one:
 ;
-(Evaluation (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
+(Edge (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
 
 ; "Evaluation" is the same type as "EvaluationLink",
 ; "Predicate" is the same type as "PredicateNode",

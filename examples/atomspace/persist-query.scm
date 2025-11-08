@@ -50,7 +50,7 @@
 (List (Concept "A") (Concept "B"))
 (Set (Concept "A") (Concept "B"))
 (Set (Concept "A") (Concept "B") (Concept "C"))
-(Evaluation (Predicate "foo")
+(Edge (Predicate "foo")
 	(List (Concept "B") (Concept "C") (Concept "oh boy!")))
 
 ; Push the entire atomspace out to disk.

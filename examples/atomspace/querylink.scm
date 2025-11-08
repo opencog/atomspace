@@ -56,7 +56,7 @@
 ; sentence "Susan makes pottery": so that "make" is the verb (a
 ; transitive verb), and "pottery" is the object of that verb.
 ;
-(Evaluation
+(Edge
 	(Predicate "_obj")
 	(ListLink
 		(Concept "make")
@@ -67,7 +67,7 @@
 ; that this can be made from clay. This might occur in the parse of
 ; "George makes sculptures from clay".
 ;
-(Evaluation
+(Edge
 	(Predicate "from")
 	(ListLink
 		(Concept "make")
@@ -96,7 +96,7 @@
 		; the AtomSpace. In SQL terms, this is an "inner join".
 		(AndLink
 			; Look for _obj($verb, $var0)
-			(Evaluation
+			(Edge
 				(Predicate "_obj")
 				(ListLink
 					(Variable "$verb") ; This will match: (Concept "make")
@@ -104,7 +104,7 @@
 				)
 			)
 			; Look for from($verb, $var1)
-			(EvaluationLink
+			(Edge
 				(Predicate "from")
 				(ListLink
 					(Variable "$verb") ; This will match: (Concept "make")
@@ -113,7 +113,7 @@
 			)
 		)
 		; Combine the two above into one.
-		(EvaluationLink
+		(Edge
 			(PredicateNode "make_from")
 			(ListLink
 				(VariableNode "$var0")
