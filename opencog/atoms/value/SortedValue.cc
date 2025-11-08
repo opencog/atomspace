@@ -34,6 +34,22 @@ using namespace opencog;
 SortedValue::SortedValue(const Handle& h)
 	: UnisetValue(SORTED_VALUE), _schema(h)
 {
+	init();
+}
+
+SortedValue::SortedValue(const HandleSeq& hs)
+	: UnisetValue(SORTED_VALUE)
+{
+	if (2 != hs.size())
+		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
+
+	_schema = hs[0];
+	_source = hs[1];
+	init();
+}
+
+void SortedValue::init()
+{
 	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
 	_right_shim = createValueShimLink();
@@ -77,12 +93,24 @@ SortedValue::~SortedValue()
 // 2x that, because I guess it has no operator==() to work with.
 void SortedValue::add(const ValuePtr& vp)
 {
+	if (vp->get_type() == VOID_VALUE)
+	{
+		close();
+		return;
+	}
+
 	_scratch->clear_transient();
 	UnisetValue::add(vp);
 }
 
 void SortedValue::add(ValuePtr&& vp)
 {
+	if (vp->get_type() == VOID_VALUE)
+	{
+		close();
+		return;
+	}
+
 	_scratch->clear_transient();
 	UnisetValue::add(std::move(vp));
 }
@@ -111,3 +139,4 @@ bool SortedValue::less(const Value& lhs, const Value& rhs) const
 
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(SORTED_VALUE, createSortedValue, const Handle&)
+DEFINE_VALUE_FACTORY(SORTED_VALUE, createSortedValue, const HandleSeq&)

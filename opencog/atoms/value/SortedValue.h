@@ -48,13 +48,15 @@ protected:
 	ValueShimLinkPtr _left_shim;
 	ValueShimLinkPtr _right_shim;
 	Handle _exout;
+	Handle _source;
 	AtomSpace* _scratch;
 
-	SortedValue(Type t, const Handle& h) : UnisetValue(t), _schema(h) {}
+	void init(void);
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
 	SortedValue(const Handle&);
+	SortedValue(const HandleSeq&);
 	virtual ~SortedValue();
 
 	virtual void add(const ValuePtr&) override;
