@@ -103,16 +103,18 @@ SORTED_VALUE <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
 // of `value()` is converted to one `execute()`
 FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 
-// A stream of Values, obtained by flattening a stream.
-// Much like FutureStream, except a list of lists is flattened
-// to get the next token. For example, given the stream
+// A stream of Values, obtained by flattening the provided stream.
+// The source stream is assumed to deliver "collections" of items.
+// The FlatStream doles out items from the collection, until emtpy,
+// and then the next collection is fetched.
+// For example, consider a stream of collections:
 //   ((a b) (c d e) (f) (g h i j k) ...)
-// it delivers (a b c d e f g h i ...) one at a time, as a stream.
+// The FlatStream will hand these out one by one, as
+//   (a b c d e f g h i ...)
 //
 // Each touch of `value()` returns one item from the current collection,
-// when the collection runs dry, then `Atom::execute()` is called to
-// get the next collection.
-FLAT_STREAM <- FUTURE_STREAM,HANDLE_ARG
+// when the collection runs dry, then the next collection is fetched.
+FLAT_STREAM <- STREAM_VALUE,HANDLE_ARG,VALUE_ARG
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace
