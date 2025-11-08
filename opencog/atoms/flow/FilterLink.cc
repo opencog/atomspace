@@ -409,7 +409,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 				const auto& valpair = valmap.find(var);
 				valseq.emplace_back(valpair->second);
 			}
-			return LinkSignatureLinkCast(body)->construct(std::move(valseq));
+			return LinkSignatureLinkCast(body)->construct(scratch, std::move(valseq));
 		}
 
 		// A list of Handles.

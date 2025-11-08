@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
@@ -54,13 +55,15 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Return a LinkValue of the desired type.
-ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
+/// If kind is a Link type, then return that Link.
+/// For this case, if anything in the newset is NOT an Atom,
+/// it is silently ignored. (XXX FIXME Perhaps exception should
+/// be thrown? I dunno.)
+ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) const
 {
 	if (nameserver().isA(_kind, LINK_VALUE))
 		return valueserver().create(_kind, std::move(newset));
 
-	// Yuck. User should have called the other constructor.
-	// But this is rare, so we'll allow.
 	if (nameserver().isA(_kind, LINK))
 	{
 		HandleSeq oset;
@@ -69,25 +72,13 @@ ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 			const Handle& h(HandleCast(vp));
 			if (h) oset.push_back(h);
 		}
-		return valueserver().create(_kind, std::move(oset));
+		return as->add_link(_kind, std::move(oset));
 	}
 
-	// Should support other kinds too.
-	const std::string& tname = nameserver().getTypeName(_kind);
-	throw InvalidParamException(TRACE_INFO,
-		"Unsupported type %s", tname.c_str());
-}
-
-// ---------------------------------------------------------------
-
-/// Return either a Link or a LinkValue of the desired type.
-ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
-{
-	if (nameserver().isA(_kind, LINK_VALUE) or
-	    nameserver().isA(_kind, LINK))
-		return valueserver().create(_kind, std::move(noset));
-
-	// Should support other kinds too.
+	// Should support other kinds too.  XXX FIXME
+	// (???) I guess we could also cast FloatVectors to NumberNodes
+	// or perform other kinds of transformations between vectors
+	// and LinkValues, ... or something. Unclear at this time.
 	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
 		"Unsupported type %s", tname.c_str());
@@ -116,7 +107,7 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 			voset.emplace_back(_outgoing[i]);
 	}
 
-	return construct(std::move(voset));
+	return construct(as, std::move(voset));
 }
 
 DEFINE_LINK_FACTORY(LinkSignatureLink, LINK_SIGNATURE_LINK)

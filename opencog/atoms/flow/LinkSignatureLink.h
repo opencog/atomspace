@@ -50,7 +50,7 @@ namespace opencog
 ///
 class LinkSignatureLink : public Link
 {
-private:
+protected:
 	Type _kind;
 
 public:
@@ -66,8 +66,7 @@ public:
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	// Construct new Value from arguments
-	ValuePtr construct(const ValueSeq&&);
-	ValuePtr construct(const HandleSeq&&);
+	ValuePtr construct(AtomSpace*, const ValueSeq&&) const;
 
 	static Handle factory(const Handle&);
 };
