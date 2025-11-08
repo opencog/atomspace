@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/value/FlatStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
@@ -32,59 +32,57 @@ using namespace opencog;
 // ==============================================================
 
 FlatStream::FlatStream(const Handle& h) :
-	LinkValue(FLAT_STREAM), _source(h), _as(h->getAtomSpace()),
-	_current_stream(nullptr), _current_index(0)
-{
-	init();
-}
-
-FlatStream::FlatStream(const HandleSeq&& oset) :
 	LinkValue(FLAT_STREAM)
 {
-	// XXX FIXME I guess we could flatten more than one
-	// stream at a time. So it would be like sucking off
-	// a row of stuff from a matrix of columns. I suppose
-	// that's a plausible thing to do, but right now it is
-	// not needed, so doing this is a future extension for
-	// that day when it might be needed.
-	if (1 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-			"Expecting just one atom!");
-
-	_source = oset[0];
-	_as = oset[0]->getAtomSpace();
-
-	init();
+	if (h->is_executable())
+		init(h->execute());
+	else
+		init(h);
 }
 
-// A pseudo copy constructor. Just copies in some existing Link Value.
 FlatStream::FlatStream(const ValuePtr& vp) :
-	LinkValue(FLAT_STREAM),
-	_source(nullptr),
-	_as(nullptr),
-	_current_index(0)
+	LinkValue(FLAT_STREAM)
 {
+	init(vp);
+}
+
+// Set up all finite streams here. Finite streams get copied into
+// the collection once and once only, and that's it.
+void FlatStream::init(const ValuePtr& vp)
+{
+	_index = 0;
+	_collection = nullptr;
+	_source = nullptr;
+
+	// Copy Link contents into the collection.
+	if (vp->is_type(LINK))
+	{
+		ValueSeq vsq;
+		for (const Handle& h: HandleCast(vp)->getOutgoingSet())
+			vsq.push_back(h);
+		_collection = createLinkValue(vsq);
+		return;
+	}
+
+	// Everything else is just a collection of size one.
+	// Possible future extensions:
+	// If _source is an ObjectNode, then send *-read-* message ???
+	// If source is a FloatStream or StringStream ... ???
 	if (not vp->is_type(LINK_VALUE))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a LinkValue, got %s",
-			vp->to_string().c_str());
+	{
+		_collection = createLinkValue(ValueSeq{vp});
+		return;
+	}
 
-	_current_stream = LinkValueCast(vp);
-}
+	// One-shot, non-streaming finite LinkValue
+	if (not vp->is_type(STREAM_VALUE))
+	{
+		_collection = LinkValueCast(vp);
+		return;
+	}
 
-// A pseudo copy constructor. Just copies in some existing ValueSeq
-FlatStream::FlatStream(const ValueSeq&& vsq) :
-	LinkValue(FLAT_STREAM),
-	_source(nullptr),
-	_as(nullptr),
-	_current_index(0)
-{
-	_current_stream = createLinkValue(std::move(vsq));
-}
-
-void FlatStream::init(void)
-{
-	// Nothing, actually ...
+	// Streaming source.
+	_source = LinkValueCast(vp);
 }
 
 // ==============================================================
@@ -92,109 +90,75 @@ void FlatStream::init(void)
 void FlatStream::update() const
 {
 	// Are we done yet?
-	if (_current_stream and 0 < _current_index and 0 == _value.size()) return;
+	if (_collection and 0 < _index and 0 == _value.size()) return;
 
 	// Flatten
-	if (_current_stream and _current_index < _current_stream->_value.size())
+	if (_collection and _index < _collection->_value.size())
 	{
-		const ValuePtr& vp = _current_stream->_value[_current_index];
-		if (vp->is_type(LINK_VALUE))
-		{
-			ValueSeq vsq(LinkValueCast(vp)->value());
-			_value.swap(vsq);
-			_current_index++;
-			return;
-		}
-
-		// This case is hit when flattening is being done on an ordinary
-		// Link. The _current_stream holds the outgoing set of the Link,
-		// so all we have to do is present each Atom in that oset, one by
-		// one.
-		if (vp->is_type(ATOM))
-		{
-			ValueSeq vsq;
-
-			const Handle& h(HandleCast(vp));
-			if (h->is_executable())
-				vsq = ValueSeq({h->execute(_as)});
-			else
-				vsq = ValueSeq({vp});
-
-			_value.swap(vsq);
-			_current_index++;
-			return;
-		}
+		const ValuePtr& vp = _collection->_value[_index];
 
 		// End-of-stream marker.
-		if (vp->is_type(VOID_VALUE))
+		if (0 == vp->size())
 		{
 			_value.clear(); // Set sequence size to zero...
-			_current_index++;
+			_index++;
 			return;
 		}
 
-		// XXX A weird stupid computer trick here would be to iterate
-		// over an entire AtomSpace. At the moment, this is awkward,
-		// because it would require making a copy of all of the Handles.
-		// That, plus nothing needs this ability. That, plus maybe
-		// there should be some distinct way of stuffing an entire
-		// AtomSpace into a distinct LinkValue. That, plus maybe there
-		// should be a way of following AtomSpace changes. That, plus
-		// the fact that ProxyNodes are intended for this kind of stuff.
-		// So we don't handle the case of an AtomSpace, here.
-
-		throw RuntimeException(TRACE_INFO,
-			"Expecting a LinkValue or Link, got %s",
-			vp->to_string().c_str());
-
+		ValueSeq vsq({vp});
+		_value.swap(vsq);
+		_index++;
+		return;
 	}
 
 	// (Re-)Start at the begining.
-	_current_index = 0;
+	_index = 0;
 
 	// End-file-file condition.
 	if (nullptr == _source or VOID_VALUE == _source->get_type())
-		return;
-
-	// Get the next list that needs flattening.
-	// Normally, the source is executable, and executing it returns a list
-	// of items that we will iterate over.
-	// But if its a Link Atom , we handle it as a special case, a "trivial" case:
-	// just iterate over the outgoing set of the Link itself.
-	// As currently designed, this will loop forever, but maybe it should halt?
-	if (not _source->is_executable())
 	{
-		ValueSeq hov;
-		HandleSeq ho(_source->getOutgoingSet());
-		for (const Handle& h : ho)
-			hov.push_back(h);
-		_current_stream = createLinkValue(std::move(hov));
-		update(); // Loop around.
+		_value.clear(); // Set sequence size to zero...
 		return;
 	}
 
-	ValuePtr result = _source->execute(_as);
-
-	// Check for end of stream
-	if (nullptr == result or result->get_type() == VOID_VALUE)
+	// Streams that are not ContainerValues can just be referenced diretly.
+	if (not _source->is_type(CONTAINER_VALUE))
 	{
-		ValueSeq empty;
-		_value.swap(empty);
+		// Reference and copy.
+		_collection = createLinkValue(_source->value());
+		update();
 		return;
 	}
 
-	if (result->get_type() != LINK_VALUE)
+	// If we are here, then we've got a container to deal with.
+	ContainerValuePtr cvp = ContainerValueCast(_source);
+
+	// If the container is closed, just grab everything, and we
+	// are done. Clear it, so we don't accidentally loop around.
+	if (cvp->is_closed())
 	{
-		ValueSeq unary({result});
-		_value.swap(unary);
+		_collection = createLinkValue(cvp->value());
+		cvp->clear();
+		update();
 		return;
 	}
 
-	// Cast to LinkValue
-	_current_stream = LinkValueCast(result);
+	// If we are here, the container is open. Get items one at
+	// a time. If we block, we block.
+	ValuePtr item = cvp->remove();
 
-	// We've queued it up; take it from the top.
-	update();
+	// End-of-stream marker. Note VoidValue and empty LinkValue
+	// both have size zero.
+	if (0 == item->size())
+	{
+		_value.clear(); // Set sequence size to zero...
+		_index++;
+		return;
+	}
+
+	ValueSeq vsq({item});
+	_value.swap(vsq);
+	_index++;
 }
 
 // ==============================================================
@@ -205,8 +169,8 @@ std::string FlatStream::to_string(const std::string& indent) const
 	rv += "\n";
 	if (_source)
 		rv += _source->to_short_string(indent + "   ");
-	else if (_current_stream)
-		rv += _current_stream->to_short_string(indent + "   ");
+	else if (_collection)
+		rv += _collection->to_short_string(indent + "   ");
 	rv += ")\n";
 	rv += indent + "; Currently:\n";
 	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
@@ -217,6 +181,4 @@ std::string FlatStream::to_string(const std::string& indent) const
 
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const Handle&)
-DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const HandleSeq&&)
 DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const ValuePtr&)
-DEFINE_VALUE_FACTORY(FLAT_STREAM, createFlatStream, const ValueSeq&&)

@@ -71,23 +71,20 @@ class UnisetValueMultithreadTest(unittest.TestCase):
             nonlocal consumer_exception
             try:
                 while True:
-                    try:
-                        val = uniset.pop()
-                        consumed_values.append(str(val))
-                    except RuntimeError as e:
-                        # Expected when set is closed
-                        if "Cannot remove from closed empty set" in str(e):
-                            # Reopen the set to drain remaining values
-                            uniset.open()
-                            remaining = len(uniset)
-                            for _ in range(remaining):
-                                val = uniset.pop()
-                                consumed_values.append(str(val))
-                            # Close the set again
-                            uniset.close()
-                            break
-                        else:
-                            raise
+                    val = uniset.pop()
+                    # Check if we got a VoidValue indicating closed empty set
+                    if val.type_name == 'VoidValue':
+                        # Reopen the set to drain remaining values
+                        uniset.open()
+                        remaining = len(uniset)
+                        for _ in range(remaining):
+                            val = uniset.pop()
+                            consumed_values.append(str(val))
+                        # Close the set again
+                        uniset.close()
+                        break
+
+                    consumed_values.append(str(val))
 
                     # Occasionally yield to expose race conditions
                     if len(consumed_values) % 100 == 0:
@@ -170,23 +167,20 @@ class UnisetValueMultithreadTest(unittest.TestCase):
             nonlocal consumer_exception
             try:
                 while True:
-                    try:
-                        val = uniset.pop()
-                        consumed_values.append(str(val))
-                    except RuntimeError as e:
-                        # Expected when set is closed
-                        if "Cannot remove from closed empty set" in str(e):
-                            # Reopen the set to drain remaining values
-                            uniset.open()
-                            remaining = len(uniset)
-                            for _ in range(remaining):
-                                val = uniset.pop()
-                                consumed_values.append(str(val))
-                            # Close the set again
-                            uniset.close()
-                            break
-                        else:
-                            raise
+                    val = uniset.pop()
+                    # Check if we got a VoidValue indicating closed empty set
+                    if val.type_name == 'VoidValue':
+                        # Reopen the set to drain remaining values
+                        uniset.open()
+                        remaining = len(uniset)
+                        for _ in range(remaining):
+                            val = uniset.pop()
+                            consumed_values.append(str(val))
+                        # Close the set again
+                        uniset.close()
+                        break
+
+                    consumed_values.append(str(val))
 
             except Exception as e:
                 consumer_exception = e
@@ -349,7 +343,10 @@ class UnisetValueMultithreadTest(unittest.TestCase):
         remaining = 0
         uniset.open()  # Reopen to drain
         while len(uniset) > 0:
-            uniset.pop()
+            val = uniset.pop()
+            # In case we get a VoidValue, stop
+            if val.type_name == 'VoidValue':
+                break
             remaining += 1
         uniset.close()
 

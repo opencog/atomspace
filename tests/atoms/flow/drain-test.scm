@@ -32,7 +32,7 @@
 (define (reset-stream)
 	(cog-execute!
 		(SetValue data-anchor (Predicate "data-stream")
-			(CollectionOfLink (Type 'FlatStream)
+			(LinkSignature (Type 'FlatStream)
 				(ValueOf data-anchor (Predicate "test-data"))))))
 
 ; Call this to rewind back to the start.

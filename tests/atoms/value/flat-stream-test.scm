@@ -34,25 +34,18 @@
 (define second-item (LinkValue (FloatValue 7 8 9) (FloatValue 10 11 12)))
 
 ; First access - should return first item
-(format #t "Stream first access: ~A\n" fs)
-(test-assert "first-access-match" (equal? fs first-item))
+(define first-ref (cog-value-ref fs 0))
+(format #t "Stream first access: ~A\n" first-ref)
+(test-assert "first-access-match" (equal? first-ref first-item))
 
 ; Second access - should return second item (not equal to first)
-(format #t "Stream second access: ~A\n" fs)
-(test-assert "second-access-nomatch" (not (equal? fs first-item)))
-(test-assert "second-access-match" (equal? fs second-item))
+(define second-ref (cog-value-ref fs 0))
+(format #t "Stream second access: ~A\n" second-ref)
+(test-assert "second-access-match" (equal? second-ref second-item))
 
-; Third access - should wrap around to first item
-; It wraps because after the second item, the end of the LinkValue
-; is reached, so FlatStream calls the ValueOf to get "the next list".
-; It gets the next list, and then cycles like this, forever.
+; Third access - should be empty.
 (format #t "Stream third access: ~A\n" fs)
-(test-assert "third-access-match" (equal? fs first-item))
-
-; Fourth access - should be second item again
-(format #t "Stream fourth access: ~A\n" fs)
-(test-assert "fourth-access-nomatch" (not (equal? fs first-item)))
-(test-assert "fourth-access-match" (equal? fs second-item))
+(test-assert "third-access-match" (equal? fs (LinkValue)))
 
 (test-end tname)
 
@@ -81,37 +74,44 @@
 
 ; Test sequential access - each access should return the next item wrapped in LinkValue
 ; Note: format advances stream, then equal? compares current value
-(format #t "Stream access (Item a): ~A\n" fs-ordered)
-(test-assert "ordered-item-a" (equal? fs-ordered (LinkValue (Item "a"))))
+(define fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item a): ~A\n" fs-ref)
+(test-assert "ordered-item-a" (equal? fs-ref (Item "a")))
 
-(format #t "Stream access (Item b): ~A\n" fs-ordered)
-(test-assert "ordered-item-b" (equal? fs-ordered (LinkValue (Item "b"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item b): ~A\n" fs-ref)
+(test-assert "ordered-item-b" (equal? fs-ref (Item "b")))
 
-(format #t "Stream access (Item c): ~A\n" fs-ordered)
-(test-assert "ordered-item-c" (equal? fs-ordered (LinkValue (Item "c"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item c): ~A\n" fs-ref)
+(test-assert "ordered-item-c" (equal? fs-ref (Item "c")))
 
 ; Next item is an Edge
 (define expected-edge
-	(LinkValue
-		(Edge
-			(Predicate "relation")
-			(List (Item "d") (Item "e") (Item "f") (Item "g")))))
-(format #t "Stream access (Edge): ~A\n" fs-ordered)
-(test-assert "ordered-edge" (equal? fs-ordered expected-edge))
+	(Edge
+		(Predicate "relation")
+		(List (Item "d") (Item "e") (Item "f") (Item "g"))))
+
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Edge): ~A\n" fs-ref)
+(test-assert "ordered-edge" (equal? fs-ref expected-edge))
 
 ; Continue with remaining items
-(format #t "Stream access (Item p): ~A\n" fs-ordered)
-(test-assert "ordered-item-p" (equal? fs-ordered (LinkValue (Item "p"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Item p): ~A\n" fs-ref)
+(test-assert "ordered-item-p" (equal? fs-ref (Item "p")))
 
-(format #t "Stream access (Predicate q): ~A\n" fs-ordered)
-(test-assert "ordered-predicate-q" (equal? fs-ordered (LinkValue (Predicate "q"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (Predicate q): ~A\n" fs-ref)
+(test-assert "ordered-predicate-q" (equal? fs-ref (Predicate "q")))
 
-(format #t "Stream access (TagNode z): ~A\n" fs-ordered)
-(test-assert "ordered-tagnode-z" (equal? fs-ordered (LinkValue (TagNode "z"))))
+(set! fs-ref (cog-value-ref fs-ordered 0))
+(format #t "Stream access (TagNode z): ~A\n" fs-ref)
+(test-assert "ordered-tagnode-z" (equal? fs-ref (TagNode "z")))
 
 ; After reaching the end, it should wrap around to the first item
-(format #t "Stream access (wrap to Item a): ~A\n" fs-ordered)
-(test-assert "ordered-wrap-a" (equal? fs-ordered (LinkValue (Item "a"))))
+(format #t "Expect end-of-stream: ~A\n" fs-ordered)
+(test-assert "ordered-eof" (equal? fs-ordered (LinkValue)))
 
 (test-end tname-ordered)
 
@@ -130,31 +130,41 @@
 		(Concept "third")))
 
 ; Use SetValue with CollectionOf to create stream in "pure Atomese"
+; Capture as "junk" to avoid accidental stream deref.
 (define junk
 	(cog-execute!
 		(SetValue (Concept "stream-test") (Predicate "location")
-			(CollectionOf (Type 'FlatStream) (OrderedLink simple-list)))))
+			(LinkSignature (Type 'FlatStream) simple-list))))
 
 ; Create ValueOf reference to the stream
-(define stream-ref (ValueOf (Concept "stream-test") (Predicate "location")))
+(define stream
+	(cog-execute! (ValueOf (Concept "stream-test") (Predicate "location"))))
 
 ; Test that cog-execute! advances the stream (returns FlatStream that wraps LinkValues)
-(format #t "SetValue test first: ~A\n" (cog-execute! stream-ref))
+(define stream-ref (cog-value-ref stream 0))
+(format #t "SetValue test first: ~A\n" stream-ref)
 (test-assert "setvalue-first"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "first"))))
+	(equal? stream-ref (Concept "first")))
 
-(format #t "SetValue test second: ~A\n" (cog-execute! stream-ref))
+(format #t "SetValue test second: ~A\n" stream)
 (test-assert "setvalue-second"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "second"))))
+	(equal? stream (LinkValue (Concept "second"))))
 
-(format #t "SetValue test third: ~A\n" (cog-execute! stream-ref))
+(set! stream-ref (cog-value-ref stream 0))
+(format #t "SetValue test third: ~A\n" stream-ref)
 (test-assert "setvalue-third"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "third"))))
+	(equal? stream-ref (Concept "third")))
 
-; Should wrap around
-(format #t "SetValue test wrap: ~A\n" (cog-execute! stream-ref))
+(define stream-end (cog-value->list stream))
+(format #t "SetValue test eof: ~A\n" stream-end)
+(test-assert "setvalue-end"
+	(equal? stream-end '()))
+
+; Should wrap around.  Why? Because FlatStream recurses on us here;
+; it treats itself as an infinite stream.
+(format #t "SetValue test wrap: ~A\n" stream)
 (test-assert "setvalue-wrap-first"
-	(equal? (cog-execute! stream-ref) (LinkValue (Concept "first"))))
+	(equal? stream (LinkValue (Concept "first"))))
 
 (test-end tname-setvalue)
 
