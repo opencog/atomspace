@@ -1,4 +1,6 @@
 ;
+; UNDER CONSTRUCTION INCOMPLETE
+;
 ; flow-sorted.scm -- Presenting streams in sorted order.
 ;
 ; In most conventional usage, it is enough to process a stream in
@@ -34,7 +36,7 @@
 (define order-relation
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
-		(GreterThan
+		(GreaterThan
 			(SizeOf (Variable "$left"))
 			(SizeOf (Variable "$right")))))
 
@@ -57,10 +59,12 @@
 			(List (Item "g") (Item "h")))
 	))
 
+
 (define sorted-list
 	(CollectionOf
-		(Type 'SortedValue)
-		x
+		(LinkSignature (Type 'SortedValue) order-relation)
+		item-list))
+
 
 ; Display it. Note that, at the bottom of the print, the current
 ; sample from the stream is printed. The stream advances every
