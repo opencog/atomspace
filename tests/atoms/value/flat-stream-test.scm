@@ -77,22 +77,21 @@
 ; Note: format advances stream, then equal? compares current value
 (define fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Item a): ~A\n" fs-ref)
-(test-assert "ordered-item-a" (equal? fs-ref (LinkValue (Item "a"))))
+(test-assert "ordered-item-a" (equal? fs-ref (Item "a")))
 
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Item b): ~A\n" fs-ref)
-(test-assert "ordered-item-b" (equal? fs-ref (LinkValue (Item "b"))))
+(test-assert "ordered-item-b" (equal? fs-ref (Item "b")))
 
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Item c): ~A\n" fs-ref)
-(test-assert "ordered-item-c" (equal? fs-ref (LinkValue (Item "c"))))
+(test-assert "ordered-item-c" (equal? fs-ref (Item "c")))
 
 ; Next item is an Edge
 (define expected-edge
-	(LinkValue
-		(Edge
-			(Predicate "relation")
-			(List (Item "d") (Item "e") (Item "f") (Item "g")))))
+	(Edge
+		(Predicate "relation")
+		(List (Item "d") (Item "e") (Item "f") (Item "g"))))
 
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Edge): ~A\n" fs-ref)
@@ -101,19 +100,19 @@
 ; Continue with remaining items
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Item p): ~A\n" fs-ref)
-(test-assert "ordered-item-p" (equal? fs-ref (LinkValue (Item "p"))))
+(test-assert "ordered-item-p" (equal? fs-ref (Item "p")))
 
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (Predicate q): ~A\n" fs-ref)
-(test-assert "ordered-predicate-q" (equal? fs-ref (LinkValue (Predicate "q"))))
+(test-assert "ordered-predicate-q" (equal? fs-ref (Predicate "q")))
 
 (set! fs-ref (cog-value-ref fs-ordered 0))
 (format #t "Stream access (TagNode z): ~A\n" fs-ref)
-(test-assert "ordered-tagnode-z" (equal? fs-ref (LinkValue (TagNode "z"))))
+(test-assert "ordered-tagnode-z" (equal? fs-ref (TagNode "z")))
 
 ; After reaching the end, it should wrap around to the first item
 (set! fs-ref (cog-value->list fs-ordered))
-(format #t "Expect end-of-stream ~A\n" fs-ref)
+(format #t "Expect end-of-stream: ~A\n" fs-ref)
 (test-assert "ordered-eof" (equal? fs-ref '()))
 
 (test-end tname-ordered)
