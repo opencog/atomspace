@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/value/UnisetValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
@@ -119,7 +120,17 @@ void UnisetValue::add(ValuePtr&& vp)
 
 ValuePtr UnisetValue::remove(void)
 {
-	return _set.value_get();
+	// Might block here, if the concurrent_set is open and empty.
+	// If it closes while we are blocked, we will catch an exception.
+	// Return VoidValue as the end-of-stream marker.
+	try
+	{
+		return _set.value_get();
+	}
+	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
+	{}
+
+	return createVoidValue();
 }
 
 size_t UnisetValue::size(void) const

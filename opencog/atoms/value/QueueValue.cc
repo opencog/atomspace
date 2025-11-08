@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
@@ -121,7 +122,16 @@ void QueueValue::add(ValuePtr&& vp)
 
 ValuePtr QueueValue::remove(void)
 {
-	return conq::value_pop();
+	// Might block here, if the concurrent_queue is open and empty.
+	// If it closes while we are blocked, we will catch an exception.
+	// Return VoidValue as the end-of-stream marker.
+	try
+	{
+		return conq::value_pop();
+	}
+	catch (typename conq::Canceled& e)
+	{}
+	return createVoidValue();
 }
 
 size_t QueueValue::size(void) const
