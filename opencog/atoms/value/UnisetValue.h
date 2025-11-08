@@ -61,7 +61,7 @@ protected:
 	concurrent_set<ValuePtr, ValueComp> _set;
 
 	UnisetValue(Type t) : ContainerValue(t), _set(ValueComp(this)) {}
-	virtual void update() const;
+	virtual void update() const override;
 
 	// Default ordering inherited from Value::operator<()
 	virtual bool less(const Value& lhs, const Value& rhs) const

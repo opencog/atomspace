@@ -70,6 +70,8 @@ Executing the above returns a FutureStream that wraps the data source.
 Each reference to the FutureStream returns an item from the source.
 Bingo -- works for FlatStream, too.
 
+Streams
+-------
 What's a stream? Well, its a Value, not an Atom. Lets look at examples:
 
   FormulaStream
@@ -80,7 +82,7 @@ What's a stream? Well, its a Value, not an Atom. Lets look at examples:
 
 Tap either of these once, they'll execute the atom that they wrap and
 return the resulting value. The only difference is that FormulaStream
-is explicitly types to be numeric.
+is explicitly typed to be numeric.
 
   FlatStream
      <executable atom returning collection>
@@ -136,14 +138,30 @@ So we have three of these things. Now for the wicked part.
    when items are inserted into the container. The container contents
    are time-varying.
 
- * FutureStream. Resembles a container, but is always empty, and pulls
-   from upstream, whenever it is pulled from. That's the promise.
+ * FutureStream. Resembles a container, but is always empty. Calls
+   `Atom::execute()` once, every time `FutureStream::value()` is called.
+   That's the promise.
 
  * FlatStream. Resembles a container, but does NOT actually derive from
-   ContainerValue. Pulls only when it needs to.
+   ContainerValue. Derives from FutureStream, unwrapping lists of items
+   from obtained via `Atom::execute()`.
+
+ * QueueValue, UnisetValue. Thread-safe containers. Don't stream; they
+   block until writer closes, then return one big gulp of everything.
+   That is, they accumulate.
 
 There is no FilterStream, because it is easy to set up FutureStream such
 that it pulls from (pulls through) a FilterLink.
+
+Issues:
+ * FlatStream behaves like a future, but perhaps it is mis-designed,
+   and should only reference `LinkValue::value()` to get the next
+   collection, instead of calling `Atom::execute()`. XXX FIXME.
+
+ * Assuming above change, then FlatStream should be able to pull items
+   one at a time from a running (open) QueueValue. That is, convert the
+   blocking ContainerValue behavior into a non-blocking form, delivering
+   one item at a time, as soon as it is available.
 
 The SortedValue works best when it drains its source, that is, keeps
 it's source drained and empty, so that it can apply the sort order to
@@ -167,6 +185,104 @@ Questions:
    threads? Probably yes. There should probably be a centralized
    thread pool, so that these can be managed. Right now, its ad hoc.
 
+ * Is DrainLink mis-designed? Probably yes; it should loop on calls
+   to `LinkValue::value()` and NOT `Atom::execute()` For the same
+   reason that FlatStream should do the same.
+
+ * How should streams work?
+
+There is an unresolved tension in the current implementation. There
+seem to be two competing paradigms for streaming, and these are in
+conflict.
+
+ * Original vision for Values is that they could be time-varying;
+   every access, by calling `Value::value()` might return something
+   different.
+
+ * Streams can run forever, or they can close. The `value()` method
+   always returns a `std::vector<>` and if this vector is of size zero,
+   it can be taken to be an end-of-stream indicator.  Note that
+   RandomStream returns random numbers, and never closes. TextFile
+   returns lines of text from a file, and closes on end-of-file.
+   It can be put in a mode where it tails the file (forever).
+
+ * FlatStream and DrainLink both call `execute()` on a source handle,
+   to grab more data. Perhaps this is a design mistake? Yes, it is.
+
+The issue is this: `execute()` returns a `ValuePtr`. If that is a true
+stream, then calling `Value::value()` is a valid way to get the next
+element. FutureStream converts calls to `value()` into calls to
+`execute()`, and thus is the right tool for creating streams.
+
+How should stream constuctors work?
+ * If the Stream constructor is given a Handle, then make make sure it
+   is executable, call it and get a ValuePtr. That will be the source.
+ * If the Stream constructor is given a ValuePtr, assume that is the
+   source.
+
+What is a source? Rather than generalizing, lets examine the
+case-by-case needs. Lets start with a re-designed FlatStream.
+The `FlatStream::update()` method does this:
+
+ * If the source is VoidValue or of size zero, return that.
+
+ * If the source is a Link, then it is taken to be a finite source.
+   The outgoing set is the "current collection", and items are doled
+   out from it, one by one. When there ae no more, VoidValue is returned
+   to indicatte end-of-stream.
+
+ * If the source is a LinkValue, and is NOT a StreamValue, then it
+   is taken to be a finite source, and treated like a Link, above.
+   That is, call `LinkValue::value()` once to get the current collection.
+   Iterate on that collection until empty, and then done.
+
+ * If the source is a StreamValue and is not a ContainerValue, then
+   it is assumed to be a infinite source. In this case, call
+   `LinkValue::value()` to get the current collection. Dole it out,
+   and, when empty, call `LinkValue::value()` again to get the next
+   collection.
+
+ * If the source is a ContainerValue, and the container is open,
+   then call the container dequeue to get one item, and return that.
+   This might block. If the Container is closed, just get everything.
+   If the Container is closed and empty, return end-of-stream VoidValue.
+   That is, a closed Container is taken to be a finite stream.
+
+How about the SortedStream? Well, it seems like it will behave a lot
+like a FlatStream, except it does sorting, and deduplication.
+
+ * If the source is VoidValue or of size zero, return that.
+
+ * If the source is a Link, then it is taken to be a finite source.
+   Grab the entire outgoing set and stuff it into Uniset, so that it
+   is sorted. Dole it out, one by one.
+
+ * If the source is a LinkValue, and is NOT a StreamValue, then it
+   is taken to be a finite source, and treated like a Link, above.
+
+ * If the source is a StreamValue and is not a ContainerValue, then
+   it is assumed to be a infinite source. In this case, a new thread
+   is launched. It will make repeated calls to `LinkValue::value()`
+   and the results will be added to the Uniset, until:
+   -- (a) it blocks
+   -- (b) it's size zero, denoting end-of-stream. Thread will exit.
+   -- (c) a queue high-watermark is reached. Thread blocks until
+          low-watermark is reached. The high-low watermarks are
+          provided natively by cogutils `concurrent_set`.
+
+ * If the source is a ContainerValue, then launch a thread for
+   processing. If the container is open, then call the container
+   dequeue in a loop, to get an item, and move it into the Uniset.
+   This might block. If the Container is closed, just get everything,
+   and close ourselves, too.
+
+ * If we ourselves are closed and empty, return VoidValue.
+
+OK, that sounds like a plan...
+
+
+ObjectNodes
+-----------
 Historically, Atoms are necessarily stateless and immutable; this is
 what allows them to have global uniqueness, thread-safety, etc. This
 has been broken in two ways:
@@ -258,3 +374,4 @@ So lets recap the issues:
    type specification got fancy, got lambda-ish, it would start
    resembling a filter.
 
+ * UnisetValue and QueueValue don't stream; should they?

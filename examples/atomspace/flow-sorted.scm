@@ -62,8 +62,10 @@
 
 (define sorted-list
 	(CollectionOf
-		(LinkSignature (Type 'SortedValue) order-relation)
-		item-list))
+		(LinkSignature
+			(Type 'SortedValue)
+			order-relation
+			item-list)))
 
 
 ; Display it. Note that, at the bottom of the print, the current

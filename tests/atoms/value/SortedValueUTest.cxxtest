@@ -175,11 +175,12 @@ void SortedValueUTest::test_deduplication(void)
 	SortedValuePtr svp = SortedValueCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
-	Handle num2 = eval.eval_h("(Number 2)");
-	Handle num3 = eval.eval_h("(Number 3)");
-	Handle num4 = eval.eval_h("(Number 4)");
-	Handle num5 = eval.eval_h("(Number 5)");
-	Handle num6 = eval.eval_h("(Number 6)");
+	ValuePtr num2 = eval.eval_v("(FloatValue 2 2)");
+	ValuePtr num3 = eval.eval_v("(FloatValue 3 3 3)");
+	ValuePtr num4 = eval.eval_v("(FloatValue 4 4 4 4)");
+	ValuePtr num5 = eval.eval_v("(FloatValue 5 5 5 5 5)");
+	ValuePtr num6 = eval.eval_v("(FloatValue 6)");
+	ValuePtr voiv = eval.eval_v("(VoidValue)");
 
 	// Add 12 items in "random" order.
 	svp->add(num2);
@@ -194,8 +195,7 @@ void SortedValueUTest::test_deduplication(void)
 	svp->add(num6); // duplicate
 	svp->add(num4); // duplicate
 	svp->add(num5); // duplicate
-
-	svp->close();
+	svp->add(voiv); // closes stream
 
 	const ValueSeq& contents = svp->value();
 

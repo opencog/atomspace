@@ -72,6 +72,10 @@ SECTION_VALUE <- LINK_VALUE
 // over time, we call them "streams".  They provide wrappers for
 // any kind of time-varying data.
 
+// XXX FIXME: there's a naming issue here; the numeric streams inherit
+// from FloatValue, but the item streams do not. Both are called
+// streams, leading to confusion.
+
 // An example of a time-varying Value stream
 RANDOM_STREAM <- FLOAT_VALUE,INT_ARG
 
@@ -92,10 +96,11 @@ UNISET_VALUE <- CONTAINER_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
 // Inherits from UnisetValue to minimize c++ duplication.
-SORTED_VALUE <- UNISET_VALUE,HANDLE_ARG
+SORTED_VALUE <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
 
-// A stream of Values, computed by a function held in the AtomSpace.
-// Just like FormulaStream, but for vectors of Values.
+// Convert calls to `LinkValue::value()` into calls to
+// `Atom::execute()`. Conversion is one-to-one: each touch
+// of `value()` is converted to one `execute()`
 FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 
 // A stream of Values, obtained by flattening a stream.
@@ -103,7 +108,11 @@ FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 // to get the next token. For example, given the stream
 //   ((a b) (c d e) (f) (g h i j k) ...)
 // it delivers (a b c d e f g h i ...) one at a time, as a stream.
-FLAT_STREAM <- STREAM_VALUE,HANDLE_ARG
+//
+// Each touch of `value()` returns one item from the current collection,
+// when the collection runs dry, then `Atom::execute()` is called to
+// get the next collection.
+FLAT_STREAM <- FUTURE_STREAM,HANDLE_ARG
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace

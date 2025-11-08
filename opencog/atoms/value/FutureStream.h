@@ -24,7 +24,6 @@
 #define _OPENCOG_FUTURE_STREAM_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 namespace opencog
@@ -35,8 +34,8 @@ namespace opencog
  */
 
 /**
- * FutureStream will evaluate the stored Atom to obtain a fresh
- * Value, every time it is queried for data.
+ * FutureStream will eexecute the stored list of Atoms, to obtain
+ * a fresh list of Values, every time it is queried for data.
  */
 class FutureStream
 	: public LinkValue
@@ -47,7 +46,7 @@ protected:
 	void init(void);
 	virtual void update() const;
 	HandleSeq _formula;
-	AtomSpace* _as;
+	AtomSpace* _scratch;
 
 public:
 	FutureStream(const Handle&);
