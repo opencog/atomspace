@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "LinkSignatureLink.h"
 
@@ -55,8 +56,8 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 /// Return a LinkValue of the desired type.
 ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 {
-	if (LINK_VALUE == _kind)
-		return createLinkValue(std::move(newset));
+	if (nameserver().isA(_kind, LINK_VALUE))
+		return valueserver().create(_kind, std::move(newset));
 
 	// Yuck. User should have called the other constructor.
 	// But this is rare, so we'll allow.
@@ -68,7 +69,7 @@ ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 			const Handle& h(HandleCast(vp));
 			if (h) oset.push_back(h);
 		}
-		return createLink(std::move(oset), _kind);
+		return valueserver().create(_kind, std::move(oset));
 	}
 
 	// Should support other kinds too.
@@ -82,11 +83,9 @@ ValuePtr LinkSignatureLink::construct(const ValueSeq&& newset)
 /// Return either a Link or a LinkValue of the desired type.
 ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
 {
-	if (LINK_VALUE == _kind)
-		return createLinkValue(noset);
-
-	if (nameserver().isA(_kind, LINK))
-		return createLink(std::move(noset), _kind);
+	if (nameserver().isA(_kind, LINK_VALUE) or
+	    nameserver().isA(_kind, LINK))
+		return valueserver().create(_kind, std::move(noset));
 
 	// Should support other kinds too.
 	const std::string& tname = nameserver().getTypeName(_kind);
