@@ -40,6 +40,7 @@ public:
 	void setUp(void);
 	void test_basic_sorted(void);
 	void test_bare_greater_than(void);
+	void test_deduplication(void);
 };
 
 SortedValueUTest::SortedValueUTest(void)
@@ -54,6 +55,8 @@ SortedValueUTest::SortedValueUTest(void)
 void SortedValueUTest::setUp(void)
 {
 }
+
+// =========================================================
 
 void SortedValueUTest::test_basic_sorted(void)
 {
@@ -107,6 +110,8 @@ void SortedValueUTest::test_basic_sorted(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// =========================================================
+
 void SortedValueUTest::test_bare_greater_than(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -153,4 +158,65 @@ void SortedValueUTest::test_bare_greater_than(void)
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
+// =========================================================
+
+void SortedValueUTest::test_deduplication(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(_asp);
+
+	// Use bare GreaterThan for descending sort
+	ValuePtr sorted_val = eval.eval_v(R"(
+		(SortedValue (GreaterThan))
+	)");
+
+	SortedValuePtr svp = SortedValueCast(sorted_val);
+	TS_ASSERT(svp != nullptr);
+
+	Handle num2 = eval.eval_h("(Number 2)");
+	Handle num3 = eval.eval_h("(Number 3)");
+	Handle num4 = eval.eval_h("(Number 4)");
+	Handle num5 = eval.eval_h("(Number 5)");
+	Handle num6 = eval.eval_h("(Number 6)");
+
+	// Add 12 items in "random" order.
+	svp->add(num2);
+	svp->add(num6);
+	svp->add(num3);
+	svp->add(num5);
+	svp->add(num4);
+	svp->add(num5); // duplicate
+	svp->add(num5); // duplicate
+	svp->add(num3); // duplicate
+	svp->add(num2); // duplicate
+	svp->add(num6); // duplicate
+	svp->add(num4); // duplicate
+	svp->add(num5); // duplicate
+
+	svp->close();
+
+	const ValueSeq& contents = svp->value();
+
+	// Deduplication works just like UnisetValue:
+	// should have only 5 unique items
+	TS_ASSERT_EQUALS(contents.size(), 5);
+
+	// Verify sorted order is 6, 5, 4, 3, 2 (descending)
+	TS_ASSERT_EQUALS(contents[0], num6);
+	TS_ASSERT_EQUALS(contents[1], num5);
+	TS_ASSERT_EQUALS(contents[2], num4);
+	TS_ASSERT_EQUALS(contents[3], num3);
+	TS_ASSERT_EQUALS(contents[4], num2);
+
+	printf("SortedValue contents (%zu items, should be 5):\n", contents.size());
+	for (size_t i = 0; i < contents.size(); i++)
+		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ======================THE END============================
+// =========================================================
 
