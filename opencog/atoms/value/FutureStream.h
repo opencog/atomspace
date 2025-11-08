@@ -35,8 +35,8 @@ namespace opencog
  */
 
 /**
- * FutureStream will evaluate the stored Atom to obtain a fresh
- * Value, every time it is queried for data.
+ * FutureStream will eexecute the stored list of Atoms, to obtain
+ * a fresh list of Values, every time it is queried for data.
  */
 class FutureStream
 	: public LinkValue

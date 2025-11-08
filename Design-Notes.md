@@ -142,6 +142,10 @@ So we have three of these things. Now for the wicked part.
  * FlatStream. Resembles a container, but does NOT actually derive from
    ContainerValue. Pulls only when it needs to.
 
+ * QueueValue, UnisetValue. Thread-safe containers. Don't stream; they
+   block until writer closes, then return one big gulp of everything.
+   That is, they accumulate.
+
 There is no FilterStream, because it is easy to set up FutureStream such
 that it pulls from (pulls through) a FilterLink.
 
@@ -167,6 +171,34 @@ Questions:
    threads? Probably yes. There should probably be a centralized
    thread pool, so that these can be managed. Right now, its ad hoc.
 
+ * How should streams work?
+
+There is an unresolved tension in the current implementation. There
+seem to be two competing paradigms for streaming, and these are in
+conflict.
+
+ * Original vision for Values is that they could be time-varying;
+   every access, by calling `Value::value()` might return something
+   different.
+
+ * Streams can run forever, or they can close. The `value()` method
+   always returns a `std::vector<>` and if this vector is of size zero,
+   it can be taken to be an end-of-stream indicator.  Note that
+   RandomStream returns random numbers, and never closes. TextFile
+   returns lines of text from a file, and closes on end-of-file.
+   It can be put in a mode where it tails the file (forever).
+
+ * FlatStream and DrainLink both call `execute()` on a source handle,
+   to grab more data. Perhaps this is a design mistake?
+
+The issue is this: `execute()` returns a `ValuePtr`. If that is a true
+stream, then calling `Value::value()` is a valid way to get the next
+element. FutureStream converts calls to `value()` into calls to
+`execute()`, and thus is the right tool for creating streams.
+
+
+ObjectNodes
+-----------
 Historically, Atoms are necessarily stateless and immutable; this is
 what allows them to have global uniqueness, thread-safety, etc. This
 has been broken in two ways:
@@ -258,3 +290,4 @@ So lets recap the issues:
    type specification got fancy, got lambda-ish, it would start
    resembling a filter.
 
+ * UnisetValue and QueueValue don't stream; should they?

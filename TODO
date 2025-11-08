@@ -54,3 +54,6 @@ Coding TODO
 * Remove ALWAYS_LINK from pattern matcher. Same idea as above:
   just use ALWAYS_VALUE, modelled on SORT_VALUE, that will turn
   into an empty set if all the items in it are not all the same.
+
+* Have some global thread pool or thread manager? Some way of
+  observing threads? Maybe killing them?

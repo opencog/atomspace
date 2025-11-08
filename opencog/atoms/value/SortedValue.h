@@ -52,6 +52,7 @@ protected:
 	AtomSpace* _scratch;
 
 	void init(void);
+	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
