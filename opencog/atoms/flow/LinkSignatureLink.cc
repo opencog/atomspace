@@ -98,6 +98,13 @@ ValuePtr LinkSignatureLink::construct(const HandleSeq&& noset)
 /// Return either a Link or a LinkValue of the desired type.
 ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 {
+	// The _kind will usually be some LinkValue. One interesting
+	// case is the stream, which takes some Handle argument that
+	// controls the stream operation. Examples include SortedValue
+	// and FlatStream. Pss that directly to the correct factory.
+	if (nameserver().isA(_kind, HANDLE_ARG))
+		return valueserver().create(_kind, _outgoing[1]);
+
 	ValueSeq voset;
 	for (size_t i=1; i < _outgoing.size(); i++)
 	{
