@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
+#include <opencog/atoms/value/ContainerValue.h>
 #include <opencog/atoms/value/FlatStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
@@ -98,7 +98,7 @@ void FlatStream::update() const
 		const ValuePtr& vp = _collection->_value[_index];
 
 		// End-of-stream marker.
-		if (vp->is_type(VOID_VALUE))
+		if (0 == vp->size())
 		{
 			_value.clear(); // Set sequence size to zero...
 			_index++;
@@ -131,6 +131,34 @@ void FlatStream::update() const
 	}
 
 	// If we are here, then we've got a container to deal with.
+	ContainerValuePtr cvp = ContainerValueCast(_source);
+
+	// If the container is closed, just grab everything, and we
+	// are done. Clear it, so we don't accidentally loop around.
+	if (cvp->is_closed())
+	{
+		_collection = createLinkValue(cvp->value());
+		cvp->clear();
+		update();
+		return;
+	}
+
+	// If we are here, the container is open. Get items one at
+	// a time. If we block, we block.
+	ValuePtr item = cvp->remove();
+
+	// End-of-stream marker. Note VoidValue and empty LinkValue
+	// both have size zero.
+	if (0 == item->size())
+	{
+		_value.clear(); // Set sequence size to zero...
+		_index++;
+		return;
+	}
+
+	ValueSeq vsq({item});
+	_value.swap(vsq);
+	_index++;
 }
 
 // ==============================================================
