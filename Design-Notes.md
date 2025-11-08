@@ -70,6 +70,8 @@ Executing the above returns a FutureStream that wraps the data source.
 Each reference to the FutureStream returns an item from the source.
 Bingo -- works for FlatStream, too.
 
+Streams
+-------
 What's a stream? Well, its a Value, not an Atom. Lets look at examples:
 
   FormulaStream
@@ -80,7 +82,7 @@ What's a stream? Well, its a Value, not an Atom. Lets look at examples:
 
 Tap either of these once, they'll execute the atom that they wrap and
 return the resulting value. The only difference is that FormulaStream
-is explicitly types to be numeric.
+is explicitly typed to be numeric.
 
   FlatStream
      <executable atom returning collection>
@@ -156,6 +158,11 @@ Issues:
    and should only reference `LinkValue::value()` to get the next
    collection, instead of calling `Atom::execute()`. XXX FIXME.
 
+ * Assuming above change, then FlatStream should be able to pull items
+   one at a time from a running (open) QueueValue. That is, convert the
+   blocking ContainerValue behavior into a non-blocking form, delivering
+   one item at a time, as soon as it is available.
+
 The SortedValue works best when it drains its source, that is, keeps
 it's source drained and empty, so that it can apply the sort order to
 the buffered contents.
@@ -178,6 +185,10 @@ Questions:
    threads? Probably yes. There should probably be a centralized
    thread pool, so that these can be managed. Right now, its ad hoc.
 
+ * Is DrainLink mis-designed? Probably yes; it should loop on calls
+   to `LinkValue::value()` and NOT `Atom::execute()` For the same
+   reason that FlatStream should do the same.
+
  * How should streams work?
 
 There is an unresolved tension in the current implementation. There
@@ -196,12 +207,16 @@ conflict.
    It can be put in a mode where it tails the file (forever).
 
  * FlatStream and DrainLink both call `execute()` on a source handle,
-   to grab more data. Perhaps this is a design mistake?
+   to grab more data. Perhaps this is a design mistake? Yes, it is.
 
 The issue is this: `execute()` returns a `ValuePtr`. If that is a true
 stream, then calling `Value::value()` is a valid way to get the next
 element. FutureStream converts calls to `value()` into calls to
 `execute()`, and thus is the right tool for creating streams.
+
+How should stream constuctors work?
+
+So how should SortedStream work? A:
 
 
 ObjectNodes
