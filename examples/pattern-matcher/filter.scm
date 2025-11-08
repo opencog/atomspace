@@ -10,10 +10,8 @@
 ; it only examines the given input list/set, and applies the map to
 ; that.
 ;
-; In many ways, FilterLink is the opposite of PutLink, in that it un-does
-; a beta reduction, by extracting values from a matching pattern. Thus,
-; FilterLink could have been named UnPutLink, CoPutLink or ExtractLink or
-; UnBetaReduceLink. That is, FilterLink is an adjoint functor to PutLink.
+; FilterLink extracts values from a matching pattern. It could also have
+; been named ExtractLink or UnBetaReduceLink.
 ;
 ; These ideas are illustrated below. The first 4 examples illustrate
 ; the extraction of values for a single variable; this is, of un-beta-
@@ -150,8 +148,7 @@
 ;
 ; This implements a kind of filtering, by returning a subset of
 ; the original input set, and discarding those values that don't
-; match the desired type.  A similar kind of filtering can be done
-; using PutLink; see the `filter.scm` example for more.
+; match the desired type.
 ;
 (define single-signature
 	(Filter
@@ -278,11 +275,6 @@
 ; Actually, this example uses two variables, so the implication
 ; link is in the form of P(x,y)->Q(x,y) and inputs P(a,b) are
 ; re-written to Q(a,b).
-;
-; Observe that the re-writing could also be achieved by combining
-; the results of the FilterLink with a PutLink.  The form below is
-; slightly less verbose, and thus, maybe more convenient than
-; using Filter and Put together.
 ;
 (define imply-map
 	(Filter

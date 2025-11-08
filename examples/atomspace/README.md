@@ -43,7 +43,6 @@ first).
 * [`basic.scm`](basic.scm)                   -- How to start the guile shell.
 * [`knowledge.scm`](knowledge.scm)           -- Representing knowledge.
 * [`querylink.scm`](bindlink.scm)            -- Queries and inference with the pattern matcher.
-* [`get-put.scm`](get-put.scm)               -- The two halves of a query: Get and Put.
 * [`assert-retract.scm`](assert-retract.scm) -- Asserting facts in the AtomSpace.
 * [`state.scm`](state.scm)                   -- Maintaining unique state.
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.

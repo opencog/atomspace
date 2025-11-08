@@ -235,14 +235,11 @@ for them.
 Filtering and Mapping
 ---------------------
 Given a set or vector or stream of Atoms, one might want to filter out
-only portions of that stream. This can be done with either `PutLink` or
-with `FilterLink`, the latter being more general.  Given a stream or
-vector of Atoms, one might want to apply some transformation to that set.
-This can be done with `FilterLink` in combination with `RuleLink`.  This
-somewhat resembles the filtering predicates and mapping functions found
-in [srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html). The `FilterLink`
-is particularly interesting: it can be though of as an `UnPutLink`, to
-undo the effects of a `PutLink`, that is, to extract data.
+only portions of that stream. This can be done with `FilterLink`.  Given
+a stream or vector of Atoms, one might want to apply some transformation
+to that set. This can be done with `FilterLink` in combination with
+`RuleLink`.  This somewhat resembles the filtering predicates and mapping
+functions found in [srfi-1](https://srfi.schemers.org/srfi-1/srfi-1.html).
 
 These link types are similar to, but different from `QueryLink` and
 `MeetLink`.  These two apply their pattern operations to the entire
@@ -258,7 +255,6 @@ list of candidates are presented directly to the filter. Filtering is also
 a kind-of one-sided unification, and thus simpler than full-fledged
 (symmetric) unification.
 
-* `put-filter.scm`     -- Using PutLink to filter sets of atoms.
 * `filter.scm`         -- Extracting and re-writing with FilterLink.
 * `filter-value.scm`   -- Using FilterLink on data streams.
 * `filter-strings.scm` -- Matching specific StringValues in data streams.

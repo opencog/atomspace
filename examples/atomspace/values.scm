@@ -25,8 +25,7 @@
 ; the old. Here's what you cannot do (see, however, footnote at bottom):
 ;
 ; 1) Use MeetLink or QueryLink to search for Values
-; 2) Use PutLink to create new Values
-; 3) Store them in the Atomspace for later retrieval. (But you do
+; 2) Store them in the Atomspace for later retrieval. (But you do
 ;    store the Atom that serves as the anchor for the Value; the Value
 ;    will ride with it.)
 ;

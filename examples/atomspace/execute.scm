@@ -24,7 +24,7 @@
 ; as a closure. If you really want closures and continuations, then
 ; treat Atom types as C++ classes or as Python objects. In brief:
 ; a type is a type is a type: Atom types can be C++ classes, and
-; that is exactly how QueryLink, MeetLink and PutLink are implemented.
+; that is exactly how QueryLink and MeetLink are implemented.
 ; Don't be afraid of creating more types and classes to do your work.
 ;
 ; What else is wrong with ExecutionOutputLink? Well, one of the big

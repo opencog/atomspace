@@ -14,10 +14,9 @@
 ; with knowledge-snippets themselves. That is, the tools for maintaining
 ; the data can be a part of the data itself.
 ;
-; The MeetLink and PutLink, from the `get-put.scm` example, provide the
-; tools needed to work with facts being deduced on the fly. They allow
-; facts to be asserted and retracted, even though their specific present
-; form is not yet known.
+; The MeetLink and PutLink provide the tools needed to work with facts
+; being deduced on the fly. They allow facts to be asserted and retracted,
+; even though their specific present form is not yet known.
 ;
 ; The `cog-execute!` function is the primary driver for affecting state
 ; change. Every time it is called, the state of the AtomSpace will
