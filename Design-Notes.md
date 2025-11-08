@@ -184,3 +184,77 @@ since every update requires a mutex lock.
    to external systems: StorageNode, for disk and newtwork I/O, and
    the SensoryNodes, for external (environmental) sensorimotor systems.
 
+Thus, ObjectNodes are valid Atomese Nodes, in that they are immutable
+and globally unique. The static Key-Value store is supplanted by special
+keys that fetch or set Values outside of local RAM.
+
+The ContainerValue C++ class has open(), close(), add(), remove()
+methods on it.
+
+Questions:
+ * Should ContainerValue be a kind of ObjectNode, instead?
+
+This could solve a long-outstanding, painful issue in stream design.
+The current stream architecture enourages small, modular stream
+transformations, with source data obtained by executing ValueOf.
+But since each of these streams are Values, they are lost if they
+are not placed somewhere: thus, by convention on some anchor point
+(arbitrary atom, e.g. Node having arbitrary name) and then a specific
+Key on that anchor: a second arbitrary Atom, typically a Node with
+arbitrary name. So, two arbitraries.
+
+If a ContainerValue was an ObjectNode, then:
+ * It would be stored in the AtomSpace
+ * It could always be found with it's unique name.
+
+Eliminating ContainerVaules is awkward, because the query engine API
+is simpler with anonymous containers; i.e. it would be awkward to force
+the query engine to select some random name or uuid. Yuck. Anonymous
+objects are useful.
+
+Question:
+ * Should *every* Value have a corresponding non-anonymous ObjectNode?
+
+Seems like "yes" would be a good answer. Except that this would create
+an explosion of new types, the Object types. Whoa.
+
+Stream access currently works like this:
+
+  (ValueOf (Anchor "some name") (Predicate "some key"))
+
+which returns some Value, e.g. FlatStream, or whatever, which is then
+sampled by reference.  This would be replaced by:
+
+  (ValueOf (ContainerObject "some obj name") (Predicate "*-read-*"))
+
+which returns... uhhh? ... one item from the stream? Already went
+through this round of confusion with sensory, where v0 implemented
+most things as treams, and version-half mostly tried to do everything
+with nodes and messages. The problem with messages is that they become
+"line-oriented" instea of "streaming".  In the end, the sensory API
+still creates (anonymouos) streams that have to be anchored.
+
+The issue here is that calling `StreamValue::value()` is fast: call it,
+and you get the stream value you wanted; done.  If this was replaced
+by `StreamLink::getValue(Predicate "*-read-*)`, this requires
+dispatching on the Predicate to fid .. what? Return what? It's
+indirection ...
+
+
+Recap
+-----
+So lets recap the issues:
+
+ * Authoring pipelines is blisteringly hard.
+
+ * Having non-anonymous ObjectNodes that do what Values do might
+   simplify the authoring of pipelines.
+
+ * We still don't have a good answer for SortedValue vis-a-vis
+   CollectionOf.
+
+ * There's some unresolved tension with the overlapping duties of
+   CollectionOf and FilterLink. Spcifically, of the CollectionOf
+   type specification got fancy, got lamba-ish, it would start
+   resembling a filter.
+
