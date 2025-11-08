@@ -127,10 +127,10 @@ class QueueValueTest(unittest.TestCase):
         # Close the queue first to prevent blocking
         value.close()
 
-        # Popping from closed empty queue should return VoidValue
+        # Popping from closed empty queue should return empty value
         result = value.pop()
-        self.assertEqual('VoidValue', result.type_name,
-                        "Expected VoidValue when popping from closed empty queue")
+        self.assertEqual(0, len(result.to_list()),
+                        "Expected empty value when popping from closed empty queue")
 
     def test_pop_until_empty_then_close(self):
         value = QueueValue()
@@ -147,10 +147,10 @@ class QueueValueTest(unittest.TestCase):
         # Now close the empty queue
         value.close()
 
-        # Trying to pop should return VoidValue
+        # Trying to pop should return empty value
         result = value.pop()
-        self.assertEqual('VoidValue', result.type_name,
-                        "Expected VoidValue when popping from closed empty queue")
+        self.assertEqual(0, len(result.to_list()),
+                        "Expected empty value when popping from closed empty queue")
 
     def test_str(self):
         value = QueueValue([FloatValue(42), StringValue('foo')])

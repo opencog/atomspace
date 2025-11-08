@@ -76,10 +76,10 @@ class TestQueueValueExceptions(unittest.TestCase):
         q.open()
         q.close()
 
-        # This should return VoidValue instead of raising exception
+        # This should return empty value instead of raising exception
         result = q.pop()
-        self.assertEqual('VoidValue', result.type_name,
-                        "Expected VoidValue when popping from closed empty queue")
+        self.assertEqual(0, len(result.to_list()),
+                        "Expected empty value when popping from closed empty queue")
 
 
 if __name__ == '__main__':

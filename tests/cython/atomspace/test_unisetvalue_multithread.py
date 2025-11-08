@@ -72,8 +72,8 @@ class UnisetValueMultithreadTest(unittest.TestCase):
             try:
                 while True:
                     val = uniset.pop()
-                    # Check if we got a VoidValue indicating closed empty set
-                    if val.type_name == 'VoidValue':
+                    # Check if we got an empty value indicating closed empty set
+                    if len(val.to_list()) == 0:
                         # Reopen the set to drain remaining values
                         uniset.open()
                         remaining = len(uniset)
@@ -168,8 +168,8 @@ class UnisetValueMultithreadTest(unittest.TestCase):
             try:
                 while True:
                     val = uniset.pop()
-                    # Check if we got a VoidValue indicating closed empty set
-                    if val.type_name == 'VoidValue':
+                    # Check if we got an empty value indicating closed empty set
+                    if len(val.to_list()) == 0:
                         # Reopen the set to drain remaining values
                         uniset.open()
                         remaining = len(uniset)
@@ -344,8 +344,8 @@ class UnisetValueMultithreadTest(unittest.TestCase):
         uniset.open()  # Reopen to drain
         while len(uniset) > 0:
             val = uniset.pop()
-            # In case we get a VoidValue, stop
-            if val.type_name == 'VoidValue':
+            # In case we get an empty value, stop
+            if len(val.to_list()) == 0:
                 break
             remaining += 1
         uniset.close()

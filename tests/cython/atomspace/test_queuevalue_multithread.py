@@ -71,8 +71,8 @@ class QueueValueMultithreadTest(unittest.TestCase):
             try:
                 while True:
                     val = queue.pop()
-                    # Check if we got a VoidValue indicating closed empty queue
-                    if val.type_name == 'VoidValue':
+                    # Check if we got an empty value indicating closed empty queue
+                    if len(val.to_list()) == 0:
                         # Reopen the queue to drain remaining values
                         queue.open()
                         remaining = len(queue)
@@ -162,8 +162,8 @@ class QueueValueMultithreadTest(unittest.TestCase):
             try:
                 while True:
                     val = queue.pop()
-                    # Check if we got a VoidValue indicating closed empty queue
-                    if val.type_name == 'VoidValue':
+                    # Check if we got an empty value indicating closed empty queue
+                    if len(val.to_list()) == 0:
                         # Reopen the queue to drain remaining values
                         queue.open()
                         remaining = len(queue)
@@ -254,8 +254,8 @@ class QueueValueMultithreadTest(unittest.TestCase):
             try:
                 while True:
                     val = queue.pop()
-                    # Check if we got a VoidValue indicating closed empty queue
-                    if val.type_name == 'VoidValue':
+                    # Check if we got an empty value indicating closed empty queue
+                    if len(val.to_list()) == 0:
                         # Reopen the queue to drain remaining values
                         queue.open()
                         remaining = len(queue)
@@ -324,9 +324,9 @@ class QueueValueMultithreadTest(unittest.TestCase):
         # Verify queue is empty
         self.assertEqual(0, len(queue))
 
-        # Try to pop from closed empty queue - should return VoidValue
+        # Try to pop from closed empty queue - should return empty value
         val = queue.pop()
-        self.assertEqual('VoidValue', val.type_name, "Expected VoidValue when popping from closed empty queue")
+        self.assertEqual(0, len(val.to_list()), "Expected empty value when popping from closed empty queue")
 
     def test_stress_many_small_operations(self):
         """Stress test with many threads doing small operations."""
@@ -382,8 +382,8 @@ class QueueValueMultithreadTest(unittest.TestCase):
         remaining = 0
         while True:
             val = queue.pop()
-            # VoidValue indicates closed empty queue
-            if val.type_name == 'VoidValue':
+            # Empty value indicates closed empty queue
+            if len(val.to_list()) == 0:
                 break
             remaining += 1
 

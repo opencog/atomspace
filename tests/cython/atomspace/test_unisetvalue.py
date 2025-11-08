@@ -148,10 +148,10 @@ class UnisetValueTest(unittest.TestCase):
         # Close the set first to prevent blocking
         value.close()
 
-        # Popping from closed empty set should return VoidValue
+        # Popping from closed empty set should return empty value
         result = value.pop()
-        self.assertEqual('VoidValue', result.type_name,
-                        "Expected VoidValue when popping from closed empty set")
+        self.assertEqual(0, len(result.to_list()),
+                        "Expected empty value when popping from closed empty set")
 
     def test_pop_until_empty_then_close(self):
         value = UnisetValue()
@@ -168,10 +168,10 @@ class UnisetValueTest(unittest.TestCase):
         # Now close the empty set
         value.close()
 
-        # Trying to pop should return VoidValue
+        # Trying to pop should return empty value
         result = value.pop()
-        self.assertEqual('VoidValue', result.type_name,
-                        "Expected VoidValue when popping from closed empty set")
+        self.assertEqual(0, len(result.to_list()),
+                        "Expected empty value when popping from closed empty set")
 
     def test_str(self):
         value = UnisetValue([FloatValue(42), StringValue('foo')])
