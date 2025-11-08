@@ -44,3 +44,29 @@ a SignatueLik is a type constructor for complex types.
      <type spec>
      <dataset or stream>
 
+The CollectionOfLink does type rewriting, changing the type of the
+objects in the data stream, without the pesky RuleLink.
+
+The original, prototypical use was
+
+  CollectionOfLink
+     (Type 'Set)
+     (LinkValue ...)
+
+which just took the contents of LinkValue, and stuffed them into a
+SetLink. So, basically, unwrap and rewrap with a different container
+type. Note the container type is a simple type, not a compund type.
+
+The first intersting change was the realization that CollectionOfLink
+is just like PromiseLink, but more general. The PromiseLink was used to
+create futures aka streams, but you can do this with CollectionOf, also.
+This makes PromiseLink 100% redundant.  Example:
+
+  CollectionOf
+     (Type 'FutureStream)
+     <dataset or source>
+
+Executing the above returns a FutureStream that wraps the data source.
+Each reference to the FutureStream returns an item from the source.
+Bingo -- the high-falutin Promise was doing the same thing.
+
