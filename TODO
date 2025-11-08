@@ -43,3 +43,14 @@ Writing TODO
 
 * The voting/club-membership algo in the learn project performs
   generalization.
+
+Coding TODO
+-----------
+* Remove GROUP_LINK from pattern matcher; this can be done with
+  a GROUP_VALUE, instead. See SORT_VALUE for an example. This will
+  maintain ultiple sub-lists, grouping inserted items into one of
+  the sublists.
+
+* Remove ALWAYS_LINK from pattern matcher. Same idea as above:
+  just use ALWAYS_VALUE, modelled on SORT_VALUE, that will turn
+  into an empty set if all the items in it are not all the same.
