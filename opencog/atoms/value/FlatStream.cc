@@ -53,14 +53,14 @@ FlatStream::FlatStream(const ValuePtr& vp) :
 void FlatStream::init(const ValuePtr& vp)
 {
 	_index = 0;
-	_source = vp;
 	_collection = nullptr;
+	_source = nullptr;
 
 	// Copy Link contents into the collection.
-	if (_source->is_type(LINK))
+	if (vp->is_type(LINK))
 	{
 		ValueSeq vsq;
-		for (const Handle& h: HandleCast(_source)->getOutgoingSet())
+		for (const Handle& h: HandleCast(vp)->getOutgoingSet())
 			vsq.push_back(h);
 		_collection = createLinkValue(vsq);
 		return;
@@ -70,15 +70,21 @@ void FlatStream::init(const ValuePtr& vp)
 	// Possible future extensions:
 	// If _source is an ObjectNode, then send *-read-* message ???
 	// If source is a FloatStream or StringStream ... ???
-	if (not _source->is_type(LINK_VALUE))
+	if (not vp->is_type(LINK_VALUE))
 	{
-		_collection = createLinkValue(ValueSeq{_source});
+		_collection = createLinkValue(ValueSeq{vp});
 		return;
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not _source->is_type(STREAM_VALUE))
-	_collection = LinkValueCast(_source);
+	if (not vp->is_type(STREAM_VALUE))
+	{
+		_collection = LinkValueCast(vp);
+		return;
+	}
+
+	// Streaming source.
+	_source = LinkValueCast(vp);
 }
 
 // ==============================================================
@@ -116,6 +122,17 @@ void FlatStream::update() const
 		_value.clear(); // Set sequence size to zero...
 		return;
 	}
+
+	// Streams that are not ContainerValues can just be referenced diretly.
+	if (not _source->is_type(CONTAINER_VALUE))
+	{
+		// Reference and copy.
+		_collection = createLinkValue(_source->value());
+		update();
+		return;
+	}
+
+	// If we are here, then we've got a container to deal with.
 }
 
 // ==============================================================

@@ -47,7 +47,7 @@ protected:
 
 	void init(const ValuePtr&);
 	virtual void update() const;
-	ValuePtr _source;
+	LinkValuePtr _source;
 	mutable LinkValuePtr _collection;
 	mutable size_t _index;
 
