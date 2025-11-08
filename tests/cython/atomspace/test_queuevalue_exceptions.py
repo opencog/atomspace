@@ -71,16 +71,15 @@ class TestQueueValueExceptions(unittest.TestCase):
         self.assertEqual(len(q), 3)
 
     def test_pop_from_closed_empty_queue(self):
-        """Test that popping from closed empty queue raises exception."""
+        """Test that popping from closed empty queue returns VoidValue."""
         q = QueueValue()
         q.open()
         q.close()
-        
-        # This should raise RuntimeError as documented
-        with self.assertRaises(RuntimeError) as context:
-            q.pop()
-        
-        self.assertIn("Cannot pop from closed empty queue", str(context.exception))
+
+        # This should return VoidValue instead of raising exception
+        result = q.pop()
+        self.assertEqual('VoidValue', result.type_name,
+                        "Expected VoidValue when popping from closed empty queue")
 
 
 if __name__ == '__main__':
