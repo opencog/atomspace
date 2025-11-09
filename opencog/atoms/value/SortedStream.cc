@@ -26,19 +26,20 @@
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
 // ==============================================================
 
 SortedStream::SortedStream(const Handle& h)
-	: UnisetValue(SORTED_STREAM), _schema(h)
+	: UnisetValue(SORTED_STREAM), _schema(h), _source(nullptr)
 {
 	init_cmp();
 }
 
 SortedStream::SortedStream(const HandleSeq& hs)
-	: UnisetValue(SORTED_STREAM)
+	: UnisetValue(SORTED_STREAM), _source(nullptr)
 {
 	if (2 != hs.size())
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
@@ -57,7 +58,7 @@ SortedStream::SortedStream(const HandleSeq& hs)
 // but twiddling this is a hassle, so not doing that right now.
 // XXX FIXME maybe fix the factory, some day.
 SortedStream::SortedStream(const ValueSeq& vsq)
-	: UnisetValue(SORTED_STREAM)
+	: UnisetValue(SORTED_STREAM), _source(nullptr)
 {
 	if (2 != vsq.size() or
 	    (not vsq[0]->is_atom()) or
@@ -76,6 +77,9 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 
 SortedStream::~SortedStream()
 {
+	if (_source)
+		_puller.join();
+
 	release_transient_atomspace(_scratch);
 }
 
@@ -144,15 +148,51 @@ void SortedStream::init_src(const ValuePtr& src)
 	if (not src->is_type(STREAM_VALUE))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
-// XXX not done
+		for (const ValuePtr& vp: vsq)
+			_set.insert(vp);
 		_set.close();
 		return;
 	}
 
-	// XXX TODO Finish Me: if we are here then its either a plain
-	// stream or a ContainerValue. Create a thread, sit in that thread
-	// and pull stuff. This need high-low watermarks to be added to
-	// the cogutils, first.
+	// If we are here, then the data source is either a plain stream,
+	// or a ContainerValue. These are potentially infinite sources,
+	// and they may block during reading, so we cannot handle them
+	// here. Instead, we create a thread that sits on these, and
+	// attempts to drain them, run them dry, buffering the results in
+	// the set. We cannot perform sorting unless we grab as many elts
+	// as possible.
+	//
+	// TODO: the concurrent_set needs to be extended with high and low
+	// watermarks so that we don't overflow. XXX FIXME.
+
+	_source = LinkValueCast(src);
+	_puller = std::thread(&SortedStream::drain, this);
+}
+
+void SortedStream::drain(void)
+{
+	// Internal bug, if this asserts.
+	OC_ASSERT(_source->is_type(STREAM_VALUE));
+
+	// Plain streams are easy. Just sample and go.
+	if (not _source->is_type(CONTAINER_VALUE))
+	{
+		// Infinite drain loop. Each reference to the source stream
+		// will pull some more values out of it. Keep doing this,
+		// forever. ... well, until the source goes empty, denoting
+		// end-of-stream, which means we are done.
+		while (true)
+		{
+			ValueSeq vsq = _source->value();
+			if (0 == vsq.size()) return;
+
+			for (const ValuePtr& vp: vsq)
+				_set.insert(vp);
+		}
+	}
+
+	// If we are here, we've got a container ...
+
 }
 
 // ==============================================================

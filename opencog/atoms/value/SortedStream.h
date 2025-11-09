@@ -26,6 +26,7 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atoms/flow/ValueShimLink.h>
+#include <thread>
 
 namespace opencog
 {
@@ -51,8 +52,10 @@ protected:
 	Handle _exout;
 	AtomSpace* _scratch;
 
-	// Data source
+	// Data source, and the thread that pulls from it.
 	LinkValuePtr _source;
+	std::thread _puller;
+	void drain(void);
 
 	void init_cmp(void);
 	void init_src(const ValuePtr&);
