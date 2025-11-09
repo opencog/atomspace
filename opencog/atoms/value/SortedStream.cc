@@ -154,6 +154,18 @@ void SortedStream::init_src(const ValuePtr& src)
 		return;
 	}
 
+	// If it's a container, but its closed, then its a finite,
+	// one-shot deal, just like the above.
+	if (src->is_type(CONTAINER_VALUE) and
+	    ContainerValueCast(src)->is_closed())
+	{
+		ValueSeq vsq = LinkValueCast(src)->value();
+		for (const ValuePtr& vp: vsq)
+			_set.insert(vp);
+		_set.close();
+		return;
+	}
+
 	// If we are here, then the data source is either a plain stream,
 	// or a ContainerValue. These are potentially infinite sources,
 	// and they may block during reading, so we cannot handle them
@@ -191,8 +203,18 @@ void SortedStream::drain(void)
 		}
 	}
 
-	// If we are here, we've got a container ...
+	// If we are here, we've got a container ... It needs to be drained
+	// one at a time.
+	ContainerValuePtr cvp = ContainerValueCast(_source);
+	while (true)
+	{
+		ValuePtr vp = cvp->remove();
 
+		// Both VoidValue, and empty ListValue have size zero.
+		if (0 == vp->size()) return;
+
+		_set.insert(vp);
+	}
 }
 
 // ==============================================================
