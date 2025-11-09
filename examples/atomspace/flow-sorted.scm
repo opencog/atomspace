@@ -32,13 +32,27 @@
 
 (use-modules (opencog) (opencog exec))
 
-; Create a stream that will sort items according to the
-; size of their outgnoing set, the the largest items coming
-; first. The GreaterThanLink provides the sort order; the
-; SizeOfLink provides a numerical value that can be ordered.
-; The comparison relation needs to be presented in such a way
-; that the two inputs are clear; a LambdaLink is used for that.
-(define order-relation
+: Demoing a running stream is difficult, and so the demo below will
+; demonstrate sorting on a static list. This has little overall impact.
+;
+; The "stream" to be sorted will consist of a collection of Atoms of
+; varying sizes. The sort function will examine the sizes, and order
+; accordingly. Several variants of the sort function are demoed:
+; ascending, descending and "deduplicating". The deduplicating order
+; is curious: it only admits one exemplar of a given size in the stream.
+; Unlucky Atoms that happen to be of the same size, but are otherwise
+; different, are discarded. This deduplication is the same as that
+; provided by the UnisetValue, although that one deduplicates based on
+; the global uniqueness of Atoms.
+;
+; The ordering relations will be created with the LambdaLink. This
+; defines two variables: the left and right variable; which can then be
+; used in arbitrarily complicated expressions in the body. For the demo,
+; the SizeOfLink provides a numerical value for the size of an Atom;
+; the GreaterThanLink, LessThanLink, EqualLink and the boolean ops
+; AndLin, OrLink can be combined.
+;
+(define greater-or-equal-relation
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Or
@@ -49,7 +63,10 @@
 				(SizeOf (Variable "$left"))
 				(SizeOf (Variable "$right"))))))
 
-(define order-relation
+; Run it. The result will be printed.
+(SortedStream greater-or-equal-relation item-list))
+
+(define not-greater-relation
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Not
