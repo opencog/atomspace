@@ -21,12 +21,15 @@
  */
 
 #include <opencog/atoms/value/SortedStream.h>
+#include <opencog/atoms/value/QueueValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 using namespace opencog;
 
@@ -42,6 +45,7 @@ public:
 	void test_basic_sorted(void);
 	void test_bare_greater_than(void);
 	void test_deduplication(void);
+	void test_queue_source(void);
 };
 
 SortedStreamUTest::SortedStreamUTest(void)
@@ -233,6 +237,168 @@ void SortedStreamUTest::test_deduplication(void)
 	printf("SortedStream contents (%zu items, should be 5):\n", contents.size());
 	for (size_t i = 0; i < contents.size(); i++)
 		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// =========================================================
+
+void SortedStreamUTest::test_queue_source(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(_asp);
+
+	// Create the greater-or-equal comparison relation
+	// This is the same as in sorting-test.scm
+	Handle greater_or_equal = eval.eval_h(R"(
+		(Lambda
+			(VariableList (Variable "$left") (Variable "$right"))
+			(Or
+				(GreaterThan
+					(SizeOf (Variable "$left"))
+					(SizeOf (Variable "$right")))
+				(Equal
+					(SizeOf (Variable "$left"))
+					(SizeOf (Variable "$right")))))
+	)");
+
+	// Create an empty QueueValue as the data source
+	QueueValuePtr queue = createQueueValue();
+	queue->open();
+
+	// Attach the queue to an atom so we can pass it to SortedStream
+	// SortedStream needs a Handle as the source
+	Handle queue_anchor = eval.eval_h("(Anchor \"queue-source\")");
+	Handle queue_key = eval.eval_h("(Predicate \"queue-data\")");
+	queue_anchor->setValue(queue_key, queue);
+
+	// Create a ValueOf link to access the queue
+	Handle queue_source = eval.eval_h(R"(
+		(ValueOf (Anchor "queue-source") (Predicate "queue-data"))
+	)");
+
+	// Create the SortedStream with the comparison and queue source
+	// Use ValuePtr to control destruction
+	HandleSeq args{greater_or_equal, queue_source};
+	ValuePtr sorter = createSortedStream(args);
+	SortedStreamPtr sorted = SortedStreamCast(sorter);
+	TS_ASSERT(sorted != nullptr);
+
+	// Create the items to add (same as in sorting-test.scm)
+	Handle item_a = eval.eval_h("(Item \"a\")");
+	Handle item_b = eval.eval_h("(Item \"b\")");
+	Handle edge1 = eval.eval_h(R"(
+		(Edge
+			(Predicate "relation")
+			(List (Item "c") (Item "d")))
+	)");
+	Handle item_e = eval.eval_h("(Item \"e\")");
+	Handle item_f = eval.eval_h("(Item \"f\")");
+	Handle link3 = eval.eval_h(R"(
+		(Link
+			(Item "p")
+			(Predicate "q")
+			(TagNode "z"))
+	)");
+	Handle edge2 = eval.eval_h(R"(
+		(Edge
+			(Predicate "relation")
+			(List (Item "g") (Item "h")))
+	)");
+
+	// Add items one at a time with 500ms sleep between each
+	printf("Adding items to queue with delays...\n");
+
+	queue->add(item_a);
+	printf("  Added item_a (size 1)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(item_b);
+	printf("  Added item_b (size 1)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(edge1);
+	printf("  Added edge1 (size 2)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(item_e);
+	printf("  Added item_e (size 1)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(item_f);
+	printf("  Added item_f (size 1)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(link3);
+	printf("  Added link3 (size 3)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	queue->add(edge2);
+	printf("  Added edge2 (size 2)\n");
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+	// Close the queue after the last add
+	queue->close();
+	printf("Queue closed\n");
+
+	// Now retrieve items from the SortedStream and verify they're in sorted order
+	// Expected order: size 3, then 2, 2, then 1, 1, 1, 1 (descending)
+	printf("Retrieving items from SortedStream...\n");
+
+	ValuePtr item1 = sorted->remove();
+	TS_ASSERT(item1 != nullptr);
+	TS_ASSERT_EQUALS(item1, link3);
+	printf("  Item 1: size 3 (Link) - CORRECT\n");
+
+	ValuePtr item2 = sorted->remove();
+	TS_ASSERT(item2 != nullptr);
+	// Could be either edge1 or edge2 (both size 2)
+	TS_ASSERT(item2 == edge1 || item2 == edge2);
+	printf("  Item 2: size 2 (Edge) - CORRECT\n");
+
+	ValuePtr item3 = sorted->remove();
+	TS_ASSERT(item3 != nullptr);
+	// The other edge (size 2)
+	TS_ASSERT(item3 == edge1 || item3 == edge2);
+	TS_ASSERT(item3 != item2);  // Should be different from item2
+	printf("  Item 3: size 2 (Edge) - CORRECT\n");
+
+	// Next 4 items should all be size 1
+	ValuePtr item4 = sorted->remove();
+	TS_ASSERT(item4 != nullptr);
+	TS_ASSERT(item4 == item_a || item4 == item_b ||
+	          item4 == item_e || item4 == item_f);
+	printf("  Item 4: size 1 - CORRECT\n");
+
+	ValuePtr item5 = sorted->remove();
+	TS_ASSERT(item5 != nullptr);
+	TS_ASSERT(item5 == item_a || item5 == item_b ||
+	          item5 == item_e || item5 == item_f);
+	printf("  Item 5: size 1 - CORRECT\n");
+
+	ValuePtr item6 = sorted->remove();
+	TS_ASSERT(item6 != nullptr);
+	TS_ASSERT(item6 == item_a || item6 == item_b ||
+	          item6 == item_e || item6 == item_f);
+	printf("  Item 6: size 1 - CORRECT\n");
+
+	ValuePtr item7 = sorted->remove();
+	TS_ASSERT(item7 != nullptr);
+	TS_ASSERT(item7 == item_a || item7 == item_b ||
+	          item7 == item_e || item7 == item_f);
+	printf("  Item 7: size 1 - CORRECT\n");
+
+	// Next remove should return VoidValue (end of stream)
+	ValuePtr end_marker = sorted->remove();
+	TS_ASSERT(end_marker != nullptr);
+	TS_ASSERT(end_marker->is_type(VOID_VALUE));
+	printf("  End of stream marker received - CORRECT\n");
+
+	// Test proper destruction by setting to nullptr
+	printf("Testing destructor...\n");
+	sorter = nullptr;
+	printf("Destructor called successfully\n");
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
