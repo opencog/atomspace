@@ -738,34 +738,13 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
 
-	// I'm confused ... why is this here? Shouldn't PutLink just be executable,
-	// and that's it? XXX FXIME
+	// PutLinks implement beta-reduction. This is special-cased here,
+	// so that first, the beta-reduction is performed, and then the
+	// result is evaluated (with the crisp evaluator).
 	if (PUT_LINK == t)
 	{
 		PutLinkPtr pl(PutLinkCast(evelnk));
-
-		// Evalating a PutLink requires three steps:
-		// (1) execute the arguments, first,
-		// (2) beta reduce (put arguments into body)
-		// (3) evaluate the resulting body.
-		Handle pvals = pl->get_arguments();
-		Instantiator inst(as);
-		// Step (1)
-		Handle gvals(HandleCast(inst.execute(pvals, silent)));
-		if (gvals != pvals)
-		{
-			as->add_atom(gvals);
-			HandleSeq goset;
-			if (pl->get_vardecl())
-				goset.emplace_back(pl->get_vardecl());
-			goset.emplace_back(pl->get_body());
-			goset.emplace_back(gvals);
-			pl = createPutLink(std::move(goset));
-		}
-		// Step (2)
 		Handle red = HandleCast(pl->execute(as));
-
-		// Step (3)
 		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
 	}
 

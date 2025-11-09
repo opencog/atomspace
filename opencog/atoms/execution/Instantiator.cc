@@ -143,45 +143,11 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 
 		// Perform substitution on the args, only.
 		args = beta_reduce(args, ist._varmap);
-
-		// unpack list link
-		const HandleSeq& oset(LIST_LINK == args->get_type() ?
-				args->getOutgoingSet(): HandleSeq{args});
-
-		return vars.substitute_nocheck(body, oset);
+		return vars.substitute_nocheck(body, {args});
 	}
 
-#define PLN_NEEDS_UNQUOTING 1
-#if PLN_NEEDS_UNQUOTING
-	// PLN quotes its arguments, which now need to be unquoted.
-	// This is required by PLNRulesUTest and specifically by
-	// PLNRulesUTest::test_closed_lambda_introduction
-	// PLNRulesUTest::test_implication_scope_to_implication
-	// PLNRulesUTest::test_implication_and_lambda_factorization
-	Type at0 = args->get_type();
-	bool done = false;
-	if ((LIST_LINK == at0 or IMPLICATION_LINK == at0) and
-	     0 < args->get_arity())
-	{
-		Handle a1 = args->getOutgoingAtom(0);
-		Type at1 = a1->get_type();
-		if (QUOTE_LINK == at1 or
-		    (IMPLICATION_LINK == at1 and
-		     QUOTE_LINK == a1->getOutgoingAtom(0)->get_type()) or
-		    (IMPLICATION_LINK == at0 and
-		     QUOTE_LINK == args->getOutgoingAtom(1)->get_type()))
-		{
-			args = walk_tree(args, ist);
-			done = true;
-		}
-	}
-
-	// Perform substitution on the args, only.
-	if (not done) args = beta_reduce(args, ist._varmap);
-#else
 	// Perform substitution on the args, only.
 	args = beta_reduce(args, ist._varmap);
-#endif
 
 	Type t = expr->get_type();
 	return createLink(t, sn, args);
