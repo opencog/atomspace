@@ -25,11 +25,7 @@ set(TEST_ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 	"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython"
 	"GUILE_LOAD_PATH=${GUILE_LOAD_PATH}")
 
-
-# The PythonEvalUTest tests PythonEval independent of the CogServer. It depends
-# on the server being around for the Scheme code but it does not message
-# through a "py-eval" server request.
-#
+# Test the evaulator wrapper for Python.
 ADD_CXXTEST(PythonEvalUTest)
 
 TARGET_LINK_LIBRARIES(PythonEvalUTest
@@ -42,9 +38,9 @@ TARGET_LINK_LIBRARIES(PythonEvalUTest
 SET_PROPERTY(TEST PythonEvalUTest
 	APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-
-# The PythonUtilitiesUTest tests C++ utility functions used from Cython bindings
-# outside of those bindings so failures are easier to debug.
+# The PythonUtilitiesUTest tests C++ utility functions used
+# by the Cython bindings, but it tests them outside of the
+# bindings, so that failures are easier to debug.
 #
 ADD_CXXTEST(PythonUtilitiesUTest)
 
