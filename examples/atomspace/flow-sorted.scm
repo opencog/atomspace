@@ -80,17 +80,31 @@
 			(List (Item "g") (Item "h")))
 	))
 
-; Run it. The result will be printed. The result should be obvious:
-; largest come first. Note that this is not a "stable sort": some of
-; the atoms that are later in the original list, get sorted earlier.
+; Construct the stream.
+(define ge-stream (SortedStream greater-or-equal-relation item-list))
+
+; Access the stream. Each access returns a list holding one item.
+; The largest is returned first.
+(cog-value->list ge-stream)
+
+; Subsequent accesses returns the next and the next ... and eventually
+; the empty list.
+(cog-value->list ge-stream)
+(cog-value->list ge-stream)
+(cog-value->list ge-stream)
+(cog-value->list ge-stream)
+(cog-value->list ge-stream)
+(cog-value->list ge-stream)
+
+; The largest came first. Note that this is not a "stable sort": some
+; of the atoms that are later in the original list, get sorted earlier.
 ; This is an artifact of the implementation: it is using the C++
 ; std::set<> to hold the items; the std::set<> is usually implemented
 ; as an RB-tree, and makes no stability guarantees. Of course, this
 ; means that results will depend on the OS, the compiler and the c++
 ; library.
-(define gestream
-	(SortedStream greater-or-equal-relation item-list))
 
+; --------------------------------------------------------
 ; Numerical (total) orders have the usual symmetries:
 ; Greater-or-equal is the same as not-less-than
 (define not-less-relation
@@ -102,8 +116,15 @@
 				(SizeOf (Variable "$right"))))))
 
 ; Should work as before.
-(SortedStream not-less-relation item-list)
+(define nlt-stream (SortedStream not-less-relation item-list))
 
+; Access the stream.
+(cog-value->list nlt-stream)
+(cog-value->list nlt-stream)
+(cog-value->list nlt-stream)
+(cog-value->list nlt-stream)
+
+; --------------------------------------------------------
 ; Make sure this is not a happy accident, and reverse the order.
 (define not-greater-relation
 	(Lambda
@@ -114,8 +135,15 @@
 				(SizeOf (Variable "$right"))))))
 
 ; This time, the smallest come first.
-(SortedStream not-greater-relation item-list)
+(define ngt-stream (SortedStream not-greater-relation item-list))
 
+; Access the stream.
+(cog-value->list ngt-stream)
+(cog-value->list ngt-stream)
+(cog-value->list ngt-stream)
+(cog-value->list ngt-stream)
+
+; --------------------------------------------------------
 ; Now for fun and games: deduplication.
 (define greater-relation
 	(Lambda
@@ -135,17 +163,32 @@
 ; Conclude that 1 == 1 and therefore these two are equivalent, and
 ; one of them can be discarded.  So this is an example of deduplication
 ; by size. When the compare is <= instead of <, then 1 <> 1 is infered,
-; and both items are kept, as the are different.
-(SortedStream greater-relation item-list)
+; and both items are kept, as they are different.
+
+; Construct the stream
+(define gt-stream (SortedStream greater-relation item-list))
+
+; Access the stream.
+(cog-value->list gt-stream)
+(cog-value->list gt-stream)
+(cog-value->list gt-stream)
+(cog-value->list gt-stream)
 
 ; ----------------------------------------------------------
 
-; The SortedStream can be constructed using the LinkSignature
-; type constructor:
+; The usual Atomese type constructors work with SortedStream.
+; For the present case, it can be constructed using the LinkSignature.
+
 (define link-sig
 	(LinkSignature (Type 'SortedStream) not-less-relation item-list))
 
-; Construct it
-(cog-execute! link-sig)
+; Construct it.
+(define cnlt (cog-execute! link-sig))
+
+; It works as before.
+(cog-value->list cnlt)
+(cog-value->list cnlt)
+(cog-value->list cnlt)
+(cog-value->list cnlt)
 
 ; ----------------- That's all, Folks! The End! -----------------
