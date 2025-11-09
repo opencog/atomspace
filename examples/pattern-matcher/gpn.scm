@@ -40,11 +40,11 @@
 
 ; The pattern-matching requires some data in the AtomSpace to match
 ; against. So populate the AtomSpace with some data.
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "Aristotle") (Concept "logician")))
 
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "CS Pierce") (Concept "logician")))
 

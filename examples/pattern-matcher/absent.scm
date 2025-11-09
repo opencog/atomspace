@@ -49,10 +49,10 @@
 ;
 (use-modules (opencog) (opencog exec))
 
-; Clause to match during query.  This is the EvaluationLink whose
+; Clause to match during query.  This is the Edge whose
 ; presence or absence we will be testing for.
 (define query
-	(Evaluation
+	(Edge
 		(Predicate "visibility")
 		(List (Variable "$x"))))
 

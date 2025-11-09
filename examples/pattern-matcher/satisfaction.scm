@@ -13,14 +13,14 @@
 ; Define a very simple satisfaction link.
 (define satlink
 	(Satisfaction
-		(Evaluation
+		(Edge
 			(Predicate "foobar")
 			(List
 				(Concept "funny")
 				(Variable "$x")))))
 
 ; Create something that will satisfy the above.
-(Evaluation
+(Edge
 	(Predicate "foobar")
 	(List
 		(Concept "funny")
@@ -37,7 +37,7 @@
 (define gnd-sat
 	(Satisfaction
 		(Anchor "please put groundings here")
-		(Evaluation
+		(Edge
 			(Predicate "foobar")
 			(List
 				(Concept "funny")
@@ -58,7 +58,7 @@
 		(VariableList
 			(Variable "$x")
 			(Anchor "please put groundings here"))
-		(Evaluation
+		(Edge
 			(Predicate "foobar")
 			(List
 				(Concept "funny")

@@ -31,12 +31,12 @@
 		; the place-holder variable $x.
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		; The graph from which a value is to be extracted.  Clearly,
 		; the variable $x corresponds to Concept "baz"
-		(Evaluation
+		(Edge
 			(Predicate "foo")
 			(List (Concept "bar") (Concept "baz"))))
 )
@@ -50,19 +50,19 @@
 		; The same pattern as above.  Extracts values for variable $x.
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(Set
 			; A set of graphs to which the above pattern should
 			; be matched.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
 		))
@@ -84,17 +84,17 @@
 	(Filter
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(List
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
 		))
@@ -114,20 +114,20 @@
 		(Lambda
 			; The type of the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(Set
 			; A set of graphs to which the above pattern should be
 			; applied.  Note that, due to the type constraint, only
 			; two of the three can match. (Numbers not being Concepts)
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -156,20 +156,20 @@
          ; The variable $x must be an evaluation of a certain form!
 			(TypedVariable (Variable "$x")
 				(Signature
-					(Evaluation
+					(Edge
 						(Predicate "foo")
 						(List (Concept "bar") (Type "ConceptNode")))))
 			(Variable "$x"))
 		(Set
 			; Of the three elements in this set, only two have the type
 			; that is specified above.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -198,18 +198,18 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y"))))
 		(Set
 			; Same input as always.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -240,17 +240,17 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y"))))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -285,21 +285,21 @@
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
 			; The P(x,y) part of the implication.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y")))
 			; The Q(x,y) part of the implication.
-			(Evaluation
+			(Edge
 				(Predicate "reverse-foo")
 				(List (Variable "$y") (Variable "$x"))))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -326,18 +326,18 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y")))
 			(Plus (Variable "$y") (Variable "$x")))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Number 2) (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Number 10) (Times (Number 3) (Number 2))))
 		))

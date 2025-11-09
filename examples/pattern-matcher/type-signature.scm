@@ -49,7 +49,7 @@
 ; A more complex example
 
 ; More data:
-(Evaluation
+(Edge
 	(PredicateNode "foo")
 	(List (ConceptNode "bingo") (ConceptNode "yes!")))
 

@@ -25,11 +25,11 @@
 
 ; -------------
 ; Create three bits of "knowledge".
-(Evaluation
+(Edge
 	(Predicate "foobar") (List (Concept "funny") (Concept "thing")))
-(Evaluation
+(Edge
 	(Predicate "foobar") (List (Concept "funny") (Concept "story")))
-(Evaluation
+(Edge
 	(Predicate "foobar") (List (Concept "funny") (Concept "joke")))
 
 ; -------------
@@ -38,7 +38,7 @@
 (define query
 	(Query
 		(TypedVariable (Variable "$x") (Type 'ConceptNode))
-		(Evaluation
+		(Edge
 			(Predicate "foobar")
 			(List (Concept "funny") (Variable "$x")))
 		(ListLink
