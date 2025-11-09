@@ -26,6 +26,7 @@
 #include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
 using namespace opencog;
 
@@ -89,23 +90,28 @@ void SortedStreamUTest::test_basic_sorted(void)
 	// Close the SortedStream
 	svp->close();
 
-	// Get the sorted contents
-	const ValueSeq& contents = svp->value();
+	// Remove items one at a time using the new streaming API
+	ValuePtr item1 = svp->remove();
+	ValuePtr item2 = svp->remove();
+	ValuePtr item3 = svp->remove();
+	ValuePtr end_marker = svp->remove();
 
-	// Verify we got 3 items
-	TS_ASSERT_EQUALS(contents.size(), 3);
+	// Verify we got 3 items plus VoidValue end marker
+	TS_ASSERT(item1 != nullptr);
+	TS_ASSERT(item2 != nullptr);
+	TS_ASSERT(item3 != nullptr);
+	TS_ASSERT(end_marker->is_type(VOID_VALUE));
 
 	// Verify sorted order is 4, 3, 2 (descending)
-	TS_ASSERT_EQUALS(contents[0], num4);
-	TS_ASSERT_EQUALS(contents[1], num3);
-	TS_ASSERT_EQUALS(contents[2], num2);
+	TS_ASSERT_EQUALS(item1, num4);
+	TS_ASSERT_EQUALS(item2, num3);
+	TS_ASSERT_EQUALS(item3, num2);
 
 	// Print the sorted contents
-	printf("SortedStream contents (%zu items):\n", contents.size());
-	for (size_t i = 0; i < contents.size(); i++)
-	{
-		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
-	}
+	printf("SortedStream contents (3 items):\n");
+	printf("  [0]: %s\n", item1->to_string().c_str());
+	printf("  [1]: %s\n", item2->to_string().c_str());
+	printf("  [2]: %s\n", item3->to_string().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -138,23 +144,28 @@ void SortedStreamUTest::test_bare_greater_than(void)
 	// Close the SortedStream
 	svp->close();
 
-	// Get the sorted contents
-	const ValueSeq& contents = svp->value();
+	// Remove items one at a time using the new streaming API
+	ValuePtr item1 = svp->remove();
+	ValuePtr item2 = svp->remove();
+	ValuePtr item3 = svp->remove();
+	ValuePtr end_marker = svp->remove();
 
-	// Verify we got 3 items
-	TS_ASSERT_EQUALS(contents.size(), 3);
+	// Verify we got 3 items plus VoidValue end marker
+	TS_ASSERT(item1 != nullptr);
+	TS_ASSERT(item2 != nullptr);
+	TS_ASSERT(item3 != nullptr);
+	TS_ASSERT(end_marker->is_type(VOID_VALUE));
 
 	// Verify sorted order is 4, 3, 2 (descending)
-	TS_ASSERT_EQUALS(contents[0], num4);
-	TS_ASSERT_EQUALS(contents[1], num3);
-	TS_ASSERT_EQUALS(contents[2], num2);
+	TS_ASSERT_EQUALS(item1, num4);
+	TS_ASSERT_EQUALS(item2, num3);
+	TS_ASSERT_EQUALS(item3, num2);
 
 	// Print the sorted contents
-	printf("SortedStream contents (%zu items):\n", contents.size());
-	for (size_t i = 0; i < contents.size(); i++)
-	{
-		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
-	}
+	printf("SortedStream contents (3 items):\n");
+	printf("  [0]: %s\n", item1->to_string().c_str());
+	printf("  [1]: %s\n", item2->to_string().c_str());
+	printf("  [2]: %s\n", item3->to_string().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -197,7 +208,16 @@ void SortedStreamUTest::test_deduplication(void)
 	svp->add(num5); // duplicate
 	svp->add(voiv); // closes stream
 
-	const ValueSeq& contents = svp->value();
+	// Remove items one at a time using the new streaming API
+	// Collect all items until we get VoidValue
+	std::vector<ValuePtr> contents;
+	while (true)
+	{
+		ValuePtr item = svp->remove();
+		if (item->is_type(VOID_VALUE))
+			break;
+		contents.push_back(item);
+	}
 
 	// Deduplication works just like UnisetValue:
 	// should have only 5 unique items
