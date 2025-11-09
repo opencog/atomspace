@@ -213,6 +213,19 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
+#if FIXME_LATER
+	// XXX FIXME. We need to store items in reverse order, to
+	// avoid the pop-from-front lunacy. But I'm too tired to fix
+	// this now.
+	if (is_closed())
+	{
+xxxxxxxxx OMG we need a cache, too. This is borken right now
+		if (0 == size()) return createVoidValue();
+		ValuePtr vp = _value.front();
+		_value.erase(_value.begin());
+		return;
+	}
+
 	ValuePtr vp = const_cast<SortedStream*>(this)->remove();
 
 	// Zero size means we've closed. End-of-stream.
@@ -226,6 +239,10 @@ void SortedStream::update() const
 	ValueSeq vsq({vp});
 	_value.swap(vsq);
 	return;
+#endif
+
+// This is wrong, but whatever. Fixme later.
+UnisetValue::update();
 }
 
 // ==============================================================

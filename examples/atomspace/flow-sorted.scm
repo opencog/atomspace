@@ -88,7 +88,8 @@
 ; as an RB-tree, and makes no stability guarantees. Of course, this
 ; means that results will depend on the OS, the compiler and the c++
 ; library.
-(SortedStream greater-or-equal-relation item-list)
+(define gestream
+	(SortedStream greater-or-equal-relation item-list))
 
 ; Numerical (total) orders have the usual symmetries:
 ; Greater-or-equal is the same as not-less-than
