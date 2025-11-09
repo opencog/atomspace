@@ -63,9 +63,49 @@
 				(SizeOf (Variable "$left"))
 				(SizeOf (Variable "$right"))))))
 
-; Run it. The result will be printed.
-(SortedStream greater-or-equal-relation item-list))
+; Create a list of items of varying sizes.
+(define item-list
+	(OrderedLink
+		(Item "a")       ; size 1
+		(Item "b")       ; size 1
+		(Edge            ; size 2 - the Predicate and the List
+			(Predicate "relation")
+			(List (Item "c") (Item "d")))
+		(Item "e")       ; size 1
+		(Item "f")       ; size 1
+		(Link            ; size 3 - p,q and z: the largest in the bunch
+			(Item "p")
+			(Predicate "q")
+			(TagNode "z"))
+		(Edge            ; size 2
+			(Predicate "relation")
+			(List (Item "g") (Item "h")))
+	))
 
+; Run it. The result will be printed. The result should be obvious:
+; largest come first. Note that this is not a "stable sort": some of
+; the atoms that are later in the original list, get sorted earlier.
+; This is an artifact of the implementation: it is using the C++
+; std::set<> to hold the items; the std::set<> is usually implemented
+; as an RB-tree, and makes no stability guarantees. Of course, this
+; means that results will depend on the OS, the compiler and the c++
+; library.
+(SortedStream greater-or-equal-relation item-list)
+
+; Numerical (total) orders have the usual symmetries:
+; Greater-or-equal is the same as not-less-than
+(define not-less-relation
+	(Lambda
+		(VariableList (Variable "$left") (Variable "$right"))
+		(Not
+			(LessThan
+				(SizeOf (Variable "$left"))
+				(SizeOf (Variable "$right"))))))
+
+; Should work as before.
+(SortedStream not-less-relation item-list)
+
+; Make sure this is not a happy accident, and reverse the order.
 (define not-greater-relation
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
@@ -74,28 +114,9 @@
 				(SizeOf (Variable "$left"))
 				(SizeOf (Variable "$right"))))))
 
-; Create a list of items of varying sizes.
-(define item-list
-	(OrderedLink
-		(Item "a")
-		(Item "b")
-		(Edge
-			(Predicate "relation")
-			(List (Item "c") (Item "d")))
-		(Item "e")
-		(Item "f")
-		(Link
-			(Item "p")
-			(Predicate "q")
-			(TagNode "z"))
-		(Edge
-			(Predicate "relation")
-			(List (Item "g") (Item "h")))
-	))
+; This time, the smallest come first.
+(SortedStream not-greater-relation item-list)
 
-
-(define sorted-list
-		(SortedStream order-relation item-list))
 
 
 (define ls
