@@ -1,5 +1,5 @@
 ;
-; knowledge.scm - Representing data with Predicates and Evaluations
+; knowledge.scm - Representing data with Predicates and Edges
 ;
 ; The AtomSpace can be thought of as a database for (hyper-)graphs.
 ; The reason for using graphs, and, more specifically, hypergraphs,
@@ -91,7 +91,7 @@
 ; verb, and "pottery" is the object of the verb. Thus, the dependency
 ; is "_obj(make, pottery)". This can be represented as
 ;
-(Evaluation
+(Edge
 	(Predicate "_obj")
 	(ListLink
 		(Concept "make")
@@ -102,12 +102,12 @@
 ;
 (Edge (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
 
-; "Evaluation" is the same type as "EvaluationLink",
+; "Edge" is the same type as "EdgeLink",
 ; "Predicate" is the same type as "PredicateNode",
 ; "Concept" is the same type as "ConceptNode".
 ; Thus you can also write:
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "_obj")
 	(ListLink
 		(ConceptNode "make")
@@ -150,7 +150,7 @@
 ; be ConceptNodes. You can declare this by writing the following:
 
 (Signature
-	(Evaluation
+	(Edge
 		(Predicate "_obj")
 		(ListLink
 			(Type "ConceptNode")
@@ -167,7 +167,7 @@
 (TypedAtom
 	(DefinedType "my obj dependency relation")
 	(Signature
-		(Evaluation
+		(Edge
 			(Predicate "_obj")
 			(ListLink
 				(Type "ConceptNode")

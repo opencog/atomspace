@@ -40,7 +40,7 @@
 ; made from clay":
 ;
 ; (UnisetValue
-;     (Evaluation (Predicate "make_from")
+;     (Edge (Predicate "make_from")
 ;         (ListLink (Concept "pottery") (Concept "clay"))))
 ;
 ; The UnisetValue wraps the collection of results; there is only one
@@ -130,6 +130,6 @@
 ; The following should have been printed:
 ;
 ; (UnisetValue
-;     (Evaluation (Predicate "make_from")
+;     (Edge (Predicate "make_from")
 ;         (ListLink (Concept "pottery") (Concept "clay"))))
 ;

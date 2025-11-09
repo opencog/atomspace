@@ -57,7 +57,7 @@
 ; written, just like the above.
 
 ; ------------------
-; Evaluate, to see if the current state is really is "apple": this
+; Execute, to see if the current state is really is "apple": this
 ; should return a truth value corresponding to "true". Here, EqualLink
 ; is a link that, when executed, returns a TruthValue.
 
@@ -143,7 +143,7 @@
 ; There is no such thing as "InheritanceStateLink" or "MemberStateLink".
 ; These are not needed; having them would be confusing. The StateLink is
 ; ideal for associating a predicate to a single-valued grounded term.
-; The EvaluationLink is for associating multiple things together, in a
+; The EdgeLink is for associating multiple things together, in a
 ; naive-set-theory predicate-like way. The InheritanceLink is handy for
 ; the extremely common "is-a" relation.  The MemberLink is handy for the
 ; equally-common set-membership relation.
