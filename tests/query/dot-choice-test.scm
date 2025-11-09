@@ -13,15 +13,15 @@
 (define tvkey (Predicate "*-TruthValueKey-*"))
 (define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))
 
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
 (cog-set-value! (Associative (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
 (cog-set-value! (Associative (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
 
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 4))
 (cog-set-value! (Associative (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 5))
 (cog-set-value! (Associative (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 6))
 
@@ -34,20 +34,20 @@
 		(VariableList
 			(TypedVariable (Variable "$prop") (Type 'Predicate))
 			(TypedVariable (Variable "$dog")
-				(TypeChoice (Type 'Evaluation) (Type 'Associative)))
+				(TypeChoice (Type 'Edge) (Type 'Associative)))
 			(TypedVariable (Variable "$cat")
-				(TypeChoice (Type 'Evaluation) (Type 'Associative)))
+				(TypeChoice (Type 'Edge) (Type 'Associative)))
 		)
 
 		; What to look for.
 		(And
 			(Identical (Variable "$dog")
 				(Choice
-					(Evaluation (Variable "$prop") (Concept "dog"))
+					(Edge (Variable "$prop") (Concept "dog"))
 					(Associative (Variable "$prop") (Concept "dog"))))
 			(Identical (Variable "$cat")
 				(Choice
-					(Evaluation (Variable "$prop") (Concept "cat"))
+					(Edge (Variable "$prop") (Concept "cat"))
 					(Associative (Variable "$prop") (Concept "cat"))))
 		)
 
