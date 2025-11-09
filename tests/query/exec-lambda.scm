@@ -1,37 +1,19 @@
 (define (dummy x) x)
 
 (define bl
-   (QueryLink
+   (Query
       (VariableList
-         (TypedVariableLink
-            (VariableNode "$V")
-            (TypeNode "VariableNode")
-         )
-         (TypedVariableLink
-            (VariableNode "$B")
-            (TypeNode "EdgeLink")
-         )
-      )
-      (AndLink
-         (VariableNode "$V")
-         (VariableNode "$B")
-      )
-      (ExecutionOutputLink
-         (GroundedSchemaNode "scm: dummy")
+         (TypedVariable (Variable "$V") (Type 'Variable))
+         (TypedVariable (Variable "$B") (Type 'Edge)))
+      (And
+         (Variable "$V")
+         (Variable "$B"))
+      (ExecutionOutput
+         (GroundedSchema "scm: dummy")
          (ListLink
-            (QuoteLink
-               (LambdaLink
-                  (UnquoteLink
-                     (VariableNode "$V")
-                  )
-                  (UnquoteLink
-                     (VariableNode "$B")
-                  )
-               )
-            )
-         )
-      )
-   )
-)
+             (Lambda
+                 (Variable "$V")
+                 (Variable "$B"))))
+   ))
 
 (Edge (Predicate "P") (Concept "A"))
