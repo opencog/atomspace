@@ -18,7 +18,7 @@ class QueueValueMultithreadTest(unittest.TestCase):
         finalize_opencog()
         del self.space
 
-    def xtest_concurrent_producer_consumer(self):
+    def test_concurrent_producer_consumer(self):
         """Test concurrent producer-consumer pattern with multiple threads."""
         queue = QueueValue()
         queue.open()
@@ -126,7 +126,7 @@ class QueueValueMultithreadTest(unittest.TestCase):
         self.assertEqual(0, len(queue))
         self.assertTrue(queue.is_closed())
 
-    def xtest_concurrent_multiple_producers_single_consumer(self):
+    def test_concurrent_multiple_producers_single_consumer(self):
         """Test multiple producers with a single consumer."""
         queue = QueueValue()
         queue.open()
@@ -295,7 +295,7 @@ class QueueValueMultithreadTest(unittest.TestCase):
         self.assertEqual(write_count, 10000)  # 100 bursts * 100 values
         self.assertEqual(read_count, write_count)
 
-    def xtest_drain_before_close(self):
+    def test_drain_before_close(self):
         """Test draining values from queue and then closing."""
         queue = QueueValue()
         queue.open()
@@ -328,7 +328,7 @@ class QueueValueMultithreadTest(unittest.TestCase):
         val = queue.pop()
         self.assertEqual(0, len(val.to_list()), "Expected empty value when popping from closed empty queue")
 
-    def xtest_stress_many_small_operations(self):
+    def test_stress_many_small_operations(self):
         """Stress test with many threads doing small operations."""
         queue = QueueValue()
         queue.open()

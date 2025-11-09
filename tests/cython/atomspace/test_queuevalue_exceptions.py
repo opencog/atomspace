@@ -70,7 +70,7 @@ class TestQueueValueExceptions(unittest.TestCase):
         
         self.assertEqual(len(q), 3)
 
-    def xtest_pop_from_closed_empty_queue(self):
+    def test_pop_from_closed_empty_queue(self):
         """Test that popping from closed empty queue returns VoidValue."""
         q = QueueValue()
         q.open()
