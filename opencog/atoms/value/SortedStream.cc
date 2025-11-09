@@ -137,6 +137,11 @@ void SortedStream::init_src(const ValuePtr& src)
 		close();
 		return;
 	}
+
+	// XXX TODO Finish Me: if we are here then its either a plain
+	// stream or a ContainerValue. Create a thread, sit in that thread
+	// and pull stuff. This need high-low watermarks to be added to
+	// the cogutils, first.
 }
 
 SortedStream::~SortedStream()
@@ -208,7 +213,19 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
-	UnisetValue::update();
+	ValuePtr vp = const_cast<SortedStream*>(this)->remove();
+
+	// Zero size means we've closed. End-of-stream.
+	if (0 == vp->size())
+	{
+		_value.clear();
+		return;
+	}
+
+	// Return just one item.
+	ValueSeq vsq({vp});
+	_value.swap(vsq);
+	return;
 }
 
 // ==============================================================
