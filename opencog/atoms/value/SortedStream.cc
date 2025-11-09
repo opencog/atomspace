@@ -34,6 +34,7 @@ using namespace opencog;
 SortedStream::SortedStream(const Handle& h)
 	: UnisetValue(SORTED_STREAM), _schema(h)
 {
+	init_cmp();
 }
 
 SortedStream::SortedStream(const HandleSeq& hs)
@@ -43,6 +44,7 @@ SortedStream::SortedStream(const HandleSeq& hs)
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
 
 	_schema = hs[0];
+	init_cmp();
 
 	if (hs[1]->is_executable())
 		init_src(hs[1]->execute());
@@ -82,8 +84,17 @@ void SortedStream::init_cmp(void)
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
 }
 
+// Set up all finite streams here. Finite streams get copied into
+// the collection once and once only, and that's it.
 void SortedStream::init_src(const ValuePtr& src)
 {
+	// Copy Link contents into the collection.
+	if (src->is_type(LINK))
+	{
+		for (const Handle& h: HandleCast(src)->getOutgoingSet())
+			UnisetValue::add(h);
+		close();
+	}
 }
 
 SortedStream::~SortedStream()
