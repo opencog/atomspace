@@ -26,9 +26,9 @@ int main()
 	// Note that Atom ID's (64-bit hashes) are printed.
 	printf("The AtomSpace contains this:\n%s\n", as->to_string().c_str());
 
-	// Create an EvaluationLink Atom, place it in the AtomSpace.
+	// Create an EdgeLink Atom, place it in the AtomSpace.
 	as->add_atom(
-		Evaluation(
+		Edge(
 			Predicate("bling"),
 			List(
 				Concept("foo"),

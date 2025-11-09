@@ -53,11 +53,11 @@
 	(PredicateNode "foo")
 	(List (ConceptNode "bingo") (ConceptNode "yes!")))
 
-(Evaluation
+(Edge
 	(AnchorNode "bar")
 	(List (ConceptNode "hurrah") (ConceptNode "yay!")))
 
-(Evaluation
+(Edge
 	(ConceptNode "baz")
 	(List (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
 
@@ -67,7 +67,7 @@
 		(TypedVariable
 			(Variable "$x")
 			(Signature
-				(Evaluation
+				(Edge
 					(TypeChoice
 						(Type "PredicateNode")
 						(Type "AnchorNode"))

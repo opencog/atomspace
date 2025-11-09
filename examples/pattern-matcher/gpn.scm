@@ -61,7 +61,7 @@
 		(And
 			; The first clause: find a grounding for the variable, such
 			; that the variable is grounded by the name of a logician.
-			(Evaluation
+			(Edge
 				(Predicate "is-a")
 				(List (Variable "$person") (Concept "logician")))
 

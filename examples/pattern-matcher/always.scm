@@ -107,8 +107,8 @@
 			; Pick out two balls from the same basket.
 			(Member (Variable "some ball")         (Variable "basket"))
 			(Member (Variable "other ball")        (Variable "basket"))
-			(Evaluation (Variable "some color")    (Variable "some ball"))
-			(Evaluation (Variable "other color")   (Variable "other ball"))
+			(Edge (Variable "some color")          (Variable "some ball"))
+			(Edge (Variable "other color")         (Variable "other ball"))
 
 			; Are those two balls of the same color?
 			(Always (Equal (Variable "some color") (Variable "other color")))

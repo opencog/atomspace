@@ -1,8 +1,8 @@
 ;
 ; absent.scm -- Demo illustrating use of AbsentLink, StateLink
 ;
-; Repeatedly create and destroy an EvaluationLink. Then test to see if
-; the EvaluationLink is present in the AtomSpace. If it is, then set a
+; Repeatedly create and destroy an EdgeLink. Then test to see if
+; the EdgeLink is present in the AtomSpace. If it is, then set a
 ; state atom that indicates whether it is present or not.
 ;
 ; The state is managed using the StateLink, which provides a device
@@ -36,13 +36,13 @@
 ; function will display the current state, when called.
 ;
 ; The room state is set by invoking two patterns: is-visible and
-; is-invisible.  The first checks for the presence of the EvaluationLink
+; is-invisible.  The first checks for the presence of the EdgeLink
 ; and, if found, sets the room state to full.  The second checks for it's
 ; absence, and if it is absent, sets the state to "empty".
 ;
-; The EvaluationLink is created and destroyed by running one of two
+; The EdgeLink is created and destroyed by running one of two
 ; patterns, `create` or `destroy`.  The first one uses a `golem`, an
-; PutLink that will create the actual EvaluationLink when it is
+; PutLink that will create the actual EdgeLink when it is
 ; executed.  That is, the PutLink defines a potential link, one that
 ; is not yet in the AtomSpace, but whose description is. When it is
 ; triggered, the description is turned into the actual link.
@@ -57,7 +57,7 @@
 		(List (Variable "$x"))))
 
 ; Create a golem; the golem is brought to life when its executed.
-; i.e. this creates the EvaluationLink when it is executed.
+; i.e. this creates the EdgeLink when it is executed.
 (define golem
 	(Put query (Concept "item 42")))
 
@@ -104,7 +104,7 @@
 ; First, verify that the room is empty.
 (show-room-state)
 
-; Now, create the EvaluationLink.
+; Now, create the EdgeLink.
 (cog-execute! create)
 
 ; Set the room state. We check for both visibility and invisibility,
@@ -115,7 +115,7 @@
 ; Show the room state.  The room should be full.
 (show-room-state)
 
-; Destroy the EvaluationLink, and set the room state.
+; Destroy the EdgeLink, and set the room state.
 (cog-execute! destroy)
 (cog-execute! is-visible)
 (cog-execute! is-invisible)

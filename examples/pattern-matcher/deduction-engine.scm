@@ -27,7 +27,7 @@
 
 ;;; Assert basic fact
 ;;;  |- likes(Tom, baseball) 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "likes")
 	(ListLink
 		(ConceptNode "Tom")
@@ -40,12 +40,12 @@
 ;;; The ImplicationLink is a declarative form of the above.
 (RuleLink
 	; (VariableNode "$X") ; <-- this variable is implicitly scoped!
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Tom")
 			(VariableNode "$X")))
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Bill")
@@ -54,12 +54,12 @@
 ;;; The equivalent imperative form of the above.
 (QueryLink
 	(VariableNode "$X")
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Tom")
 			(VariableNode "$X")))
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "likes")
 		(ListLink
 			(ConceptNode "Bill")
@@ -75,13 +75,13 @@
 ;;; lambda, defining the arguments that PutLink accepts.
 (define implication
 	(PutLink
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "likes")
 			(ListLink
 				(ConceptNode "Bill")
 				(VariableNode "$Y")))
 		(MeetLink
-			(EvaluationLink
+			(EdgeLink
 				(PredicateNode "likes")
 				(ListLink
 					(ConceptNode "Tom")
@@ -95,7 +95,7 @@
 
 ;;;
 ;;; A named satisfiability query: Does Bill like $X?
-;;; The EvaluationLink just asserts that "Bill does like X" (as a fact).
+;;; The EdgeLink just asserts that "Bill does like X" (as a fact).
 ;;; The SatisfactionLink turns it into a question: the SatisfactionLink
 ;;; can evaluate to true or false, depending on what X is.
 ;;; Note that the SatisfactionLink is in the form of a lambda; that is,
@@ -119,7 +119,7 @@
 	(DefinedPredicateNode "Does Bill like X?")
 	(SatisfactionLink
 		(VariableNode "$X")
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "likes")
 			(ListLink
 				(ConceptNode "Bill")
@@ -156,13 +156,13 @@
 		(QuoteLink
 			(RuleLink
 				(UnquoteLink
-					(EvaluationLink
+					(EdgeLink
 						(VariableNode "$fpred")
 						(ListLink
 							(VariableNode "$A")
 							(VariableNode "$V"))))
 				(UnquoteLink
-					(EvaluationLink
+					(EdgeLink
 						(VariableNode "$tpred")
 						(ListLink
 							(VariableNode "$B")
@@ -180,14 +180,14 @@
 		(QuoteLink
 			(PutLink
 				(UnquoteLink
-					(EvaluationLink
+					(EdgeLink
 						(VariableNode "$tp")
 						(ListLink
 							(VariableNode "$bbb")
 							(VariableNode "$vvv"))))
 				(MeetLink
 					(UnquoteLink
-						(EvaluationLink
+						(EdgeLink
 							(VariableNode "$fp")
 							(ListLink
 								(VariableNode "$aaa")
@@ -208,13 +208,13 @@
 	(QuoteLink
 		(RuleLink
 			(UnquoteLink
-				(EvaluationLink
+				(EdgeLink
 					(VariableNode "$fpred")
 					(ListLink
 						(VariableNode "$A")
 						(VariableNode "$V"))))
 			(UnquoteLink
-				(EvaluationLink
+				(EdgeLink
 					(VariableNode "$tpred")
 					(ListLink
 						(VariableNode "$B")
@@ -223,12 +223,12 @@
 	; If an ImplicationLink was found, create a matching QueryLink
 	(QueryLink
 		(VariableNode "$V")
-		(EvaluationLink
+		(EdgeLink
 			(VariableNode "$fpred")
 			(ListLink
 				(VariableNode "$A")
 				(VariableNode "$V")))
-		(EvaluationLink
+		(EdgeLink
 			(VariableNode "$tpred")
 			(ListLink
 				(VariableNode "$B")

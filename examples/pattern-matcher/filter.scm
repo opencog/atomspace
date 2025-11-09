@@ -178,10 +178,10 @@
 ; Executing this will filter the input set down to just two members.
 ; The return value should be this:
 ;    (SetLink
-;       (EvaluationLink
+;       (EdgeLink
 ;          (Predicate "foo")
 ;          (ListLink (Concept "bar") (Concept "ah one")))
-;       (EvaluationLink
+;       (EdgeLink
 ;          (Predicate "foo")
 ;          (ListLink (Concept "bar") (Concept "ah two")))
 ;    )
@@ -310,10 +310,10 @@
 ; i.e. the order of the arguments is switched. The expected result is:
 ;
 ;    (SetLink
-;       (EvaluationLink
+;       (EdgeLink
 ;          (PredicateNode "reverse-foo")
 ;          (ListLink (ConceptNode "ah one") (ConceptNode "bar")))
-;       (EvaluationLink
+;       (EdgeLink
 ;          (PredicateNode "reverse-foo")
 ;          (ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 ;    )

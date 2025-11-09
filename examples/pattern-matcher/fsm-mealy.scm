@@ -35,7 +35,7 @@
 (List my-state halt-state)
 
 ;; The current environment
-(Evaluation extern-anchor halt)
+(Edge extern-anchor halt)
 
 ;; The set of allowed state transitions.  The transitions depend on
 ;; both the current state, and the external state; thus, this is
@@ -104,7 +104,7 @@
 				(Variable "$curr-state")
 			)
 			;; ... and the external environment is in the given state
-			(EvaluationLink
+			(EdgeLink
 				extern-state
 				(Variable "$extern-state")
 			)
@@ -149,14 +149,14 @@
 
 ;;; As above, but show the environment
 (define (show-environment-state)
-	(car (cog-chase-link 'EvaluationLink 'ConceptNode extern-anchor)))
+	(car (cog-chase-link 'EdgeLink 'ConceptNode extern-anchor)))
 
 ; Set the direction
 (define (move-dir dir)
 	; First, delete the current external state
-	(cog-extract! (Evaluation extern-anchor (show-environment-state)))
+	(cog-extract! (Edge extern-anchor (show-environment-state)))
 	; Next, set the new direction
-	(Evaluation extern-anchor dir))
+	(Edge extern-anchor dir))
 
 ; Set the direction
 (define (move-forward) (move-dir go-forward))

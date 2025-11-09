@@ -91,7 +91,7 @@
 		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
-; As in earlier examples, the TV on the EvaluationLink is recomputed
+; As in earlier examples, the TV on the EdgeLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.3 0.7))
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.6))

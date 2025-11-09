@@ -91,10 +91,10 @@
 
 		; The QueryLink is a kind of rewrite-rule; the variable
 		; groundings can be used to create new structures. For this
-		; demo, some nonsense Implication & Evaluation links are
+		; demo, some nonsense Implication & Edge links are
 		; created. You don't want to use Implication like this in
 		; practice, but visually, it works for this demo.
-		(Evaluation (Concept "things that go together")
+		(Edge (Concept "things that go together")
 			(Implication (Variable "$Y") (Variable "$X")))))
 
 ; Perform the query, and put the results in a scheme object.

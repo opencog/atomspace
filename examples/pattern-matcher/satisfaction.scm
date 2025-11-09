@@ -75,7 +75,7 @@
 			(Variable "$p")
 			(Variable "$x")
 			(Anchor "please put groundings here"))
-		(Evaluation
+		(Edge
 			(Variable "$p")
 			(List
 				(Concept "funny")
@@ -89,7 +89,7 @@
 		(VariableList
 			(Variable "$p")
 			(Variable "$x"))
-		(Evaluation
+		(Edge
 			(Variable "$p")
 			(List
 				(Concept "funny")

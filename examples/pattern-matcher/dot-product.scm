@@ -39,13 +39,13 @@
 
 		; What to look for.
 		(Present
-			(Evaluation (Variable "$prop") (Concept "dog"))
-			(Evaluation (Variable "$prop") (Concept "cat")))
+			(Edge (Variable "$prop") (Concept "dog"))
+			(Edge (Variable "$prop") (Concept "cat")))
 
 		; Multiply the counts on the search results.
 		(Times
-			(count-of (Evaluation (Variable "$prop") (Concept "dog")))
-			(count-of (Evaluation (Variable "$prop") (Concept "cat"))))))
+			(count-of (Edge (Variable "$prop") (Concept "dog")))
+			(count-of (Edge (Variable "$prop") (Concept "cat"))))))
 
 ; Dry run -- this should return a list of numbers 1,4,9,16,25
 (cog-execute! qdot-math)
