@@ -68,7 +68,8 @@
 
 (DefineLink
 	(DefinedProcedure "col diffs")
-   (Lambda
+   (Rule
+      (Variable "$tbl-name")
       (Variable "$tbl-name")
 		(SetValue
 			(Variable "$tbl-name") (Predicate "f2 minus f1")
@@ -77,7 +78,7 @@
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
 
 ; Apply the function to the table.
-(cog-execute! (Put (DefinedProcedure "col diffs") tab))
+(cog-execute! (Filter (DefinedProcedure "col diffs") tab))
 
 ; Verify that the new column showed up.
 (cog-keys tab)
@@ -96,7 +97,8 @@
 ; conventional machine-learning algos.
 (DefineLink
 	(DefinedProcedure "compute score")
-   (Lambda
+   (Rule
+      (Variable "$tbl-name")
       (Variable "$tbl-name")
 		(Accumulate
 			(Minus
@@ -104,7 +106,7 @@
 				(FloatValueOf (Variable "$tbl-name") (PredicateNode "flt1"))))))
 
 ; Apply the function to the table.
-(cog-execute! (Put (DefinedProcedure "compute score") tab))
+(cog-execute! (Filter (DefinedProcedure "compute score") tab))
 
 ; That's all, folks.
 ; -------------------------------------------------------------------

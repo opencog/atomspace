@@ -139,26 +139,3 @@
 (cog-execute! bind-empty)
 
 ; ------------------------------------------------------
-;; This variant uses a PutLink-MeetLink combination. It is functionally
-;; identical to the QueryLink; merely, the order in which the action
-;; is done is reversed w.r.t. the test.
-;;
-(define put-empty-atom
-	(Put
-		;; Replace the value of $x by whatever the MeetLink returns.
-		(ExecutionOutput
-				(GroundedSchema "scm: atom-print-atom")
-				(List (Variable "$x")))
-		(Meet
-			;; The variable $y is automatically bound by the MeetLink;
-			;; it does not escape the scope of the MeetLink.
-			(And
-				;; Search for presence
-				(List room-state (Variable "$y"))
-				;; Check for equality ...
-				(Equal (Variable "$y") room-empty)))
-		))
-
-(cog-execute! put-empty-atom)
-
-; ------------------------------------------------------

@@ -260,8 +260,4 @@ a kind-of one-sided unification, and thus simpler than full-fledged
 * `filter-strings.scm` -- Matching specific StringValues in data streams.
 * `vector-column.scm`  -- Packing float point data into vectors (for GPU's).
 
-Unfinished examples
--------------------
-Some experiments that get complicated. And can't easily be done.
-
-* `deduction-engine.scm`  -- a ProLog-like reasoning engine
+-------
