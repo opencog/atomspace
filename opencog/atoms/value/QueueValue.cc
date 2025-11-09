@@ -77,16 +77,17 @@ void QueueValue::update() const
 	catch (typename conq::Canceled& e)
 	{}
 
-	// If we are here, the queue closed up. Reopen it
-	// just long enough to drain any remaining values.
-	const_cast<QueueValue*>(this) -> cancel_reset();
-	while (not is_empty())
+	// If we are here, the queue closed up.
+	// Drain any remaining values.
+	std::queue<ValuePtr> rem =
+		const_cast<QueueValue*>(this)->wait_and_take_all();
+
+	_value.reserve(_value.size() + rem.size());
+	while (not rem.empty())
 	{
-		ValuePtr val;
-		const_cast<QueueValue*>(this) -> pop(val);
-		_value.emplace_back(val);
+		_value.emplace_back(std::move(rem.front()));
+		rem.pop();
 	}
-	const_cast<QueueValue*>(this) -> cancel();
 }
 
 // ==============================================================

@@ -75,16 +75,10 @@ void UnisetValue::update() const
 	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
 	{}
 
-	// If we are here, the queue closed up. Reopen it
-	// just long enough to drain any remaining values.
-	const_cast<UnisetValue*>(this)->_set.cancel_reset();
-	while (not _set.is_empty())
-	{
-		ValuePtr val;
-		const_cast<UnisetValue*>(this)->_set.get(val);
-		_value.emplace_back(val);
-	}
-	const_cast<UnisetValue*>(this)->_set.cancel();
+	// If we are here, the queue closed up.
+	// Drain any remaining values.
+	ValueSeq rem(const_cast<UnisetValue*>(this)->_set.try_get(SIZE_MAX));
+	_value.insert(_value.end(), rem.begin(), rem.end());
 }
 
 // ==============================================================
