@@ -117,7 +117,29 @@
 ; This time, the smallest come first.
 (SortedStream not-greater-relation item-list)
 
+; Now for fun and games: deduplication.
+(define greater-relation
+	(Lambda
+		(VariableList (Variable "$left") (Variable "$right"))
+		(GreaterThan
+			(SizeOf (Variable "$left"))
+			(SizeOf (Variable "$right")))))
 
+; The result here is surprising: only three items, of size 3,2 and 1
+; So, indeed, in the proper greater-than ordering; but where did the
+; rest go? The answer is provided by the vagaries of sorting when
+; equality is deduced from the relation. Explicitly:
+;
+;   Is sizeof(thing-A of size 1) < sizeof(thing-B of size 1)?  No!
+;   Is sizeof(thing-B of size 1) < sizeof(thing-A of size 1)?  No!
+;
+; Conclude that 1 == 1 and therefore these two are equivalent, and
+; one of them can be discarded.  So this is an example of deduplication
+; by size. When the compare is <= instead of <, then 1 <> 1 is infered,
+; and both items are kept, as the are different.
+(SortedStream greater-relation item-list)
+
+; ----------------------------------------------------------
 
 (define ls
 	(LinkSignature
