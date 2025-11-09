@@ -61,11 +61,14 @@
 
 
 (define sorted-list
-	(CollectionOf
-		(LinkSignature
-			(Type 'SortedStream)
-			order-relation
-			item-list)))
+		(SortedStream order-relation item-list))
+
+
+(define ls
+	(LinkSignature
+		(Type 'SortedStream)
+		order-relation
+		item-list))
 
 
 ; Display it. Note that, at the bottom of the print, the current

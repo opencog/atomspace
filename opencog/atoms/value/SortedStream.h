@@ -59,6 +59,7 @@ protected:
 public:
 	SortedStream(const Handle&);
 	SortedStream(const HandleSeq&);
+	SortedStream(const ValueSeq&);
 	virtual ~SortedStream();
 
 	virtual void add(const ValuePtr&) override;

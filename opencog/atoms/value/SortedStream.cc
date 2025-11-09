@@ -52,6 +52,28 @@ SortedStream::SortedStream(const HandleSeq& hs)
 		init_src(hs[1]);
 }
 
+// Same as above, but the two arguments arive in a ValueSeq.
+// Ideally, the factory *should* have given us a pair of Handles,
+// but twiddling this is a hassle, so not doing that right now.
+// XXX FIXME maybe fix the factory, some day.
+SortedStream::SortedStream(const ValueSeq& vsq)
+	: UnisetValue(SORTED_STREAM)
+{
+	if (2 != vsq.size() or
+	    (not vsq[0]->is_atom()) or
+	    (not vsq[1]->is_atom()))
+		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
+
+	_schema = HandleCast(vsq[0]);
+	init_cmp();
+
+	Handle src = HandleCast(vsq[1]);
+	if (src->is_executable())
+		init_src(src->execute());
+	else
+		init_src(vsq[1]);
+}
+
 // Set up the compare op by wrapping the given relation in
 // an ExecutionOutputLink, fed by a pair of ValueShims that
 // will pass the Values into the relation.
@@ -194,3 +216,4 @@ void SortedStream::update() const
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const Handle&)
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const HandleSeq&)
+DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const ValueSeq&)
