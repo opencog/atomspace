@@ -77,16 +77,17 @@ void QueueValue::update() const
 	catch (typename conq::Canceled& e)
 	{}
 
-	// If we are here, the queue closed up. Reopen it
-	// just long enough to drain any remaining values.
-	const_cast<QueueValue*>(this) -> cancel_reset();
-	while (not is_empty())
+	// If we are here, the queue closed up.
+	// Drain any remaining values.
+	std::queue<ValuePtr> rem =
+		const_cast<QueueValue*>(this)->wait_and_take_all();
+
+	_value.reserve(_value.size() + rem.size());
+	while (not rem.empty())
 	{
-		ValuePtr val;
-		const_cast<QueueValue*>(this) -> pop(val);
-		_value.emplace_back(val);
+		_value.emplace_back(std::move(rem.front()));
+		rem.pop();
 	}
-	const_cast<QueueValue*>(this) -> cancel();
 }
 
 // ==============================================================
@@ -122,8 +123,15 @@ void QueueValue::add(ValuePtr&& vp)
 
 ValuePtr QueueValue::remove(void)
 {
-	// Might block here, if the concurrent_queue is open and empty.
-	// If it closes while we are blocked, we will catch an exception.
+	// Use try_get first, in case the queue is closed.
+	ValuePtr vp;
+	if (conq::try_get(vp))
+		return vp;
+
+	// If we are here, then the queue is empty.
+	// If it is closed, then it's end-of-stream.
+	// Else, we block and wait.
+	// If the queue closes while we are blocked, we will catch an exception.
 	// Return VoidValue as the end-of-stream marker.
 	try
 	{

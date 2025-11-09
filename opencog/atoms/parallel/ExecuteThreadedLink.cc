@@ -69,7 +69,7 @@ using namespace opencog;
 ///    (cog-execute! (WaitForCloseLink (ExecuteThreadedLink ...)))
 /// and the WaitForCloseLink just ... waits for the queue to close,
 /// and returns only then. This would be generic, for all QueueValue
-/// users... XXX should port BindLink etc. to this, too!?
+/// users... XXX should port QueryLink etc. to this, too!?
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1)
