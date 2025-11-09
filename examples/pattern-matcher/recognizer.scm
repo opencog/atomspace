@@ -149,7 +149,7 @@
 
 ; ------------------
 ; The below takes the above MeetLink, and uses it to generate values
-; that are then installed in place by a PutLink. That is, the PutLink
+; that are then installed in place by a FilterLink. That is, the FilterLink
 ; re-assembles the rule from the antecedent and the consequent.
 
 (define (get-rules-for-ante ANTECEDENT)
@@ -163,20 +163,20 @@
 	; The MeetLink below returns all of the consequents.
 	; The TypedVariable filters out and rejects all consequents that
 	;   are not ListLinks.
-	; The PutLink reconstructs the rule, out of the antecedent and
+	; The FilterLink reconstructs the rule, out of the antecedent and
 	;   the consequent.
 	; The Quotes are used to avoid accidentally running the QueryLink
 	;   that is being assembled.
 	(cog-execute!
-		(Put
-			(TypedVariable (Variable "$list") (Type "ListLink"))
-			(Quote (Query ANTECEDENT (Unquote (Variable "$list"))))
+		(Filter
+			(Rule
+				(TypedVariable (Variable "$list") (Type "ListLink"))
+				(Variable "$list")
+				(Quote (Query ANTECEDENT (Unquote (Variable "$list")))))
 			(Meet
 				(Variable "$consequent")
-				(Quote (QueryLink ANTECEDENT (Unquote (Variable "$consequent"))))
-			)
-		)
-	)
+				(Quote (QueryLink ANTECEDENT (Unquote (Variable "$consequent")))))
+	))
 )
 
 ; Try it!
@@ -185,7 +185,7 @@
 ; ------------------
 ; The below takes the above rule generator, and turns it into a
 ; bona-fide rule recognizer.  It does this by running the DualLink to
-; find the antecedents, and then using a PutLink to plug these into
+; find the antecedents, and then using a FilterLink to plug these into
 ; the rule generator.
 
 (define (get-untyped-rules DATA)
@@ -197,22 +197,25 @@
      (get-untyped-rules (List (Concept \"I\") (Concept \"love\") (Concept \"you\")))
 "
 	(cog-execute!
-		(Put
-			(TypedVariable (Variable "$ante") (Type "ListLink"))
-			(Put
-				(TypedVariable (Variable "$list") (Type "ListLink"))
-				(Quote (QueryLink
-					(Unquote (Variable "$ante"))
-					(Unquote (Variable "$list"))
-				))
-				(MeetLink
-					(Variable "$consequent")
-					(Quote (QueryLink
-						(Unquote (Variable "$ante"))
-						(Unquote (Variable "$consequent"))))
-				))
-			(Dual DATA)
-		))
+		(Filter
+			(Rule
+				(TypedVariable (Variable "$ante") (Type "ListLink"))
+				(Variable "$ante")
+				(Filter
+					(Rule
+						(TypedVariable (Variable "$list") (Type "ListLink"))
+						(Variable "$list")
+						(Quote (QueryLink
+							(Unquote (Variable "$ante"))
+							(Unquote (Variable "$list"))
+						)))
+					(MeetLink
+						(Variable "$consequent")
+						(Quote (QueryLink
+							(Unquote (Variable "$ante"))
+							(Unquote (Variable "$consequent"))))
+					)))
+			(Dual DATA)))
 )
 
 ; Try it!
@@ -325,20 +328,21 @@
 	; The MeetLink returns all of the vardecls and consequents.
 	; The TypedVariable filters out and rejects all consequents that
 	;   are not ListLinks.
-	; The PutLink reconstructs the rule, out of the antecedent and
+	; The FilterLink reconstructs the rule, out of the antecedent and
 	;   the consequent.
 	; The Quotes are used to avoid accidentally running the QueryLink
 	;   that is being assembled.
-	(Put
-		(VariableList
-			(Variable "$decls")
-			(Variable "$sequent"))
-		(Quote (Query
-				(Unquote (Variable "$decls"))
-				ANTECEDENT
-				(Unquote (Variable "$sequent"))))
-		(pattern-getter ANTECEDENT)
-	)
+	(Filter
+		(Rule
+			(VariableList
+				(Variable "$decls")
+				(Variable "$sequent"))
+			(List (Variable "$decls") (Variable "$sequent"))
+			(Quote (Query
+					(Unquote (Variable "$decls"))
+					ANTECEDENT
+					(Unquote (Variable "$sequent")))))
+		(pattern-getter ANTECEDENT))
 )
 
 (define (get-typed-rules-for-ante ANTECEDENT)
@@ -360,11 +364,12 @@
 ; typed rules.
 
 (define (rule-recognizer DATA)
-	(Put
-		(TypedVariable (Variable "$ante") (Type "ListLink"))
-		(rule-getter (Unquote (Variable "$ante")))
-		(Dual DATA)
-	)
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$ante") (Type "ListLink"))
+			(Variable "$ante")
+			(rule-getter (Unquote (Variable "$ante"))))
+		(Dual DATA))
 )
 
 (define (get-typed-rules DATA)
