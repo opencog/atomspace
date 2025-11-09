@@ -74,6 +74,13 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 		init_src(vsq[1]);
 }
 
+SortedStream::~SortedStream()
+{
+	release_transient_atomspace(_scratch);
+}
+
+// ==============================================================
+
 // Set up the compare op by wrapping the given relation in
 // an ExecutionOutputLink, fed by a pair of ValueShims that
 // will pass the Values into the relation.
@@ -106,8 +113,11 @@ void SortedStream::init_cmp(void)
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
 }
 
+// ==============================================================
+
 // Set up all finite streams here. Finite streams get copied into
-// the collection once and once only, and that's it.
+// the collection once and once only, and that's it. They're sorted,
+// and then deliverd one at a time from the buffer.
 void SortedStream::init_src(const ValuePtr& src)
 {
 	// Copy Link contents into the collection.
@@ -134,6 +144,7 @@ void SortedStream::init_src(const ValuePtr& src)
 	if (not src->is_type(STREAM_VALUE))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
+// XXX not done
 		close();
 		return;
 	}
@@ -142,11 +153,6 @@ void SortedStream::init_src(const ValuePtr& src)
 	// stream or a ContainerValue. Create a thread, sit in that thread
 	// and pull stuff. This need high-low watermarks to be added to
 	// the cogutils, first.
-}
-
-SortedStream::~SortedStream()
-{
-	release_transient_atomspace(_scratch);
 }
 
 // ==============================================================
@@ -213,36 +219,40 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
-#if FIXME_LATER
-	// XXX FIXME. We need to store items in reverse order, to
-	// avoid the pop-from-front lunacy. But I'm too tired to fix
-	// this now.
-	if (is_closed())
+	// Pull one item from the set.
+	ValuePtr val;
+	bool empty = const_cast<SortedStream*>(this)->_set.try_get(val);
+
+	// Return just that one item.
+	if (not empty)
 	{
-xxxxxxxxx OMG we need a cache, too. This is borken right now
-		if (0 == size()) return createVoidValue();
-		ValuePtr vp = _value.front();
-		_value.erase(_value.begin());
+		ValueSeq vsq({val});
+		_value.swap(vsq);
 		return;
 	}
 
-	ValuePtr vp = const_cast<SortedStream*>(this)->remove();
-
-	// Zero size means we've closed. End-of-stream.
-	if (0 == vp->size())
+	// If stream is empy and its closed, then we hit end of stream.
+	if (is_closed())
 	{
 		_value.clear();
 		return;
 	}
 
-	// Return just one item.
-	ValueSeq vsq({vp});
-	_value.swap(vsq);
-	return;
-#endif
+	// If we are here, then the stream is open but empty. Block and
+	// wait for something to arrive or for the stream to close.
+	try
+	{
+		const_cast<SortedStream*>(this)->_set.wait_get(val);
+		ValueSeq vsq({val});
+		_value.swap(vsq);
+		return;
+	}
+	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
+	{}
 
-// This is wrong, but whatever. Fixme later.
-UnisetValue::update();
+	// If we are here, the queue closed, with nothing in it.
+	// So this is end-of-stream, again.
+	_value.clear();
 }
 
 // ==============================================================

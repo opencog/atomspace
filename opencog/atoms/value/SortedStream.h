@@ -44,15 +44,19 @@ class SortedStream
 	: public UnisetValue
 {
 protected:
+	// Ordering schema and its evaluation
 	Handle _schema;
 	ValueShimLinkPtr _left_shim;
 	ValueShimLinkPtr _right_shim;
 	Handle _exout;
-	LinkValuePtr _source;
 	AtomSpace* _scratch;
+
+	// Data source
+	LinkValuePtr _source;
 
 	void init_cmp(void);
 	void init_src(const ValuePtr&);
+
 	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
