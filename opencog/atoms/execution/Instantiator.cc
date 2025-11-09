@@ -143,12 +143,7 @@ Handle Instantiator::reduce_exout(const Handle& expr,
 
 		// Perform substitution on the args, only.
 		args = beta_reduce(args, ist._varmap);
-
-		// unpack list link
-		const HandleSeq& oset(LIST_LINK == args->get_type() ?
-				args->getOutgoingSet(): HandleSeq{args});
-
-		return vars.substitute_nocheck(body, oset);
+		return vars.substitute_nocheck(body, {args});
 	}
 
 	// Perform substitution on the args, only.
