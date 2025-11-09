@@ -17,13 +17,18 @@
 ; The buffered contents will be kept (and returned) in sorted order.
 ;
 ; As a buffer, this is not really intended for sorting static lists,
-; but for sorting items arriving on a stream.
+; but for sorting items arriving on a stream. However, for the present
+; example, sorting will be applied to statiic lists.
 ;
-; To provide meaningful stream buffering, it will pull from it's
-; upstream source, attempting to "fill itself up". If the upstream
-; source is empty but open, the reader will block. The buufer will
-; remain in sorted order, and readers will be handed out in sorted
-; order to readers.
+; It seems that the only meaningful way to apply sorting to a stream
+; is to pull as much as possible from the stream, and sort that. The
+; SortedStream does exactly that: it pulls as much as possible from
+; the upstream source, and puts everything it gets into sorted order.
+; To avoid blocking when the upstream source blocks, the pull is done
+; from a separate, privately-maintained thread. To avoid overflowing
+; when the upstream producer is fast, and the downstream producer is
+; slow, high-low watermarks are used on the sorted buffer. These are
+; currently hard-coded.
 
 (use-modules (opencog) (opencog exec))
 
@@ -36,9 +41,21 @@
 (define order-relation
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
-		(GreaterThan
-			(SizeOf (Variable "$left"))
-			(SizeOf (Variable "$right")))))
+		(Or
+			(GreaterThan
+				(SizeOf (Variable "$left"))
+				(SizeOf (Variable "$right")))
+			(Equal
+				(SizeOf (Variable "$left"))
+				(SizeOf (Variable "$right"))))))
+
+(define order-relation
+	(Lambda
+		(VariableList (Variable "$left") (Variable "$right"))
+		(Not
+			(GreaterThan
+				(SizeOf (Variable "$left"))
+				(SizeOf (Variable "$right"))))))
 
 ; Create a list of items of varying sizes.
 (define item-list
