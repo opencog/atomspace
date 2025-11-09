@@ -123,8 +123,15 @@ void QueueValue::add(ValuePtr&& vp)
 
 ValuePtr QueueValue::remove(void)
 {
-	// Might block here, if the concurrent_queue is open and empty.
-	// If it closes while we are blocked, we will catch an exception.
+	// Use try_get first, in case the queue is closed.
+	ValuePtr vp;
+	if (conq::try_get(vp))
+		return vp;
+
+	// If we are here, then the queue is empty.
+	// If it is closed, then it's end-of-stream.
+	// Else, we block and wait.
+	// If the queue closes while we are blocked, we will catch an exception.
 	// Return VoidValue as the end-of-stream marker.
 	try
 	{

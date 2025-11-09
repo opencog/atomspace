@@ -114,7 +114,14 @@ void UnisetValue::add(ValuePtr&& vp)
 
 ValuePtr UnisetValue::remove(void)
 {
-	// Might block here, if the concurrent_set is open and empty.
+	// Use try_get first, in case the set is closed.
+	ValuePtr vp;
+	if (_set.try_get(vp))
+		return vp;
+
+	// If we are here, then the set is empty.
+	// If it is closed, then it's end-of-stream.
+	// Else, we block and wait.
 	// If it closes while we are blocked, we will catch an exception.
 	// Return VoidValue as the end-of-stream marker.
 	try
