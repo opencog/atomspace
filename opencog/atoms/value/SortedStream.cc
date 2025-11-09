@@ -32,9 +32,9 @@ using namespace opencog;
 // ==============================================================
 
 SortedStream::SortedStream(const Handle& h)
-	: UnisetValue(SORTED_STREAM), _schema(h), _source(nullptr)
+	: UnisetValue(SORTED_STREAM), _schema(h)
 {
-	init();
+	init_cmp();
 }
 
 SortedStream::SortedStream(const HandleSeq& hs)
@@ -44,11 +44,40 @@ SortedStream::SortedStream(const HandleSeq& hs)
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
 
 	_schema = hs[0];
-	_source = hs[1];
-	init();
+	init_cmp();
+
+	if (hs[1]->is_executable())
+		init_src(hs[1]->execute());
+	else
+		init_src(hs[1]);
 }
 
-void SortedStream::init()
+// Same as above, but the two arguments arive in a ValueSeq.
+// Ideally, the factory *should* have given us a pair of Handles,
+// but twiddling this is a hassle, so not doing that right now.
+// XXX FIXME maybe fix the factory, some day.
+SortedStream::SortedStream(const ValueSeq& vsq)
+	: UnisetValue(SORTED_STREAM)
+{
+	if (2 != vsq.size() or
+	    (not vsq[0]->is_atom()) or
+	    (not vsq[1]->is_atom()))
+		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
+
+	_schema = HandleCast(vsq[0]);
+	init_cmp();
+
+	Handle src = HandleCast(vsq[1]);
+	if (src->is_executable())
+		init_src(src->execute());
+	else
+		init_src(vsq[1]);
+}
+
+// Set up the compare op by wrapping the given relation in
+// an ExecutionOutputLink, fed by a pair of ValueShims that
+// will pass the Values into the relation.
+void SortedStream::init_cmp(void)
 {
 	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
@@ -75,6 +104,44 @@ void SortedStream::init()
 	// overlays the AtomSpace in which the schema sits, and thus,
 	// the schema can use this for context.
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
+}
+
+// Set up all finite streams here. Finite streams get copied into
+// the collection once and once only, and that's it.
+void SortedStream::init_src(const ValuePtr& src)
+{
+	// Copy Link contents into the collection.
+	if (src->is_type(LINK))
+	{
+		for (const Handle& h: HandleCast(src)->getOutgoingSet())
+			UnisetValue::add(h);
+		close();
+		return;
+	}
+
+	// Everything else is just a collection of size one.
+	// Possible future extensions:
+	// If _source is an ObjectNode, then send *-read-* message ???
+	// If source is a FloatStream or StringStream ... ???
+	if (not src->is_type(LINK_VALUE))
+	{
+		UnisetValue::add(src);
+		close();
+		return;
+	}
+
+	// One-shot, non-streaming finite LinkValue
+	if (not src->is_type(STREAM_VALUE))
+	{
+		ValueSeq vsq = LinkValueCast(src)->value();
+		close();
+		return;
+	}
+
+	// XXX TODO Finish Me: if we are here then its either a plain
+	// stream or a ContainerValue. Create a thread, sit in that thread
+	// and pull stuff. This need high-low watermarks to be added to
+	// the cogutils, first.
 }
 
 SortedStream::~SortedStream()
@@ -146,7 +213,51 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
-	UnisetValue::update();
+#if FIXME_LATER
+	// XXX FIXME. We need to store items in reverse order, to
+	// avoid the pop-from-front lunacy. But I'm too tired to fix
+	// this now.
+	if (is_closed())
+	{
+xxxxxxxxx OMG we need a cache, too. This is borken right now
+		if (0 == size()) return createVoidValue();
+		ValuePtr vp = _value.front();
+		_value.erase(_value.begin());
+		return;
+	}
+
+	ValuePtr vp = const_cast<SortedStream*>(this)->remove();
+
+	// Zero size means we've closed. End-of-stream.
+	if (0 == vp->size())
+	{
+		_value.clear();
+		return;
+	}
+
+	// Return just one item.
+	ValueSeq vsq({vp});
+	_value.swap(vsq);
+	return;
+#endif
+
+// This is wrong, but whatever. Fixme later.
+UnisetValue::update();
+}
+
+// ==============================================================
+
+std::string SortedStream::to_string(const std::string& indent) const
+{
+	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	rv += "\n";
+	rv += _schema->to_short_string(indent + "   ");
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	rv += ")\n";
+	rv += indent + "; Currently:\n";
+	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
+	return rv;
 }
 
 // ==============================================================
@@ -154,3 +265,4 @@ void SortedStream::update() const
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const Handle&)
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const HandleSeq&)
+DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const ValueSeq&)

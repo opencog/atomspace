@@ -48,20 +48,23 @@ protected:
 	ValueShimLinkPtr _left_shim;
 	ValueShimLinkPtr _right_shim;
 	Handle _exout;
-	Handle _source;
+	LinkValuePtr _source;
 	AtomSpace* _scratch;
 
-	void init(void);
+	void init_cmp(void);
+	void init_src(const ValuePtr&);
 	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
 	SortedStream(const Handle&);
 	SortedStream(const HandleSeq&);
+	SortedStream(const ValueSeq&);
 	virtual ~SortedStream();
 
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
+	virtual std::string to_string(const std::string& indent = "") const;
 };
 
 VALUE_PTR_DECL(SortedStream);

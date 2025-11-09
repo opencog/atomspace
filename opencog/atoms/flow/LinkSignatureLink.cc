@@ -93,7 +93,7 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 	// case is the stream, which takes some Handle argument that
 	// controls the stream operation. Examples include SortedStream
 	// and FlatStream. Pss that directly to the correct factory.
-	if (nameserver().isA(_kind, HANDLE_ARG))
+	if (nameserver().isA(_kind, HANDLE_ARG) and 2 == _outgoing.size())
 		return valueserver().create(_kind, _outgoing[1]);
 
 	ValueSeq voset;
