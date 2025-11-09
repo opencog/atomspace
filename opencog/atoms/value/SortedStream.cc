@@ -94,6 +94,26 @@ void SortedStream::init_src(const ValuePtr& src)
 		for (const Handle& h: HandleCast(src)->getOutgoingSet())
 			UnisetValue::add(h);
 		close();
+		return;
+	}
+
+	// Everything else is just a collection of size one.
+	// Possible future extensions:
+	// If _source is an ObjectNode, then send *-read-* message ???
+	// If source is a FloatStream or StringStream ... ???
+	if (not src->is_type(LINK_VALUE))
+	{
+		UnisetValue::add(src);
+		close();
+		return;
+	}
+
+	// One-shot, non-streaming finite LinkValue
+	if (not src->is_type(STREAM_VALUE))
+	{
+		ValueSeq vsq = LinkValueCast(src)->value();
+		close();
+		return;
 	}
 }
 
