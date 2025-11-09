@@ -230,6 +230,21 @@ void SortedStream::update() const
 
 // ==============================================================
 
+std::string SortedStream::to_string(const std::string& indent) const
+{
+	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	rv += "\n";
+	rv += _schema->to_short_string(indent + "   ");
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	rv += ")\n";
+	rv += indent + "; Currently:\n";
+	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
+	return rv;
+}
+
+// ==============================================================
+
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const Handle&)
 DEFINE_VALUE_FACTORY(SORTED_STREAM, createSortedStream, const HandleSeq&)
