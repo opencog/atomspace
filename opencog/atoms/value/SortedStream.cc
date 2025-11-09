@@ -124,8 +124,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	if (src->is_type(LINK))
 	{
 		for (const Handle& h: HandleCast(src)->getOutgoingSet())
-			UnisetValue::add(h);
-		close();
+			_set.insert(h);
+		_set.close();
 		return;
 	}
 
@@ -135,8 +135,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	// If source is a FloatStream or StringStream ... ???
 	if (not src->is_type(LINK_VALUE))
 	{
-		UnisetValue::add(src);
-		close();
+		_set.insert(src);
+		_set.close();
 		return;
 	}
 
@@ -145,7 +145,7 @@ void SortedStream::init_src(const ValuePtr& src)
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
 // XXX not done
-		close();
+		_set.close();
 		return;
 	}
 
@@ -177,7 +177,7 @@ void SortedStream::add(const ValuePtr& vp)
 	}
 
 	_scratch->clear_transient();
-	UnisetValue::add(vp);
+	_set.insert(vp);
 }
 
 void SortedStream::add(ValuePtr&& vp)
@@ -190,7 +190,7 @@ void SortedStream::add(ValuePtr&& vp)
 	}
 
 	_scratch->clear_transient();
-	UnisetValue::add(std::move(vp));
+	_set.insert(std::move(vp));
 }
 
 // ==============================================================
@@ -219,19 +219,16 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
-	// Pull one item from the set.
+	// Try to pull one item from the set.
 	ValuePtr val;
-	bool empty = const_cast<SortedStream*>(this)->_set.try_get(val);
-
-	// Return just that one item.
-	if (not empty)
+	if (const_cast<SortedStream*>(this)->_set.try_get(val))
 	{
 		ValueSeq vsq({val});
 		_value.swap(vsq);
 		return;
 	}
 
-	// If stream is empy and its closed, then we hit end of stream.
+	// Stream is empty. If its closed, then we hit end of stream.
 	if (is_closed())
 	{
 		_value.clear();
