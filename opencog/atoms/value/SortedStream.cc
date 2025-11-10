@@ -77,11 +77,11 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 
 SortedStream::~SortedStream()
 {
+	if (not is_closed())
+		close();
+
 	if (_source)
-	{
-		_set.close();
 		_puller.join();
-	}
 
 	release_transient_atomspace(_scratch);
 }
