@@ -56,6 +56,7 @@ protected:
 	LinkValuePtr _source;
 	std::thread _puller;
 	void drain(void);
+	void drainloop(void);
 
 	void init_cmp(void);
 	void init_src(const ValuePtr&);

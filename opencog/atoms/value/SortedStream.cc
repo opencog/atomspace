@@ -77,6 +77,9 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 
 SortedStream::~SortedStream()
 {
+	if (not is_closed())
+		close();
+
 	if (_source)
 		_puller.join();
 
@@ -174,18 +177,22 @@ void SortedStream::init_src(const ValuePtr& src)
 	// the set. We cannot perform sorting unless we grab as many elts
 	// as possible.
 	//
-	// TODO: the concurrent_set needs to be extended with high and low
-	// watermarks so that we don't overflow. XXX FIXME.
+	// However, there is a risk of going crazy and pulling in billions
+	// of values, if upstream supplies them faster than downstream
+	// consumes them. So we set a max size here, and hard code it to
+	// something small-ish.  65K seems ... not unreasonable.
+	// The thread won't be able to add more than HIMARK, and will block
+	// until the size drops below LOMARK.
+#define HIMARK 65536
+#define LOMARK 65536 - 4096
+	_set.set_watermarks(HIMARK, LOMARK);
 
 	_source = LinkValueCast(src);
 	_puller = std::thread(&SortedStream::drain, this);
 }
 
-void SortedStream::drain(void)
+void SortedStream::drainloop(void)
 {
-	// Internal bug, if this asserts.
-	OC_ASSERT(_source->is_type(STREAM_VALUE));
-
 	// Plain streams are easy. Just sample and go.
 	if (not _source->is_type(CONTAINER_VALUE))
 	{
@@ -215,6 +222,22 @@ void SortedStream::drain(void)
 
 		_set.insert(vp);
 	}
+}
+
+void SortedStream::drain(void)
+{
+	// Internal bug, if this asserts.
+	OC_ASSERT(_source->is_type(STREAM_VALUE));
+
+	// This should "never happen", but still ... if there's some weird
+	// bug, and the set gets closed, we will catch an exception. In this
+	// case, the jig is up.
+	try
+	{
+		drainloop();
+		_set.close(); // We are done; close shop.
+	}
+	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e) {}
 }
 
 // ==============================================================
