@@ -56,9 +56,6 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 
 /// Return a LinkValue of the desired type.
 /// If kind is a Link type, then return that Link.
-/// For this case, if anything in the newset is NOT an Atom,
-/// it is silently ignored. (XXX FIXME Perhaps exception should
-/// be thrown? I dunno.)
 ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) const
 {
 	if (nameserver().isA(_kind, LINK_VALUE))
@@ -69,8 +66,11 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		HandleSeq oset;
 		for (const ValuePtr& vp : newset)
 		{
-			const Handle& h(HandleCast(vp));
-			if (h) oset.push_back(h);
+			if (not vp->is_atom())
+				throw RuntimeException(TRACE_INFO,
+					"Expecting Atom, got %s\n", vp->to_string().c_str());
+
+			oset.emplace_back(HandleCast(vp));
 		}
 		return as->add_link(_kind, std::move(oset));
 	}
