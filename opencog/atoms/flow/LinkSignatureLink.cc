@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
@@ -44,6 +45,11 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting LinkSignatureLink with at least one argument");
 
+	// XXX FIXME: we could allow complex types here, e.g. SignatureLink
+	// or whatever, as long as that signature has only one blank slot
+	// in it. If there's more than one blank, then ... well, see the
+	// wiki page https://wiki.opencog.org/w/LinkSignatureLink for what
+	// alse could be done here, and a hint of maybe why it should not be.
 	if (not oset[0]->is_type(TYPE_NODE))
 		throw InvalidParamException(TRACE_INFO,
 			"LinkSignatureLink only supports TypeNode at this time, got %s",
@@ -75,10 +81,33 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		return as->add_link(_kind, std::move(oset));
 	}
 
+	if (nameserver().isA(_kind, NUMBER_NODE))
+	{
+		std::vector<double> numvec;
+		for (const ValuePtr& vp : newset)
+		{
+			if (vp->is_type(NUMBER_NODE))
+			{
+				const std::vector<double>& nums(NumberNodeCast(vp)->value());
+				numvec.insert(numvec.end(), nums.begin(), nums.end());
+				continue;
+			}
+			if (vp->is_type(FLOAT_VALUE))
+			{
+				const std::vector<double>& nums(FloatValueCast(vp)->value());
+				numvec.insert(numvec.end(), nums.begin(), nums.end());
+				continue;
+			}
+			throw RuntimeException(TRACE_INFO,
+				"Expecting Atom, got %s\n", vp->to_string().c_str());
+		}
+
+		return as->add_atom(Handle(createNumberNode(numvec)));
+	}
+
 	// Should support other kinds too.  XXX FIXME
-	// (???) I guess we could also cast FloatVectors to NumberNodes
-	// or perform other kinds of transformations between vectors
-	// and LinkValues, ... or something. Unclear at this time.
+	// (???) Are there any other kinds of transformations
+	// between vectors and LinkValues that would be natural?
 	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
 		"Unsupported type %s", tname.c_str());
