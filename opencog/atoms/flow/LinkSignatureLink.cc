@@ -81,7 +81,8 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		return as->add_link(_kind, std::move(oset));
 	}
 
-	if (nameserver().isA(_kind, NUMBER_NODE))
+	if (nameserver().isA(_kind, NUMBER_NODE) or
+	    nameserver().isA(_kind, FLOAT_VALUE))
 	{
 		std::vector<double> numvec;
 		for (const ValuePtr& vp : newset)
@@ -102,7 +103,10 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 				"Expecting Atom, got %s\n", vp->to_string().c_str());
 		}
 
-		return as->add_atom(Handle(createNumberNode(numvec)));
+		if (NUMBER_NODE == _kind)
+			return as->add_atom(Handle(createNumberNode(std::move(numvec))));
+
+		return valueserver().create(_kind, std::move(numvec));
 	}
 
 	// Should support other kinds too.  XXX FIXME
