@@ -78,7 +78,10 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 SortedStream::~SortedStream()
 {
 	if (_source)
+	{
+		_set.close();
 		_puller.join();
+	}
 
 	release_transient_atomspace(_scratch);
 }
@@ -181,11 +184,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	_puller = std::thread(&SortedStream::drain, this);
 }
 
-void SortedStream::drain(void)
+void SortedStream::drainloop(void)
 {
-	// Internal bug, if this asserts.
-	OC_ASSERT(_source->is_type(STREAM_VALUE));
-
 	// Plain streams are easy. Just sample and go.
 	if (not _source->is_type(CONTAINER_VALUE))
 	{
@@ -215,6 +215,22 @@ void SortedStream::drain(void)
 
 		_set.insert(vp);
 	}
+}
+
+void SortedStream::drain(void)
+{
+	// Internal bug, if this asserts.
+	OC_ASSERT(_source->is_type(STREAM_VALUE));
+
+	// This should "never happen", but still ... if there's some weird
+	// bug, and the set gets closed, we will catch an exception. In this
+	// case, the jig is up.
+	try
+	{
+		drainloop();
+		_set.close(); // We are done; close shop.
+	}
+	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e) {}
 }
 
 // ==============================================================
