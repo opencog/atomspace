@@ -95,15 +95,14 @@ that collection.  Tap it again, you get the next item, until the
 current collection goes dry.  Then it taps it's source stream again,
 to get the next collection.
 
-The above three are simple types, and CollectionOfLink works great
+The above three are simple types, and LinkSignatureLink works great
 for wrapping up that executable Atom with the StreamValue.
 
   SortedStream
      <lambda defining ordering relation>
      <dataset or source>
 
-This is a challenge for CollectionOfLink. Before diving into that,
-two more, that are planned but not yet implemented:
+There are two more that are planned but not yet implemented:
 
   GroupValue
      <lambda defining equivalence buckets>
@@ -128,6 +127,15 @@ a common property. If not, it returns null (no result). Its like a
 GroupLink, followed by a test that there is only one group, and early
 invalidation if there is more than one. Its stapled on to the tail of
 the search, not at all integrated in any way. Should be sliced off.
+
+The wiki page for GroupLink and AlwaysLink propose converting these to a
+form of FilterLink. But this is not needed: the same ability is provided
+by writing
+
+    LinkSignature
+       Type 'GroupValue
+       <grouping relation>
+       <data source>
 
 So we have three of these things. Now for the wicked part.
 
