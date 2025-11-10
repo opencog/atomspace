@@ -72,6 +72,10 @@ Bingo -- works for FlatStream, too.
 
 Streams
 -------
+This subsection has been copied into the
+[wiki streams page](https://wiki.opencog.org/w/Streams). The wiki page
+updates some of the discussion below.
+
 What's a stream? Well, its a Value, not an Atom. Lets look at examples:
 
   FormulaStream
