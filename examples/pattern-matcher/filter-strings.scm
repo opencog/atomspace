@@ -8,7 +8,7 @@
 ; cannot be placed directly into Link Atoms.
 ;
 ; This example shows how to work around this issue, by using the
-; StringOfLink to encode a StringValue in a pattern.
+; LinkSignatureLink to encode a StringValue in a pattern.
 
 (use-modules (opencog) (opencog exec))
 
@@ -34,12 +34,12 @@
 
 			; The pattern to be matched. Look for direntries that are
 			; regular files, having file type (StringValue "reg").
-			; The StringOfLink is an Atom and can be placed in the
+			; The LinkSignatureLink is an Atom and can be placed in the
 			; pattern. It grabs the Node name, and constructs a
 			; a StringValue which is then used in the search pattern.
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$filename")
-				(StringOf (Type 'StringValue) (Node "reg")))
+				(LinkSignature (Type 'StringValue) (Node "reg")))
 
 			; The rewrite to be applied to all matching items. In this
 			; case, the filename is converted from a StringValue to a
@@ -50,7 +50,7 @@
 			; again. The AtomSpace now "remembers" what was seen.
 			(Edge
 				(Predicate "is-a file URL")
-				(StringOf (Type 'ItemNode) (Variable "$filename"))))
+				(LinkSignature (Type 'ItemNode) (Variable "$filename"))))
 
 		; The location of the input stream, to which the filter
 		; pattern will be applied.
