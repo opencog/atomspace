@@ -40,18 +40,11 @@
 
 #include "PyIncludeWrapper.h"
 
-#include <condition_variable>
-#include <filesystem>
-#include <map>
-#include <mutex>
-#include <string>
-#include <vector>
-
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
 
+#include <filesystem>
 
 namespace opencog {
 

@@ -24,11 +24,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/executioncontext/Context.h>
+#include "PythonEval.h"
+
+// This is an header in the build dreictory, auto-gened by cython
+#include "opencog/atomspace_api.h"
+
 #include <dlfcn.h>
-#include <unistd.h>
-#include <algorithm>
-#include <chrono>
-#include <filesystem>
+#include <utility>   // for std::forward
+
+#ifdef __APPLE__
+  #define secure_getenv getenv
+#endif
 
 // A simple callback wrapper to do RAII when coing out of scope,
 // capable of handling exceptions. Boost provides this (in the form of
@@ -36,9 +51,6 @@
 // Some future C++ will provide this, but gcc does not, as of mid-2025.
 // Anyway, this is so simple, it seems best to avoid the dependencies.
 // Just do it ourselves.
-#include <iostream>
-#include <utility>
-
 template <typename Callback>
 class scope_exit
 {
@@ -56,29 +68,10 @@ class scope_exit
 #define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&](void)
 #define SCOPE_GUARD_END )
 
-#include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/misc.h>
-#include <opencog/util/oc_assert.h>
-
-#include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/value/BoolValue.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/executioncontext/Context.h>
-#include "PythonEval.h"
-
-// This is an header in the build dreictory, auto-gened by cython
-#include "opencog/atomspace_api.h"
-
 using namespace opencog;
 using namespace std::chrono_literals;
 
-#ifdef __APPLE__
-  #define secure_getenv getenv
-#endif
-
 const int NO_SIGNAL_HANDLERS = 0;
-const char* NO_FUNCTION_NAME = "";
 
 /*
  * @todo When can we remove the singleton instance? Answer: not sure.
@@ -1077,96 +1070,6 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Execute the user function.
     do_call_user_function(moduleFunction, pyArguments);
-}
-
-// ===================================================================
-// Error handling
-
-/**
- * Build the Python error message for the current error.
- */
-std::string PythonEval::build_python_error_message(
-                                     const std::string& function_name)
-{
-    // Get the error from Python.
-    PyObject *pyErrorType, *pyError, *pyTraceback;
-    PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
-
-    if (not pyError) return "No error!";
-
-    // Construct the error message string.
-    std::stringstream errorStringStream;
-    errorStringStream << "Python error";
-
-    if (function_name != NO_FUNCTION_NAME)
-        errorStringStream << " in " << function_name;
-
-    PyObject* pyErrorString = PyObject_Str(pyError);
-    const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
-    if (pythonErrorString) {
-        errorStringStream << ": " << pythonErrorString << ".";
-    } else {
-        errorStringStream << ": Undescribed Error.";
-    }
-
-    // Print the traceback, too, if it is provided.
-    if (pyTraceback)
-    {
-        errorStringStream << "\nTraceback (most recent call last):\n";
-
-        PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
-
-        while (pyTracebackObject != NULL)
-        {
-            int line_number = pyTracebackObject-> tb_lineno;
-
-// Python 3.8 and earlier do not have these line-number macros
-// Python 3.8 was released in October 2019
-#if PY_VERSION_HEX < 0x03090000
-    #define PyFrame_GetCode(frame) ((frame)->f_code)
-    #define PyFrame_GetLineNumber(frame) ((frame)->f_lineno)
-#endif
-            const char* filename = PyUnicode_AsUTF8(
-                PyFrame_GetCode(pyTracebackObject->tb_frame)->co_filename);
-            const char* code_name = PyUnicode_AsUTF8(
-                PyFrame_GetCode(pyTracebackObject->tb_frame)->co_name);
-
-            errorStringStream << "File \"" << filename <<"\", ";
-            errorStringStream << "line " << line_number <<", ";
-            errorStringStream << "in " << code_name <<"\n";
-
-            pyTracebackObject = pyTracebackObject -> tb_next;
-        }
-    }
-
-    // Cleanup the references. NOTE: The traceback can be NULL even
-    // when the others aren't.
-    Py_DECREF(pyErrorType);
-    Py_DECREF(pyError);
-    Py_DECREF(pyErrorString);
-    if (pyTraceback)
-        Py_DECREF(pyTraceback);
-
-    return errorStringStream.str();
-}
-
-// Check for errors in a script.
-bool PythonEval::check_for_error()
-{
-    if (not PyErr_Occurred()) return false;
-
-    std::string error_string = build_python_error_message(NO_FUNCTION_NAME);
-    _input_line = "";
-    PyErr_Clear();
-
-    // Let the shell know what is going on.
-    _caught_error = true;
-    _error_string = error_string;
-    _pending_input = false;
-    _result = "";
-    _eval_done = true;
-    _wait_done.notify_all();
-    throw SilentException();
 }
 
 // ===================================================================

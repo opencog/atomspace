@@ -26,6 +26,7 @@ FILE(MAKE_DIRECTORY opencog)
 FILE(COPY opencog/__init__.py DESTINATION opencog)
 
 ADD_LIBRARY(PythonEval
+	PythonError.cc
 	PythonEval.cc
 )
 
