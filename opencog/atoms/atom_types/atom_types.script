@@ -1031,12 +1031,6 @@ ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
-// Convert a FloatValue to a NumberNode. The argument is presumed to
-// be some executable link that, when executed, returns a FloatValue
-// (or some derived type, e.g. some stream) and now we want an
-// actual NumberNode.
-NUMBER_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
-
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
