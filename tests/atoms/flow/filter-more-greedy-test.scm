@@ -84,10 +84,10 @@
 					(Glob "$b2")))
 
 			(Edge
-				(StringOf (Type 'Predicate) (Variable "$verb"))
+				(LinkSignature (Type 'Predicate) (Variable "$verb"))
 				(List
-					(StringOf (Type 'Concept) (Variable "$subj"))
-					(StringOf (Type 'Concept) (Variable "$obj")))))
+					(LinkSignature (Type 'Concept) (Variable "$subj"))
+					(LinkSignature (Type 'Concept) (Variable "$obj")))))
 
 		(ValueOf (Anchor "sent") (Predicate "bonds"))))
 
@@ -125,10 +125,10 @@
 					(Glob "$b2")))
 
 			(Edge
-				(StringOf (Type 'Predicate) (Variable "$verb"))
+				(LinkSignature (Type 'Predicate) (Variable "$verb"))
 				(List
-					(StringOf (Type 'Concept) (Variable "$subj"))
-					(StringOf (Type 'Concept) (Variable "$obj")))))
+					(LinkSignature (Type 'Concept) (Variable "$subj"))
+					(LinkSignature (Type 'Concept) (Variable "$obj")))))
 
 		(ValueOf (Anchor "sent") (Predicate "bonds"))))
 

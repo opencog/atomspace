@@ -7,7 +7,7 @@
 ; there is no way to get "naked strings" in Atomese.
 ;
 ; The need to convert transient StringValue streams into concrete
-; Nodes stored in the AtomSpace is fulfilled by the StringOfLink
+; Nodes stored in the AtomSpace is fulfilled by the LinkSignatureLink.
 ; It will convert between different Node types, and also between
 ; Nodes and StringValues.
 ;
@@ -16,8 +16,8 @@
 ; can be a need to capture some or all of the string stream as Atomese
 ; Nodes. As Nodes, they can be stored to disk (as a form of "memory")
 ; and become available for conventional AtomSpace processing, such as
-; with searches and queries. The StringOfLink provides the conversion
-; from flowing streams to static Nodes.
+; with searches and queries. The LinkSignatureLink provides the
+; conversion from flowing streams to static Nodes.
 ;
 ; The technical jargon for this is that the AtomSpace becomes a "sink"
 ; for the flow. Everything that flowed in stops and turns into Nodes.
@@ -25,8 +25,8 @@
 ; the remaining evidence of what had flowed in.
 ;
 ; Conversely, there might be a need to stream the contents of the
-; AtomSpace back out to a chat interface; the StringOfLink can provide
-; the needed conversion from AtomSpace Nodes to string streams.
+; AtomSpace back out to a chat interface; the LinkSignatureLink can
+; provide the needed conversion from AtomSpace Nodes to string streams.
 ; Here, the AtomSpace becomes a "source" (opposite of "sink") for
 ; a stream.
 ;
@@ -35,7 +35,7 @@
 ; Given the (PredicateNode "bar"), create the (ConceptNode "bar")
 
 (define node-from-node
-	(cog-execute! (StringOf (Type 'Concept) (Predicate "bar"))))
+	(cog-execute! (LinkSignature (Type 'Concept) (Predicate "bar"))))
 (format #t "Node from node created ~A\n" node-from-node)
 
 ; -----------
@@ -46,7 +46,7 @@
 	(StringValue "a" "b" "c"))
 
 (define node-from-string
-	(cog-execute! (StringOf (Type 'Concept)
+	(cog-execute! (LinkSignature (Type 'Concept)
 		(ValueOf (Anchor "anch") (Predicate "key")))))
 
 (format #t "Node from string got ~A\n" node-from-string)
@@ -57,7 +57,7 @@
 ; then be flowed to desired targets.)
 (cog-execute!
 	(SetValue (Anchor "anch") (Predicate "strkey")
-		(StringOf (Type 'StringValue)
+		(LinkSignature (Type 'StringValue)
 			(Concept "do-da"))))
 
 (define string-from-node
@@ -101,7 +101,7 @@
 			; into ConceptNodes, and then tagged to indicate their type.
 			; (They came from a sentence. They are words.)
 			(Edge (Predicate "sentence word")
-				(StringOf (Type 'Concept)
+				(LinkSignature (Type 'Concept)
 					(ValueOf (Variable "$strv")))))
 
 		; The stream source, to which the filter is applied.

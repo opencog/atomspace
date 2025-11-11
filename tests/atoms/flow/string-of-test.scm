@@ -1,5 +1,5 @@
 ;
-; string-of-test.scm -- Test the StringOfLink for basic fuction
+; string-of-test.scm -- Test the LinkSignatureLink for basic fuction
 ;
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
@@ -10,7 +10,7 @@
 ; -----------
 
 (define node-from-node
-	(cog-execute! (StringOf (Type 'Concept) (Predicate "bar"))))
+	(cog-execute! (LinkSignature (Type 'Concept) (Predicate "bar"))))
 (format #t "Node from node got ~A\n" node-from-node)
 
 (test-assert "Node-from-node"
@@ -22,7 +22,7 @@
 	(StringValue "a" "b" "c"))
 
 (define node-from-string
-	(cog-execute! (StringOf (Type 'Concept)
+	(cog-execute! (LinkSignature (Type 'Concept)
 		(ValueOf (Anchor "anch") (Predicate "key")))))
 
 (format #t "Node from string got ~A\n" node-from-string)
@@ -34,7 +34,7 @@
 
 (cog-execute!
 	(SetValue (Anchor "anch") (Predicate "strkey")
-		(StringOf (Type 'StringValue)
+		(LinkSignature (Type 'StringValue)
 			(Concept "do-da"))))
 
 (define string-from-node
@@ -56,7 +56,7 @@
 			(Variable "$strv")
 			(Edge (Predicate "foobar")
 				(List
-					(StringOf (Type 'Concept)
+					(LinkSignature (Type 'Concept)
 						(Variable "$strv")))))
 		(ValueOf (Anchor "anch") (Predicate "flokey"))))
 
