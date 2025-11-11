@@ -1090,11 +1090,6 @@ IS_MESSAGE_LINK <- VIRTUAL_LINK
 // actual set.
 COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_LINK
 
-// Convert StringValues into Nodes, or vice-versa, or convert
-// from one type of Node to another. The string is kept; the
-// type is rewritten. This is the string version of NumberOfLink.
-STRING_OF_LINK <- FUNCTION_LINK
-
 // Opposite of the ValueOfLink; attach a Value to an Atom.
 // Verb: "to set", and not noun "a set (collection)"
 // When executed, SetValue returns the value; and SetValueOn returns
