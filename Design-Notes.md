@@ -70,6 +70,9 @@ Executing the above returns a FutureStream that wraps the data source.
 Each reference to the FutureStream returns an item from the source.
 Bingo -- works for FlatStream, too.
 
+Oh wait ... there is also [[LinkSignatureLink]] ... which also does
+rewriting, but at the type level...
+
 Streams
 -------
 This subsection has been copied into the
@@ -189,13 +192,15 @@ Questions:
    also drains? A: DrainLink is not a container; it can never fill up.
    A2: Historical accident.
 
- * Should DrainLink and SortedStream automatically launch their own
-   threads? Probably yes. There should probably be a centralized
-   thread pool, so that these can be managed. Right now, its ad hoc.
+ * Should DrainLink automatically launch its own thread? Probably yes.
+   There should probably be a centralized thread pool, so that these
+   can be managed. Right now, threading is ad hoc.
 
  * Is DrainLink mis-designed? Probably yes; it should loop on calls
-   to `LinkValue::value()` and NOT `Atom::execute()` For the same
-   reason that FlatStream should do the same.
+   to `LinkValue::value()` and NOT `Atom::execute()` This is what
+   FlatStream does.
+
+A General question:
 
  * How should streams work?
 
@@ -214,30 +219,30 @@ conflict.
    returns lines of text from a file, and closes on end-of-file.
    It can be put in a mode where it tails the file (forever).
 
- * FlatStream and DrainLink both call `execute()` on a source handle,
-   to grab more data. Perhaps this is a design mistake? Yes, it is.
+ * DrainLink calls `execute()` on a source handle, to grab more data.
+   This is a design mistake.
 
 The issue is this: `execute()` returns a `ValuePtr`. If that is a true
 stream, then calling `Value::value()` is a valid way to get the next
 element. FutureStream converts calls to `value()` into calls to
 `execute()`, and thus is the right tool for creating streams.
 
-How should stream constuctors work?
+How should stream constructors work?
  * If the Stream constructor is given a Handle, then make make sure it
    is executable, call it and get a ValuePtr. That will be the source.
  * If the Stream constructor is given a ValuePtr, assume that is the
    source.
 
 What is a source? Rather than generalizing, lets examine the
-case-by-case needs. Lets start with a re-designed FlatStream.
+case-by-case needs. Lets start with FlatStream.
 The `FlatStream::update()` method does this:
 
  * If the source is VoidValue or of size zero, return that.
 
  * If the source is a Link, then it is taken to be a finite source.
    The outgoing set is the "current collection", and items are doled
-   out from it, one by one. When there ae no more, VoidValue is returned
-   to indicatte end-of-stream.
+   out from it, one by one. When there are no more, VoidValue is returned
+   to indicate end-of-stream.
 
  * If the source is a LinkValue, and is NOT a StreamValue, then it
    is taken to be a finite source, and treated like a Link, above.
@@ -245,7 +250,7 @@ The `FlatStream::update()` method does this:
    Iterate on that collection until empty, and then done.
 
  * If the source is a StreamValue and is not a ContainerValue, then
-   it is assumed to be a infinite source. In this case, call
+   it is assumed to be an endless (infinite) source. In this case, call
    `LinkValue::value()` to get the current collection. Dole it out,
    and, when empty, call `LinkValue::value()` again to get the next
    collection.
