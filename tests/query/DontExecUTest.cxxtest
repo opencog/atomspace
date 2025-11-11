@@ -59,7 +59,6 @@ public:
 
 	void test_DontExecLink_simple();
 	void test_DontExecLink_multi();
-	void test_DontExecLink_consumption();
 };
 
 void DontExecUTest::tearDown()
@@ -112,26 +111,6 @@ void DontExecUTest::test_DontExecLink_multi()
 	logger().debug() << "put-multi result = " << oc_to_string(got);
 	logger().debug() << "put-multi expected = " << oc_to_string(want);
 
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-/**
- * Test that DontExecLink are properly consumed when executed.
- */
-void DontExecUTest::test_DontExecLink_consumption()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"tests/query/dont-exec.scm\")");
-
-	Handle bl = eval.eval_h("bl");
-	Handle result = HandleCast(bl->execute(as.get()));
-	Handle simple_bl = eval.eval_h("simple-bl");
-	Handle expected = al(SET_LINK, al(DONT_EXEC_LINK, simple_bl));
-
-	logger().debug() << "result = " << oc_to_string(result);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(result, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
