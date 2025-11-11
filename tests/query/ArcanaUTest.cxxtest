@@ -221,7 +221,7 @@ void ArcanaUTest::test_numeric(void)
 	// ----
 	Handle sl = eval->eval_h("(StateLink"
 	                         "   (SchemaNode \"start-interaction-timestamp\")"
-	                         "   (NumberOf (TimeLink)))");
+	                         "   (LinkSignature (Type 'Number) (TimeLink)))");
 	Instantiator(as.get()).execute(sl);
   
 	ValuePtr too_soon = eval->eval_v(
