@@ -61,9 +61,12 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
-/// Return a LinkValue of the desired type.
-/// If kind is a Link type, then return that Link.
-ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) const
+/// Rewrite the provided input into the desired type. This will rewrite
+/// between Links and LinkValues, going in eitehr direction, and between
+/// Nodes and StringValues, going in either direction, and between
+/// NumberNodes and FloatValues, going in eitehr direction.
+//
+ValuePtr LinkSignatureLink::do_construct(const ValueSeq&& newset) const
 {
 	if (nameserver().isA(_kind, LINK_VALUE))
 		return valueserver().create(_kind, std::move(newset));
@@ -79,7 +82,7 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 
 			oset.emplace_back(HandleCast(vp));
 		}
-		return as->add_link(_kind, std::move(oset));
+		return createLink(std::move(oset), _kind);
 	}
 
 	if (nameserver().isA(_kind, NUMBER_NODE) or
@@ -105,7 +108,7 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		}
 
 		if (NUMBER_NODE == _kind)
-			return as->add_atom(Handle(createNumberNode(std::move(numvec))));
+			return createNumberNode(std::move(numvec));
 
 		return valueserver().create(_kind, std::move(numvec));
 	}
@@ -122,7 +125,7 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		if (newset[0]->is_type(NODE))
 			name = NodeCast(newset[0])->get_name();
 
-		if (newset[0]->is_type(STRING_VALUE))
+		else if (newset[0]->is_type(STRING_VALUE))
 		{
 			if (0 == newset[0]->size())
 				throw RuntimeException(TRACE_INFO,
@@ -130,16 +133,15 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 
 			name = StringValueCast(newset[0])->value()[0];
 		}
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Expecting source to be Node or StringValue, got %s\n",
+				newset[0]->to_string().c_str());
 
 		if (nameserver().isA(_kind, NODE))
-			return as->add_node(_kind, std::move(name));
+			return createNode(_kind, std::move(name));
 
 		return valueserver().create(_kind, std::move(name));
-
-		throw RuntimeException(TRACE_INFO,
-			"Expecting Node or StringValue, got %s\n",
-			newset[0]->to_string().c_str());
-
 	}
 
 	// Should support other kinds too.  XXX FIXME
@@ -148,6 +150,20 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 	const std::string& tname = nameserver().getTypeName(_kind);
 	throw InvalidParamException(TRACE_INFO,
 		"Unsupported type %s", tname.c_str());
+}
+
+ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) const
+{
+	// The LinkSignature ise used to rewrite Values ... which means those
+	// Values will typically NOT be resident in the AtomSpace, but will
+	// be in some ValueShimLink. During such rewrites (coming from
+	// Replacement::substitute_scoped()) the AtomSpace ptr will be
+	// a nullptr, which is OK, because the ValueShim could not have
+	// been inserted into it anyway. So .. check for nullptr==as.
+	ValuePtr vp(do_construct(std::move(newset)));
+	if (as and vp->is_atom())
+		return as->add_atom(HandleCast(vp));
+	return vp;
 }
 
 // ---------------------------------------------------------------
