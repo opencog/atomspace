@@ -23,6 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -153,8 +154,8 @@ Handle Replacement::substitute_scoped(Handle term,
 				// non-executable Atom, and nothing more.
 				//
 				// Well, sort-of. Execution could return something that
-				// is not an Atom. In that case, we redord the original
-				// form. This original form might be executted again,
+				// is not an Atom. In that case, we record the original
+				// form. This original form might be executed again,
 				// later on, and if this execution has side-effects,
 				// then, well, things get ugly.  But there's no obvious
 				// way of avoiding this; we'd need some method that
@@ -164,6 +165,12 @@ Handle Replacement::substitute_scoped(Handle term,
 				    not term->is_executable() and
 				    sub->is_executable())
 				{
+					// Execution MUST happen in some AtomSpace.
+					// XXX I'm confused; shouldn't this be in a
+					// scratch space? Or not?
+					AtomSpace* as = term->getAtomSpace();
+					sub = as->add_atom(sub);
+
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
 						sub = HandleCast(evp);
