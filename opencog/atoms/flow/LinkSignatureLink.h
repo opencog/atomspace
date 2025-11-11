@@ -53,6 +53,8 @@ class LinkSignatureLink : public Link
 protected:
 	Type _kind;
 
+	ValuePtr do_construct(const ValueSeq&&) const;
+
 public:
 	LinkSignatureLink(const HandleSeq&&, Type = LINK_SIGNATURE_LINK);
 	LinkSignatureLink(const LinkSignatureLink&) = delete;
