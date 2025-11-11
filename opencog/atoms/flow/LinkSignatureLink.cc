@@ -122,7 +122,7 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		if (newset[0]->is_type(NODE))
 			name = NodeCast(newset[0])->get_name();
 
-		if (newset[0]->is_type(STRING_VALUE))
+		else if (newset[0]->is_type(STRING_VALUE))
 		{
 			if (0 == newset[0]->size())
 				throw RuntimeException(TRACE_INFO,
@@ -130,16 +130,15 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 
 			name = StringValueCast(newset[0])->value()[0];
 		}
+		else
+			throw RuntimeException(TRACE_INFO,
+				"Expecting source to be Node or StringValue, got %s\n",
+				newset[0]->to_string().c_str());
 
 		if (nameserver().isA(_kind, NODE))
 			return as->add_node(_kind, std::move(name));
 
 		return valueserver().create(_kind, std::move(name));
-
-		throw RuntimeException(TRACE_INFO,
-			"Expecting Node or StringValue, got %s\n",
-			newset[0]->to_string().c_str());
-
 	}
 
 	// Should support other kinds too.  XXX FIXME
