@@ -845,6 +845,24 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
             pyModuleTmp = _modules[moduleName];
         }
 
+        // If still not found, check Python's sys.modules for modules
+        // that were imported via standard Python import statements
+        if (nullptr == pyModuleTmp)
+        {
+            PyObject* sys_modules = PyImport_GetModuleDict();
+            if (sys_modules)
+            {
+                pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
+                if (pyModuleTmp)
+                {
+                    // Cache it in _modules for future lookups
+                    // PyDict_GetItemString returns borrowed reference, so increment it
+                    Py_INCREF(pyModuleTmp);
+                    _modules[moduleName] = pyModuleTmp;
+                }
+            }
+        }
+
         // If found, set new module and truncate the function name
         if (pyModuleTmp)
         {
