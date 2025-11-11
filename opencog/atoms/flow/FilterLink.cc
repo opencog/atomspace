@@ -249,26 +249,35 @@ bool FilterLink::extract(const Handle& termpat,
 	if (not termpat->is_link())
 		return (termpat == vgnd);
 
-	// Pattern is a LinkSig. LinkSigs have a typespec. Does the type
-	// of the proposed grounding agree with the LinkSig typespec?
-	// If not, bounce out.
-	// The LinkSig typespec might be TypeNode, TypeInhNode or TypeCoInhNode
-	// The TypeNode::is_kind() handles all three cases.
-
-	// Search for a specific StringValue. There's not way to
-	// place StringValues directly into the pattern, but it
-	// can be encoded with StringOfLink. Note this is a content
-	// compare, not a pointer compare, because values are not
-	// de-duped.
+	// Pattern is a LinkSig. LinkSigs have a typespec. These are handled
+	// in multiple steps.
+	// Step 1) Does the type of the proposed grounding agree with the
+	//         LinkSig typespec? If so, proceed, else bounce out.
+	//
+	//         Note that the LinkSig typespec might be TypeNode,
+	//         TypeInhNode or TypeCoInhNode.  The TypeNode::is_kind()
+	//         handles all three cases.
+	// Step 2) The LinkSig might be rewriting into a StringValue, or
+	//         to a Node, or to a FloatValue or to a NumberNode. None
+	//         of these will contain Variables or Globs, and so they
+	//         can be directly compared. They either compare, or they
+	//         don't. Fail here, and bounce out.
+	//
+	// If Step 1) matches, and Step 2) suggests variables may be
+	// involved, then the variables have to be matched/reduced.
+	//
 	if (LINK_SIGNATURE_LINK == t)
 	{
-		// Type of LinkSig is encoded in the first atom.
+		// Step 1) Type of LinkSig is encoded in the first atom.
 		Handle ts = LinkSignatureLinkCast(termpat)->get_typespec();
 		if (not TypeNodeCast(ts)->is_kind(vgnd->get_type()))
 			return false;
 
+		// Step 2) Is it concrete?
 		ValuePtr patval = termpat->execute();
-		return (*patval == *vgnd);
+		if ((not vgnd->is_type(LINK_VALUE)) and
+		    (not vgnd->is_type(LINK)))
+			return (*patval == *vgnd);
 	}
 
 	// Else straight-up see if pattern and grounding types agree.
