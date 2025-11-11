@@ -25,6 +25,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 #include "LinkSignatureLink.h"
@@ -107,6 +108,35 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 			return as->add_atom(Handle(createNumberNode(std::move(numvec))));
 
 		return valueserver().create(_kind, std::move(numvec));
+	}
+
+	if (nameserver().isA(_kind, NODE))
+	{
+		if (1 != newset.size())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting Node or String Value of size one, got size %lu\n",
+				newset.size());
+
+		if (newset[0]->is_type(NODE))
+		{
+			std::string name(NodeCast(newset[0])->get_name());
+			return as->add_node(_kind, std::move(name));
+		}
+
+		if (newset[0]->is_type(STRING_VALUE))
+		{
+			if (0 == newset[0]->size())
+				throw RuntimeException(TRACE_INFO,
+					"Expecting non-empty StringValue\n");
+
+			std::string name(StringValueCast(newset[0])->value()[0]);
+			return as->add_node(_kind, std::move(name));
+		}
+
+		throw RuntimeException(TRACE_INFO,
+			"Expecting Node or StringValue, got %s\n",
+			newset[0]->to_string().c_str());
+
 	}
 
 	// Should support other kinds too.  XXX FIXME
