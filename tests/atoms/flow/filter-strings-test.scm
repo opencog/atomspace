@@ -31,11 +31,11 @@
 
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$filename")
-				(StringOf (Type 'StringValue) (Node "reg")))
+				(LinkSignature (Type 'StringValue) (Node "reg")))
 
 			(Edge
 				(Predicate "is-a file URL")
-				(StringOf (Type 'ItemNode) (Variable "$filename"))))
+				(LinkSignature (Type 'ItemNode) (Variable "$filename"))))
 
 		(ValueOf (Anchor "rock") (Predicate "key"))))
 
