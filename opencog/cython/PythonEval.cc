@@ -304,12 +304,8 @@ static bool try_to_load_modules(const char ** config_paths)
 
         if (S_ISDIR(finfo.st_mode))
         {
-#if PY_MAJOR_VERSION < 3
-            PyObject* pyModulePath = PyBytes_FromString(config_paths[i]);
-#else
             PyObject* pyModulePath = PyUnicode_DecodeUTF8(
                   config_paths[i], strlen(config_paths[i]), "strict");
-#endif
             PyList_Insert(pySysPath, pos_idx, pyModulePath);
             Py_DECREF(pyModulePath);
             pos_idx += 1;
@@ -412,10 +408,9 @@ void opencog::global_python_initialize()
 
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
+// Python 3.9 came out in October 2020
 #if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
-#else
-        // gstate = PyGILState_Ensure();
 #endif
 
         // Many python libraries (e.g. ROS) expect sys.argv to be set.
@@ -1161,11 +1156,7 @@ std::string PythonEval::build_python_error_message(
         errorStringStream << " in " << function_name;
 
     PyObject* pyErrorString = PyObject_Str(pyError);
-#if PY_MAJOR_VERSION == 2
-    char* pythonErrorString = PyBytes_AsString(pyErrorString);
-#else
     const char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
-#endif
     if (pythonErrorString) {
         errorStringStream << ": " << pythonErrorString << ".";
     } else {
@@ -1175,12 +1166,6 @@ std::string PythonEval::build_python_error_message(
     // Print the traceback, too, if it is provided.
     if (pyTraceback)
     {
-#if PY_MAJOR_VERSION == 2
-        PyObject* pyTBString = PyObject_Str(pyTraceback);
-        char* tb = PyBytes_AsString(pyTBString);
-        errorStringStream << "\nTraceback: " << tb;
-        Py_DECREF(pyTBString);
-#else
         errorStringStream << "\nTraceback (most recent call last):\n";
 
         PyTracebackObject* pyTracebackObject = (PyTracebackObject*)pyTraceback;
@@ -1190,6 +1175,7 @@ std::string PythonEval::build_python_error_message(
             int line_number = pyTracebackObject-> tb_lineno;
 
 // Python 3.8 and earlier do not have these line-number macros
+// Python 3.8 was released in October 2019
 #if PY_VERSION_HEX < 0x03090000
     #define PyFrame_GetCode(frame) ((frame)->f_code)
     #define PyFrame_GetLineNumber(frame) ((frame)->f_lineno)
@@ -1205,7 +1191,6 @@ std::string PythonEval::build_python_error_message(
 
             pyTracebackObject = pyTracebackObject -> tb_next;
         }
-#endif
     }
 
     // Cleanup the references. NOTE: The traceback can be NULL even
@@ -1274,9 +1259,6 @@ std::string PythonEval::execute_string(const char* command)
     if (pyResult)
     {
         PyObject* obrep = PyObject_Repr(pyResult);
-#if PY_MAJOR_VERSION < 3
-        retval = PyString_AsString(obrep);
-#else
         PyObject* pyStr = nullptr;
         if (not PyBytes_Check(obrep))
         {
@@ -1285,7 +1267,6 @@ std::string PythonEval::execute_string(const char* command)
             obrep = pyStr;
         }
         retval = PyBytes_AS_STRING(obrep);
-#endif
         Py_DECREF(obrep);
         Py_DECREF(pyResult);
     }
