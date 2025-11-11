@@ -115,8 +115,6 @@ class PythonEval : public GenericEval
 
         PyObject* _pySysPath;
 
-        std::map <std::string, PyObject*> _modules;
-
         std::string _result;
         std::string _capture_stdout;
         int _paren_count;

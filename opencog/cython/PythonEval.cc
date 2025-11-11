@@ -544,22 +544,15 @@ void PythonEval::import_module(const std::filesystem::path &file,
         logger().warn() << "Couldn't import '" << moduleName << "' module";
         return;
     }
-    // We need to increment the pyModule reference because
-    // PyModule_AddObject "steals" it and we're keeping a copy
-    // in our modules list.
-    Py_INCREF(pyModule);
 
     // Add the module name to the root module.
+    // PyModule_AddObject steals the reference returned by PyImport_ImportModuleLevel.
+    // The module remains accessible via sys.modules.
     PyModule_AddObject(_pyRootModule, moduleName.c_str(), pyModule);
-
-    // Add the module to our modules list. So don't decrement the
-    // Python reference in this function.
-    _modules[moduleName] = pyModule;
 }
 
 /**
-* Add all the .py files in the given directory as modules to __main__ and
-* keep the references in a dictionary (this->modules)
+* Add all the .py files in the given directory as modules to __main__
 */
 void PythonEval::add_module_directory(const std::filesystem::path &directory)
 {
@@ -765,7 +758,15 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
     if (0 < index)
     {
         std::string moduleName = moduleFunction.substr(0, index);
-        PyObject* pyModuleTmp = _modules[moduleName];
+
+        // Check Python's sys.modules directly (no need for separate cache)
+        PyObject* sys_modules = PyImport_GetModuleDict();
+        PyObject* pyModuleTmp = nullptr;
+
+        if (sys_modules)
+        {
+            pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
+        }
 
         // If not found, first check that it is not an object.
         // Then try loading it.
@@ -776,24 +777,11 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
         {
             add_modules_from_path(moduleName);
             add_modules_from_path(moduleName + ".py");
-            pyModuleTmp = _modules[moduleName];
-        }
 
-        // If still not found, check Python's sys.modules for modules
-        // that were imported via standard Python import statements
-        if (nullptr == pyModuleTmp)
-        {
-            PyObject* sys_modules = PyImport_GetModuleDict();
+            // Check sys.modules again after attempted import
             if (sys_modules)
             {
                 pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
-                if (pyModuleTmp)
-                {
-                    // Cache it in _modules for future lookups
-                    // PyDict_GetItemString returns borrowed reference, so increment it
-                    Py_INCREF(pyModuleTmp);
-                    _modules[moduleName] = pyModuleTmp;
-                }
             }
         }
 
