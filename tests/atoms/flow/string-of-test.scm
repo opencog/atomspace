@@ -57,7 +57,7 @@
 			(Edge (Predicate "foobar")
 				(List
 					(StringOf (Type 'Concept)
-						(ValueOf (Variable "$strv"))))))
+						(Variable "$strv")))))
 		(ValueOf (Anchor "anch") (Predicate "flokey"))))
 
 (define flow-string
