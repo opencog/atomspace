@@ -373,9 +373,6 @@ bool FilterLink::extract(const Handle& termpat,
 ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
                                  AtomSpace* scratch, bool silent) const
 {
-	// temp hack
-	Handle cterm(HandleCast(vterm));
-
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	ValueMap valmap;
