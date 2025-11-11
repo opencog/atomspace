@@ -182,52 +182,20 @@ PythonEval& PythonEval::instance()
 // ====================================================
 // Initialization of search paths for python modules.
 
-static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
-{
-    NULL
-};
-
-static const char* PROJECT_PYTHON_MODULE_PATHS[] =
-{
-    PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
-    NULL
-};
-
-// Weird hack to work-around nutty python behavior.  Python sucks.
-// I spent three effing 12 hour-days tracking this down. Cython sucks.
-// The python bug this is working around is this: python does not
-// know how to load modules unless there is an __init__.py in the
-// directory. However, once it finds this, then it stops looking,
-// and just assumes that everything is in that directory. Of course,
-// this is a bad assumption: python modules can be in a variety of
-// directories. In particular, they can be in the local build
-// directories.  If we put the local build directories in the search
-// path first, then the modules are found. But if we then install this
-// code into the system (i.e. into /usr or /usr/local) then python will
-// still look in these build directories, even though they are bogus
-// when the system version is installed. This, of course, results in the
-// build directories "hiding" the install directories, causing only
-// some, but not all of the modules to be found. This ends up being
-// terribly confusing, because you get "ImportError: No module named
-// blah" errors, even though you can be staring the module right in the
-// face, and there it is!
-//
-// So the ugly work-around implemented here is this: If code is
-// executing in the project source or project build directories, then
-// add the project source and build directories to the search path, and
-// place them first, so that they are searched before the system
-// directories. Otherwise, do not search the build directories.
-// This is just plain fucked up, but I cannot find a better solution.
+/**
+ * Get Python module search paths from the PYTHONPATH environment variable.
+ * This replaces the old hardcoded PROJECT_PYTHON_MODULE_PATHS approach.
+ *
+ * CMake test infrastructure sets PYTHONPATH appropriately for tests,
+ * and installed versions will use the system PYTHONPATH.
+ */
 static const char** get_module_paths()
 {
     static const char** paths = nullptr;
 
     if (paths) return paths;
 
-    unsigned nproj = sizeof(PROJECT_PYTHON_MODULE_PATHS) / sizeof(char**);
-    unsigned ndefp = sizeof(DEFAULT_PYTHON_MODULE_PATHS) / sizeof(char**);
-
+    // Count paths in PYTHONPATH
     unsigned nenv = 0;
     char* pypath = secure_getenv("PYTHONPATH");
     if (pypath) {
@@ -235,33 +203,11 @@ static const char** get_module_paths()
         while (p) { p = strchr(p+1, ':'); nenv++; }
     }
 
-    paths = (const char**) malloc(sizeof(char *) * (nproj + ndefp + nenv + 1));
+    // Allocate array for paths (+1 for NULL terminator)
+    paths = (const char**) malloc(sizeof(char *) * (nenv + 1));
 
-    // Get current working directory.
-    char* cwd = getcwd(NULL, 0);
-    bool in_project = false;
-    if (0 == strncmp(PROJECT_SOURCE_DIR, cwd, strlen(PROJECT_SOURCE_DIR)) or
-        0 == strncmp(PROJECT_BINARY_DIR, cwd, strlen(PROJECT_BINARY_DIR)))
-        in_project = true;
-    free(cwd);
-
-    // If the current working directory is the projet build or source
-    // directory, then search those first.
+    // Parse PYTHONPATH and populate array
     int ip = 0;
-    if (in_project) {
-        for (unsigned i=0; i < nproj-1; i++) {
-            paths[ip] = PROJECT_PYTHON_MODULE_PATHS[i];
-            ip++;
-        }
-    }
-
-    // Search the usual locations next.
-    for (unsigned i=0; i < ndefp-1; i++) {
-        paths[ip] = DEFAULT_PYTHON_MODULE_PATHS[i];
-        ip++;
-    }
-
-    // Finally, use the environment variable.
     if (pypath) {
         char* p = strdup(pypath);
         char* q = strchr(p, ':');
