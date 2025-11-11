@@ -379,9 +379,6 @@ So lets recap the issues:
  * Having non-anonymous ObjectNodes that do what Values do might
    simplify the authoring of pipelines.
 
- * We still don't have a good answer for SortedStream vis-a-vis
-   CollectionOf.
-
  * There's some unresolved tension with the overlapping duties of
    CollectionOf and FilterLink. Specifically, of the CollectionOf
    type specification got fancy, got lambda-ish, it would start
