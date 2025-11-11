@@ -367,7 +367,8 @@ Handle Instantiator::walk_tree(const Handle& expr,
 #endif
 
 	// Fire any other function links, not handled above.
-	if (nameserver().isA(t, FUNCTION_LINK))
+	if (nameserver().isA(t, FUNCTION_LINK) or
+	    nameserver().isA(t, EXECUTABLE_LINK))
 	{
 		Handle flh = beta_reduce(expr, ist._varmap);
 
