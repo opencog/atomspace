@@ -70,6 +70,13 @@ IF (HAVE_NOSETESTS)
 	SET_PROPERTY(TEST CythonAtomSpace
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
+	ADD_TEST(CythonValues ${NOSETESTS_EXECUTABLE} -vs
+		${CMAKE_SOURCE_DIR}/tests/cython/values/)
+	SET_PROPERTY(TEST CythonValues
+		PROPERTY DEPENDS atomspace_cython)
+	SET_PROPERTY(TEST CythonValues
+		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
+
 	# All of the subsequent cython unit tests  depend on having
 	# guile working. So test guile first, and then the others.
 	ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
