@@ -336,6 +336,17 @@ static std::string format_exception_manually(
  * 1. Try traceback.format_exception() for richest output
  * 2. Fall back to enhanced manual formatting
  * 3. Ultimate fallback: minimal error message
+ *
+ * This error is delivered as a string to the user of the python
+ * evaluator. This user will typically be accessing the evaluator
+ * remotely, via the cogserver, and will not have any debugging
+ * console, nor even a "normal" python REPL shell. Thus, we try
+ * to provide as much debug info as reasonable, given they have
+ * no other tools available.
+ *
+ * FWIW, the primary goal here is to make sure this code never crashes,
+ * as it would bring down the cogserver. So that's rule one: don't
+ * crash, even if the python error is insane.
  */
 std::string PythonEval::build_python_error_message(
                                      const std::string& function_name)
