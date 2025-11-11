@@ -110,18 +110,17 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 		return valueserver().create(_kind, std::move(numvec));
 	}
 
-	if (nameserver().isA(_kind, NODE))
+	if (nameserver().isA(_kind, NODE) or
+	    nameserver().isA(_kind, STRING_VALUE))
 	{
 		if (1 != newset.size())
 			throw RuntimeException(TRACE_INFO,
 				"Expecting Node or String Value of size one, got size %lu\n",
 				newset.size());
 
+		std::string name;
 		if (newset[0]->is_type(NODE))
-		{
-			std::string name(NodeCast(newset[0])->get_name());
-			return as->add_node(_kind, std::move(name));
-		}
+			name = NodeCast(newset[0])->get_name();
 
 		if (newset[0]->is_type(STRING_VALUE))
 		{
@@ -129,9 +128,13 @@ ValuePtr LinkSignatureLink::construct(AtomSpace* as, const ValueSeq&& newset) co
 				throw RuntimeException(TRACE_INFO,
 					"Expecting non-empty StringValue\n");
 
-			std::string name(StringValueCast(newset[0])->value()[0]);
-			return as->add_node(_kind, std::move(name));
+			name = StringValueCast(newset[0])->value()[0];
 		}
+
+		if (nameserver().isA(_kind, NODE))
+			return as->add_node(_kind, std::move(name));
+
+		return valueserver().create(_kind, std::move(name));
 
 		throw RuntimeException(TRACE_INFO,
 			"Expecting Node or StringValue, got %s\n",
