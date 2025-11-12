@@ -92,34 +92,6 @@ static bool try_to_load_modules()
         free(p);
     }
 
-    // NOTE: Can't use get_path_as_string() yet, because it is defined
-    // in a Cython api which we can't import, unless the sys.path is
-    // correct. So we'll write it out before the imports below to aid
-    // in debugging.
-    if (logger().is_debug_enabled())
-    {
-        logger().debug("Python 'sys.path' is:");
-        Py_ssize_t pathSize = PyList_Size(pySysPath);
-        for (int i = 0; i < pathSize; i++)
-        {
-            PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
-            PyObject* pyStr = nullptr;
-            if (not PyBytes_Check(pySysPathLine)) {
-                pyStr = PyUnicode_AsEncodedString(pySysPathLine,
-                                               "UTF-8", "strict");
-                pySysPathLine = pyStr;
-            }
-            const char* sysPathCString = PyBytes_AsString(pySysPathLine);
-            logger().debug("    %2d > %s", i, sysPathCString);
-            // PyList_GetItem returns borrowed reference,
-            // so don't do this:
-            // Py_DECREF(pySysPathLine);
-            if (pyStr) Py_DECREF(pyStr);
-        }
-    }
-    // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
-    // Py_DECREF(pySysPath);
-
     // Initialize the auto-generated Cython api. Do this AFTER the python
     // sys.path is updated so the imports can find the cython modules.
     import_opencog__atomspace();
@@ -150,19 +122,7 @@ void opencog::global_python_initialize()
 {
     // Don't initialize twice
     if (already_initialized) return;
-
     already_initialized = true;
-
-    // Calling "import rospy" exhibits bug
-    // https://github.com/opencog/atomspace/issues/669
-    // Error message:
-    //    Python error :
-    //    /usr/lib/python2.7/lib-dynload/datetime.x86_64-linux-gnu.so:
-    //    undefined symbol: PyExc_SystemError
-    // Googling for the above error message reveals that the "feature"
-    // is as old as the wind. The solution of using dlopen() is given
-    // here:
-    // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
 
     _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
@@ -188,7 +148,8 @@ void opencog::global_python_initialize()
 
         // Initialize Python (InitThreads grabs GIL implicitly)
         Py_InitializeEx(NO_SIGNAL_HANDLERS);
-// Python 3.9 came out in October 2020
+
+// Python 3.9 came out in October 2020. Remove this in 2026/2027
 #if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
 #endif
