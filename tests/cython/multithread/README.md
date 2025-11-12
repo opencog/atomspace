@@ -17,12 +17,12 @@ The tests are organized into 7 phases:
 - **Test 2.3**: Shared AtomSpace (Read-Write Mix)
 - **Test 2.4**: AtomSpace Parent-Child Relationships
 
-### Phase 3: Error Handling Tests (DISABLED - see note below)
+### Phase 3: Error Handling Tests (`test_error_isolation.py`)
 - **Test 3.1**: Exception Isolation
 - **Test 3.2**: Module Import Errors
 - **Test 3.3**: Invalid Function Calls
 
-**NOTE**: Phase 3 tests are disabled (renamed to `DISABLED_test_error_isolation.py`) because exception handling through the C++/Python boundary with singleton + global mutex is extremely slow (55+ seconds for just 6 threads). These tests will be re-enabled after singleton removal when true concurrent exception handling is possible.
+**NOTE**: Phase 3 tests are now **ENABLED** after thread-local PythonEval implementation. Exception handling is now fast and concurrent with thread-local instances (tests run in ~1 second vs 55+ seconds with the old singleton).
 
 ### Phase 4: Resource Management Tests (`test_resource_management.py`)
 - **Test 4.1**: Memory Leak Detection (Long Running)
