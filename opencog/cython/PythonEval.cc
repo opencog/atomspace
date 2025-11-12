@@ -35,9 +35,6 @@
 #include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
 
-// This is an header in the build dreictory, auto-gened by cython
-#include "opencog/atomspace_api.h"
-
 #include <chrono>    // for std::chrono_literals
 #include <utility>   // for std::forward
 

@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "PythonEval.h"
 
-// This is an header in the build dreictory, auto-gened by cython
+// This is an header in the build directory, auto-gened by cython
 #include "opencog/atomspace_api.h"
 
 #include <dlfcn.h>
