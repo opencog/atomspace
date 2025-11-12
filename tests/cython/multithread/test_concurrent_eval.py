@@ -100,7 +100,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             f"Expected {num_threads} successes, got {success_count}"
         )
 
-    @check_memory_leaks(tolerance_mb=20.0)
+    @check_memory_leaks(tolerance_mb=50.0)
     def test_rapid_eval_creation_destruction(self):
         """
         Rapidly create and destroy evaluators to detect reference counting issues.

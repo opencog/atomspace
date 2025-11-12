@@ -35,6 +35,7 @@
 #include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
 
+#include <algorithm> // for std::count
 #include <chrono>    // for std::chrono_literals
 #include <utility>   // for std::forward
 
