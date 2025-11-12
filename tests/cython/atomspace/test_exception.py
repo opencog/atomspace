@@ -51,7 +51,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print(f"The exception message is {str(e)}")
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("not found in" in str(e))
 
     # Call function that returns None
     def test_pass_evaluation(self):
@@ -139,7 +139,7 @@ class TestExceptions(unittest.TestCase):
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
             print(f"The exception message is {str(e)}")
-            self.assertTrue("not found in module" in str(e))
+            self.assertTrue("not found in" in str(e))
 
     # Call function that returns None
     def test_pass_execution(self):

@@ -28,6 +28,7 @@ FILE(COPY opencog/__init__.py DESTINATION opencog)
 ADD_LIBRARY(PythonEval
 	PythonError.cc
 	PythonEval.cc
+	PythonLoader.cc
 )
 
 ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython type_constructors)

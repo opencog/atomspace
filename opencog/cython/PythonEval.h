@@ -60,27 +60,15 @@ class PythonEval : public GenericEval
     private:
         void initialize_python_objects_and_imports(void);
 
-        // Module utility functions
-        void import_module(const std::filesystem::path &file,
-                           PyObject* pyFromList);
-        void add_module_directory(const std::filesystem::path &directory);
-        void add_module_file(const std::filesystem::path &file);
-        void add_modules_from_path(std::string path);
-        void add_modules_from_abspath(std::string path);
-
         // Python utility functions
-        void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpacePtr);
-        void print_dictionary(PyObject*);
-        PyObject* find_object(PyObject* pyModule,
-                              const std::string& objectName);
         PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
 
         // Call functions; execute scripts.
         PyObject* call_user_function(const std::string& func,
-                                     Handle varargs);
+                                     const HandleSeq& args);
         std::string build_python_error_message(const std::string&);
 
         std::string execute_string(const char*);
@@ -109,11 +97,7 @@ class PythonEval : public GenericEval
         std::mutex _eval_mutex;
         std::condition_variable _wait_done;
 
-        PyObject* _pyGlobal;
-        PyObject* _pyLocal;
         PyObject* _pyRootModule;
-
-        PyObject* _pySysPath;
 
         std::string _result;
         std::string _capture_stdout;
