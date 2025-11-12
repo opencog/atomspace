@@ -60,14 +60,6 @@ class PythonEval : public GenericEval
     private:
         void initialize_python_objects_and_imports(void);
 
-        // Module utility functions
-        void import_module(const std::filesystem::path &file,
-                           PyObject* pyFromList);
-        void add_module_directory(const std::filesystem::path &directory);
-        void add_module_file(const std::filesystem::path &file);
-        void add_modules_from_path(std::string path);
-        void add_modules_from_abspath(std::string path);
-
         // Python utility functions
         void add_to_sys_path(std::string path);
         PyObject * atomspace_py_object(AtomSpacePtr);

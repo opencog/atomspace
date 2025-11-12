@@ -54,82 +54,40 @@ public:
 };
 
 // ====================================================
-// Initialization of search paths for python modules.
+// Python initialization
 
 /**
- * Get Python module search paths from the PYTHONPATH environment variable.
- * This replaces the old hardcoded PROJECT_PYTHON_MODULE_PATHS approach.
- *
- * CMake test infrastructure sets PYTHONPATH appropriately for tests,
- * and installed versions will use the system PYTHONPATH.
+ * Setup Python sys.path from PYTHONPATH and load Cython API.
+ * Python's import system will handle module loading.
+ * Return true if the Cython API loaded successfully.
  */
-static const char** get_module_paths()
-{
-    static const char** paths = nullptr;
-
-    if (paths) return paths;
-
-    // Count paths in PYTHONPATH
-    unsigned nenv = 0;
-    char* pypath = secure_getenv("PYTHONPATH");
-    if (pypath) {
-        char *p = pypath;
-        while (p) { p = strchr(p+1, ':'); nenv++; }
-    }
-
-    // Allocate array for paths (+1 for NULL terminator)
-    paths = (const char**) malloc(sizeof(char *) * (nenv + 1));
-
-    // Parse PYTHONPATH and populate array
-    int ip = 0;
-    if (pypath) {
-        char* p = strdup(pypath);
-        char* q = strchr(p, ':');
-        while (true) {
-           if (q) *q = '\0';
-           paths[ip] = p;
-           ip++;
-           if (nullptr == q) break;
-           p = q+1;
-           q = strchr(p, ':');
-       }
-    }
-    paths[ip] = NULL;
-
-    return paths;
-}
-
-
-/**
- * Ongoing python nuttiness. Because we never know in advance whether
- * python will be able to find a module or not, until it actually does,
- * we have to proceed by trial and error, trying different path
- * combinations, until it finally works.  The sequence of paths
- * that leads to success will then be declared the official system
- * path, henceforth. Woe unto those try to defy the will of the python
- * gods.
- *
- * Return true if the load worked, else return false.
- */
-static bool try_to_load_modules(const char ** config_paths)
+static bool try_to_load_modules()
 {
     PyObject* pySysPath = PySys_GetObject((char*)"path");
 
-    Py_ssize_t pos_idx = 0;
-    // Add default OpenCog module directories to the Python interpreter's path.
-    for (int i = 0; config_paths[i] != NULL; ++i)
-    {
-        struct stat finfo = {};
-        stat(config_paths[i], &finfo);
+    // Add PYTHONPATH entries to sys.path
+    char* pypath = secure_getenv("PYTHONPATH");
+    if (pypath) {
+        char* p = strdup(pypath);
+        char* token = p;
+        char* next = strchr(token, ':');
 
-        if (S_ISDIR(finfo.st_mode))
-        {
-            PyObject* pyModulePath = PyUnicode_DecodeUTF8(
-                  config_paths[i], strlen(config_paths[i]), "strict");
-            PyList_Insert(pySysPath, pos_idx, pyModulePath);
-            Py_DECREF(pyModulePath);
-            pos_idx += 1;
+        while (token) {
+            if (next) *next = '\0';
+
+            // Check if it's a valid directory before adding
+            struct stat finfo = {};
+            if (stat(token, &finfo) == 0 && S_ISDIR(finfo.st_mode)) {
+                PyObject* pyModulePath = PyUnicode_DecodeUTF8(
+                    token, strlen(token), "strict");
+                PyList_Insert(pySysPath, 0, pyModulePath);
+                Py_DECREF(pyModulePath);
+            }
+
+            token = next ? next + 1 : nullptr;
+            if (token) next = strchr(token, ':');
         }
+        free(p);
     }
 
     // NOTE: Can't use get_path_as_string() yet, because it is defined
@@ -240,12 +198,8 @@ void opencog::global_python_initialize()
     // Get starting "sys.path".
     PyRun_SimpleString("import sys\n");
 
-    // Add default OpenCog module directories to the Python interprator's path.
-    try_to_load_modules(get_module_paths());
-
-    // Hmm. If the above returned false, we should try a different
-    // permutation of the config paths.  I'm confused, though, different
-    // users are reporting conflicting symptoms.  What to do?
+    // Setup sys.path and load Cython API
+    try_to_load_modules();
 
     // Release the GIL, otherwise the Python shell hangs on startup.
     if (initialized_outside_opencog)
@@ -382,224 +336,7 @@ void PythonEval::add_to_sys_path(std::string path)
 }
 
 // ====================================================
-// Finding and loading python modules.
-
-const int ABSOLUTE_IMPORTS_ONLY = 0;
-
-void PythonEval::import_module(const std::filesystem::path &file,
-                               PyObject* pyFromList)
-{
-    // The pyFromList parameter corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, this corresponds to an import of the
-    // entire module as is done in the simple import statement:
-    //
-    // import <module>
-
-    // Get the module name from the Python file name by removing the ".py"
-    std::string fileName = file.filename().c_str();
-    std::string moduleName = fileName.substr(0, fileName.length()-3);
-
-    logger().info("    importing Python module: " + moduleName);
-
-    // Import the entire module into the current Python environment.
-    PyObject* pyModule = PyImport_ImportModuleLevel((char*) moduleName.c_str(),
-            _pyGlobal, _pyLocal, pyFromList,
-            ABSOLUTE_IMPORTS_ONLY);
-
-    if (nullptr == pyModule)
-    {
-        if (PyErr_Occurred()) PyErr_Print();
-        logger().warn() << "Couldn't import '" << moduleName << "' module";
-        return;
-    }
-
-    // Add the module name to the root module.
-    // PyModule_AddObject steals the reference returned by PyImport_ImportModuleLevel.
-    // The module remains accessible via sys.modules.
-    PyModule_AddObject(_pyRootModule, moduleName.c_str(), pyModule);
-}
-
-/**
-* Add all the .py files in the given directory as modules to __main__
-*/
-void PythonEval::add_module_directory(const std::filesystem::path &directory)
-{
-    typedef std::vector<std::filesystem::path> PathList;
-    PathList files;
-    PathList pyFiles;
-
-    // Loop over the files in the directory looking for Python files.
-    copy(std::filesystem::directory_iterator(directory),
-         std::filesystem::directory_iterator(), back_inserter(files));
-
-    for (auto filepath: files)
-    {
-        if (filepath.extension() == std::filesystem::path(".py"))
-            pyFiles.push_back(filepath);
-    }
-
-    // Add the directory we are adding to Python's sys.path
-    this->add_to_sys_path(directory.c_str());
-
-    // The pyFromList variable corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, as below, this corresponds to an import
-    // of the entire module as is done in the simple import statement:
-    //
-    // import <module>
-    //
-    PyObject* pyFromList = PyList_New(0);
-
-    // Import each of the ".py" files as a Python module.
-    for (auto filepath: pyFiles)
-        import_module(filepath, pyFromList);
-
-    // Cleanup the reference count for the from list.
-    Py_DECREF(pyFromList);
-}
-
-/**
-* Add the .py file in the given path as a module to __main__ and add the
-* reference to the dictionary (this->modules)
-*/
-void PythonEval::add_module_file(const std::filesystem::path &file)
-{
-    // Add this file's parent path to sys.path so Python imports
-    // can find it.
-    this->add_to_sys_path(file.parent_path().c_str());
-
-    // The pyFromList variable corresponds to what would appear in
-    // an import statement after the import:
-    //
-    // from <module> import <from list>
-    //
-    // When this list is empty, as below, this corresponds to an import
-    // of the entire module as is done in the simple import statement:
-    //
-    // import <module>
-
-    // Import this file as a module.
-    PyObject* pyFromList = PyList_New(0);
-    this->import_module(file, pyFromList);
-    Py_DECREF(pyFromList);
-}
-
-/**
- * Get a path and determine if it is a file or directory, then call the
- * corresponding function specific to directories and files.
- */
-void PythonEval::add_modules_from_path(std::string pathString)
-{
-    std::vector<std::string> dirs;
-    std::vector<std::string> files;
-    bool found = false;
-
-    auto loadmod_prep = [&dirs, &files, &found](const std::string& abspath,
-            const char** config_paths)
-    {
-        // If the resulting path is a directory or a regular file,
-        // then push to loading list.
-        struct stat finfo;
-        int stat_ret = stat(abspath.c_str(), &finfo);
-
-        if (stat_ret != 0)
-            return;
-
-        if (S_ISDIR(finfo.st_mode)) {
-            found = true;
-            dirs.push_back(abspath);
-            logger().info() << "Found python module in directory \'"
-                << abspath << "\'";
-        }
-
-        else if (S_ISREG(finfo.st_mode)) {
-            found = true;
-            files.push_back(abspath);
-            logger().info() << "Found python module in file \'"
-                << abspath << "\'";
-        }
-    };
-
-    const char** config_paths = get_module_paths();
-    std::vector<std::string> paths;
-    tokenize(pathString, std::back_inserter(paths), ",");
-    for (const auto& pathString : paths)
-    {
-        if ('/' == pathString[0]) {
-            loadmod_prep(pathString, NULL);
-            continue;
-        }
-
-        else if ('.' == pathString[0]) {
-            std::string base = getcwd(NULL, 0);
-            base += '/';
-            base += pathString;
-            auto pypath = std::filesystem::canonical(base);
-            loadmod_prep(pypath.string(), NULL);
-            continue;
-
-        } else {
-            for (int i = 0; config_paths[i] != NULL; ++i) {
-                std::string abspath = config_paths[i];
-                abspath += "/";
-                abspath += pathString;
-                loadmod_prep(abspath, config_paths);
-            }
-        }
-    }
-
-    if (not found)
-    {
-        Logger::Level btl = logger().get_backtrace_level();
-        logger().set_backtrace_level(Logger::Level::NONE);
-        logger().warn() << "Failed to load python module \'"
-            << pathString << "\', searched directories:";
-        for (int i = 0; config_paths[i] != NULL; ++i) {
-            logger().warn() << "Directory: " << config_paths[i];
-        }
-        logger().set_backtrace_level(btl);
-    }
-
-    // First, load directories, and then load files, to properly
-    // handle import dependencies.
-    dirs.insert(dirs.end(), files.begin(), files.end());
-    for (const auto& abspath : dirs)
-        add_modules_from_abspath(abspath);
-}
-
-void PythonEval::add_modules_from_abspath(std::string pathString)
-{
-    logger().info("Adding Python module (or directory): " + pathString);
-
-    // Grab the GIL
-    GILGuard gil;
-
-    struct stat finfo;
-    int stat_ret = stat(pathString.c_str(), &finfo);
-
-    if (stat_ret != 0)
-    {
-        logger().warn() << "Python module path \'" << pathString
-                        << "\' can't be found";
-    }
-    else
-    {
-        if (S_ISDIR(finfo.st_mode))
-            add_module_directory(pathString);
-        else if (S_ISREG(finfo.st_mode))
-            add_module_file(pathString);
-        else
-            logger().warn() << "Python module path \'" << pathString
-                            << "\' can't be found";
-    }
-}
+// Finding python functions
 
 /**
  * Find the Python object by its name in the given module.
@@ -636,20 +373,23 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
             pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
         }
 
-        // If not found, first check that it is not an object.
-        // Then try loading it.
-        // We have to guess, if its a single file, or an entire
-        // directory with an __init__.py file in it ...
+        // If not found, first check that it is not an object in __main__.
+        // Then try importing it using Python's import system.
         if (nullptr == pyModuleTmp and
             nullptr == find_object(pyModule, moduleName))
         {
-            add_modules_from_path(moduleName);
-            add_modules_from_path(moduleName + ".py");
+            // Try importing the module using Python's standard import
+            PyObject* imported = PyImport_ImportModule(moduleName.c_str());
+            if (imported) {
+                Py_DECREF(imported);  // Module is now in sys.modules
 
-            // Check sys.modules again after attempted import
-            if (sys_modules)
-            {
-                pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
+                // Check sys.modules again after import
+                if (sys_modules) {
+                    pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
+                }
+            } else {
+                // Clear the import error - we'll check if it's an object instead
+                PyErr_Clear();
             }
         }
 
