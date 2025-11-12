@@ -42,9 +42,9 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_concurrent_eval_creation_20_threads(self):
+    def test_concurrent_eval_creation_50_threads(self):
         """
-        20 threads simultaneously create evaluator instances and execute.
+        50 threads simultaneously create evaluator instances and execute.
 
         Each thread:
         1. Creates a new AtomSpace (implicitly creates PythonEval)
@@ -53,7 +53,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
         Success: All threads complete without crashes/hangs
         """
-        num_threads = 20
+        num_threads = 50
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -105,11 +105,11 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
         """
         Rapidly create and destroy evaluators to detect reference counting issues.
 
-        10 threads, each creating/destroying evaluator 10 times.
+        10 threads, each creating/destroying evaluator 50 times.
         Tests for memory leaks and double-free issues.
         """
         num_threads = 10
-        iterations_per_thread = 10
+        iterations_per_thread = 50
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -172,13 +172,13 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_20_threads_same_function(self):
+    def test_30_threads_same_function(self):
         """
-        20 threads call the same function simultaneously.
+        30 threads call the same function simultaneously.
 
         Tests for race conditions in function lookup and execution.
         """
-        num_threads = 20
+        num_threads = 30
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -222,11 +222,11 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
 
     def test_concurrent_with_arguments(self):
         """
-        20 threads call same function with different arguments.
+        30 threads call same function with different arguments.
 
         Verifies argument passing is thread-safe.
         """
-        num_threads = 20
+        num_threads = 30
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -290,13 +290,13 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_20_threads_different_functions(self):
+    def test_30_threads_different_functions(self):
         """
-        20 threads, each calling a different function.
+        30 threads, each calling a different function.
 
         Verifies function dispatch is thread-safe and correct.
         """
-        num_threads = 20
+        num_threads = 30
         validator = ThreadSafetyValidator()
 
         # Define function mapping
@@ -364,7 +364,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
         - Functions with 1 arg
         - Functions with 2 args
         """
-        num_threads = 15
+        num_threads = 30
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
