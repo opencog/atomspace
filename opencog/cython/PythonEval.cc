@@ -194,33 +194,10 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyUserFunc);
     Py_DECREF(pyArguments);
 
-    // Check for errors.
+    // Check for errors and throw with proper exception type preserved
     if (PyErr_Occurred())
-    {
-        // Extract Python exception type name before building error message
-        PyObject *pyErrorType, *pyError, *pyTraceback;
-        PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
-        PyErr_NormalizeException(&pyErrorType, &pyError, &pyTraceback);
+        throw_python_exception(moduleFunction);
 
-        std::string python_exc_type = "RuntimeError";  // default fallback
-        if (pyErrorType && PyType_Check(pyErrorType)) {
-            PyObject* type_name = PyObject_GetAttrString(pyErrorType, "__name__");
-            if (type_name && PyUnicode_Check(type_name)) {
-                python_exc_type = PyUnicode_AsUTF8(type_name);
-                Py_DECREF(type_name);
-            }
-        }
-
-        // Restore error for build_python_error_message to use
-        PyErr_Restore(pyErrorType, pyError, pyTraceback);
-
-        // Construct the error message
-        std::string errorString = build_python_error_message(moduleFunction);
-        PyErr_Clear();
-
-        // Throw PythonException with the original exception type
-        throw PythonException(python_exc_type, TRACE_INFO, "%s", errorString.c_str());
-    }
     return pyReturnValue;
 }
 
