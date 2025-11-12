@@ -31,6 +31,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PythonEval.h"
+#include "PyGILGuard.h"
 
 // This is an header in the build directory, auto-gened by cython
 #include "opencog/atomspace_api.h"
@@ -40,15 +41,6 @@
 using namespace opencog;
 
 const int NO_SIGNAL_HANDLERS = 0;
-
-class GILGuard {
-    PyGILState_STATE gstate;
-public:
-    GILGuard() : gstate(PyGILState_Ensure()) {}
-    ~GILGuard() { PyGILState_Release(gstate); }
-    GILGuard(const GILGuard&) = delete;
-    GILGuard& operator=(const GILGuard&) = delete;
-};
 
 // ============================================================
 // Python system initialization

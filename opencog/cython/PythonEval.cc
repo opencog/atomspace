@@ -34,6 +34,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
+#include "PyGILGuard.h"
 
 #include <algorithm> // for std::count
 #include <chrono>    // for std::chrono_literals
@@ -62,7 +63,6 @@ class scope_exit
 };
 
 #define SCOPE_GUARD0 scope_exit scope_guard_void([](void)
-#define SCOPE_GUARD(X) scope_exit scope_guard([X](void)
 #define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&](void)
 #define SCOPE_GUARD_END )
 
@@ -229,12 +229,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
             "Python function '%s' did not return Atomese!",
             func.c_str());
 
-    // Grab the GIL.
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
-    SCOPE_GUARD(&gstate) {
-        PyGILState_Release(gstate);
-    } SCOPE_GUARD_END;
+    GILGuard gil;
 
     // Check if the return value is a Python boolean (True or False)
     // and convert to BoolValue
@@ -292,27 +287,14 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
 void PythonEval::apply_as(const std::string& moduleFunction,
                           AtomSpace* as_argument)
 {
-    // Thread-local instance, no mutex needed.
-
-    // Grab the GIL.
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
-    // SCOPE_GUARD is a declaration for a scope-exit handler.
-    // It will call PyGILState_Release() when this function returns
-    // (e.g. due to a throw).  The below is not a call; it's just a
-    // declaration. Anyway, once the GIL is released, no more python
-    // API calls are allowed.
-    SCOPE_GUARD(&gstate) {
-        PyGILState_Release(gstate);
-    } SCOPE_GUARD_END;
+    GILGuard gil;
 
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = this->atomspace_py_object(AtomSpacePtr(as_argument));
+    PyObject* pyAtomSpace = atomspace_py_object(AtomSpacePtr(as_argument));
 
     PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
-    // Py_DECREF(pyAtomSpace);
 
     // Execute the user function.
     do_call_user_function(moduleFunction, pyArguments);
@@ -376,28 +358,9 @@ std::string PythonEval::execute_string(const char* command)
 /// Exactly the same as execute_string, but the GIL lock is taken.
 std::string PythonEval::execute_script(const std::string& script)
 {
-    // Thread-local instance, no mutex needed.
-
-    // Grab the GIL
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
-    // SCOPE_GUARD is a declaration for a scope-exit handler.
-    // It will call PyGILState_Release() when this function returns
-    // (e.g. due to a throw).  The below is not a call; it's just a
-    // declaration. Anyway, once the GIL is released, no more python
-    // API calls are allowed.
-    SCOPE_GUARD(&gstate) {
-        PyGILState_Release(gstate);
-    } SCOPE_GUARD_END;
-
+    GILGuard gil;
     check_for_error();
-
-    // Execute the script. NOTE: This call replaces PyRun_SimpleString
-    // which was masking errors because it calls PyErr_Clear() so the
-    // call to PyErr_Occurred below was returning false even when there
-    // was an error.
     std::string rc = execute_string(script.c_str());
-
     check_for_error();
     return rc;
 }

@@ -48,8 +48,6 @@
 
 namespace opencog {
 
-class AtomSpace;
-
 /**
  * Singleton class used to initialize python interpreter in the main thread.
  * It also provides some handy functions, such as getPyAtomspace. These helper
