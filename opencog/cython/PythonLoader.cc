@@ -28,7 +28,6 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include "PythonEval.h"
@@ -50,34 +49,6 @@ public:
     GILGuard(const GILGuard&) = delete;
     GILGuard& operator=(const GILGuard&) = delete;
 };
-
-// ====================================================
-// Python initialization
-
-/**
- * Load Cython API. Python has already setup sys.path from PYTHONPATH
- * during Py_Initialize(), so we just need to import the module.
- * Return true if the Cython API loaded successfully.
- */
-static bool try_to_load_modules()
-{
-    // Initialize the auto-generated Cython api.
-    import_opencog__atomspace();
-
-    // The import_opencog__atomspace() call above sets the
-    // py_atomspace() function pointer if the cython module load
-    // succeeded. But the function pointer will be NULL if the
-    // opencog.atomspace cython module failed to load. Avert
-    // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a hard-to-debug error message.
-    if (nullptr == py_atomspace) {
-        PyErr_Print();
-        logger().warn("PythonEval::%s Failed to load the "
-                       "opencog.atomspace module", __FUNCTION__);
-    }
-
-    return (NULL != py_atomspace);
-}
 
 // ============================================================
 // Python system initialization
@@ -129,8 +100,20 @@ void opencog::global_python_initialize()
     // Get starting "sys.path".
     PyRun_SimpleString("import sys\n");
 
-    // Setup sys.path and load Cython API
-    try_to_load_modules();
+    // Initialize the auto-generated Cython api.
+    import_opencog__atomspace();
+
+    // The import_opencog__atomspace() call above sets the
+    // py_atomspace() function pointer if the cython module load
+    // succeeded. But the function pointer will be NULL if the
+    // opencog.atomspace cython module failed to load. Avert
+    // a hard-to-debug crash on null-pointer-deref, and replace
+    // it by a hard-to-debug error message.
+    if (nullptr == py_atomspace) {
+        PyErr_Print();
+        logger().warn("PythonEval::%s Failed to load the "
+                       "opencog.atomspace module", __FUNCTION__);
+    }
 
     // Release the GIL, otherwise the Python shell hangs on startup.
     if (initialized_outside_opencog)
