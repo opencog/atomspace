@@ -102,4 +102,14 @@ IF (HAVE_NOSETESTS)
 	SET_PROPERTY(TEST CythonBindlink
 		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/querylink")
 
+	# Multi-threading tests for Python bindings
+	ADD_TEST(CythonMultiThread ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/multithread/)
+	SET_PROPERTY(TEST CythonMultiThread
+		PROPERTY DEPENDS atomspace_cython PythonEval)
+	SET_PROPERTY(TEST CythonMultiThread
+		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
+	SET_PROPERTY(TEST CythonMultiThread
+		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/multithread")
+
 ENDIF (HAVE_NOSETESTS)
