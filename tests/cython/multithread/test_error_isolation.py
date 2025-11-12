@@ -139,7 +139,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
         - ValueError
         - ZeroDivisionError
 
-        Success: All exceptions properly caught and isolated
+        Success: All exceptions properly caught and isolated with correct types
         """
         num_threads = 20
         validator = ThreadSafetyValidator()
