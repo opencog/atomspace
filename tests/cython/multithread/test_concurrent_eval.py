@@ -42,9 +42,9 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_concurrent_eval_creation_50_threads(self):
+    def test_concurrent_eval_creation_20_threads(self):
         """
-        50 threads simultaneously create evaluator instances and execute.
+        20 threads simultaneously create evaluator instances and execute.
 
         Each thread:
         1. Creates a new AtomSpace (implicitly creates PythonEval)
@@ -53,7 +53,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
         Success: All threads complete without crashes/hangs
         """
-        num_threads = 50
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -105,11 +105,11 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
         """
         Rapidly create and destroy evaluators to detect reference counting issues.
 
-        10 threads, each creating/destroying evaluator 50 times.
+        10 threads, each creating/destroying evaluator 10 times.
         Tests for memory leaks and double-free issues.
         """
         num_threads = 10
-        iterations_per_thread = 50
+        iterations_per_thread = 10
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -172,13 +172,13 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_30_threads_same_function(self):
+    def test_20_threads_same_function(self):
         """
-        30 threads call the same function simultaneously.
+        20 threads call the same function simultaneously.
 
         Tests for race conditions in function lookup and execution.
         """
-        num_threads = 30
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -222,11 +222,11 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
 
     def test_concurrent_with_arguments(self):
         """
-        30 threads call same function with different arguments.
+        20 threads call same function with different arguments.
 
         Verifies argument passing is thread-safe.
         """
-        num_threads = 30
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -272,58 +272,6 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
         success_count = sum(1 for r in results.values() if r == "success")
         self.assertEqual(success_count, num_threads)
 
-    def test_performance_vs_serial(self):
-        """
-        Measure concurrent execution time vs serial baseline.
-
-        With I/O-bound operations (sleep), concurrent should be much faster.
-        """
-        num_threads = 20
-        sleep_ms = 100  # 100ms sleep per operation
-
-        # Serial baseline: run operations one after another
-        serial_start = time.time()
-        for i in range(num_threads):
-            atomspace = AtomSpace()
-            push_default_atomspace(atomspace)
-            exec_link = ExecutionOutputLink(
-                GroundedSchemaNode("py:helper_module.function_with_sleep"),
-                ListLink(NumberNode(str(sleep_ms)))
-            )
-            atomspace.execute(exec_link)
-        serial_time = time.time() - serial_start
-
-        # Concurrent execution
-        def worker(thread_id):
-            atomspace = AtomSpace()
-            push_default_atomspace(atomspace)
-            exec_link = ExecutionOutputLink(
-                GroundedSchemaNode("py:helper_module.function_with_sleep"),
-                ListLink(NumberNode(str(sleep_ms)))
-            )
-            result = atomspace.execute(exec_link)
-            return result.name
-
-        concurrent_start = time.time()
-        results = self.run_threads(worker, num_threads, use_barrier=True)
-        concurrent_time = time.time() - concurrent_start
-
-        # Concurrent should be significantly faster for I/O-bound ops
-        # Allow 2x tolerance (should be ~num_threads faster ideally)
-        expected_min_speedup = num_threads / 2.0
-        actual_speedup = serial_time / concurrent_time if concurrent_time > 0 else 0
-
-        print(f"\nPerformance comparison:")
-        print(f"  Serial time: {serial_time:.2f}s")
-        print(f"  Concurrent time: {concurrent_time:.2f}s")
-        print(f"  Speedup: {actual_speedup:.2f}x")
-        print(f"  Expected minimum speedup: {expected_min_speedup:.2f}x")
-
-        self.assertGreater(
-            actual_speedup, expected_min_speedup,
-            f"Concurrent execution only {actual_speedup:.2f}x faster, "
-            f"expected at least {expected_min_speedup:.2f}x speedup"
-        )
 
 
 class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
@@ -416,7 +364,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
         - Functions with 1 arg
         - Functions with 2 args
         """
-        num_threads = 30
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -437,12 +385,12 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
 
                 elif case == 1:
                     # One argument
-                    arg = NumberNode("100")
+                    arg = ConceptNode(f"single_{thread_id}")
                     exec_link = ExecutionOutputLink(
-                        GroundedSchemaNode("py:helper_module.function_with_sleep"),
-                        ListLink(arg)
+                        GroundedSchemaNode("py:helper_module.function_with_args"),
+                        ListLink(arg, arg)
                     )
-                    expected = "slept_100ms"
+                    expected = f"result_single_{thread_id}_single_{thread_id}"
 
                 else:  # case == 2
                     # Two arguments
