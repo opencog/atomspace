@@ -66,3 +66,19 @@ def function_returning_none():
 def function_that_raises():
     """Function that raises an exception."""
     raise RuntimeError("Deliberate test exception from helper_module")
+
+
+def function_with_type_error():
+    """Function that raises TypeError."""
+    raise TypeError("Type error from helper_module")
+
+
+def function_with_value_error():
+    """Function that raises ValueError."""
+    raise ValueError("Value error from helper_module")
+
+
+def function_with_division_by_zero():
+    """Function that raises ZeroDivisionError."""
+    x = 1 / 0
+    return NumberNode(str(x))
