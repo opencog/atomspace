@@ -260,7 +260,7 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
 PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
                                          const HandleSeq& args)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    // Thread-local instance, no mutex needed.
 
     // Grab the GIL.
     GILGuard gil;

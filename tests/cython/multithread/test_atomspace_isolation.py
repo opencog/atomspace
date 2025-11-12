@@ -41,9 +41,9 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_15_isolated_atomspaces(self):
+    def test_20_isolated_atomspaces(self):
         """
-        15 threads each create isolated AtomSpaces with unique atoms.
+        20 threads each create isolated AtomSpaces with unique atoms.
 
         Each thread:
         1. Creates its own AtomSpace
@@ -52,7 +52,7 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
 
         Success: No crashes, all atoms created correctly
         """
-        num_threads = 15
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -108,11 +108,11 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
 
     def test_isolation_with_execution(self):
         """
-        10 threads execute GroundedSchemas in isolated AtomSpaces.
+        15 threads execute GroundedSchemas in isolated AtomSpaces.
 
         Verifies that Python execution context is properly isolated.
         """
-        num_threads = 10
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -179,9 +179,9 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
         """Clean up after test."""
         del self.shared_atomspace
 
-    def test_15_threads_concurrent_reads(self):
+    def test_20_threads_concurrent_reads(self):
         """
-        15 threads concurrently read from shared AtomSpace.
+        20 threads concurrently read from shared AtomSpace.
 
         Each thread:
         1. Looks up specific atoms by name
@@ -189,7 +189,7 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
 
         Success: All threads see consistent data
         """
-        num_threads = 15
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -252,9 +252,9 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
         """Clean up after test."""
         del self.shared_atomspace
 
-    def test_10_threads_mixed_operations(self):
+    def test_15_threads_mixed_operations(self):
         """
-        10 threads perform mixed read/write operations on shared AtomSpace.
+        15 threads perform mixed read/write operations on shared AtomSpace.
 
         Operations:
         - Even threads: Add new atoms
@@ -262,7 +262,7 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
 
         Success: No crashes, operations complete correctly
         """
-        num_threads = 10
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -328,9 +328,9 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
         """Clean up after test."""
         del self.parent_atomspace
 
-    def test_10_child_atomspaces(self):
+    def test_15_child_atomspaces(self):
         """
-        10 threads each create child AtomSpaces with parent relationship.
+        15 threads each create child AtomSpaces with parent relationship.
 
         Each thread:
         1. Creates child AtomSpace with parent
@@ -340,7 +340,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
 
         Success: Proper inheritance and isolation
         """
-        num_threads = 10
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -394,11 +394,11 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
 
     def test_nested_execution_with_parent_child(self):
         """
-        10 threads execute GroundedSchemas in child AtomSpaces.
+        15 threads execute GroundedSchemas in child AtomSpaces.
 
         Verifies execution works correctly with parent-child relationships.
         """
-        num_threads = 10
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         # Add a shared atom in parent that all can reference

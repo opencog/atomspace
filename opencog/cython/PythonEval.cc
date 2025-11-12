@@ -92,15 +92,12 @@ using namespace std::chrono_literals;
  *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
-PythonEval* PythonEval::singletonInstance = NULL;
+thread_local PythonEval* PythonEval::threadLocalInstance = nullptr;
 
 PythonEval::PythonEval()
 {
-    // Check that this is the first and only PythonEval object.
-    if (singletonInstance) {
-        throw RuntimeException(TRACE_INFO,
-            "Can't create more than one PythonEval singleton instance!");
-    }
+    // Each thread can have its own PythonEval instance.
+    // Thread-local storage ensures proper isolation.
 
     _eval_done = true;
     _paren_count = 0;
@@ -135,38 +132,38 @@ PythonEval::~PythonEval()
 }
 
 /**
-* Use a singleton instance to avoid initializing python interpreter twice.
+* Create thread-local instance for the current thread.
+* Python interpreter is thread-safe via GIL, so multiple
+* PythonEval instances (one per thread) are safe.
 */
 void PythonEval::create_singleton_instance()
 {
-    if (singletonInstance) return;
+    if (threadLocalInstance) return;
 
-    // Create the single instance of a PythonEval object.
-    singletonInstance = new PythonEval();
+    // Create thread-local instance of PythonEval.
+    threadLocalInstance = new PythonEval();
 }
 
 void PythonEval::delete_singleton_instance()
 {
-    if (!singletonInstance) return;
+    if (!threadLocalInstance) return;
 
-    // Delete the singleton PythonEval instance.
-    delete singletonInstance;
-    singletonInstance = NULL;
+    // Delete the thread-local PythonEval instance.
+    delete threadLocalInstance;
+    threadLocalInstance = nullptr;
 }
 
 PythonEval& PythonEval::instance()
 {
-    // Make sure we have a singleton.
-    if (!singletonInstance)
+    // Get or create the thread-local instance.
+    if (!threadLocalInstance)
         create_singleton_instance();
-    return *singletonInstance;
+    return *threadLocalInstance;
 }
 
 // ===========================================================
 // Calling functions and applying functions to arguments
 // Most of these are part of the public API.
-
-std::recursive_mutex PythonEval::_mtx;
 
 /**
  * Get the user defined function.
@@ -221,7 +218,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
 
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    // Thread-local instance, no mutex needed.
     push_context_atomspace(AtomSpaceCast(as));
     SCOPE_GUARD0 {
         pop_context_atomspace();
@@ -299,7 +296,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
 void PythonEval::apply_as(const std::string& moduleFunction,
                           AtomSpace* as_argument)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    // Thread-local instance, no mutex needed.
 
     // Grab the GIL.
     PyGILState_STATE gstate = PyGILState_Ensure();
@@ -383,7 +380,7 @@ std::string PythonEval::execute_string(const char* command)
 /// Exactly the same as execute_string, but the GIL lock is taken.
 std::string PythonEval::execute_script(const std::string& script)
 {
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    // Thread-local instance, no mutex needed.
 
     // Grab the GIL
     PyGILState_STATE gstate = PyGILState_Ensure();

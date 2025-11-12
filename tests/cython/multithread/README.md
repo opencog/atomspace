@@ -50,13 +50,13 @@ The tests are organized into 7 phases:
 
 ### Run all threading tests:
 ```bash
-cd /home/opencog/bb/oc/atomspace/build
-ctest -R threading -V
+cd build
+make -j test_python
 ```
 
 ### Run specific phase:
 ```bash
-cd /home/opencog/bb/oc/atomspace/build/tests/cython/threading
+cd build/tests/cython/multithread
 python3 -m unittest test_concurrent_eval
 ```
 
@@ -81,20 +81,6 @@ Provides shared utilities for all threading tests:
 
 ### `helper_module.py`
 External Python module with test functions called from GroundedSchemas.
-
-## Expected Behavior
-
-### Current (Singleton) Implementation
-With the current singleton PythonEval:
-- **Tests should PASS** (serialization via global mutex ensures safety)
-- **Performance**: Limited by global lock, no true parallelism
-- **Scalability**: I/O-bound operations may still show some concurrency
-
-### After Thread-Local Implementation
-After removing singleton:
-- **All tests should still PASS**
-- **Performance**: Better I/O-bound concurrency
-- **Scalability**: True parallel execution for independent atomspaces
 
 ## Debugging Failed Tests
 
