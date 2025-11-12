@@ -38,10 +38,6 @@
 
 #include <dlfcn.h>
 
-#ifdef __APPLE__
-  #define secure_getenv getenv
-#endif
-
 using namespace opencog;
 
 const int NO_SIGNAL_HANDLERS = 0;
@@ -59,41 +55,13 @@ public:
 // Python initialization
 
 /**
- * Setup Python sys.path from PYTHONPATH and load Cython API.
- * Python's import system will handle module loading.
+ * Load Cython API. Python has already setup sys.path from PYTHONPATH
+ * during Py_Initialize(), so we just need to import the module.
  * Return true if the Cython API loaded successfully.
  */
 static bool try_to_load_modules()
 {
-    PyObject* pySysPath = PySys_GetObject((char*)"path");
-
-    // Add PYTHONPATH entries to sys.path
-    char* pypath = secure_getenv("PYTHONPATH");
-    if (pypath) {
-        char* p = strdup(pypath);
-        char* token = p;
-        char* next = strchr(token, ':');
-
-        while (token) {
-            if (next) *next = '\0';
-
-            // Check if it's a valid directory before adding
-            struct stat finfo = {};
-            if (stat(token, &finfo) == 0 && S_ISDIR(finfo.st_mode)) {
-                PyObject* pyModulePath = PyUnicode_DecodeUTF8(
-                    token, strlen(token), "strict");
-                PyList_Insert(pySysPath, 0, pyModulePath);
-                Py_DECREF(pyModulePath);
-            }
-
-            token = next ? next + 1 : nullptr;
-            if (token) next = strchr(token, ':');
-        }
-        free(p);
-    }
-
-    // Initialize the auto-generated Cython api. Do this AFTER the python
-    // sys.path is updated so the imports can find the cython modules.
+    // Initialize the auto-generated Cython api.
     import_opencog__atomspace();
 
     // The import_opencog__atomspace() call above sets the
