@@ -75,21 +75,11 @@ class PythonEval : public GenericEval
         std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
 
-        // Single-threaded design.
-        static PythonEval* singletonInstance;
-
-        // Single, global mutex for serializing access to the atomspace.
-        // The singleton-instance design of this class forces us to
-        // serialize access (the GIL is not enough), because there is
-        // no way to guarantee that python won't accidentally be called
-        // from multiple threads.  That's because the EvaluationLink
-        // is called from scheme and from the pattern engine, and its
-        // unknown how many threads those things might be running in.
-        // The lock is recursive, because we may need to use multiple
-        // different atomspaces with the evaluator, in some nested
-        // fashion. So this lock prevents other threads from using the
-        // wrong atomspace in some other thread.  Quite unfortunate.
-        static std::recursive_mutex _mtx;
+        // Thread-local design: each thread gets its own PythonEval instance.
+        // The Python GIL provides necessary serialization for Python
+        // interpreter access. Thread-local storage eliminates the need
+        // for a global C++ mutex, allowing better concurrency.
+        static thread_local PythonEval* threadLocalInstance;
 
         // Computed results are typically polled in a distinct thread.
         bool _eval_done;
@@ -111,17 +101,20 @@ class PythonEval : public GenericEval
         virtual std::string get_name(void) const { return "PythonEval"; }
 
         /**
-         * Create the singleton instance with the supplied atomspace.
+         * Create the thread-local instance for the current thread.
+         * Safe to call multiple times - will not recreate if already exists.
          */
         static void create_singleton_instance();
 
         /**
-         * Delete the singleton instance.
+         * Delete the thread-local instance for the current thread.
+         * Safe to call even if no instance exists.
          */
         static void delete_singleton_instance();
 
         /**
-         * Get a reference to the singleton instance.
+         * Get a reference to the thread-local instance for the current thread.
+         * Creates the instance on first call within each thread.
          */
         static PythonEval & instance();
 
