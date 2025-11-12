@@ -313,13 +313,8 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
  * On error throws an exception.
  */
 PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
-                                         Handle arguments)
+                                         const HandleSeq& args)
 {
-    // Get the actual argument count, passed in the ListLink.
-    if (arguments->get_type() != LIST_LINK)
-        throw RuntimeException(TRACE_INFO,
-            "Expecting arguments to be a ListLink!");
-
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     // Grab the GIL.
@@ -327,9 +322,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
-    size_t nargs = arguments->get_arity();
+    size_t nargs = args.size();
     PyObject* pyArguments = PyTuple_New(nargs);
-    const HandleSeq& args = arguments->getOutgoingSet();
     for (size_t i=0; i<nargs; i++)
         PyTuple_SetItem(pyArguments, i, py_atom(args[i]));
 

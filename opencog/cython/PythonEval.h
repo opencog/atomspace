@@ -68,7 +68,7 @@ class PythonEval : public GenericEval
 
         // Call functions; execute scripts.
         PyObject* call_user_function(const std::string& func,
-                                     Handle varargs);
+                                     const HandleSeq& args);
         std::string build_python_error_message(const std::string&);
 
         std::string execute_string(const char*);

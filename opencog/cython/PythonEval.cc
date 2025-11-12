@@ -214,8 +214,13 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
  */
 ValuePtr PythonEval::apply_v(AtomSpace * as,
                              const std::string& func,
-                             Handle varargs)
+                             Handle args)
 {
+    // Get the actual argument count, passed in the ListLink.
+    if (args->get_type() != LIST_LINK)
+        throw RuntimeException(TRACE_INFO,
+            "Expecting arguments to be a ListLink!");
+
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     push_context_atomspace(AtomSpaceCast(as));
     SCOPE_GUARD0 {
@@ -223,7 +228,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
     } SCOPE_GUARD_END;
 
     // Get the python value object returned by this user function.
-    PyObject *pyValue = call_user_function(func, varargs);
+    PyObject *pyValue = call_user_function(func, args->getOutgoingSet());
 
     // If we got a non-null Value there were no errors.
     if (NULL == pyValue)
