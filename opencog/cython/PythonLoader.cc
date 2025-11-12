@@ -232,11 +232,6 @@ void opencog::global_python_initialize()
 #if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 9
         PyEval_InitThreads();
 #endif
-
-        // Many python libraries (e.g. ROS) expect sys.argv to be set.
-        // So, avoid the error print, and let them know who we are.
-        // We must do this *before* the module pre-loading, done below.
-        PyRun_SimpleString("import sys; sys.argv='cogserver'\n");
     }
 
     logger().info("[global_python_initialize] Adding OpenCog sys.path "
