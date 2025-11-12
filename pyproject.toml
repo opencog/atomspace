@@ -81,13 +81,13 @@ classifiers = [
 requires-python = ">=3.8"
 
 dependencies = [
-    "nose3",  # For testing
+    "pytest",  # For testing
 ]
 
 [project.optional-dependencies]
 dev = [
     "cxxtest",
-    "nose3",
+    "pytest",
     "build",
 ]
 
@@ -154,5 +154,15 @@ before-all = [
 ]
 
 # Test the wheel
-test-requires = ["nose3"]
+test-requires = ["pytest"]
 test-command = "python -c 'import opencog.atomspace; print(\"AtomSpace import successful\")'"
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests/cython"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+# Don't create __pycache__ directories
+cache_dir = ".pytest_cache"

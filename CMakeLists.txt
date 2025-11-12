@@ -369,7 +369,7 @@ SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 # Don't print, it's never used.
 # SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
-SUMMARY_ADD("Python tests" "Python bindings nose2 tests" HAVE_NOSETESTS)
+SUMMARY_ADD("Python tests" "Python bindings pytest tests" HAVE_PYTEST)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
 SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)

@@ -55,22 +55,22 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 SET_PROPERTY(TEST PythonUtilitiesUTest
 	APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-IF (HAVE_NOSETESTS)
+IF (HAVE_PYTEST)
 
 	# Basic test, just does the cython wrapper for opencog/util
-	ADD_TEST(CythonLogger ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonLogger ${PYTEST_EXECUTABLE} -v
 		${CMAKE_SOURCE_DIR}/tests/cython/logger)
 	SET_PROPERTY(TEST CythonLogger
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-	ADD_TEST(CythonAtomSpace ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonAtomSpace ${PYTEST_EXECUTABLE} -v
 		${CMAKE_SOURCE_DIR}/tests/cython/atomspace/)
 	SET_PROPERTY(TEST CythonAtomSpace
 		PROPERTY DEPENDS atomspace_cython)
 	SET_PROPERTY(TEST CythonAtomSpace
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-	ADD_TEST(CythonValues ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonValues ${PYTEST_EXECUTABLE} -v
 		${CMAKE_SOURCE_DIR}/tests/cython/values/)
 	SET_PROPERTY(TEST CythonValues
 		PROPERTY DEPENDS atomspace_cython)
@@ -79,21 +79,21 @@ IF (HAVE_NOSETESTS)
 
 	# All of the subsequent cython unit tests  depend on having
 	# guile working. So test guile first, and then the others.
-	ADD_TEST(CythonGuile ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonGuile ${PYTEST_EXECUTABLE} -v
 		${CMAKE_SOURCE_DIR}/tests/cython/guile/)
 	SET_PROPERTY(TEST CythonGuile
 		PROPERTY DEPENDS atomspace_cython scheme)
 	SET_PROPERTY(TEST CythonGuile
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-	ADD_TEST(CythonUtilities ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonUtilities ${PYTEST_EXECUTABLE} -v
 		${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
 	SET_PROPERTY(TEST CythonUtilities
 		PROPERTY DEPENDS atomspace_cython logger_cython)
 	SET_PROPERTY(TEST CythonUtilities
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-	ADD_TEST(CythonBindlink ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonBindlink ${PYTEST_EXECUTABLE} -v
 			${CMAKE_SOURCE_DIR}/tests/cython/querylink/)
 	SET_PROPERTY(TEST CythonBindlink
 		PROPERTY DEPENDS atomspace_cython querylink_cython)
@@ -103,7 +103,7 @@ IF (HAVE_NOSETESTS)
 		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/querylink")
 
 	# Multi-threading tests for Python bindings
-	ADD_TEST(CythonMultiThread ${NOSETESTS_EXECUTABLE} -vs
+	ADD_TEST(CythonMultiThread ${PYTEST_EXECUTABLE} -v
 			${CMAKE_SOURCE_DIR}/tests/cython/multithread/)
 	SET_PROPERTY(TEST CythonMultiThread
 		PROPERTY DEPENDS atomspace_cython PythonEval)
@@ -112,4 +112,4 @@ IF (HAVE_NOSETESTS)
 	SET_PROPERTY(TEST CythonMultiThread
 		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/multithread")
 
-ENDIF (HAVE_NOSETESTS)
+ENDIF (HAVE_PYTEST)
