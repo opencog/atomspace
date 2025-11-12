@@ -155,7 +155,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     Py_INCREF(_pyRootModule);
     PyModule_AddStringConstant(_pyRootModule, "__file__", "");
 
-    logger().info("PythonEval::%s Finished initialising python evaluator.",
+    logger().debug("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
 }
 

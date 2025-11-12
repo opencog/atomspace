@@ -114,7 +114,7 @@ PythonEval::PythonEval()
     // never used or needed.  I thought this was unexpected, so I
     // mention it here.
     global_python_initialize();
-    this->initialize_python_objects_and_imports();
+    initialize_python_objects_and_imports();
 }
 
 PythonEval::~PythonEval()
