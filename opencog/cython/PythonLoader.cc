@@ -63,12 +63,12 @@ void opencog::global_python_initialize()
     if (already_initialized) return;
     already_initialized = true;
 
-    _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
-
     logger().info("[global_python_initialize] Start");
 
-    // We don't really know the gstate yet but we'll set it here to avoid
-    // compiler warnings below.
+    _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
+
+    // We don't really know the gstate yet but we'll set
+    // it here to avoid compiler warnings below.
     PyGILState_STATE gstate = PyGILState_UNLOCKED;
 
     // Start up Python.
@@ -94,12 +94,6 @@ void opencog::global_python_initialize()
 #endif
     }
 
-    logger().info("[global_python_initialize] Adding OpenCog sys.path "
-            "directories");
-
-    // Get starting "sys.path".
-    PyRun_SimpleString("import sys\n");
-
     // Initialize the auto-generated Cython api.
     import_opencog__atomspace();
 
@@ -108,7 +102,7 @@ void opencog::global_python_initialize()
     // succeeded. But the function pointer will be NULL if the
     // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a hard-to-debug error message.
+    // it by this hard-to-debug error message.
     if (nullptr == py_atomspace) {
         PyErr_Print();
         logger().warn("PythonEval::%s Failed to load the "
@@ -161,7 +155,7 @@ void PythonEval::initialize_python_objects_and_imports(void)
     Py_INCREF(_pyRootModule);
     PyModule_AddStringConstant(_pyRootModule, "__file__", "");
 
-    logger().info("PythonEval::%s Finished initialising python evaluator.",
+    logger().debug("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
 }
 
