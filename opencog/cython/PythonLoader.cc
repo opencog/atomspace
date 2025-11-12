@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <vector>
+
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
@@ -280,131 +282,67 @@ PyObject* PythonEval::atomspace_py_object(AtomSpacePtr asp)
 // Finding python functions
 
 /**
- * Find the Python object by its name in the given module.
- */
-PyObject* PythonEval::find_object(PyObject* pyModule,
-                                  const std::string& objectName)
-{
-    PyObject* pyDict = PyModule_GetDict(pyModule);
-    return PyDict_GetItemString(pyDict, objectName.c_str());
-}
-
-/**
- * Get the Python module and/or object and stripped function name, given
- * the identifier of the form '[module.][object.[attribute.]*]function'.
+ * Get the Python function from a dotted name like "module.Class.method".
+ * Returns a new reference that the caller must DECREF.
  */
 PyObject* PythonEval::get_function(const std::string& moduleFunction)
 {
-    PyObject* pyModule = _pyRootModule;
-    PyObject* pyObject = nullptr;
-    std::string functionName = moduleFunction;
+    // Split into parts: "module.Class.method" -> ["module", "Class", "method"]
+    std::vector<std::string> parts;
+    size_t start = 0;
+    size_t dot = moduleFunction.find('.');
 
-    // Get the correct module and extract the function name.
-    int index = moduleFunction.find_first_of('.');
-    if (0 < index)
+    while (dot != std::string::npos)
     {
-        std::string moduleName = moduleFunction.substr(0, index);
-
-        // Check Python's sys.modules directly (no need for separate cache)
-        PyObject* sys_modules = PyImport_GetModuleDict();
-        PyObject* pyModuleTmp = nullptr;
-
-        if (sys_modules)
-        {
-            pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
-        }
-
-        // If not found, first check that it is not an object in __main__.
-        // Then try importing it using Python's import system.
-        if (nullptr == pyModuleTmp and
-            nullptr == find_object(pyModule, moduleName))
-        {
-            // Try importing the module using Python's standard import
-            PyObject* imported = PyImport_ImportModule(moduleName.c_str());
-            if (imported) {
-                Py_DECREF(imported);  // Module is now in sys.modules
-
-                // Check sys.modules again after import
-                if (sys_modules) {
-                    pyModuleTmp = PyDict_GetItemString(sys_modules, moduleName.c_str());
-                }
-            } else {
-                // Clear the import error - we'll check if it's an object instead
-                PyErr_Clear();
-            }
-        }
-
-        // If found, set new module and truncate the function name
-        if (pyModuleTmp)
-        {
-            pyModule = pyModuleTmp;
-            functionName = moduleFunction.substr(index+1);
-        }
+        parts.push_back(moduleFunction.substr(start, dot - start));
+        start = dot + 1;
+        dot = moduleFunction.find('.', start);
     }
+    parts.push_back(moduleFunction.substr(start));
 
-    // Iteratively check for objects in the selected (either root
-    // or loaded) module.
-    index = functionName.find_first_of('.');
-    bool bDecRef = false;
-    while (0 < index)
+    // Start with __main__ or import the first part as a module
+    PyObject* obj = nullptr;
+    size_t i = 0;
+
+    if (parts.size() > 1)
     {
-        std::string objectName = functionName.substr(0, index);
-        // If there is no object yet, find it in Module
-        // Else find it as Attr in Object
-        if (nullptr == pyObject)
-            pyObject = find_object(pyModule, objectName);
-        else
-        {
-            PyObject* pyTmp = PyObject_GetAttrString(pyObject,
-                                              objectName.c_str());
-            if (bDecRef) Py_DECREF(pyObject);
-            pyObject =  pyTmp;
-            // Next time, we should use DECREF, since
-            // PyObject_GetAttrString returns new reference
-            bDecRef = true;
+        // Try to import first part as a module
+        obj = PyImport_ImportModule(parts[0].c_str());
+        if (obj) {
+            i = 1;  // Successfully imported, continue from second part
+        } else {
+            // Not a module, clear error and try as __main__ attribute
+            PyErr_Clear();
+            obj = _pyRootModule;
+            Py_INCREF(obj);
+            i = 0;
         }
-
-        if (nullptr == pyObject)
-            throw RuntimeException(TRACE_INFO,
-                "Python object/attribute for '%s' not found!",
-                functionName.c_str());
-
-        functionName = functionName.substr(index+1);
-        index = functionName.find_first_of('.');
-    }
-
-    // For uniformity to DEC later in any case
-    if (pyObject && !bDecRef) Py_INCREF(pyObject);
-
-    PyObject* pyUserFunc;
-
-    // If there is no object, then search in module
-    if (nullptr == pyObject)
-    {
-        PyObject* pyDict = PyModule_GetDict(pyModule);
-        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
     }
     else
-        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
-
-    // If we can't find that function then throw an exception.
-    if (!pyUserFunc)
     {
-        if (pyObject) Py_DECREF(pyObject);
-        const char * moduleName = PyModule_GetName(pyModule);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' not found in module '%s'!",
-            moduleFunction.c_str(), moduleName);
+        // No dots, just a function name in __main__
+        obj = _pyRootModule;
+        Py_INCREF(obj);
     }
 
-    // Promote the borrowed reference for pyUserFunc since it will
-    // be passed to a Python C API function later that "steals" it.
-    // PyObject_GetAttrString already returns new reference, so we
-    // do this only for PyDict_GetItemString
-    if (nullptr == pyObject) Py_INCREF(pyUserFunc);
-    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+    // Walk the remaining dotted path
+    for (; i < parts.size(); i++)
+    {
+        PyObject* next = PyObject_GetAttrString(obj, parts[i].c_str());
+        Py_DECREF(obj);
 
-    return pyUserFunc;
+        if (!next)
+        {
+            PyErr_Clear();
+            throw RuntimeException(TRACE_INFO,
+                "Python object '%s' not found in '%s'!",
+                parts[i].c_str(), moduleFunction.c_str());
+        }
+
+        obj = next;
+    }
+
+    return obj;  // Returns new reference
 }
 
 /**
