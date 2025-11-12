@@ -44,6 +44,15 @@ using namespace opencog;
 
 const int NO_SIGNAL_HANDLERS = 0;
 
+class GILGuard {
+    PyGILState_STATE gstate;
+public:
+    GILGuard() : gstate(PyGILState_Ensure()) {}
+    ~GILGuard() { PyGILState_Release(gstate); }
+    GILGuard(const GILGuard&) = delete;
+    GILGuard& operator=(const GILGuard&) = delete;
+};
+
 // ====================================================
 // Initialization of search paths for python modules.
 
@@ -733,6 +742,36 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
     if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
     return pyUserFunc;
+}
+
+/**
+ * Call the user defined function with the arguments passed in the
+ * ListLink handle 'arguments'.
+ *
+ * On error throws an exception.
+ */
+PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
+                                         Handle arguments)
+{
+    // Get the actual argument count, passed in the ListLink.
+    if (arguments->get_type() != LIST_LINK)
+        throw RuntimeException(TRACE_INFO,
+            "Expecting arguments to be a ListLink!");
+
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
+    // Grab the GIL.
+    GILGuard gil;
+
+    // Create the Python tuple for the function call with python
+    // atoms for each of the atoms in the link arguments.
+    size_t nargs = arguments->get_arity();
+    PyObject* pyArguments = PyTuple_New(nargs);
+    const HandleSeq& args = arguments->getOutgoingSet();
+    for (size_t i=0; i<nargs; i++)
+        PyTuple_SetItem(pyArguments, i, py_atom(args[i]));
+
+    return do_call_user_function(moduleFunction, pyArguments);
 }
 
 // =========== END OF FILE =========
