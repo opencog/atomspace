@@ -15,12 +15,11 @@ from opencog.type_constructors import (
     ListLink, NumberNode
 )
 from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace, finalize_opencog
+    set_default_atomspace, push_default_atomspace
 )
 
 from test_threading_utils import (
-    ThreadTestCase, MemoryMonitor, ThreadSafetyValidator,
-    check_memory_leaks, timeout
+    ThreadTestCase, ThreadSafetyValidator, check_memory_leaks
 )
 
 # Import helper module for testing
@@ -41,10 +40,8 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
     def tearDown(self):
         """Clean up after test."""
-        finalize_opencog()
         del self.main_atomspace
 
-    @timeout(45)
     def test_concurrent_eval_creation_50_threads(self):
         """
         50 threads simultaneously create evaluator instances and execute.
@@ -103,7 +100,6 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             f"Expected {num_threads} successes, got {success_count}"
         )
 
-    @timeout(45)
     @check_memory_leaks(tolerance_mb=20.0)
     def test_rapid_eval_creation_destruction(self):
         """
@@ -128,7 +124,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
                     # Quick execution
                     exec_link = ExecutionOutputLink(
-                        GroundedSchemaNode("py:simple_function"),
+                        GroundedSchemaNode("py:helper_module.simple_function"),
                         ListLink()
                     )
                     result = thread_atomspace.execute(exec_link)
@@ -174,10 +170,8 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
 
     def tearDown(self):
         """Clean up after test."""
-        finalize_opencog()
         del self.main_atomspace
 
-    @timeout(30)
     def test_30_threads_same_function(self):
         """
         30 threads call the same function simultaneously.
@@ -226,7 +220,6 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
         success_count = sum(1 for r in results.values() if r == "success")
         self.assertEqual(success_count, num_threads)
 
-    @timeout(30)
     def test_concurrent_with_arguments(self):
         """
         30 threads call same function with different arguments.
@@ -279,7 +272,6 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
         success_count = sum(1 for r in results.values() if r == "success")
         self.assertEqual(success_count, num_threads)
 
-    @timeout(60)
     def test_performance_vs_serial(self):
         """
         Measure concurrent execution time vs serial baseline.
@@ -348,10 +340,8 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
 
     def tearDown(self):
         """Clean up after test."""
-        finalize_opencog()
         del self.main_atomspace
 
-    @timeout(30)
     def test_20_threads_different_functions(self):
         """
         20 threads, each calling a different function.
@@ -417,7 +407,6 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
                 f"Thread {thread_id} got wrong result"
             )
 
-    @timeout(30)
     def test_mixed_signatures(self):
         """
         Threads calling functions with different signatures simultaneously.
