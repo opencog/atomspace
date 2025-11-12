@@ -163,7 +163,7 @@ class SchemeEval : public GenericEval
 
 		SchemeEval(AtomSpace* = NULL);
 		SchemeEval(AtomSpacePtr&);
-		~SchemeEval();
+		virtual ~SchemeEval();
 		virtual std::string get_name(void) const { return "SchemeEval"; }
 
 		// Return per-thread, per-atomspace singleton
