@@ -61,7 +61,7 @@ class PythonEval : public GenericEval
         void initialize_python_objects_and_imports(void);
 
         // Python utility functions
-        PyObject * atomspace_py_object(AtomSpacePtr);
+        PyObject* atomspace_py_object(AtomSpacePtr);
         PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
@@ -158,17 +158,6 @@ class PythonEval : public GenericEval
          * the AtomSpace as an argument, returning void.
          */
         void apply_as(const std::string& func, AtomSpace*);
-
-#if 0
-        /**
-         * Debug utility
-         */
-        void print_root_dictionary()
-        {
-            printf("The root dictionary is:\n");
-            this->print_dictionary(PyModule_GetDict(_pyRootModule));
-        }
-#endif
 };
 
 /**
