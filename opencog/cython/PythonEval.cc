@@ -125,14 +125,9 @@ PythonEval::~PythonEval()
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure();
 
-    // Decrement reference counts for instance Python object references.
-    Py_DECREF(_pyGlobal);
-    Py_DECREF(_pyLocal);
-
     // NOTE: The following come from Python C api calls that return borrowed
     // references. However, we have called Py_INCREF( x ) to promote them
     // to full references so we can and must decrement them here.
-    Py_DECREF(_pySysPath);
     Py_DECREF(_pyRootModule);
 
     // Release the GIL. No Python API allowed beyond this point.

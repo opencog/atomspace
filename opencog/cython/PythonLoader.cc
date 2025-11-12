@@ -241,23 +241,11 @@ void PythonEval::initialize_python_objects_and_imports(void)
     // Grab the GIL
     GILGuard gil;
 
-    // Get sys.path and keep the reference, used in this->add_to_sys_path()
-    // NOTE: We have to promote the reference here with Py_INCREF because
-    // PySys_GetObject returns a borrowed reference and we don't want it to
-    // go away behind the scenes.
-    _pySysPath = PySys_GetObject((char*)"path");
-    Py_INCREF(_pySysPath);
-
-    // Get the __main__ module. NOTE: As above, PyImport_AddModule returns
+    // Get the __main__ module. NOTE: PyImport_AddModule returns
     // a borrowed reference so we must promote it with an increment.
     _pyRootModule = PyImport_AddModule("__main__");
     Py_INCREF(_pyRootModule);
     PyModule_AddStringConstant(_pyRootModule, "__file__", "");
-
-    // These are needed for calling Python/C API functions, define
-    // them once here so we can reuse them.
-    _pyGlobal = PyDict_New();
-    _pyLocal = PyDict_New();
 
     logger().info("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
@@ -286,53 +274,6 @@ PyObject* PythonEval::atomspace_py_object(AtomSpacePtr asp)
     }
 
     return pyAtomSpace;
-}
-
-void PythonEval::print_dictionary(PyObject* pyDict)
-{
-    if (!PyDict_Check(pyDict))
-        return;
-
-    // Get the keys from the dictionary and print them.
-    PyObject* pyKeys = PyDict_Keys(pyDict);
-    Py_ssize_t sz = PyList_Size(pyKeys);
-    for (int i = 0; i < sz; i++)
-    {
-        // Get and print one key.
-        PyObject* pyKey = PyList_GetItem(pyKeys, i);
-        PyObject* pyStr = nullptr;
-        if (not PyBytes_Check(pyKey))
-        {
-            pyStr = PyUnicode_AsEncodedString(pyKey, "UTF-8", "strict");
-            Py_DECREF(pyKey);
-            pyKey = pyStr;
-        }
-
-        const char* c_name = PyBytes_AsString(pyKey);
-        printf("Dict item %d is %s\n", i, c_name);
-
-        // PyList_GetItem returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyKey);
-    }
-
-    // Cleanup the Python reference count for the keys list.
-    Py_DECREF(pyKeys);
-}
-
-void PythonEval::add_to_sys_path(std::string path)
-{
-    PyObject* pyPathString = PyBytes_FromString(path.c_str());
-    PyList_Append(_pySysPath, pyPathString);
-
-    // We must decrement because, unlike PyList_SetItem, PyList_Append
-    // does not "steal" the reference we pass to it. So this:
-    //
-    // PyList_Append(this->pySysPath, PyBytes_FromString(path.c_str()));
-    //
-    // leaks memory. So we need to save the reference as above and
-    // decrement it, as below.
-    //
-    Py_DECREF(pyPathString);
 }
 
 // ====================================================
@@ -440,11 +381,6 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
     // If there is no object, then search in module
     if (nullptr == pyObject)
     {
-#ifdef DEBUG
-        printf("Looking for %s in module %s; here's what we have:\n",
-            functionName.c_str(), PyModule_GetName(pyModule));
-        print_dictionary(pyDict);
-#endif
         PyObject* pyDict = PyModule_GetDict(pyModule);
         pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
     }
