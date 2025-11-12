@@ -194,15 +194,10 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
     Py_DECREF(pyUserFunc);
     Py_DECREF(pyArguments);
 
-    // Check for errors.
+    // Check for errors and throw with proper exception type preserved
     if (PyErr_Occurred())
-    {
-        // Construct the error message and throw an exception.
-        std::string errorString =
-            build_python_error_message(moduleFunction);
-        PyErr_Clear();
-        throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
-    }
+        throw_python_exception(moduleFunction);
+
     return pyReturnValue;
 }
 

@@ -394,6 +394,51 @@ std::string PythonEval::build_python_error_message(
     return result;
 }
 
+// Throw a PythonException with the correct exception type preserved.
+// This function extracts the Python exception type, formats an error message,
+// and throws a PythonException without save/restore overhead.
+void PythonEval::throw_python_exception(const std::string& function_name)
+{
+    // Fetch the error from Python (clears the error indicator)
+    PyObject *pyErrorType, *pyError, *pyTraceback;
+    PyErr_Fetch(&pyErrorType, &pyError, &pyTraceback);
+    PyErr_NormalizeException(&pyErrorType, &pyError, &pyTraceback);
+
+    // Extract Python exception type name
+    std::string python_exc_type = "RuntimeError";  // default fallback
+    if (pyErrorType && PyType_Check(pyErrorType)) {
+        PyObject* type_name = PyObject_GetAttrString(pyErrorType, "__name__");
+        if (type_name && PyUnicode_Check(type_name)) {
+            python_exc_type = PyUnicode_AsUTF8(type_name);
+            Py_DECREF(type_name);
+        }
+    }
+
+    // Format error message using existing helpers
+    std::string error_msg = try_format_with_traceback_module(
+        pyErrorType, pyError, pyTraceback, function_name
+    );
+
+    if (error_msg.empty()) {
+        error_msg = format_exception_manually(
+            pyErrorType, pyError, pyTraceback, function_name
+        );
+    }
+
+    if (error_msg.empty()) {
+        error_msg = "Python error: <unable to format error details>";
+    }
+
+    // Clean up Python objects
+    Py_XDECREF(pyErrorType);
+    Py_XDECREF(pyError);
+    Py_XDECREF(pyTraceback);
+    PyErr_Clear();
+
+    // Throw with original exception type preserved
+    throw PythonException(python_exc_type, TRACE_INFO, "%s", error_msg.c_str());
+}
+
 // Check for errors in a script.
 bool PythonEval::check_for_error()
 {

@@ -39,9 +39,9 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_6_threads_mixed_success_failure(self):
+    def test_20_threads_mixed_success_failure(self):
         """
-        6 threads: even threads succeed, odd threads raise exceptions.
+        20 threads: even threads succeed, odd threads raise exceptions.
 
         Verifies:
         - Exceptions in odd threads don't crash even threads
@@ -50,7 +50,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
 
         Success: Even threads complete successfully, odd threads catch exceptions
         """
-        num_threads = 6
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -131,7 +131,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
 
     def test_different_exception_types(self):
         """
-        8 threads raise different exception types concurrently.
+        20 threads raise different exception types concurrently.
 
         Tests:
         - RuntimeError
@@ -139,9 +139,9 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
         - ValueError
         - ZeroDivisionError
 
-        Success: All exceptions properly caught and isolated
+        Success: All exceptions properly caught and isolated with correct types
         """
-        num_threads = 8
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         exception_functions = [
@@ -226,9 +226,9 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_5_threads_import_nonexistent_module(self):
+    def test_15_threads_import_nonexistent_module(self):
         """
-        5 threads attempt to import non-existent module.
+        15 threads attempt to import non-existent module.
 
         Verifies:
         - Import errors are properly caught
@@ -237,7 +237,7 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
 
         Success: All threads properly handle import error
         """
-        num_threads = 5
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -310,9 +310,9 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
         """Clean up after test."""
         del self.main_atomspace
 
-    def test_5_threads_invalid_function_name(self):
+    def test_15_threads_invalid_function_name(self):
         """
-        5 threads attempt to call non-existent function.
+        15 threads attempt to call non-existent function.
 
         Verifies:
         - Invalid function calls are properly handled
@@ -320,7 +320,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
 
         Success: All threads properly handle the error
         """
-        num_threads = 5
+        num_threads = 15
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
@@ -377,11 +377,11 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
 
     def test_wrong_argument_count(self):
         """
-        6 threads call function with wrong number of arguments.
+        20 threads call function with wrong number of arguments.
 
         Verifies proper handling of argument mismatches.
         """
-        num_threads = 6
+        num_threads = 20
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):

@@ -5,6 +5,12 @@ from libcpp.set cimport set as cpp_set
 from opencog.atomspace cimport cAtomSpace, Type, cHandle, cValuePtr
 
 
+cdef extern from "opencog/util/exceptions.h" namespace "opencog":
+    cdef cppclass cPythonException "opencog::PythonException":
+        const string& get_python_exception_type() except +
+        const char* get_message() except +
+
+
 cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
     cdef void c_initialize_python "opencog::initialize_python" ()
     cdef void c_finalize_python "opencog::finalize_python" ()

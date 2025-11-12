@@ -2,7 +2,9 @@ from libcpp cimport bool
 from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
+from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
+from opencog.utilities cimport cPythonException
 
 # from atomspace cimport *
 
@@ -49,6 +51,32 @@ cdef AtomSpace_factoid(cValuePtr to_wrap):
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
+
+
+cdef object raise_python_exception_from_cpp(const cPythonException& exc):
+    """Convert C++ PythonException back to native Python exception"""
+    cdef cpp_string exc_type_cpp = exc.get_python_exception_type()
+    cdef const char* exc_msg_c = exc.get_message()
+
+    exc_type_name = exc_type_cpp.decode('utf-8')
+    exc_message = exc_msg_c.decode('utf-8') if exc_msg_c else ""
+
+    # Map to Python exception type
+    exception_map = {
+        'TypeError': TypeError,
+        'ValueError': ValueError,
+        'ZeroDivisionError': ZeroDivisionError,
+        'AttributeError': AttributeError,
+        'ImportError': ImportError,
+        'ModuleNotFoundError': ModuleNotFoundError,
+        'KeyError': KeyError,
+        'IndexError': IndexError,
+        'NameError': NameError,
+        'RuntimeError': RuntimeError,
+    }
+
+    exc_class = exception_map.get(exc_type_name, RuntimeError)
+    raise exc_class(exc_message)
 
 
 cdef class AtomSpace(Value):
@@ -232,9 +260,38 @@ cdef class AtomSpace(Value):
     def execute(self, Atom atom):
         if atom is None:
             raise ValueError("No atom provided!")
-        cdef cValuePtr c_value_ptr = c_do_execute_atom(
-            self.atomspace, deref(atom.handle))
-        return create_python_value_from_c_value(c_value_ptr)
+        cdef cValuePtr c_value_ptr
+        try:
+            c_value_ptr = c_do_execute_atom(self.atomspace, deref(atom.handle))
+            return create_python_value_from_c_value(c_value_ptr)
+        except RuntimeError as e:
+            # Check if this is actually a PythonException by examining the message
+            # PythonException messages contain "Python error in <func>:" prefix
+            error_msg = str(e)
+
+            # Try to extract Python exception type from message
+            # Format: "Python error in helper_module.function:\n\nTraceback...\nTypeError: ..."
+            for exc_type_name in ['TypeError', 'ValueError', 'ZeroDivisionError',
+                                   'AttributeError', 'ImportError', 'ModuleNotFoundError',
+                                   'KeyError', 'IndexError', 'NameError']:
+                if exc_type_name + ':' in error_msg:
+                    # Get the Python exception type and re-raise
+                    exception_map = {
+                        'TypeError': TypeError,
+                        'ValueError': ValueError,
+                        'ZeroDivisionError': ZeroDivisionError,
+                        'AttributeError': AttributeError,
+                        'ImportError': ImportError,
+                        'ModuleNotFoundError': ModuleNotFoundError,
+                        'KeyError': KeyError,
+                        'IndexError': IndexError,
+                        'NameError': NameError,
+                    }
+                    exc_class = exception_map[exc_type_name]
+                    raise exc_class(error_msg)
+
+            # If we can't identify the type, just re-raise as-is (RuntimeError)
+            raise
 
 cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
