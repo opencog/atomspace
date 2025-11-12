@@ -290,8 +290,7 @@ void opencog::global_python_finalize()
 void PythonEval::initialize_python_objects_and_imports(void)
 {
     // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    GILGuard gil;
 
     // Get sys.path and keep the reference, used in this->add_to_sys_path()
     // NOTE: We have to promote the reference here with Py_INCREF because
@@ -310,9 +309,6 @@ void PythonEval::initialize_python_objects_and_imports(void)
     // them once here so we can reuse them.
     _pyGlobal = PyDict_New();
     _pyLocal = PyDict_New();
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
 
     logger().info("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
@@ -588,8 +584,7 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     logger().info("Adding Python module (or directory): " + pathString);
 
     // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
+    GILGuard gil;
 
     struct stat finfo;
     int stat_ret = stat(pathString.c_str(), &finfo);
@@ -609,9 +604,6 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
             logger().warn() << "Python module path \'" << pathString
                             << "\' can't be found";
     }
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
 }
 
 /**
