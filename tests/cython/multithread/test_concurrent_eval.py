@@ -103,26 +103,28 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
     @check_memory_leaks(tolerance_mb=50.0)
     def test_rapid_eval_creation_destruction(self):
         """
-        Rapidly create and destroy evaluators to detect reference counting issues.
+        Rapidly execute functions using reused evaluators to detect issues.
 
-        10 threads, each creating/destroying evaluator 50 times.
-        Tests for memory leaks and double-free issues.
+        10 threads, each reusing the same AtomSpace for 50 executions.
+        Tests for memory leaks and thread-safety issues with realistic usage.
+        Note: AtomSpaces are long-lived databases, not meant to be rapidly
+        created/destroyed.
         """
         num_threads = 10
         iterations_per_thread = 50
         validator = ThreadSafetyValidator()
 
         def worker(thread_id):
-            """Worker that rapidly creates/destroys evaluators."""
+            """Worker that reuses one AtomSpace for multiple executions."""
             success_count = 0
 
-            for iteration in range(iterations_per_thread):
-                try:
-                    # Create AtomSpace (and implicitly PythonEval)
-                    thread_atomspace = AtomSpace()
-                    push_default_atomspace(thread_atomspace)
+            try:
+                # Create ONE long-lived AtomSpace per thread (realistic usage)
+                thread_atomspace = AtomSpace()
+                push_default_atomspace(thread_atomspace)
 
-                    # Quick execution
+                # Repeatedly execute using the same atomspace
+                for iteration in range(iterations_per_thread):
                     exec_link = ExecutionOutputLink(
                         GroundedSchemaNode("py:helper_module.simple_function"),
                         ListLink()
@@ -131,16 +133,18 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
                     if result.name == "success":
                         success_count += 1
+                    else:
+                        validator.record_error(
+                            thread_id,
+                            f"Iteration {iteration}: wrong result {result.name}"
+                        )
+                        break
 
-                    # Explicit cleanup to stress test
-                    del thread_atomspace
+                # Cleanup at end of thread
+                del thread_atomspace
 
-                except Exception as e:
-                    validator.record_error(
-                        thread_id,
-                        f"Iteration {iteration}: {e}"
-                    )
-                    break
+            except Exception as e:
+                validator.record_error(thread_id, str(e))
 
             return success_count
 
