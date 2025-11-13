@@ -100,11 +100,3 @@ def scheme_eval_as(str pys):
     expr = pys.encode('UTF-8')
     ret = eval_scheme_as(expr)
     return AtomSpace_factoid(ret)
-
-cdef extern from "opencog/cython/opencog/load-file.h" namespace "opencog":
-    int load_scm_file_relative (cAtomSpace& as, char* filename) except +
-
-def load_scm(AtomSpace a, str fname):
-    fname_tmp = fname.encode('UTF-8')
-    status = load_scm_file_relative(deref(a.atomspace), fname_tmp)
-    return status == 0
