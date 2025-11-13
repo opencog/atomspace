@@ -153,6 +153,9 @@ class SchemeEval : public GenericEval
 		bool _in_eval;
 
 	public:
+		// Call before first use. Cogserver needs this!
+		static void init_scheme(void);
+
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
 		virtual void set_scheme_as(const AtomSpacePtr&);
