@@ -1,13 +1,11 @@
 import unittest
 from opencog.atomspace import AtomSpace
-from opencog.utilities import set_default_atomspace
 from opencog.type_constructors import *
 
 
 class TestQueueValueExceptions(unittest.TestCase):
     def setUp(self):
         self.atomspace = AtomSpace()
-        set_default_atomspace(self.atomspace)
 
     def tearDown(self):
         self.atomspace = None

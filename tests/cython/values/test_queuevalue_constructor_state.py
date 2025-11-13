@@ -1,7 +1,7 @@
 import unittest
 
 from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import finalize_opencog
 
 class QueueValueConstructorStateTest(unittest.TestCase):
     """
@@ -14,7 +14,6 @@ class QueueValueConstructorStateTest(unittest.TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
 
     def tearDown(self):
         finalize_opencog()
