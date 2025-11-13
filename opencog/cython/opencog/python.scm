@@ -32,13 +32,14 @@
 
     A more complicated example:
       (python-eval \"
-      from opencog.atomspace import AtomSpace, TruthValue
-      from opencog.atomspace import types
+      from opencog.atomspace import AtomSpace,types
 
       def foo(asp):
-          TV = TruthValue(0.42, 0.69)
-          asp.add_node(types.ConceptNode, 'Apple', TV)
+          apple = asp.add_node(types.ConceptNode, 'Apple')
+          key = asp.add_node(types.PredicateNode, 'lookup key')
+          value = FloatValue(1,2,3)
+          apple.set_value(key, value)
       \")
       (python-call-with-as \"foo\" (cog-atomspace))
-      (cog-node 'ConceptNode \"Apple\")
+      (cog-value (Concept \"Apple\") (Predicate \"lookup key\"))
 ")
