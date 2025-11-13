@@ -910,9 +910,7 @@ void * SchemeEval::c_wrap_eval_v(void * p)
 
 /**
  * Evaluate a string containing a scheme expression, returning a
- * ProtoAtom (Handle, TruthValue or Value).  If an evaluation error
- * occurs, an exception is thrown, and the stack trace is logged to
- * the log file.
+ * ValuePtr.  If an evaluation error occurs, an exception is thrown.
  */
 ValuePtr SchemeEval::eval_v(const std::string &expr)
 {
@@ -949,7 +947,7 @@ ValuePtr SchemeEval::eval_v(const std::string &expr)
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
 	// We do not want this->_retval to point at anything after we return.
-	// This is so that we do not hold a long-term reference to the TV.
+	// This is so that we do not hold a long-term reference to the Value.
 	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
@@ -958,8 +956,7 @@ ValuePtr SchemeEval::eval_v(const std::string &expr)
 /**
  * Evaluate a string containing a scheme expression, returning an
  * AtomSpace.
- * If an evaluation error occurs, an exception is thrown, and the stack
- * trace is logged to the log file.
+ * If an evaluation error occurs, an exception is thrown.
  */
 AtomSpacePtr SchemeEval::eval_as(const std::string &expr)
 {
@@ -1065,13 +1062,13 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const ValuePtr& varargs)
 /* ============================================================== */
 /**
  * apply_v -- apply named function func to arguments in ListLink.
- * Return an OpenCog ValuePtr (Handle, TruthValue or Value).
+ * Return an OpenCog ValuePtr.
+ *
  * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the function func
+ * Handles. This list is unpacked, and then the function func
  * is applied to them. The function is presumed to return pointer
- * to a ProtoAtom [now renamed Value] object. If the function does
- * not return a ProtoAtom, or if n error occurred during evaluation,
- * then a C++ exception is thrown.
+ * to a ValuePtr. If the function does not return a Valueptr, or if
+ * an error occurred during evaluation, then a C++ exception is thrown.
  */
 ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 {
@@ -1080,20 +1077,18 @@ ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 	// Just go.
 	if (_in_eval) {
 		SCM smob = do_apply_scm(func, varargs);
+
+		// If error, rethrow. It would be better to just allow exceptions
+		// to pass on through, but thus breaks some unit tests.
+		// XXX FIXME -- idealy we should avoid catch-and-rethrow.
 		if (eval_error())
-		{
-			// Rethrow.  It would be better to just allow exceptions
-			// to pass on through, but thus breaks some unit tests.
-			// XXX FIXME -- idealy we should avoid catch-and-rethrow.
-			// At any rate, we must not return a TV of any sort, here.
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-		}
+
 		// Check if the return value is a scheme boolean (#t or #f)
 		// and convert to BoolValue
 		if (scm_is_bool(smob))
-		{
 			return createBoolValue(scm_to_bool(smob) != 0);
-		}
+
 		return SchemeSmob::scm_to_protom(smob);
 	}
 
@@ -1111,7 +1106,7 @@ ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 			_error_msg.c_str());
 
 	// We do not want this->_retval to point at anything after we return.
-	// This is so that we do not hold a long-term reference to the TV.
+	// This is so that we do not hold a long-term reference to the Value.
 	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
@@ -1122,16 +1117,14 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 	SchemeEval *self = (SchemeEval *) p;
 	SCM smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
 	if (self->eval_error()) return self;
+
 	// Check if the return value is a scheme boolean (#t or #f)
 	// and convert to BoolValue
 	if (scm_is_bool(smob))
-	{
 		self->_retval = createBoolValue(scm_to_bool(smob) != 0);
-	}
 	else
-	{
 		self->_retval = SchemeSmob::scm_to_protom(smob);
-	}
+
 	return self;
 }
 
