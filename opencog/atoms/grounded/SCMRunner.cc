@@ -72,8 +72,11 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 	SchemeEval* applier = get_evaluator_for_scheme(as);
 	AtomSpacePtr saved_as = applier->get_atomspace();
 	ValuePtr vp = applier->apply_v(_fname, asargs);
-	if (saved_as)
-		applier->set_atomspace(saved_as);
+
+	// Recursive lollapalooza means someone might have messed
+	// with our atomspace and not set it back. So we reset.
+	// Explicitly tested in MultiAtomSpaceUTest
+	applier->set_atomspace(saved_as);
 
 	// In general, we expect the scheme fuction to return some Value.
 	// But user-written functions can return anything, e.g. scheme
