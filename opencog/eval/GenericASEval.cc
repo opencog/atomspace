@@ -132,11 +132,8 @@ GenericASEval* GenericASEval::get_evaluator(const AtomSpacePtr& asp, EvalFactory
 
 GenericASEval* GenericASEval::get_evaluator(AtomSpace* as, EvalFactory factory)
 {
-	// A null AtomSpace is passed from the cython initialization
-	// code. That code scrambles to create an AtomSpace, after
-	// the evaluator is initialized.
-	static AtomSpacePtr nullasp;
-	if (nullptr == as) return get_evaluator(nullasp, factory);
+	OC_ASSERT(nullptr != as,
+		"Cannot create evaluator without an AtomSpace!");
 
 	const AtomSpacePtr& asp = AtomSpaceCast(as);
 	return get_evaluator(asp, factory);
