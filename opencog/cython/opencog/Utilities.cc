@@ -15,18 +15,10 @@ void opencog::initialize_python()
     // Initialize Python.
     logger().debug("initialize_opencog - initializing Python");
     global_python_initialize();
-
-    // Tell the python evaluator to create its singleton instance
-    // with our atomspace.
-    logger().debug("initialize_opencog - creating PythonEval singleton instance");
-    PythonEval::create_singleton_instance();
 }
 
 void opencog::finalize_python()
 {
-    // Delete the singleton instance of the PythonEval.
-    PythonEval::delete_singleton_instance();
-
     // Cleanup Python.
     global_python_finalize();
 }

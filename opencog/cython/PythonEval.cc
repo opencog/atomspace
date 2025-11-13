@@ -84,16 +84,6 @@ using namespace std::chrono_literals;
  *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
-thread_local PythonEval* PythonEval::threadLocalInstance = nullptr;
-
-PythonEval::PythonEval()
-	: GenericASEval(nullptr)
-{
-    _eval_done = true;
-    _paren_count = 0;
-    global_python_initialize();
-    initialize_python_objects_and_imports();
-}
 
 PythonEval::PythonEval(AtomSpace* as)
 	: GenericASEval(as)
@@ -117,36 +107,6 @@ PythonEval::~PythonEval()
 {
     GILGuard gil;
     Py_DECREF(_pyRootModule);
-}
-
-/**
-* Create thread-local instance for the current thread.
-* Python interpreter is thread-safe via GIL, so multiple
-* PythonEval instances (one per thread) are safe.
-*/
-void PythonEval::create_singleton_instance()
-{
-    if (threadLocalInstance) return;
-
-    // Create thread-local instance of PythonEval.
-    threadLocalInstance = new PythonEval();
-}
-
-void PythonEval::delete_singleton_instance()
-{
-    if (!threadLocalInstance) return;
-
-    // Delete the thread-local PythonEval instance.
-    delete threadLocalInstance;
-    threadLocalInstance = nullptr;
-}
-
-PythonEval& PythonEval::instance()
-{
-    // Get or create the thread-local instance.
-    if (!threadLocalInstance)
-        create_singleton_instance();
-    return *threadLocalInstance;
 }
 
 // Factory function for pool management

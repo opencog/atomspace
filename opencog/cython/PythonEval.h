@@ -74,12 +74,6 @@ class PythonEval : public GenericASEval
         std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
 
-        // Thread-local design: each thread gets its own PythonEval instance.
-        // The Python GIL provides necessary serialization for Python
-        // interpreter access. Thread-local storage eliminates the need
-        // for a global C++ mutex, allowing better concurrency.
-        static thread_local PythonEval* threadLocalInstance;
-
         // Factory function for pool management
         static GenericASEval* create_evaluator();
 
@@ -98,29 +92,10 @@ class PythonEval : public GenericASEval
         bool check_for_error();
 
     public:
-        PythonEval();
         PythonEval(AtomSpace*);
         PythonEval(AtomSpacePtr&);
         ~PythonEval();
         virtual std::string get_name(void) const { return "PythonEval"; }
-
-        /**
-         * Create the thread-local instance for the current thread.
-         * Safe to call multiple times - will not recreate if already exists.
-         */
-        static void create_singleton_instance();
-
-        /**
-         * Delete the thread-local instance for the current thread.
-         * Safe to call even if no instance exists.
-         */
-        static void delete_singleton_instance();
-
-        /**
-         * Get a reference to the thread-local instance for the current thread.
-         * Creates the instance on first call within each thread.
-         */
-        static PythonEval & instance();
 
         // Return per-thread, per-atomspace evaluator using pool management
         static PythonEval* get_python_evaluator(AtomSpace*);
