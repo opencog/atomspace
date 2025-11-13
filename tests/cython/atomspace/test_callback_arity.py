@@ -1,6 +1,6 @@
 import unittest
 
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import set_default_atomspace
 from opencog.type_constructors import *
 
 import __main__
@@ -20,7 +20,6 @@ class TestExecutionOutputLink(unittest.TestCase):
         set_default_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_correct_argcount(self):

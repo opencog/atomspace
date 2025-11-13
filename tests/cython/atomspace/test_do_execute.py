@@ -3,7 +3,7 @@ import threading
 
 from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import set_default_atomspace
 from opencog.utilities import push_default_atomspace, get_default_atomspace
 
 
@@ -14,7 +14,6 @@ class DoExecuteTest(unittest.TestCase):
         set_default_atomspace(self.atomspace)
 
     def tearDown(self):
-        finalize_opencog()
         del self.atomspace
 
     def test_do_execute_value(self):

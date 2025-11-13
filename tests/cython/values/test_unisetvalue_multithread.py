@@ -4,7 +4,6 @@ import time
 import random
 
 from opencog.type_constructors import *
-from opencog.utilities import finalize_opencog
 
 
 class UnisetValueMultithreadTest(unittest.TestCase):
@@ -14,7 +13,6 @@ class UnisetValueMultithreadTest(unittest.TestCase):
         self.space = AtomSpace()
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_concurrent_producer_consumer(self):

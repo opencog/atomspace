@@ -8,7 +8,7 @@ class TestQueueValueExceptions(unittest.TestCase):
         self.atomspace = AtomSpace()
 
     def tearDown(self):
-        self.atomspace = None
+        del self.atomspace
 
     def test_push_to_closed_queue_raises_exception(self):
         """Test that pushing to a closed queue raises a Python exception."""

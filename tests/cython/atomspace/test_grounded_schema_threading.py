@@ -55,7 +55,6 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
 
     def tearDown(self):
         """Clean up after test."""
-        finalize_opencog()
         del self.main_atomspace
 
     def test_grounded_schema_multithread_external_module(self):

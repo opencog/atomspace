@@ -1,7 +1,7 @@
 import unittest
 
 from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import set_default_atomspace
 
 class UnisetValueTest(unittest.TestCase):
 
@@ -10,7 +10,6 @@ class UnisetValueTest(unittest.TestCase):
         set_default_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_create_empty(self):

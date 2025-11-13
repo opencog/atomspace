@@ -1,6 +1,5 @@
 import unittest
 
-from opencog.utilities import finalize_opencog
 from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.scheme import scheme_eval
@@ -14,7 +13,6 @@ class TestExceptions(unittest.TestCase):
         self.space = AtomSpace()
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_bogus_scheme(self):
