@@ -1233,7 +1233,7 @@ void* SchemeEval::c_wrap_get_atomspace(void * p)
 	return self;
 }
 
-AtomSpacePtr SchemeEval::get_scheme_as(void)
+AtomSpacePtr SchemeEval::get_atomspace(void)
 {
 	scm_with_guile(c_wrap_get_atomspace, this);
 
@@ -1262,7 +1262,7 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 	scm_with_guile(c_wrap_set_atomspace, as);
 }
 
-void SchemeEval::set_scheme_as(const AtomSpacePtr& as)
+void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
