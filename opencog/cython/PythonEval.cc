@@ -220,7 +220,8 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
 
-    // Thread-local instance, no mutex needed.
+    // push_context_atomspace sets the as for this thread.
+    // That is where we want to perform our evaluations.
     push_context_atomspace(AtomSpaceCast(as));
     SCOPE_GUARD0 {
         pop_context_atomspace();
