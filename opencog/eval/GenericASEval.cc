@@ -33,7 +33,7 @@ GenericASEval::GenericASEval(AtomSpace* as)
 {
 	// If it is coming from the pool, the as will be null.
 	if (as)
-		_atomspace = AtomSpaceCast(as->shared_from_this());
+		_atomspace = AtomSpaceCast(as);
 	else
 		_atomspace = nullptr;
 }
@@ -138,6 +138,6 @@ GenericASEval* GenericASEval::get_evaluator(AtomSpace* as, EvalFactory factory)
 	static AtomSpacePtr nullasp;
 	if (nullptr == as) return get_evaluator(nullasp, factory);
 
-	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
+	const AtomSpacePtr& asp = AtomSpaceCast(as);
 	return get_evaluator(asp, factory);
 }
