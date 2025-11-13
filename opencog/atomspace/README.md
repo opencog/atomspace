@@ -38,9 +38,6 @@ Valuation Implementation Notes
 Valuations are stored in a C++ `std::map` container -- basically, a
 key-value database -- in each atom.
 
-TruthValues and AttentionValues are layered on top of FloatValue; a
-FloatValue is just a sequence of doubles (`std::vector<double>`).
-
 Valuations are immutable. It seemed like it was just easier to make
 them immutable, rather than adding a mutex to each and every one.
 Adding a mutex would bloat each valuation with more RAM usage.  Also,
@@ -82,14 +79,15 @@ hierarchical nature means that Links in the child atomspace can refer
 to Atoms in the parent atomspace (but not vice-versa).
 
 The AtomSpace API is completely thread-safe. This includes the methods
-on class Atom and class TruthValue: these can be accessed by any number
+on class Atom and (most??) Values: these can be accessed by any number
 of threads simultaneously. Several unit tests test for this. More about
 threading below.
 
 Memory management for Atoms is handled by reference-counting, using the
 std::shared_ptr class. This means that you should never use the new()
-and delete() operators directly on Atoms or TruthValues. An Atom will
+and delete() operators directly on Atoms or Values. An Atom will
 automatically be destroyed when it's reference counter drops to zero.
+
 A prototype using garbage collections (the Boehm GC) was attempted, but
 this did not work well, due to the bad interplay between std:: container
 classes and weak pointers.  Basically, every atom stores both it's
@@ -133,8 +131,8 @@ Overlay AtomSpaces are needed in (at least) these situations:
 The above are requirements; the base and overlay atomspaces should
 behave as intuitively described.  In practice, this means:
 
-* When a user alters a Value (TruthValue, AttentionValue, or other) in
-  the overlay, it should *not* clobber the Value in the base space.
+* When a user alters a Value in the overlay, it should *not* clobber
+  the Value in the base space.
 
 How can this be implemented?
 
@@ -239,41 +237,8 @@ Threading Design
 ----------------
 
 As of November 2013, all atomspace operations are thread-safe.  This
-includes all AtomSpace API calls, and all public methods on Atoms,
-Links, Nodes, Truth and Attention values.  Thread-safety is mildly
-tested in `AtomSpaceAsyncUTest` but more robust threading tests would be
-great.  In addition, comprehensive multi-threaded benchmarks are sorely
-needed.
+includes all AtomSpace API calls, and all public methods on Atoms and
+Values.  Thread-safety is mildly tested in `AtomSpaceAsyncUTest`.
 
-The `AtomTable::getHandlesByXXX()` methods offer a great opportunity for
-adding parallelism.  Currently, they use `std::copy_if()`, which can be
-replaced by `OMP_ALGO` versions, and including `oc_omp.h`. For examples
-showing how this is done in practice, grep the MOSES code. Its actually
-quite very easy; I haven't done so out of laziness mostly (and the greedy
-desire for a benchmark).
-
-The AtomTable uses a single global lock, and it potentially causes
-significant contention in a highly-threaded environment. It is not
-clear how to fix this.  Converting it to a reader-writer lock is not
-a solution, because reader-writer locks are much larger, while also
-requiring that any cache-lines holding the locks be cleared,
-synchronized.  Thus, reader-writer locks don't avoid any of the
-cache-contention bottlenecks that ordinary plain-simple mutexes have,
-while at the same time being fatter and clunkier.
-
-Some speedup might be possible if each index used it's own private lock,
-maybe. Maybe not.  Some speedup might be possible if index insertion was
-done asynchronously (i.e. in service threads). Maybe. Unclear. That
-entails extra complexity.  A multi-threaded benchmark is needed.
-
-The atoms are all using a per-atom lock, and thus should have no
-contention (although this is a bit RAM-greedy, but what the heck --
-the alternative of one global lock would be a huge bottleneck.)
-
-The NameServer() uses a mutex when fetching info.  If would be great
-to make this lock-less somehow, since, realistically, as, currently,
-absolutely no one ever adds new atom types, once the cogserver has been
-initialized. i.e. we're using a lock to protect a case that never
-happens in real life.
-
------
+A variety of assorted threading and performance activities have occurred
+since then.

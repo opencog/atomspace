@@ -23,9 +23,9 @@ AtomSpace.
 
 At the same time, the code in this directory allows arithmetic
 expressions to be evaluated, to get numeric results. In particular,
-these arithmetic expressions can be applied to FloatValues and
-TruthValues. That is, it can be executed on the fly to create new
-FloatValues, and so on.
+these arithmetic expressions can be applied to FloatValues.
+That is, it can be executed on the fly to create new FloatValues,
+and so on.
 
 This is particularly interesting for two kinds of systems. One type
 is any kind of vector processing done in the AtomSpace. FloatValues

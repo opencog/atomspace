@@ -34,8 +34,6 @@ Listed in order of dependency:
  * `value` -- The C++ base class for Atoms and for Values. The
    `FloatValue`, `StringValue` and `LinkValue` are defined here.
 
- * `truthvalue` -- various kinds of `TruthValue`s are defined here.
-
  * `base` -- The C++ base classes for `Atom`, `Node` and `Link` are
    defined here. The Atom factory (aka `classserver`) is defined here.
 
