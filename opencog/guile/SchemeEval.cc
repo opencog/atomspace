@@ -1205,6 +1205,12 @@ void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 
+void SchemeEval::init_scheme(void)
+{
+	// XXX FIXME only a subset of what this does is acutally needed.
+	SchemeEval sch(nullptr);
+}
+
 extern "C" {
 // Thin wrapper for easy dlopen/dlsym dynamic loading
 opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
@@ -1213,6 +1219,5 @@ opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
 }
 
 };
-
 
 /* ===================== END OF FILE ============================ */
