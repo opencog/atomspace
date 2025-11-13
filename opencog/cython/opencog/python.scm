@@ -35,7 +35,7 @@
 
     Example showing atomspace modification:
       (python-eval \"
-      from opencog.atomspace import AtomSpace,types
+      from opencog.atomspace import types
       from opencog.type_constructors import FloatValue
 
       def foo(asp):
