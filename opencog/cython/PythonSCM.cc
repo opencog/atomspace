@@ -77,20 +77,6 @@ void* PythonSCM::init_in_guile(void* self)
 {
 	scm_c_define_module("opencog python", init_in_module, self);
 	scm_c_use_module("opencog python");
-
-  	// Make sure that guile and python are using the same atomspace.
-	// This will avoid assorted confusion.
-	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("python-eval");
-	PythonEval* pev = PythonEval::get_python_evaluator(asp);
-
-	// This feels hacky, I guess, but I cannot figure out any other
-	// way of telling python which atomspace it is supposed to use
-	// by default.
-	pev->eval("from opencog.atomspace import AtomSpace");
-	pev->eval("from opencog.type_constructors import set_default_atomspace");
-	pev->eval("set_default_atomspace(AtomSpace(" +
-            std::to_string((uint64_t) asp.get()) + "))\n");
-
 	return NULL;
 }
 
