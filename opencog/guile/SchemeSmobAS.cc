@@ -274,7 +274,7 @@ SCM SchemeSmob::ss_as(SCM satom)
 	}
 
 	AtomSpace* as = h->getAtomSpace();
-	return as ? make_as(AtomSpaceCast(as->shared_from_this())) : SCM_EOL;
+	return as ? make_as(AtomSpaceCast(as)) : SCM_EOL;
 }
 
 /* ============================================================== */

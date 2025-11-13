@@ -40,9 +40,6 @@ class GenericASEval : public GenericEval
 	protected:
 		AtomSpacePtr _atomspace;
 
-		virtual void set_atomspace(const AtomSpacePtr&);
-		virtual AtomSpacePtr get_atomspace(void);
-
 		// Pool management
 		static GenericASEval* get_from_pool(EvalFactory factory);
 		static void return_to_pool(GenericASEval* ev);
@@ -51,6 +48,9 @@ class GenericASEval : public GenericEval
 		GenericASEval(AtomSpace*);
 		GenericASEval(AtomSpacePtr&);
 		virtual ~GenericASEval() {}
+
+		virtual void set_atomspace(const AtomSpacePtr&);
+		virtual AtomSpacePtr get_atomspace(void);
 
 		// Return evaluator for this thread and atomspace combination.
 		// Uses thread-local storage and a pool to avoid repeatedly

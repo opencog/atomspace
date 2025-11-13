@@ -1178,8 +1178,7 @@ void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {
 	if (nullptr == vas) return vas;
 	AtomSpace* as = (AtomSpace*) vas;
-	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
-	SchemeSmob::ss_set_env_as(asp);
+	SchemeSmob::ss_set_env_as(AtomSpaceCast(as));
 	return vas;
 }
 

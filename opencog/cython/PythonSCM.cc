@@ -97,17 +97,18 @@ void* PythonSCM::init_in_guile(void* self)
 {
 	scm_c_define_module("opencog python", init_in_module, self);
 	scm_c_use_module("opencog python");
-	PythonEval& pev = PythonEval::instance();
+
   	// Make sure that guile and python are using the same atomspace.
 	// This will avoid assorted confusion.
 	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("python-eval");
+	PythonEval* pev = PythonEval::get_python_evaluator(asp);
 
 	// This feels hacky, I guess, but I cannot figure out any other
 	// way of telling python which atomspace it is supposed to use
 	// by default.
-	pev.eval("from opencog.atomspace import AtomSpace");
-	pev.eval("from opencog.type_constructors import set_default_atomspace");
-	pev.eval("set_default_atomspace(AtomSpace(" +
+	pev->eval("from opencog.atomspace import AtomSpace");
+	pev->eval("from opencog.type_constructors import set_default_atomspace");
+	pev->eval("set_default_atomspace(AtomSpace(" +
             std::to_string((uint64_t) asp.get()) + "))\n");
 
 	return NULL;
@@ -127,15 +128,15 @@ void PythonSCM::init(void)
 
 std::string PythonSCM::eval(const std::string& pystr)
 {
-	static PythonEval& pyev = PythonEval::instance();
-	return pyev.eval(pystr);
+	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("python-eval");
+	PythonEval* pyev = PythonEval::get_python_evaluator(asp);
+	return pyev->eval(pystr);
 }
 
 void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
 {
-	static PythonEval& pyev = PythonEval::instance();
-
-	pyev.apply_as(pystr, as);
+	PythonEval* pyev = PythonEval::get_python_evaluator(as);
+	pyev->apply_as(pystr, as);
 }
 
 void opencog_python_init(void)

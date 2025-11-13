@@ -44,7 +44,8 @@ public:
 	PythonRunner& operator=(const PythonRunner&) = delete;
 
 	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool=false);
-	virtual ValuePtr evaluate(AtomSpace*, const ValuePtr&, bool=false);
+	virtual ValuePtr evaluate(AtomSpace* as, const ValuePtr& args, bool silent=false)
+	{ return execute(as, args, silent); }
 };
 
 /** @}*/

@@ -39,6 +39,7 @@ TARGET_LINK_LIBRARIES(PythonEval
 	atomflow
 	atombase
 	atomspace
+	generic-eval
 	executioncontext
 	${Python3_LIBRARIES}
 )

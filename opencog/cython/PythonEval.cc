@@ -70,15 +70,6 @@ using namespace opencog;
 using namespace std::chrono_literals;
 
 /*
- * @todo When can we remove the singleton instance? Answer: not sure.
- * Python itself is single-threaded. That is, currently, python fakes
- * multi-thread support by grabbing a lock and only allowing just
- * one thread to run at a time.  Our singleton instance mirrors this
- * python limitation.  However, if we could set a per-thread atomspace,
- * then we could maybe still have python be callable in multiple threads,
- * with different atomspaces. Clearly python would become a major
- * bottleneck, but this is why we strongly discourage using python.
- *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
  * DO NOT change the reference count calls below using Py_INCREF
@@ -93,73 +84,48 @@ using namespace std::chrono_literals;
  *   https://docs.python.org/2/c-api/intro.html?highlight=steals#reference-count-details
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
-thread_local PythonEval* PythonEval::threadLocalInstance = nullptr;
 
-PythonEval::PythonEval()
+PythonEval::PythonEval(AtomSpace* as)
+	: GenericASEval(as)
 {
-    // Each thread can have its own PythonEval instance.
-    // Thread-local storage ensures proper isolation.
+	_eval_done = true;
+	_paren_count = 0;
+	global_python_initialize();
+	initialize_python_objects_and_imports();
+}
 
-    _eval_done = true;
-    _paren_count = 0;
-    // Initialize Python objects and imports.
-    //
-    // Strange but true: one can use the atomspace, and put atoms
-    // in it .. using the type constructors and everything (e.g.
-    // the demos in the /examples/python directory) and never ever
-    // actually call global_python_initialize() ... it might never
-    // be called, if the python evaluator (i.e. this object) is
-    // never used or needed.  I thought this was unexpected, so I
-    // mention it here.
-    global_python_initialize();
-    initialize_python_objects_and_imports();
+PythonEval::PythonEval(AtomSpacePtr& asp)
+	: GenericASEval(asp)
+{
+	_eval_done = true;
+	_paren_count = 0;
+	global_python_initialize();
+	initialize_python_objects_and_imports();
 }
 
 PythonEval::~PythonEval()
 {
-    logger().info("PythonEval::%s destructor", __FUNCTION__);
-
-    // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    // NOTE: The following come from Python C api calls that return borrowed
-    // references. However, we have called Py_INCREF( x ) to promote them
-    // to full references so we can and must decrement them here.
+    GILGuard gil;
     Py_DECREF(_pyRootModule);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
 }
 
-/**
-* Create thread-local instance for the current thread.
-* Python interpreter is thread-safe via GIL, so multiple
-* PythonEval instances (one per thread) are safe.
-*/
-void PythonEval::create_singleton_instance()
+// Factory function for pool management
+GenericASEval* PythonEval::create_evaluator()
 {
-    if (threadLocalInstance) return;
-
-    // Create thread-local instance of PythonEval.
-    threadLocalInstance = new PythonEval();
+	return new PythonEval(nullptr);
 }
 
-void PythonEval::delete_singleton_instance()
+// Return per-thread, per-atomspace evaluator using pool management
+PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)
 {
-    if (!threadLocalInstance) return;
-
-    // Delete the thread-local PythonEval instance.
-    delete threadLocalInstance;
-    threadLocalInstance = nullptr;
+	return static_cast<PythonEval*>(
+		GenericASEval::get_evaluator(asp, &PythonEval::create_evaluator));
 }
 
-PythonEval& PythonEval::instance()
+PythonEval* PythonEval::get_python_evaluator(AtomSpace* as)
 {
-    // Get or create the thread-local instance.
-    if (!threadLocalInstance)
-        create_singleton_instance();
-    return *threadLocalInstance;
+	return static_cast<PythonEval*>(
+		GenericASEval::get_evaluator(as, &PythonEval::create_evaluator));
 }
 
 // ===========================================================
@@ -214,7 +180,8 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
 
-    // Thread-local instance, no mutex needed.
+    // push_context_atomspace sets the as for this thread.
+    // That is where we want to perform our evaluations.
     push_context_atomspace(AtomSpaceCast(as));
     SCOPE_GUARD0 {
         pop_context_atomspace();
@@ -253,11 +220,11 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
             func.c_str());
     }
 
-    // Get the truth value pointer from the object (will be encoded
+    // Get the ValuePtr from the object (will be encoded
     // as a long by PyVoidPtr_asLong)
     PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
                                     (char*) "value_ptr", NULL);
-    // Make sure we got a truth value pointer.
+    // Make sure we got a ValuePtr.
     PyObject *pyError = PyErr_Occurred();
     if (pyError or nullptr == pyValuePtrPtr)
     {
@@ -292,7 +259,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Create the Python tuple for the function call with python
     // atomspace.
     PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = atomspace_py_object(AtomSpacePtr(as_argument));
+    PyObject* pyAtomSpace = atomspace_py_object(AtomSpaceCast(as_argument));
 
     PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
 
@@ -560,7 +527,7 @@ extern "C" {
 // Thin wrapper for easy dlopen/dlsym dynamic loading
 opencog::PythonEval* get_python_evaluator(opencog::AtomSpace* as)
 {
-   return &opencog::PythonEval::instance();
+	return opencog::PythonEval::get_python_evaluator(as);
 }
 
 };
