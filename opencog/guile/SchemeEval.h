@@ -166,8 +166,8 @@ class SchemeEval : public GenericASEval
 		virtual std::string get_name(void) const { return "SchemeEval"; }
 
 		// Return per-thread, per-atomspace singleton
-		static SchemeEval* get_evaluator(AtomSpace*);
-		static SchemeEval* get_evaluator(const AtomSpacePtr&);
+		static SchemeEval* get_scheme_evaluator(AtomSpace*);
+		static SchemeEval* get_scheme_evaluator(const AtomSpacePtr&);
 
 		// The async-output interface.
 		void begin_eval(void);

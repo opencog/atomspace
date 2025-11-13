@@ -1150,13 +1150,13 @@ GenericASEval* SchemeEval::create_evaluator()
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
+SchemeEval* SchemeEval::get_scheme_evaluator(const AtomSpacePtr& asp)
 {
 	return static_cast<SchemeEval*>(
 		GenericASEval::get_evaluator(asp, &SchemeEval::create_evaluator));
 }
 
-SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
+SchemeEval* SchemeEval::get_scheme_evaluator(AtomSpace* as)
 {
 	return static_cast<SchemeEval*>(
 		GenericASEval::get_evaluator(as, &SchemeEval::create_evaluator));
@@ -1209,7 +1209,7 @@ extern "C" {
 // Thin wrapper for easy dlopen/dlsym dynamic loading
 opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
 {
-	return opencog::SchemeEval::get_evaluator(as);
+	return opencog::SchemeEval::get_scheme_evaluator(as);
 }
 
 };
