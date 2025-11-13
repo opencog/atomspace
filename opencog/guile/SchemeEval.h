@@ -153,15 +153,12 @@ class SchemeEval : public GenericEval
 		bool _in_eval;
 
 	public:
-		// Call before first use.
-		static void init_scheme(void);
-
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);
 		virtual void set_scheme_as(const AtomSpacePtr&);
 		virtual AtomSpacePtr get_scheme_as(void);
 
-		SchemeEval(AtomSpace* = NULL);
+		SchemeEval(AtomSpace*);
 		SchemeEval(AtomSpacePtr&);
 		virtual ~SchemeEval();
 		virtual std::string get_name(void) const { return "SchemeEval"; }

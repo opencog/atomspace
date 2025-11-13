@@ -1158,7 +1158,7 @@ static SchemeEval* get_from_pool(void)
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	SchemeEval* ev = NULL;
 	if (pool.try_pop(ev)) return ev;
-	return new SchemeEval();
+	return new SchemeEval(nullptr);
 }
 
 static void return_to_pool(SchemeEval* ev)
@@ -1272,12 +1272,6 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 void SchemeEval::set_scheme_as(const AtomSpacePtr& as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as.get());
-}
-
-void SchemeEval::init_scheme(void)
-{
-	// XXX FIXME only a subset is needed.
-	SchemeEval sch;
 }
 
 extern "C" {
