@@ -48,7 +48,7 @@ public:
 		logger().set_timestamp_flag(false);
 
 		as = createAtomSpace();
-		SchemeEval* eval = SchemeEval::get_evaluator(as);
+		SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -80,7 +80,7 @@ void GetStateUTest::setUp(void)
 
 void GetStateUTest::Setter(void)
 {
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 #define LOOP_CNT 20000
 	for (int lc=0; lc<LOOP_CNT; lc++)
 	{
@@ -92,7 +92,7 @@ void GetStateUTest::Setter(void)
 
 void GetStateUTest::Getter(void)
 {
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval(
 			"(define getter (Meet (State anch (Variable \"foovar\"))))");
 
@@ -124,7 +124,7 @@ void GetStateUTest::test_race(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(define anch (Anchor \"foo-anchor\"))");
 	eval->eval_h("(State anch (Concept \"initial value\"))");
 

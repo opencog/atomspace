@@ -29,6 +29,7 @@ TARGET_LINK_LIBRARIES(smob
 	# to run the ctors for C++-backed atom types, resulting in
 	# screwball failures.
 	${NO_AS_NEEDED}
+	generic-eval
 	clearbox
 	join
 	pattern

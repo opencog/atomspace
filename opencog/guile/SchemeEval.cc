@@ -313,23 +313,16 @@ static void init_only_once(void)
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)
+	: GenericASEval(as)
 {
 	init_only_once();
-
-	// If it is coming from the pool, the as will be null.
-	if (as)
-		_atomspace = AtomSpaceCast(as->shared_from_this());
-	else
-		_atomspace = nullptr;
-
 	scm_with_guile(c_wrap_init, this);
 }
 
 SchemeEval::SchemeEval(AtomSpacePtr& asp)
+	: GenericASEval(asp)
 {
 	init_only_once();
-	_atomspace = asp;
-
 	scm_with_guile(c_wrap_init, this);
 }
 
@@ -1144,35 +1137,10 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 
 /* ============================================================== */
 
-// A pool of scheme evaluators, sitting hot and ready to go.
-// This is used to implement get_evaluator(), below.  The only
-// reason this is done with a pool, instead of simply new() and
-// delete() is because calling delete() from TLS conflicts with
-// the guile garbage collector, when the thread is destroyed. See
-// the note below.
-static concurrent_stack<SchemeEval*> pool;
-static std::mutex pool_mtx;
-
-static SchemeEval* get_from_pool(void)
+// Factory function for creating new SchemeEval instances
+GenericASEval* SchemeEval::create_evaluator()
 {
-	std::lock_guard<std::mutex> lock(pool_mtx);
-	SchemeEval* ev = NULL;
-	if (pool.try_pop(ev)) return ev;
 	return new SchemeEval(nullptr);
-}
-
-static void return_to_pool(SchemeEval* ev)
-{
-	ev->clear_pending();
-	std::lock_guard<std::mutex> lock(pool_mtx);
-
-	// try..catch is needed during library exit; the stack may
-	// already be gone. So just ignore the resulting exception.
-	// This should only happen during finalization.
-	try {
-		pool.push(ev);
-	}
-	catch (const concurrent_stack<SchemeEval*>::Canceled&) {}
 }
 
 /// Return evaluator, for this thread and atomspace combination.
@@ -1182,53 +1150,16 @@ static void return_to_pool(SchemeEval* ev)
 /// Use thread-local storage (TLS) in order to avoid repeatedly
 /// creating and destroying the evaluator.
 ///
-SchemeEval* SchemeEval::get_evaluator(const AtomSpacePtr& asp)
+SchemeEval* SchemeEval::get_scheme_evaluator(const AtomSpacePtr& asp)
 {
-	static thread_local std::map<AtomSpacePtr,SchemeEval*> issued;
-
-	// The eval_dtor runs when this thread is destroyed.
-	class eval_dtor {
-		public:
-		~eval_dtor() {
-			for (auto ev : issued)
-			{
-				SchemeEval* evaluator = ev.second;
-
-				// It would have been easier to just call delete evaluator
-				// instead of return_to_pool.  Unfortunately, the delete
-				// won't work, because the TLS thread destructor has already
-				// run the guile GC at this point, for this thread, and so
-				// calling delete will lead to a crash in c_wrap_finish().
-				// It would be nice if we got called before guile did, but
-				// there is no way in TLS to control execution order...
-				evaluator->_atomspace = nullptr;
-				return_to_pool(evaluator);
-			}
-		}
-	};
-	static thread_local eval_dtor killer;
-
-	auto ev = issued.find(asp);
-	if (ev != issued.end())
-		return ev->second;
-
-	SchemeEval* evaluator = get_from_pool();
-	evaluator->_atomspace = asp;
-	issued[asp] = evaluator;
-
-	return evaluator;
+	return static_cast<SchemeEval*>(
+		GenericASEval::get_evaluator(asp, &SchemeEval::create_evaluator));
 }
 
-SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
+SchemeEval* SchemeEval::get_scheme_evaluator(AtomSpace* as)
 {
-	// A null AtomSpace is passed from the cython initialization
-	// code. That code scramble to create an AtomSpace, after
-	// guile is initialized.
-	static AtomSpacePtr nullasp;
-	if (nullptr == as) return get_evaluator(nullasp);
-
-	const AtomSpacePtr& asp = AtomSpaceCast(as->shared_from_this());
-	return get_evaluator(asp);
+	return static_cast<SchemeEval*>(
+		GenericASEval::get_evaluator(as, &SchemeEval::create_evaluator));
 }
 
 /* ============================================================== */
@@ -1240,7 +1171,7 @@ void* SchemeEval::c_wrap_get_atomspace(void * p)
 	return self;
 }
 
-AtomSpacePtr SchemeEval::get_scheme_as(void)
+AtomSpacePtr SchemeEval::get_atomspace(void)
 {
 	scm_with_guile(c_wrap_get_atomspace, this);
 
@@ -1269,7 +1200,7 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 	scm_with_guile(c_wrap_set_atomspace, as);
 }
 
-void SchemeEval::set_scheme_as(const AtomSpacePtr& as)
+void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 {
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
@@ -1284,7 +1215,7 @@ extern "C" {
 // Thin wrapper for easy dlopen/dlsym dynamic loading
 opencog::SchemeEval* get_scheme_evaluator(opencog::AtomSpace* as)
 {
-	return opencog::SchemeEval::get_evaluator(as);
+	return opencog::SchemeEval::get_scheme_evaluator(as);
 }
 
 };

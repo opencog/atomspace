@@ -48,7 +48,7 @@ public:
 		logger().set_timestamp_flag(false);
 
 		as = createAtomSpace();
-		SchemeEval* eval = SchemeEval::get_evaluator(as);
+		SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -84,7 +84,7 @@ void QueryUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(load-from-path \"tests/query/query.scm\")");
 	TS_ASSERT_EQUALS(false, eval->eval_error());
 
@@ -113,7 +113,7 @@ void QueryUTest::test_meet(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(load-from-path \"tests/query/query-meet.scm\")");
 	TS_ASSERT_EQUALS(false, eval->eval_error());
 
@@ -154,7 +154,7 @@ void QueryUTest::test_exclusive(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(load-from-path \"tests/query/query-exclusive.scm\")");
 	TS_ASSERT_EQUALS(false, eval->eval_error());
 
