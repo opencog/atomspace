@@ -163,10 +163,6 @@ class SchemeEval : public GenericASEval
 		virtual void set_atomspace(const AtomSpacePtr&);
 		virtual AtomSpacePtr get_atomspace(void);
 
-		// XXX Temporary hack until porting is complete.
-		void set_scheme_as(const AtomSpacePtr& asp)
-		{ set_atomspace(asp); }
-
 		SchemeEval(AtomSpace*);
 		SchemeEval(AtomSpacePtr&);
 		virtual ~SchemeEval();
@@ -175,10 +171,6 @@ class SchemeEval : public GenericASEval
 		// Return per-thread, per-atomspace singleton
 		static SchemeEval* get_scheme_evaluator(AtomSpace*);
 		static SchemeEval* get_scheme_evaluator(const AtomSpacePtr&);
-
-		// XXX Temporary hack until porting is complete.
-		static inline SchemeEval* get_evaluator(const AtomSpacePtr& asp)
-		{ return get_scheme_evaluator(asp); }
 
 		// The async-output interface.
 		void begin_eval(void);
