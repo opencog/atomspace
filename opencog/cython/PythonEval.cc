@@ -96,6 +96,7 @@ using namespace std::chrono_literals;
 thread_local PythonEval* PythonEval::threadLocalInstance = nullptr;
 
 PythonEval::PythonEval()
+	: GenericASEval(nullptr)
 {
     // Each thread can have its own PythonEval instance.
     // Thread-local storage ensures proper isolation.
@@ -113,6 +114,24 @@ PythonEval::PythonEval()
     // mention it here.
     global_python_initialize();
     initialize_python_objects_and_imports();
+}
+
+PythonEval::PythonEval(AtomSpace* as)
+	: GenericASEval(as)
+{
+	_eval_done = true;
+	_paren_count = 0;
+	global_python_initialize();
+	initialize_python_objects_and_imports();
+}
+
+PythonEval::PythonEval(AtomSpacePtr& asp)
+	: GenericASEval(asp)
+{
+	_eval_done = true;
+	_paren_count = 0;
+	global_python_initialize();
+	initialize_python_objects_and_imports();
 }
 
 PythonEval::~PythonEval()
@@ -160,6 +179,25 @@ PythonEval& PythonEval::instance()
     if (!threadLocalInstance)
         create_singleton_instance();
     return *threadLocalInstance;
+}
+
+// Factory function for pool management
+GenericASEval* PythonEval::create_evaluator()
+{
+	return new PythonEval(nullptr);
+}
+
+// Return per-thread, per-atomspace evaluator using pool management
+PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)
+{
+	return static_cast<PythonEval*>(
+		GenericASEval::get_evaluator(asp, &PythonEval::create_evaluator));
+}
+
+PythonEval* PythonEval::get_python_evaluator(AtomSpace* as)
+{
+	return static_cast<PythonEval*>(
+		GenericASEval::get_evaluator(as, &PythonEval::create_evaluator));
 }
 
 // ===========================================================
@@ -560,7 +598,7 @@ extern "C" {
 // Thin wrapper for easy dlopen/dlsym dynamic loading
 opencog::PythonEval* get_python_evaluator(opencog::AtomSpace* as)
 {
-   return &opencog::PythonEval::instance();
+	return opencog::PythonEval::get_python_evaluator(as);
 }
 
 };
