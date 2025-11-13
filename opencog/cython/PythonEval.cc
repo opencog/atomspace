@@ -70,15 +70,6 @@ using namespace opencog;
 using namespace std::chrono_literals;
 
 /*
- * @todo When can we remove the singleton instance? Answer: not sure.
- * Python itself is single-threaded. That is, currently, python fakes
- * multi-thread support by grabbing a lock and only allowing just
- * one thread to run at a time.  Our singleton instance mirrors this
- * python limitation.  However, if we could set a per-thread atomspace,
- * then we could maybe still have python be callable in multiple threads,
- * with different atomspaces. Clearly python would become a major
- * bottleneck, but this is why we strongly discourage using python.
- *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
  * DO NOT change the reference count calls below using Py_INCREF
@@ -98,20 +89,8 @@ thread_local PythonEval* PythonEval::threadLocalInstance = nullptr;
 PythonEval::PythonEval()
 	: GenericASEval(nullptr)
 {
-    // Each thread can have its own PythonEval instance.
-    // Thread-local storage ensures proper isolation.
-
     _eval_done = true;
     _paren_count = 0;
-    // Initialize Python objects and imports.
-    //
-    // Strange but true: one can use the atomspace, and put atoms
-    // in it .. using the type constructors and everything (e.g.
-    // the demos in the /examples/python directory) and never ever
-    // actually call global_python_initialize() ... it might never
-    // be called, if the python evaluator (i.e. this object) is
-    // never used or needed.  I thought this was unexpected, so I
-    // mention it here.
     global_python_initialize();
     initialize_python_objects_and_imports();
 }
@@ -136,19 +115,8 @@ PythonEval::PythonEval(AtomSpacePtr& asp)
 
 PythonEval::~PythonEval()
 {
-    logger().info("PythonEval::%s destructor", __FUNCTION__);
-
-    // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    // NOTE: The following come from Python C api calls that return borrowed
-    // references. However, we have called Py_INCREF( x ) to promote them
-    // to full references so we can and must decrement them here.
+    GILGuard gil;
     Py_DECREF(_pyRootModule);
-
-    // Release the GIL. No Python API allowed beyond this point.
-    PyGILState_Release(gstate);
 }
 
 /**
