@@ -220,11 +220,11 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
             func.c_str());
     }
 
-    // Get the truth value pointer from the object (will be encoded
+    // Get the ValuePtr from the object (will be encoded
     // as a long by PyVoidPtr_asLong)
     PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
                                     (char*) "value_ptr", NULL);
-    // Make sure we got a truth value pointer.
+    // Make sure we got a ValuePtr.
     PyObject *pyError = PyErr_Occurred();
     if (pyError or nullptr == pyValuePtrPtr)
     {
