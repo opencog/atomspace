@@ -51,6 +51,8 @@ cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
+    instance.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>to_wrap)
+    instance.parent_atomspace = None
     # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
 
