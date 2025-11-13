@@ -33,7 +33,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/eval/GenericEval.h>
+#include <opencog/eval/GenericASEval.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -75,7 +75,7 @@ namespace opencog {
 
 class AtomSpace;
 
-class SchemeEval : public GenericEval
+class SchemeEval : public GenericASEval
 {
 	private:
 		// Initialization stuff
@@ -149,7 +149,6 @@ class SchemeEval : public GenericEval
 
 		static void * c_wrap_set_atomspace(void *);
 		static void * c_wrap_get_atomspace(void *);
-		AtomSpacePtr _atomspace;
 		bool _in_eval;
 
 	public:
