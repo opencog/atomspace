@@ -75,19 +75,3 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	applier->set_atomspace(saved_as);
 	return vp;
 }
-
-ValuePtr PythonRunner::evaluate(AtomSpace* as,
-                                const ValuePtr& vargs,
-                                bool silent)
-{
-	if (not vargs->is_atom())
-		throw SyntaxException(TRACE_INFO,
-			"PythonRunner: Expecting Handle; got %s",
-			vargs->to_string().c_str());
-
-	Handle cargs = HandleCast(vargs);
-	Handle asargs = as->add_atom(cargs);
-
-	PythonEval* applier = get_evaluator_for_python(as);
-	return applier->apply_v(as, _fname, asargs);
-}
