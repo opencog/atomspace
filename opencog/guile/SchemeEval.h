@@ -151,6 +151,9 @@ class SchemeEval : public GenericASEval
 		static void * c_wrap_get_atomspace(void *);
 		bool _in_eval;
 
+		// Factory function for pool management
+		static GenericASEval* create_evaluator();
+
 	public:
 		// Set per-thread global
 		static void set_scheme_as(AtomSpace*);

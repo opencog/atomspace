@@ -33,16 +33,30 @@ namespace opencog {
 
 class GenericASEval : public GenericEval
 {
+	public:
+		// Factory function type for creating new evaluators
+		typedef GenericASEval* (*EvalFactory)();
+
 	protected:
 		AtomSpacePtr _atomspace;
 
 		virtual void set_atomspace(const AtomSpacePtr&);
 		virtual AtomSpacePtr get_atomspace(void);
 
+		// Pool management
+		static GenericASEval* get_from_pool(EvalFactory factory);
+		static void return_to_pool(GenericASEval* ev);
+
 	public:
 		GenericASEval(AtomSpace*);
 		GenericASEval(AtomSpacePtr&);
 		virtual ~GenericASEval() {}
+
+		// Return evaluator for this thread and atomspace combination.
+		// Uses thread-local storage and a pool to avoid repeatedly
+		// creating and destroying evaluators.
+		static GenericASEval* get_evaluator(const AtomSpacePtr&, EvalFactory factory);
+		static GenericASEval* get_evaluator(AtomSpace*, EvalFactory factory);
 };
 
 /** @}*/
