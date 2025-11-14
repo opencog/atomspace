@@ -128,7 +128,7 @@ class BindlinkTest(unittest.TestCase):
             )
         )
 
-        tv = self.atomspace.execute(satisfaction_atom)
+        tv = satisfaction_atom.execute()
         self.assertEqual(green_count(), 2)
         self.assertEqual(red_count(), 1)
 
@@ -147,15 +147,13 @@ class BindlinkTest(unittest.TestCase):
         self.assertEqual(result, list_link)
 
     def test_evaluate_atom(self):
-        result = self.atomspace.execute(
-                EvaluationLink(
+        result = EvaluationLink(
                     GroundedPredicateNode("py: test_functions.bogus_tv"),
                     ListLink(
                         ConceptNode("one"),
                         ConceptNode("two")
                     )
-                )
-            )
+                ).execute()
         self.assertEqual(result, BoolValue(True))
 
     def test_execute_atom_no_return_value(self):
