@@ -281,7 +281,7 @@ void PutLinkUTest::test_filtering()
 				N(NUMBER_NODE, "42"),
 				foo = N(CONCEPT_NODE, "foo"),
 				N(PREDICATE_NODE, "biffle"),
-				L(EVALUATION_LINK,
+				L(EDGE_LINK,
 					N(CONCEPT_NODE, "thingy")),
 				N(SCHEMA_NODE, "finagle"),
 				bar = N(CONCEPT_NODE, "bar")));
@@ -645,7 +645,7 @@ void PutLinkUTest::test_compose()
 	//
 	Handle gee =
 		L(LAMBDA_LINK,
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(PREDICATE_NODE, "P"),
 				N(VARIABLE_NODE, "$x")));
 	Handle eff =
@@ -661,7 +661,7 @@ void PutLinkUTest::test_compose()
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(PREDICATE_NODE, "P"),
 				L(INHERITANCE_LINK,
 					N(VARIABLE_NODE, "$x"),
@@ -878,7 +878,7 @@ void PutLinkUTest::test_typed_compose()
 			L(TYPED_VARIABLE_LINK,
 				N(VARIABLE_NODE, "$x"),
 				N(TYPE_NODE, "InheritanceLink")),
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(PREDICATE_NODE, "P"),
 				N(VARIABLE_NODE, "$x")));
 	Handle eff =
@@ -908,7 +908,7 @@ void PutLinkUTest::test_typed_compose()
 				L(TYPED_VARIABLE_LINK,
 					N(VARIABLE_NODE, "$v"),
 					N(TYPE_NODE, "ConceptNode"))),
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(PREDICATE_NODE, "P"),
 				L(INHERITANCE_LINK,
 					N(VARIABLE_NODE, "$u"),
@@ -923,7 +923,7 @@ void PutLinkUTest::test_typed_compose()
 			L(TYPED_VARIABLE_LINK,
 				N(VARIABLE_NODE, "$x"),
 				N(TYPE_NODE, "SimilarityLink")), // type mismatch here!
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(PREDICATE_NODE, "P"),
 				N(VARIABLE_NODE, "$x")));
 
@@ -962,7 +962,7 @@ void PutLinkUTest::test_ident_compose()
 	//
 	Handle gee =
 		L(LAMBDA_LINK,
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(VARIABLE_NODE, "$x"),
 				N(VARIABLE_NODE, "$y")));
 	Handle eff =
@@ -991,7 +991,7 @@ void PutLinkUTest::test_ident_compose()
 				N(VARIABLE_NODE, "$x"),
 				N(VARIABLE_NODE, "$y"),
 				N(VARIABLE_NODE, "$z")),
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(VARIABLE_NODE, "$w"),
 				L(INHERITANCE_LINK,
 					N(VARIABLE_NODE, "$y"),
@@ -1038,7 +1038,7 @@ void PutLinkUTest::test_recursive_compose()
 	//
 	Handle gee =
 		L(LAMBDA_LINK,
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(VARIABLE_NODE, "$x"),
 				N(VARIABLE_NODE, "$y")));
 	Handle eff =
@@ -1073,7 +1073,7 @@ void PutLinkUTest::test_recursive_compose()
 				N(VARIABLE_NODE, "A"),
 				N(VARIABLE_NODE, "B"),
 				N(VARIABLE_NODE, "C")),
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				N(VARIABLE_NODE, "A"),
 				L(INHERITANCE_LINK,
 					N(VARIABLE_NODE, "B"),
@@ -1142,10 +1142,10 @@ void PutLinkUTest::test_eval_inheritance()
 		Y_human = L(INHERITANCE_LINK, Y, human),
 		Self_human = L(INHERITANCE_LINK, Self, human),
 		Bob_human = L(INHERITANCE_LINK, Bob, human),
-		X_Y_acquainted = L(EVALUATION_LINK,
+		X_Y_acquainted = L(EDGE_LINK,
 		                   acquainted,
 		                   L(LIST_LINK, X, Y)),
-		Self_Bob_acquainted = L(EVALUATION_LINK,
+		Self_Bob_acquainted = L(EDGE_LINK,
 		                        acquainted,
 		                        L(LIST_LINK, Self, Bob)),
 		vardecl = L(VARIABLE_LIST,
@@ -1199,8 +1199,8 @@ void PutLinkUTest::test_eval_implication_1()
 		A = N(CONCEPT_NODE, "A"),
 		CT = N(TYPE_NODE, "ConceptNode"),
 		P = N(PREDICATE_NODE, "P"),
-		P_X = L(EVALUATION_LINK, P, X),
-		P_A = L(EVALUATION_LINK, P, A),
+		P_X = L(EDGE_LINK, P, X),
+		P_A = L(EDGE_LINK, P, A),
 		body = L(QUOTE_LINK,
 		         L(RULE_LINK,
 		           L(UNQUOTE_LINK, P_X),
@@ -1276,10 +1276,10 @@ void PutLinkUTest::test_eval_implication_2()
 		Y_human = L(IMPLICATION_LINK, Y, human),
 		Self_human = L(IMPLICATION_LINK, Self, human),
 		Bob_human = L(IMPLICATION_LINK, Bob, human),
-		X_Y_acquainted = L(EVALUATION_LINK,
+		X_Y_acquainted = L(EDGE_LINK,
 		                   acquainted,
 		                   L(LIST_LINK, X, Y)),
-		Self_Bob_acquainted = L(EVALUATION_LINK,
+		Self_Bob_acquainted = L(EDGE_LINK,
 		                        acquainted,
 		                        L(LIST_LINK, Self, Bob)),
 		vardecl = L(VARIABLE_LIST,
@@ -1333,7 +1333,7 @@ void PutLinkUTest::test_ill_unquote()
 		put = L(PUT_LINK,
 		        L(LAMBDA_LINK,
 		          X,
-		          L(EVALUATION_LINK, P, X)),
+		          L(EDGE_LINK, P, X)),
 		        L(LAMBDA_LINK,
 		          L(UNQUOTE_LINK, x),
 		          L(UNQUOTE_LINK, g)));
@@ -2256,7 +2256,7 @@ void PutLinkUTest::test_get_multi()
 	Handle result = _eval.eval_h("(cog-execute! put-get-multi)");
 
 	Handle expected =
-		L(EVALUATION_LINK,
+		L(EDGE_LINK,
 			N(PREDICATE_NODE, "relatives"),
 			L(LIST_LINK,
 				N(CONCEPT_NODE, "Jim"),
@@ -2287,7 +2287,7 @@ void PutLinkUTest::test_multi_set()
 	Handle result = _eval.eval_h("(cog-execute! put-multi-set)");
 
 	Handle expected =
-		L(EVALUATION_LINK,
+		L(EDGE_LINK,
 			N(PREDICATE_NODE, "relatives"),
 			L(LIST_LINK,
 				N(CONCEPT_NODE, "Jim"),

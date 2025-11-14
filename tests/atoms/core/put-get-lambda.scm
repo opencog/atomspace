@@ -5,7 +5,7 @@
  (PutLink
   (LambdaLink
    (VariableNode "x")
-   (EvaluationLink
+   (EdgeLink
     (PredicateNode "relation")
     (ListLink
      (VariableNode "x")
@@ -16,12 +16,12 @@
 
 (define expected-put-get-lambda
  (SetLink
-  (EvaluationLink
+  (EdgeLink
    (PredicateNode "relation")
    (ListLink
     (ConceptNode "B")
     (ConceptNode "A")))
-  (EvaluationLink
+  (EdgeLink
    (PredicateNode "relation")
    (ListLink
     (ConceptNode "C")

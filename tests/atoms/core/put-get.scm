@@ -3,7 +3,7 @@
 
 (define put-get
  (PutLink
-   (EvaluationLink
+   (EdgeLink
     (PredicateNode "relation")
     (ListLink
      (VariableNode "x")
@@ -14,12 +14,12 @@
 
 (define expected-put-get
  (SetLink
-  (EvaluationLink
+  (EdgeLink
    (PredicateNode "relation")
    (ListLink
     (ConceptNode "B")
     (ConceptNode "A")))
-  (EvaluationLink
+  (EdgeLink
    (PredicateNode "relation")
    (ListLink
     (ConceptNode "C")

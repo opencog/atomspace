@@ -6,7 +6,7 @@
 	(PutLink
 		(LambdaLink
 			(VariableList (Variable "x") (Variable "y"))
-			(EvaluationLink
+			(EdgeLink
 				(PredicateNode "relatives")
 				(ListLink
 					(Variable "x")
