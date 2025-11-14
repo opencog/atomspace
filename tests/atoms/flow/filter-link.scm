@@ -9,10 +9,10 @@
 	(FilterLink
 		(LambdaLink
 			(Variable "$x")
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Concept "baz"))))
 )
@@ -21,18 +21,18 @@
 	(FilterLink
 		(LambdaLink
 			(Variable "$x")
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(SetLink
 			; Not in alphaebtical or type-order!
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
 		))
@@ -43,18 +43,18 @@
 	(FilterLink
 		(LambdaLink
 			(Variable "$x")
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(SetLink
 			; Not in alphaebtical or type-order!
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "oof dah")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
 		))
@@ -63,18 +63,18 @@
 ; Same as above, but implicit scoping
 (define single-set-noscope
 	(FilterLink
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Variable "$x")))
 		(SetLink
 			; Not in alphaebtical or type-order!
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
 		))
@@ -83,18 +83,18 @@
 ; Like above but does implicit scope and filtering.
 (define single-set-filter-noscope
 	(FilterLink
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Variable "$x")))
 		(SetLink
 			; Not in alphaebtical or type-order!
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "oof dah")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
 		))
@@ -104,17 +104,17 @@
 	(FilterLink
 		(LambdaLink
 			(Variable "$x")
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(ListLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -124,17 +124,17 @@
 	(FilterLink
 		(LambdaLink
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Variable "$x"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -147,18 +147,18 @@
 		(LambdaLink
 			(TypedVariable (Variable "$x")
 				(SignatureLink
-					(EvaluationLink
+					(EdgeLink
 						(Predicate "foo")
 						(ListLink (Concept "bar") (Type "ConceptNode")))))
 			(Variable "$x"))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -166,10 +166,10 @@
 
 (define sig-expect
 	(SetLink
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Concept "ah one")))
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "foo")
 			(ListLink (Concept "bar") (Concept "ah two")))
 	)
@@ -183,17 +183,17 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -207,17 +207,17 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -232,20 +232,20 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "reverse-foo")
 				(ListLink (Variable "$y") (Variable "$x"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Number 3)))
 		))
@@ -253,10 +253,10 @@
 
 (define imply-expected
 	(SetLink
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "reverse-foo")
 			(ListLink (ConceptNode "ah one") (ConceptNode "bar")))
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "reverse-foo")
 			(ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 	)
@@ -270,20 +270,20 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "reverse-foo nature")
 				(ListLink (Variable "$y") (Variable "$x"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Plus (Number 3) (Number 2))))
 		))
@@ -291,7 +291,7 @@
 
 (define eval-expected
 	(SetLink
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "reverse-foo nature")
 			(ListLink (Number 5) (ConceptNode "bar")))
 	)
@@ -303,20 +303,20 @@
 (define imply-map-nodecl
 	(FilterLink
 		(RuleLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Variable "$x") (Variable "$y")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "reverse-foo")
 				(ListLink (Variable "$y") (Variable "$x"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "ah two")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar") (Concept "too") (Concept "much")))
 		))
@@ -329,23 +329,23 @@
 (define imply-glob-nodecl
 	(FilterLink
 		(RuleLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Glob "$y")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "goo nature")
 				(ListLink (Concept "gar") (Glob "$y"))))
 		(SetLink
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "goo")
 				(ListLink (Concept "bar")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Concept "ah one")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "goo")
 				(ListLink (Concept "bar") (Concept "two") (Concept "three")))
-			(EvaluationLink
+			(EdgeLink
 				(Predicate "foo")
 				(ListLink (Concept "bar")))
 		))
@@ -353,10 +353,10 @@
 
 (define imply-glob-expected
 	(SetLink
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "goo nature")
 			(ListLink (Concept "gar") (Concept "ah one")))
-		(EvaluationLink
+		(EdgeLink
 			(Predicate "goo nature")
 			(ListLink (Concept "gar") (Concept "two") (Concept "three")))
 	)
@@ -367,18 +367,18 @@
 
 (define glob-simple
 	(FilterLink
-		(EvaluationLink (Predicate "goo")
+		(EdgeLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif")))
 		(SetLink
-			(EvaluationLink (Predicate "foo")
+			(EdgeLink (Predicate "foo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "gif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "gar") (Concept "baz") (Concept "bif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz")))
 		)))
 
@@ -391,18 +391,18 @@
 
 (define glob-simple-tail
 	(FilterLink
-		(EvaluationLink (Predicate "goo")
+		(EdgeLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x")))
 		(SetLink
-			(EvaluationLink (Predicate "foo")
+			(EdgeLink (Predicate "foo")
 				(ListLink (Concept "bar") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "bif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "gif")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "gar") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz")))
 		)))
 
@@ -417,18 +417,18 @@
 
 (define glob-double
 	(FilterLink
-		(EvaluationLink (Predicate "goo")
+		(EdgeLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
 		(SetLink
-			(EvaluationLink (Predicate "foo")
+			(EdgeLink (Predicate "foo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "bif") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "gif") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "gar") (Concept "baz") (Concept "bif") (Concept "baz")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar") (Concept "baz") (Concept "baz")))
 		)))
 
@@ -441,30 +441,30 @@
 
 (define glob-glob
 	(FilterLink
-		(EvaluationLink (Predicate "goo")
+		(EdgeLink (Predicate "goo")
 			(ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
 		(SetLink
-			(EvaluationLink (Predicate "foo")
+			(EdgeLink (Predicate "foo")
 				(ListLink (Concept "bar")
 					(Concept "baz") (Concept "ni") (Concept "goh")
 					(Concept "bif")
 					(Concept "baz") (Concept "ni") (Concept "goh")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar")
 					(Concept "baz") (Concept "ni") (Concept "goh")
 					(Concept "bif")
 					(Concept "baz") (Concept "ni") (Concept "goh")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "gar")
 					(Concept "baz") (Concept "ni") (Concept "goh")
 					(Concept "bif")
 					(Concept "baz") (Concept "ni") (Concept "goh")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar")
 					(Concept "baz") (Concept "ni") (Concept "goh")
 					(Concept "gif")
 					(Concept "baz") (Concept "ni") (Concept "goh")))
-			(EvaluationLink (Predicate "goo")
+			(EdgeLink (Predicate "goo")
 				(ListLink (Concept "bar")
 					(Concept "baz") (Concept "ni") (Concept "goh")
 					(Concept "bif")
@@ -590,23 +590,23 @@
    (Filter
 
    (Signature
-      (Evaluation
+      (Edge
          (PredicateNode "foo")
          (List (Type 'Concept) (Type 'Concept))))
   (Set
-     (Evaluation
+     (Edge
         (Predicate "foo")
         (List (Concept "A") (Concept "B")))
-     (Evaluation
+     (Edge
         (PredicateNode "bar")
         (List (Concept "C") (Concept "D")))
-     (Evaluation
+     (Edge
         (Predicate "foo")
         (List (Number 5) (Number 6))))))
 
 (define siggy-expect
   (Set
-     (Evaluation
+     (Edge
         (Predicate "foo")
         (List (Concept "A") (Concept "B")))))
 
@@ -618,7 +618,7 @@
       (VariableList
          (TypedVariable (Variable "$x") (Type 'ConceptNode))
          (TypedVariable (Variable "$y") (Type 'ConceptNode)))
-      (Evaluation
+      (Edge
          (PredicateNode "foo")
          (List (Variable "$x") (Variable "$y")))))
 
@@ -626,13 +626,13 @@
    (Filter
       (DefinedSchema "foof-match")
       (Set
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Concept "A") (Concept "B")))
-         (Evaluation
+         (Edge
             (PredicateNode "bar")
             (List (Concept "C") (Concept "D")))
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Number 5) (Number 6))))))
 
@@ -647,7 +647,7 @@
       (VariableList
          (TypedVariable (Variable "$x") (Type 'ConceptNode))
          (TypedVariable (Variable "$y") (Type 'ConceptNode)))
-      (Evaluation
+      (Edge
          (PredicateNode "foo")
          (List (Variable "$x") (Variable "$y")))
       (Member (Variable "$x") (Concept "all things frob"))
@@ -657,13 +657,13 @@
    (Filter
       (DefinedSchema "foo to frob")
       (Set
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Concept "A") (Concept "B")))
-         (Evaluation
+         (Edge
             (PredicateNode "bar")
             (List (Concept "C") (Concept "D")))
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Number 5) (Number 6))))))
 
@@ -683,7 +683,7 @@
    (DefinedSchema "extract bc")
    (Rule
       (Variable "$x")
-      (Evaluation
+      (Edge
          ; (PredicateNode "foo")
          (Sign 'PredicateNode)
          (List (Sign 'Concept) (Variable "$x")))
@@ -693,13 +693,13 @@
    (Filter
       (DefinedSchema "extract bc")
       (Set
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Concept "A") (Concept "B")))
-         (Evaluation
+         (Edge
             (PredicateNode "bar")
             (List (Concept "C") (Concept "D")))
-         (Evaluation
+         (Edge
             (Predicate "foo")
             (List (Number 5) (Number 6))))))
 
