@@ -51,7 +51,6 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
 
     def tearDown(self):
         """Clean up after test."""

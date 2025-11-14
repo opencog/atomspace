@@ -1,13 +1,12 @@
 import unittest
 
 from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace
+
 
 class QueueValueTest(unittest.TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
 
     def tearDown(self):
         del self.space
