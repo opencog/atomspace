@@ -7,7 +7,7 @@
 (DefineLink
    (DefinedSchemaNode "set timestamp")
    (PutLink
-      (EvaluationLink (PredicateNode "event-timestamp")
+      (EdgeLink (PredicateNode "event-timestamp")
          (ListLink (VariableNode "$ts")))
       (ExecutionOutputLink
          (GroundedSchemaNode "scm: get-timestamp")

@@ -15,19 +15,19 @@
 	(ConceptNode "transistor")
 	(ConceptNode "electrical device"))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "battery")
 		(VariableNode "car")))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "transistor")
 		(VariableNode "phone")))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "windsheild")
@@ -40,7 +40,7 @@
 		(InheritanceLink
 			(VariableNode "$x")
 			(ConceptNode "electrical device"))
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "PartOf")
 			(ListLink
 				(VariableNode "$x")
@@ -55,7 +55,7 @@
 			(InheritanceLink
 				(VariableNode "$x")
 				(ConceptNode "electrical device"))
-			(EvaluationLink
+			(EdgeLink
 				(PredicateNode "PartOf")
 				(ListLink
 					(VariableNode "$x")
@@ -70,7 +70,7 @@
 
 (DefineLink
    (DefinedPredicateNode "Part-whole Relation")
-   (EvaluationLink
+   (EdgeLink
       (PredicateNode "PartOf")
       (ListLink
          (VariableNode "$x")

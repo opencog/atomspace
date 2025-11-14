@@ -107,7 +107,7 @@ void DefineLinkUTest::test_schema(void)
 	TS_ASSERT_EQUALS(2, getarity(timestamp));
 
 	// Executing the above should return something like this:
-	// (EvaluationLink
+	// (EdgeLink
 	//	 (PredicateNode "start-interaction-timestamp")
 	//	 (ListLink
 	//		 (NumberNode "1442342173.000000")))
