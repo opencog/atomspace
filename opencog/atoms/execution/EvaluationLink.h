@@ -39,7 +39,7 @@ public:
 	EvaluationLink(const EvaluationLink&) = delete;
 	EvaluationLink& operator=(const EvaluationLink&) = delete;
 
-	virtual bool is_executale() const { return true; }
+	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
 		return evaluate(as, silent);
 	}
