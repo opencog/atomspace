@@ -30,6 +30,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/executioncontext/Context.h>
 #include "PythonEval.h"
 #include "PyGILGuard.h"
 
@@ -99,6 +100,13 @@ void opencog::global_python_initialize()
         PyErr_Print();
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
+    } else {
+        // Create and set a default atomspace for the initial thread.
+        // This allows type constructors to work without requiring
+        // explicit set_default_atomspace() calls.
+        AtomSpacePtr default_atomspace = createAtomSpace();
+        push_context_atomspace(default_atomspace);
+        logger().info("[global_python_initialize] Created default atomspace");
     }
 
     // Release the GIL, otherwise the Python shell hangs on startup.
