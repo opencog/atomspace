@@ -13,9 +13,7 @@ from opencog.type_constructors import (
     ConceptNode, PredicateNode, ListLink, ExecutionOutputLink,
     GroundedSchemaNode
 )
-from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace
-)
+from opencog.utilities import set_default_atomspace, push_default_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator
@@ -34,12 +32,11 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_20_isolated_atomspaces(self):
         """
@@ -130,7 +127,7 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
                     ListLink(arg, arg)
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result is thread-specific
                 expected = f"result_isolated_{thread_id}_isolated_{thread_id}"
@@ -424,7 +421,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
                     ListLink(arg, parent_atom)
                 )
 
-                result = child_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result
                 expected = f"result_child_arg_{thread_id}_shared_parent_atom"
