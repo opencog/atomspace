@@ -1,12 +1,9 @@
 
 from opencog.atomspace import AtomSpace, types
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import get_default_atomspace
 import opencog.scheme as scheme
 from opencog.scheme import scheme_eval
 from opencog.type_constructors import *
-
-atomspace = AtomSpace()
-set_default_atomspace(atomspace)
 
 executed = False
 
@@ -16,7 +13,8 @@ def add_link(atom1, atom2):
     executed = True
     return link
 
-# Module for cog-execute!
+# Module that defines cog-execute!
+atomspace = get_default_atomspace()
 scheme_eval(atomspace, '(use-modules (opencog exec))')
 
 execute_code = \
@@ -52,7 +50,3 @@ if (executed):
     print ("add_link - executed successfully")
 else:
     print ("add_link - did NOT execute")
-
-
-finalize_opencog()
-del atomspace
