@@ -2,12 +2,12 @@
 
 (use-modules ((opencog exec)))
 
-(EvaluationLink
+(EdgeLink
    (ConceptNode "arkle")
    (ConceptNode "barkle")
    (ConceptNode "curry"))
 
-(EvaluationLink
+(EdgeLink
    (ConceptNode "glib")
    (ConceptNode "blab"))
 
@@ -15,14 +15,14 @@
 (Meet
    (VariableList (VariableNode "$a") (VariableNode "$b")
       (TypedVariableLink (VariableNode "$lnk")
-          (TypeNode "EvaluationLink")))
+          (TypeNode "EdgeLink")))
    (AndLink
        (VariableNode "$lnk")
-       (EvaluationLink
+       (EdgeLink
            (VariableNode "$a")
            (VariableNode "$b"))
        (EqualLink
            (VariableNode "$lnk")
-           (EvaluationLink
+           (EdgeLink
                (VariableNode "$a")
                (VariableNode "$b"))))))

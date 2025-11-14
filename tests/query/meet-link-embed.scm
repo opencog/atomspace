@@ -43,12 +43,12 @@
 	(Meet
 		(And
 			(Present
-				(Evaluation
+				(Edge
 					(Predicate "take")
 					(List (Variable "$X") (Concept "treatment-1"))))
 			(TypedVariable (Variable "$X") (Type "Concept"))
 			(Present
-				(Evaluation
+				(Edge
 					(Predicate "contain")
 					(List (Concept "treatment-1") (Variable "$Z"))))
 			(TypedVariable (Variable "$Z") (Type "Concept"))
@@ -56,10 +56,10 @@
 
 ; (cog-execute! g-take-contain)
 
-(Evaluation
+(Edge
 	(Predicate "take")
 	(List (Concept "John") (Concept "treatment-1")))
 
-(Evaluation
+(Edge
 	(Predicate "contain")
 	(List (Concept "treatment-1") (Concept "compound-A")))

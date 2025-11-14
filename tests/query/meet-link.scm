@@ -53,14 +53,14 @@
          )
       )
       (AndLink
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "take")
             (ListLink
                (VariableNode "$X")
                (ConceptNode "treatment-1")
             )
          )
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "contain")
             (ListLink
                (ConceptNode "treatment-1")
@@ -71,13 +71,13 @@
    )
 )
 
-(EvaluationLink
+(EdgeLink
    (PredicateNode "take")
    (ListLink
       (ConceptNode "John")
       (ConceptNode "treatment-1")))
 
-(EvaluationLink
+(EdgeLink
    (PredicateNode "contain")
    (ListLink
       (ConceptNode "treatment-1")

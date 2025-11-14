@@ -195,7 +195,7 @@ void MeetLinkUTest::test_eval_clause(void)
 	                           "   (LinkValue"
 	                           "      (ConceptNode \"glib\")"
 	                           "      (ConceptNode \"blab\")"
-	                           "      (EvaluationLink"
+	                           "      (EdgeLink"
 	                           "         (ConceptNode \"glib\")"
 	                           "         (ConceptNode \"blab\"))))");
 
