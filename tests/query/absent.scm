@@ -1,8 +1,8 @@
 ;
 ; Unit testing for absence of a single term.
 ;
-; Repeatedly create and destroy an EvaluationLink. Then test to see if the
-; EvaluationLink is present in the atomspace. If it is, then set a state
+; Repeatedly create and destroy an EdgeLink. Then test to see if the
+; EdgeLink is present in the atomspace. If it is, then set a state
 ; atom that indicates whether it is present or not.
 ;
 ; The state atom is called "Room List", and it will be linked either to
@@ -10,11 +10,11 @@
 ; function will display the current state, when called.
 ;
 ; The room state is set by invoking two patterns: is-visible and
-; is-invisibile.  The first checks for the presence of the EvaluationLink
+; is-invisibile.  The first checks for the presence of the EdgeLink
 ; and, if found, sets the room state to full.  The second checks for it's
 ; absence, and if it is absent, sets the state to "empty".
 ;
-; The EvaluationLink is created and destroyed by running one of two
+; The EdgeLink is created and destroyed by running one of two
 ; patterns, `create` or `destroy`.
 ;
 (use-modules (opencog))
@@ -22,7 +22,7 @@
 
 ; Clause to match during query
 (define query 
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "visibility")
 		(ListLink (VariableNode "$x"))))
 
