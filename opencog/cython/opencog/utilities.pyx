@@ -20,13 +20,13 @@ def initialize_opencog(AtomSpace atomspace=None):
     create python evaluator singleton object.
 
     Calling this function should not be needed.
-    Use set_default_atomspace to set default atomspace.
+    Use set_thread_atomspace to set default atomspace.
     Python evaluator will be created on first evaluation.
     """
     if atomspace is not None:
         warnings.warn("setting default atomspace with initialize_opencog is deprecated,\
-                use set_default_atomspace instead", DeprecationWarning)
-        set_default_atomspace(atomspace)
+                use set_thread_atomspace instead", DeprecationWarning)
+        set_thread_atomspace(atomspace)
     # Avoid recursive initialization
     global is_initialized
     if is_initialized:
@@ -48,15 +48,15 @@ def tmp_atomspace():
     """
     Context manager, to create child atomspace from current default
     """
-    parent_atomspace = get_default_atomspace()
+    parent_atomspace = get_thread_atomspace()
     if parent_atomspace is None:
         raise RuntimeError("Default atomspace is None")
     atomspace = create_child_atomspace(parent_atomspace)
-    set_default_atomspace(atomspace)
+    set_thread_atomspace(atomspace)
     try:
         yield atomspace
     finally:
-        set_default_atomspace(parent_atomspace)
+        set_thread_atomspace(parent_atomspace)
 
 
 def add_link(Type t, outgoing):
@@ -109,11 +109,12 @@ def add_node(Type t, atom_name):
     if result == result.UNDEFINED: return None
     return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
 
-def set_default_atomspace(AtomSpace atomspace):
+def set_thread_atomspace(AtomSpace atomspace):
     """
-    Emulate set default atomspace with queue for old code
+    Set the default atomspace for the current thread.
+    Clears the context stack and pushes the atomspace onto it.
     """
-    c_clear_context() 
+    c_clear_context()
     if atomspace is not None:
         push_default_atomspace(atomspace)
 
@@ -125,9 +126,9 @@ def push_default_atomspace(AtomSpace new_atomspace):
     push_context_atomspace(new_atomspace.asp)
 
 
-def get_default_atomspace():
+def get_thread_atomspace():
     """
-    Get default atomspace
+    Get the default atomspace for the current thread
     """
     cdef cValuePtr context = get_context_atomspace()
     return AtomSpace_factoid(context)
@@ -135,3 +136,26 @@ def get_default_atomspace():
 
 def pop_default_atomspace():
     return AtomSpace_factoid(pop_context_atomspace())
+
+
+# Backwards-compatibility wrappers (deprecated)
+def set_default_atomspace(AtomSpace atomspace):
+    """
+    Deprecated: Use set_thread_atomspace instead.
+
+    Set the default atomspace for the current thread.
+    """
+    warnings.warn("set_default_atomspace is deprecated, use set_thread_atomspace instead",
+                  DeprecationWarning, stacklevel=2)
+    set_thread_atomspace(atomspace)
+
+
+def get_default_atomspace():
+    """
+    Deprecated: Use get_thread_atomspace instead.
+
+    Get the default atomspace for the current thread.
+    """
+    warnings.warn("get_default_atomspace is deprecated, use get_thread_atomspace instead",
+                  DeprecationWarning, stacklevel=2)
+    return get_thread_atomspace()

@@ -22,8 +22,9 @@ from opencog.utilities import add_node, add_link
 
 # The code below never uses these imports, but users do, when they say
 #    from opencog.type_constructors import *
-# and expect to get the four functions below.
-from opencog.utilities import get_default_atomspace, set_default_atomspace
+# and expect to get these functions below.
+from opencog.utilities import get_thread_atomspace, set_thread_atomspace
+from opencog.utilities import get_default_atomspace, set_default_atomspace  # deprecated
 from opencog.utilities import push_default_atomspace, pop_default_atomspace
 
 # -----------------------------------------------------------------
