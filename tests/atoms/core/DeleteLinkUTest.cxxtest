@@ -60,7 +60,7 @@ void DeleteLinkUTest::test_free_delete()
 	Handle pred, list;
 	Handle add =
 		L(PUT_LINK,
-			L(EVALUATION_LINK,
+			L(EDGE_LINK,
 				pred = N(PREDICATE_NODE, "some property"),
 				N(VARIABLE_NODE, "$x")),
 			list = L(LIST_LINK,
@@ -76,7 +76,7 @@ void DeleteLinkUTest::test_free_delete()
 	Handle prop = HandleCast(inst.execute(add));
 
 	printf("Created link %s\n", prop->to_string().c_str());
-	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->get_type());
+	TS_ASSERT_EQUALS(EDGE_LINK, prop->get_type());
 	TS_ASSERT_EQUALS(pred, prop->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(list, prop->getOutgoingAtom(1));
 
@@ -89,7 +89,7 @@ void DeleteLinkUTest::test_free_delete()
 	Handle del =
 		L(PUT_LINK,
 			L(DELETE_LINK,
-				L(EVALUATION_LINK,
+				L(EDGE_LINK,
 					N(PREDICATE_NODE, "some property"),
 					N(VARIABLE_NODE, "$x"))),
 			L(LIST_LINK,
