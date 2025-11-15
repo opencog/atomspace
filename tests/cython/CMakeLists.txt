@@ -42,7 +42,7 @@ ADD_CXXTEST(PythonInitFiniUTest)
 
 TARGET_LINK_LIBRARIES(PythonInitFiniUTest
 	PythonEval
-	utilities_cython
+	type_ctors_cython
 	atomspace_cython
 	atomspace
 	${COGUTIL_LIBRARY}

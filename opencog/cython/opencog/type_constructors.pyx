@@ -23,9 +23,9 @@ from opencog.type_ctors import add_node, add_link
 # The code below never uses these imports, but users do, when they say
 #    from opencog.type_constructors import *
 # and expect to get these functions below.
+from opencog.type_ctors import push_thread_atomspace, pop_thread_atomspace
 from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
 from opencog.type_ctors import get_default_atomspace, set_default_atomspace  # deprecated
-from opencog.type_ctors import push_default_atomspace, pop_default_atomspace
 
 # -----------------------------------------------------------------
 # The core Atom types are taken from an auto-generated file

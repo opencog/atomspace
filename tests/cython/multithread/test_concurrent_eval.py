@@ -14,7 +14,7 @@ from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )
-from opencog.utilities import push_default_atomspace
+from opencog.utilities import push_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator, check_memory_leaks
@@ -58,7 +58,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             try:
                 # Create new AtomSpace (triggers PythonEval creation)
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Execute a simple GroundedSchema
                 exec_link = ExecutionOutputLink(
@@ -118,7 +118,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             try:
                 # Create ONE long-lived AtomSpace per thread (realistic usage)
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Repeatedly execute using the same atomspace
                 for iteration in range(iterations_per_thread):
@@ -185,7 +185,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
             """Worker calling same function."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # All threads call the same function
                 exec_link = ExecutionOutputLink(
@@ -233,7 +233,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
             """Worker calling function with thread-specific args."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create thread-specific arguments
                 arg1 = ConceptNode(f"arg1_{thread_id}")
@@ -311,7 +311,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
             """Worker calling function based on thread ID."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Select function based on thread ID
                 func_name, expected_result = functions[thread_id % len(functions)]
@@ -370,7 +370,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
             """Worker calling function based on thread ID mod 3."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 case = thread_id % 3
 

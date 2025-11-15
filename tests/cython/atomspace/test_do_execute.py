@@ -3,7 +3,7 @@ import threading
 
 from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
-from opencog.utilities import push_default_atomspace, get_thread_atomspace
+from opencog.utilities import push_thread_atomspace, get_thread_atomspace
 
 
 class DoExecuteTest(unittest.TestCase):
@@ -60,7 +60,7 @@ class DoExecuteTest(unittest.TestCase):
         """push default atomspace in different thread and check the behaviour"""
         test_as = AtomSpace()
         different_as = AtomSpace()
-        push_default_atomspace(test_as)
+        push_thread_atomspace(test_as)
         th = threading.Thread(target=push_default, args=(different_as,))
         th.start()
         th.join()
@@ -73,7 +73,7 @@ class DoExecuteTest(unittest.TestCase):
 
 
 def push_default(atomspace):
-    push_default_atomspace(atomspace)
+    push_thread_atomspace(atomspace)
     ConceptNode("test-1")
 
 

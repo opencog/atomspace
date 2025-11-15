@@ -83,12 +83,12 @@ def set_thread_atomspace(AtomSpace atomspace):
     """
     c_clear_context()
     if atomspace is not None:
-        push_default_atomspace(atomspace)
+        push_context_atomspace(atomspace.asp)
 
 
-def push_default_atomspace(AtomSpace new_atomspace):
+def push_thread_atomspace(AtomSpace new_atomspace):
     """
-    Set default atomspace for current threads
+    Set default atomspace for current thread
     """
     push_context_atomspace(new_atomspace.asp)
 
@@ -101,7 +101,7 @@ def get_thread_atomspace():
     return AtomSpace_factoid(context)
 
 
-def pop_default_atomspace():
+def pop_thread_atomspace():
     return AtomSpace_factoid(pop_context_atomspace())
 
 
