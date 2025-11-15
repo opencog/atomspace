@@ -2,7 +2,7 @@
 #include <opencog/cython/executioncontext/Context.h>
 #include <opencog/util/exceptions.h>
 
-#include "Utilities.h"
+#include "TypeCtors.h"
 
 using namespace opencog;
 

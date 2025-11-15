@@ -1,5 +1,5 @@
 /*
- * opencog/cython/opencog/Utilities.h
+ * opencog/cython/opencog/TypeCtors.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_UTILITIES_H
-#define _OPENCOG_UTILITIES_H
+#ifndef _OPENCOG_PYTHON_TYPE_CTORS_H
+#define _OPENCOG_PYTHON_TYPE_CTORS_H
 #include "opencog/atoms/base/Handle.h"
 #include "opencog/atomspace/AtomSpace.h"
 
@@ -34,4 +34,4 @@ AtomSpacePtr get_context_atomspace(void);
 } // namespace opencog
 
 
-#endif // _OPENCOG_UTILITIES_H
+#endif // _OPENCOG_PYTHON_TYPE_CTORS_H
