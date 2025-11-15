@@ -12,7 +12,6 @@ cdef extern from "opencog/util/exceptions.h" namespace "opencog":
 
 
 cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
-    cdef void c_initialize_python "opencog::initialize_python" ()
     cHandle c_add_node "opencog::add_node" (Type t, const string s) except +
     cHandle c_add_link "opencog::add_link" (Type t, const vector[cHandle]) except +
 

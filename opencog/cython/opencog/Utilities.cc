@@ -10,13 +10,6 @@
 
 using namespace opencog;
 
-void opencog::initialize_python()
-{
-    // Initialize Python.
-    logger().debug("initialize_opencog - initializing Python");
-    global_python_initialize();
-}
-
 Handle opencog::add_node(Type t, std::string name) {
     AtomSpacePtr atomspace = get_context_atomspace();
     if (atomspace == nullptr){

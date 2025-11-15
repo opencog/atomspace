@@ -10,31 +10,6 @@ from opencog.atomspace import create_child_atomspace
 import warnings
 
 
-# Avoid recursive initialization
-is_initialized = False
-
-
-def initialize_opencog(AtomSpace atomspace=None):
-    """
-    Set default atomspace(deprecated feature) and
-    create python evaluator singleton object.
-
-    Calling this function should not be needed.
-    Use set_thread_atomspace to set default atomspace.
-    Python evaluator will be created on first evaluation.
-    """
-    if atomspace is not None:
-        warnings.warn("setting default atomspace with initialize_opencog is deprecated,\
-                use set_thread_atomspace instead", DeprecationWarning)
-        set_thread_atomspace(atomspace)
-    # Avoid recursive initialization
-    global is_initialized
-    if is_initialized:
-        return
-    is_initialized = True
-    c_initialize_python()
-
-
 @contextmanager
 def tmp_atomspace():
     """
