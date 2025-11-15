@@ -1199,7 +1199,11 @@ void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 
 void SchemeEval::init_scheme(void)
 {
-	// XXX FIXME only a subset of what this does is acutally needed.
+	// XXX FIXME This does just more than what is actually needed.
+	// We should move the `init_only_once` stuff to here, and also
+	// the calls to SchemeSmob::init(); and PrimitiveEnviron::init();
+	// (which must be called by scm_with_guile()). But whatever, not
+	// a big deal.
 	SchemeEval sch(nullptr);
 }
 
