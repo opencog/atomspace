@@ -4,6 +4,36 @@ from libcpp.set cimport set as cpp_set
 
 # from atomspace cimport Atom
 
+
+cdef void cpp_except_to_pyerr(object e):
+    """
+    Parse RuntimeError message to extract and re-raise original Python exception.
+
+    Examines RuntimeError messages to detect if they contain Python exceptions
+    that were converted to C++ and back. Re-raises with the proper exception type.
+    """
+    error_msg = str(e)
+
+    exception_map = {
+        'TypeError': TypeError,
+        'ValueError': ValueError,
+        'ZeroDivisionError': ZeroDivisionError,
+        'AttributeError': AttributeError,
+        'ImportError': ImportError,
+        'ModuleNotFoundError': ModuleNotFoundError,
+        'KeyError': KeyError,
+        'IndexError': IndexError,
+        'NameError': NameError,
+    }
+
+    for exc_type_name, exc_class in exception_map.items():
+        if exc_type_name + ':' in error_msg:
+            raise exc_class(error_msg)
+
+    # If we can't identify the type, re-raise as-is
+    raise e
+
+
 # Atom wrapper object
 cdef class Atom(Value):
 
@@ -136,33 +166,7 @@ cdef class Atom(Value):
             c_value_ptr = atom_ptr.execute()
             return create_python_value_from_c_value(c_value_ptr)
         except RuntimeError as e:
-            # Check if this is actually a PythonException by examining the message
-            # PythonException messages contain "Python error in <func>:" prefix
-            error_msg = str(e)
-
-            # Try to extract Python exception type from message
-            # Format: "Python error in helper_module.function:\n\nTraceback...\nTypeError: ..."
-            for exc_type_name in ['TypeError', 'ValueError', 'ZeroDivisionError',
-                                   'AttributeError', 'ImportError', 'ModuleNotFoundError',
-                                   'KeyError', 'IndexError', 'NameError']:
-                if exc_type_name + ':' in error_msg:
-                    # Get the Python exception type and re-raise
-                    exception_map = {
-                        'TypeError': TypeError,
-                        'ValueError': ValueError,
-                        'ZeroDivisionError': ZeroDivisionError,
-                        'AttributeError': AttributeError,
-                        'ImportError': ImportError,
-                        'ModuleNotFoundError': ModuleNotFoundError,
-                        'KeyError': KeyError,
-                        'IndexError': IndexError,
-                        'NameError': NameError,
-                    }
-                    exc_class = exception_map[exc_type_name]
-                    raise exc_class(error_msg)
-
-            # If we can't identify the type, just re-raise as-is (RuntimeError)
-            raise
+            cpp_except_to_pyerr(e)
 
     def __richcmp__(self, other, int op):
         if op == Py_NE:
