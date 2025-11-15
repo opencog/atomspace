@@ -5,11 +5,11 @@ from libcpp cimport bool
 def createQueueValue(arg=None):
     cdef shared_ptr[cQueueValue] c_ptr
     if arg is None:
-        c_ptr.reset(new cQueueValue())
+        c_ptr = c_createQueueValue_empty()
     elif isinstance(arg, list):
-        c_ptr.reset(new cQueueValue(QueueValue.list_of_values_to_vector(arg)))
+        c_ptr = c_createQueueValue_vector(QueueValue.list_of_values_to_vector(arg))
     else:
-        c_ptr.reset(new cQueueValue(QueueValue.list_of_values_to_vector([arg])))
+        c_ptr = c_createQueueValue_vector(QueueValue.list_of_values_to_vector([arg]))
     return QueueValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class QueueValue(Value):

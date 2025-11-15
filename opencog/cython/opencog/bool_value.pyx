@@ -2,9 +2,9 @@
 def createBoolValue(arg):
     cdef shared_ptr[cBoolValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cBoolValue(BoolValue.list_of_bool_to_vector(arg)))
+        c_ptr = c_createBoolValue_vector(BoolValue.list_of_bool_to_vector(arg))
     else:
-        c_ptr.reset(new cBoolValue(<bool>arg))
+        c_ptr = c_createBoolValue_single(<bool>arg)
     return BoolValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class BoolValue(Value):

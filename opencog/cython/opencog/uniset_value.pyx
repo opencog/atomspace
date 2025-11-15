@@ -5,11 +5,11 @@ from libcpp cimport bool
 def createUnisetValue(arg=None):
     cdef shared_ptr[cUnisetValue] c_ptr
     if arg is None:
-        c_ptr.reset(new cUnisetValue())
+        c_ptr = c_createUnisetValue_empty()
     elif isinstance(arg, list):
-        c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector(arg)))
+        c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector(arg))
     else:
-        c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector([arg])))
+        c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector([arg]))
     return UnisetValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class UnisetValue(Value):

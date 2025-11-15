@@ -2,9 +2,9 @@
 def createFloatValue(arg):
     cdef shared_ptr[cFloatValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cFloatValue(FloatValue.list_of_doubles_to_vector(arg)))
+        c_ptr = c_createFloatValue_vector(FloatValue.list_of_doubles_to_vector(arg))
     else:
-        c_ptr.reset(new cFloatValue(<double>arg))
+        c_ptr = c_createFloatValue_single(<double>arg)
     return FloatValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class FloatValue(Value):
