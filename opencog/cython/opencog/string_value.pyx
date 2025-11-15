@@ -2,9 +2,9 @@
 def createStringValue(arg):
     cdef shared_ptr[cStringValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cStringValue(StringValue.list_of_strings_to_vector(arg)))
+        c_ptr = c_createStringValue_vector(StringValue.list_of_strings_to_vector(arg))
     else:
-        c_ptr.reset(new cStringValue(<string>(arg.encode('UTF-8'))))
+        c_ptr = c_createStringValue_single(<string>(arg.encode('UTF-8')))
     return StringValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
 
 cdef class StringValue(Value):

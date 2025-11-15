@@ -199,6 +199,9 @@ cdef extern from "opencog/atoms/value/BoolValue.h" namespace "opencog":
         cBoolValue(const vector[bool]& values)
         const vector[bool]& value() const
 
+    cdef shared_ptr[cBoolValue] c_createBoolValue_single "opencog::createBoolValue" (bool) nogil
+    cdef shared_ptr[cBoolValue] c_createBoolValue_vector "opencog::createBoolValue" (const vector[bool]&) nogil
+
 
 # FloatValue
 cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
@@ -206,6 +209,9 @@ cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
         cFloatValue(double value)
         cFloatValue(const vector[double]& values)
         const vector[double]& value() const
+
+    cdef shared_ptr[cFloatValue] c_createFloatValue_single "opencog::createFloatValue" (double) nogil
+    cdef shared_ptr[cFloatValue] c_createFloatValue_vector "opencog::createFloatValue" (const vector[double]&) nogil
 
 
 # StringValue
@@ -215,12 +221,17 @@ cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
         cStringValue(const vector[string]& values)
         const vector[string]& value() const
 
+    cdef shared_ptr[cStringValue] c_createStringValue_single "opencog::createStringValue" (const string&) nogil
+    cdef shared_ptr[cStringValue] c_createStringValue_vector "opencog::createStringValue" (const vector[string]&) nogil
+
 
 # LinkValue
 cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         cLinkValue(const vector[cValuePtr]& values)
         const vector[cValuePtr]& value() const
+
+    cdef shared_ptr[cLinkValue] c_createLinkValue "opencog::createLinkValue" (const vector[cValuePtr]&) nogil
 
 
 # QueueValue
@@ -241,6 +252,9 @@ cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
         void clear() nogil
         const vector[cValuePtr]& value() nogil
 
+    cdef shared_ptr[cQueueValue] c_createQueueValue_empty "opencog::createQueueValue" () nogil
+    cdef shared_ptr[cQueueValue] c_createQueueValue_vector "opencog::createQueueValue" (const vector[cValuePtr]&) nogil
+
 
 # UnisetValue
 cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
@@ -255,6 +269,9 @@ cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
         size_t size() nogil
         void clear() nogil
         const vector[cValuePtr]& value() nogil
+
+    cdef shared_ptr[cUnisetValue] c_createUnisetValue_empty "opencog::createUnisetValue" () nogil
+    cdef shared_ptr[cUnisetValue] c_createUnisetValue_vector "opencog::createUnisetValue" (const vector[cValuePtr]&) nogil
 
 
 # VoidValue

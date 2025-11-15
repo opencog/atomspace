@@ -269,33 +269,7 @@ cdef class AtomSpace(Value):
             c_value_ptr = c_do_execute_atom(self.atomspace, deref(atom.handle))
             return create_python_value_from_c_value(c_value_ptr)
         except RuntimeError as e:
-            # Check if this is actually a PythonException by examining the message
-            # PythonException messages contain "Python error in <func>:" prefix
-            error_msg = str(e)
-
-            # Try to extract Python exception type from message
-            # Format: "Python error in helper_module.function:\n\nTraceback...\nTypeError: ..."
-            for exc_type_name in ['TypeError', 'ValueError', 'ZeroDivisionError',
-                                   'AttributeError', 'ImportError', 'ModuleNotFoundError',
-                                   'KeyError', 'IndexError', 'NameError']:
-                if exc_type_name + ':' in error_msg:
-                    # Get the Python exception type and re-raise
-                    exception_map = {
-                        'TypeError': TypeError,
-                        'ValueError': ValueError,
-                        'ZeroDivisionError': ZeroDivisionError,
-                        'AttributeError': AttributeError,
-                        'ImportError': ImportError,
-                        'ModuleNotFoundError': ModuleNotFoundError,
-                        'KeyError': KeyError,
-                        'IndexError': IndexError,
-                        'NameError': NameError,
-                    }
-                    exc_class = exception_map[exc_type_name]
-                    raise exc_class(error_msg)
-
-            # If we can't identify the type, just re-raise as-is (RuntimeError)
-            raise
+            cpp_except_to_pyerr(e)
 
 cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)

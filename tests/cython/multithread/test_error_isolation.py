@@ -143,9 +143,9 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
 
         exception_functions = [
             ("py:helper_module.function_that_raises", RuntimeError, "Deliberate test exception"),
-            ("py:helper_module.function_with_type_error", RuntimeError, "TypeError"),
-            ("py:helper_module.function_with_value_error", RuntimeError, "ValueError"),
-            ("py:helper_module.function_with_division_by_zero", RuntimeError, "ZeroDivisionError"),
+            ("py:helper_module.function_with_type_error", TypeError, "TypeError"),
+            ("py:helper_module.function_with_value_error", ValueError, "ValueError"),
+            ("py:helper_module.function_with_division_by_zero", ZeroDivisionError, "ZeroDivisionError"),
         ]
 
         def worker(thread_id):
