@@ -1,38 +1,18 @@
-#include <string>
-#include <cstdio>
-
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 
-
-using std::string;
-
 using namespace opencog;
-
 
 class PythonUtilitiesUTest :  public CxxTest::TestSuite
 {
 
-private:
-
-
 public:
+    PythonUtilitiesUTest() {}
+    ~PythonUtilitiesUTest() {}
+    void setUp() {}
+    void tearDown() {}
 
-    PythonUtilitiesUTest() {
-
-    }
-
-    ~PythonUtilitiesUTest() {
-    }
-
-    void setUp() {
-    }
-
-    void tearDown() {
-    }
-
-    void testOpencogInitializationFinalization() {
-
+    void testPythonInitnFini()
+    {
         // Initialize Python.
         global_python_initialize();
 
@@ -40,10 +20,10 @@ public:
         global_python_finalize();
 
         // Do it again.
+        global_python_initialize();
+        global_python_finalize();
 
-        // Stop Python.
+        global_python_initialize();
         global_python_finalize();
    }
-
-
 };
