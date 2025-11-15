@@ -22,7 +22,7 @@ include "atomspace_details.pyx"
 # doesn't already exist. This allows type constructors to work
 # without requiring explicit set_default_atomspace() calls.
 
-from opencog.utilities cimport get_context_atomspace, push_context_atomspace
+from opencog.type_ctors cimport get_context_atomspace, push_context_atomspace
 
 cdef void _init_default_atomspace():
     cdef cValuePtr default_as

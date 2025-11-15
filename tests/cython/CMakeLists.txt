@@ -38,21 +38,17 @@ TARGET_LINK_LIBRARIES(PythonEvalUTest
 SET_PROPERTY(TEST PythonEvalUTest
 	APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-# The PythonUtilitiesUTest tests C++ utility functions used
-# by the Cython bindings, but it tests them outside of the
-# bindings, so that failures are easier to debug.
-#
-ADD_CXXTEST(PythonUtilitiesUTest)
+ADD_CXXTEST(PythonInitFiniUTest)
 
-TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
+TARGET_LINK_LIBRARIES(PythonInitFiniUTest
 	PythonEval
-	utilities_cython
+	type_ctors_cython
 	atomspace_cython
 	atomspace
 	${COGUTIL_LIBRARY}
 )
 
-SET_PROPERTY(TEST PythonUtilitiesUTest
+SET_PROPERTY(TEST PythonInitFiniUTest
 	APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
 IF (HAVE_PYTEST)
@@ -84,13 +80,6 @@ IF (HAVE_PYTEST)
 	SET_PROPERTY(TEST CythonGuile
 		PROPERTY DEPENDS atomspace_cython scheme)
 	SET_PROPERTY(TEST CythonGuile
-		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
-
-	ADD_TEST(CythonUtilities ${PYTEST_EXECUTABLE} -v
-		${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
-	SET_PROPERTY(TEST CythonUtilities
-		PROPERTY DEPENDS atomspace_cython logger_cython)
-	SET_PROPERTY(TEST CythonUtilities
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
 	ADD_TEST(CythonBindlink ${PYTEST_EXECUTABLE} -v

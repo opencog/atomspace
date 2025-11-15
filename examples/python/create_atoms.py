@@ -16,9 +16,6 @@ be a big deal.
 from opencog.atomspace import *
 from opencog.type_constructors import *
 
-# Create an AtomSpace, and tell the type constructors to use it.
-set_default_atomspace(AtomSpace())
-
 # Add three nodes
 A = ConceptNode('Apple')
 B = ConceptNode('Berry')

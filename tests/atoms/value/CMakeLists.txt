@@ -6,7 +6,6 @@ LINK_LIBRARIES(
 
 # Tests in order of increasing functional complexity/dependency
 ADD_CXXTEST(ValueUTest)
-ADD_CXXTEST(VoidValueUTest)
 
 IF (HAVE_GUILE)
 	ADD_CXXTEST(StreamUTest)

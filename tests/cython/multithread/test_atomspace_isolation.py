@@ -13,9 +13,7 @@ from opencog.type_constructors import (
     ConceptNode, PredicateNode, ListLink, ExecutionOutputLink,
     GroundedSchemaNode
 )
-from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace
-)
+from opencog.type_ctors import set_thread_atomspace, push_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator
@@ -34,12 +32,11 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_20_isolated_atomspaces(self):
         """
@@ -60,7 +57,7 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
             try:
                 # Create thread-local AtomSpace
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create thread-specific atoms
                 atom1 = ConceptNode(f"thread_{thread_id}_atom_1")
@@ -119,7 +116,7 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
             """Worker executing in isolated AtomSpace."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create thread-specific argument
                 arg = ConceptNode(f"isolated_{thread_id}")
@@ -130,7 +127,7 @@ class Test_2_1_ThreadLocalAtomSpaces(ThreadTestCase):
                     ListLink(arg, arg)
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result is thread-specific
                 expected = f"result_isolated_{thread_id}_isolated_{thread_id}"
@@ -169,7 +166,7 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.shared_atomspace = AtomSpace()
-        set_default_atomspace(self.shared_atomspace)
+        set_thread_atomspace(self.shared_atomspace)
 
         # Pre-populate with atoms for reading
         for i in range(20):
@@ -195,7 +192,7 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
         def worker(thread_id):
             """Worker performing read operations."""
             try:
-                push_default_atomspace(self.shared_atomspace)
+                push_thread_atomspace(self.shared_atomspace)
 
                 # Look up specific atoms (simple reads)
                 atom_idx = thread_id % 20
@@ -242,7 +239,7 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.shared_atomspace = AtomSpace()
-        set_default_atomspace(self.shared_atomspace)
+        set_thread_atomspace(self.shared_atomspace)
 
         # Pre-populate with some base atoms
         for i in range(10):
@@ -268,7 +265,7 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
         def worker(thread_id):
             """Worker performing mixed read/write."""
             try:
-                push_default_atomspace(self.shared_atomspace)
+                push_thread_atomspace(self.shared_atomspace)
 
                 if thread_id % 2 == 0:
                     # Writer thread - add a few atoms
@@ -318,7 +315,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.parent_atomspace = AtomSpace()
-        set_default_atomspace(self.parent_atomspace)
+        set_thread_atomspace(self.parent_atomspace)
 
         # Add atoms to parent
         for i in range(5):
@@ -348,7 +345,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
             try:
                 # Create child atomspace with parent
                 child_atomspace = AtomSpace(parent=self.parent_atomspace)
-                push_default_atomspace(child_atomspace)
+                push_thread_atomspace(child_atomspace)
 
                 # Verify parent atoms are visible in child
                 parent_atom = ConceptNode(f"parent_atom_{thread_id % 5}")
@@ -409,7 +406,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
             try:
                 # Create child with parent
                 child_atomspace = AtomSpace(parent=self.parent_atomspace)
-                push_default_atomspace(child_atomspace)
+                push_thread_atomspace(child_atomspace)
 
                 # Verify can access parent atom
                 parent_atom = ConceptNode("shared_parent_atom")
@@ -424,7 +421,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
                     ListLink(arg, parent_atom)
                 )
 
-                result = child_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result
                 expected = f"result_child_arg_{thread_id}_shared_parent_atom"

@@ -38,13 +38,15 @@ namespace opencog
  */
 class VoidValue : public Value
 {
+	template<typename... Type>
+	friend ValuePtr createVoidValue();
+
 private:
 	VoidValue() : Value(VOID_VALUE) {}
+	static const ValuePtr INSTANCE;
 
 public:
 	virtual ~VoidValue() {}
-
-	static const ValuePtr INSTANCE;
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const {

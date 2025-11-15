@@ -4,6 +4,7 @@ import os
 from opencog.atomspace import Atom, types
 
 from opencog.type_constructors import *
+from opencog.type_ctors import get_thread_atomspace
 
 from test_functions import green_count, red_count
 import test_functions
@@ -15,17 +16,14 @@ class BindlinkTest(unittest.TestCase):
 
     bindlink_atom = None
     getlink_atom = None
-    atomspace = AtomSpace()
     starting_size = 0
 
     def setUp(self):
+        self.atomspace = get_thread_atomspace()
         print ("setUp - atomspace = ", self.atomspace)
 
         # Clear atoms from previous test
         self.atomspace.clear()
-
-        # Initialize Python
-        set_default_atomspace(self.atomspace)
 
         # Define several animals and something of a different type as well
         InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))
@@ -62,16 +60,8 @@ class BindlinkTest(unittest.TestCase):
         # Remember the starting atomspace size.
         self.starting_size = self.atomspace.size()
 
-
     def tearDown(self):
         print ("tearDown - atomspace = ", self.atomspace)
-
-        # Can't do this; finalize can be called only once, ever, and
-        # then never again.  The second call will never follow through.
-        # Also, cannot create and delete atomspaces here; this will
-        # confuse the PythonEval singletonInstance.
-        # finalize_opencog()
-        # del self.atomspace
 
     def _check_result_setlink(self, value, expected_arity):
 
@@ -128,7 +118,7 @@ class BindlinkTest(unittest.TestCase):
             )
         )
 
-        tv = self.atomspace.execute(satisfaction_atom)
+        tv = satisfaction_atom.execute()
         self.assertEqual(green_count(), 2)
         self.assertEqual(red_count(), 1)
 
@@ -147,15 +137,13 @@ class BindlinkTest(unittest.TestCase):
         self.assertEqual(result, list_link)
 
     def test_evaluate_atom(self):
-        result = self.atomspace.execute(
-                EvaluationLink(
+        result = EvaluationLink(
                     GroundedPredicateNode("py: test_functions.bogus_tv"),
                     ListLink(
                         ConceptNode("one"),
                         ConceptNode("two")
                     )
-                )
-            )
+                ).execute()
         self.assertEqual(result, BoolValue(True))
 
     def test_execute_atom_no_return_value(self):

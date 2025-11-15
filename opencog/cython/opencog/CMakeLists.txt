@@ -119,34 +119,34 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 	OUTPUT_NAME type_constructors)
 
 
-############################## utilities #####################
+#################### type_ctors #####################
 
-CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" "utilities.pxd" opencog_atom_types
+CYTHON_ADD_MODULE_PYX(type_ctors
+	"atomspace.pxd" "type_ctors.pxd" opencog_atom_types
 )
 
-ADD_LIBRARY(utilities_cython
-	Utilities.cc
-	utilities.cpp
+ADD_LIBRARY(type_ctors_cython
+	TypeCtors.cc
+	type_ctors.cpp
 )
 
-TARGET_LINK_LIBRARIES(utilities_cython
+TARGET_LINK_LIBRARIES(type_ctors_cython
 	PythonEval
 	atomspace
 	executioncontext
 	${Python3_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
+SET_TARGET_PROPERTIES(type_ctors_cython PROPERTIES
 	PREFIX ""
-	OUTPUT_NAME utilities)
+	OUTPUT_NAME type_ctors)
 
-INSTALL (TARGETS utilities_cython EXPORT AtomSpaceTargets
+INSTALL (TARGETS type_ctors_cython EXPORT AtomSpaceTargets
    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
-	Utilities.h
+	TypeCtors.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
@@ -157,7 +157,7 @@ INSTALL(TARGETS
 	atomspace_cython
 	logger_cython
 	type_constructors
-	utilities_cython
+	type_ctors_cython
 	DESTINATION "${PYTHON_DEST}")
 
 # This custom target allows *only* the Python bindings to be installed;
@@ -170,7 +170,7 @@ ADD_CUSTOM_TARGET(PythonBindings DEPENDS
 	atomspace_cython
 	logger_cython
 	type_constructors
-	utilities_cython)
+	type_ctors_cython)
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################

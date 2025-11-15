@@ -26,13 +26,10 @@ from opencog.logger import Logger, log
 log.set_level('DEBUG')
 log.info("Starting the stop-go demo")
 
-# Tell the python type constructors where to find the AtomSpace.
-set_default_atomspace(AtomSpace())
-
 # The callback counts the number of red and green lights.
-# It returns a TruthValue of TRUE for green lights and FALSE for the
-# red lights.  FALSE is interpreted as a mismatch (failure to satisfy)
-# by the pattner matcher, and thus, the pattern matcher will backtrack
+# It returns True for green lights and False the red lights.
+# False is interpreted as a mismatch (failure to satisfy)
+# by the query engine, and thus, the query engine  will backtrack
 # and search for a different solution. Since the example below contains
 # no variables, it will just backtrack to the start, and then report
 # non-satisfiability (which is what we want, when we get a red light).
@@ -45,19 +42,19 @@ def stop_go(atom):
         print("Got a green light...")
         global green
         green += 1
-        return TruthValue(1,1)
+        return True
 
     elif atom == ConceptNode("red light"):
         print("Got a red light!")
         global red
         red += 1
-        return TruthValue(0,1)
+        return False
 
     else:
         print("Oh No!! Car wreck!")
         assert(false)
 
-    return TruthValue(0,0)
+    return None
 
 # This is the pattern that the pattern matcher attempts to ground.
 # It consists of two green lights, which evaluate to true, followed

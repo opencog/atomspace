@@ -11,9 +11,7 @@ cdef extern from "opencog/util/exceptions.h" namespace "opencog":
         const char* get_message() except +
 
 
-cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
-    cdef void c_initialize_python "opencog::initialize_python" ()
-    cdef void c_finalize_python "opencog::finalize_python" ()
+cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
     cHandle c_add_node "opencog::add_node" (Type t, const string s) except +
     cHandle c_add_link "opencog::add_link" (Type t, const vector[cHandle]) except +
 

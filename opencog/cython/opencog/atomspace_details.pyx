@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
 from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
-from opencog.utilities cimport cPythonException
+from opencog.type_ctors cimport cPythonException
 
 # from atomspace cimport *
 
@@ -146,7 +146,7 @@ cdef class AtomSpace(Value):
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
 
-        # See comments on encoding "invalid" bytes in utilities.pyx
+        # See comments on encoding "invalid" bytes in type_ctors.pyx
         # These bytes are from Microsoft Windows doggie litter.
         cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
         cdef cHandle result = self.atomspace.xadd_node(t, name)

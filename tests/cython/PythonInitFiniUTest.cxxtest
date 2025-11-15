@@ -1,0 +1,31 @@
+#include <opencog/cython/PythonEval.h>
+
+using namespace opencog;
+
+class PythonInitFiniUTest :  public CxxTest::TestSuite
+{
+public:
+    PythonInitFiniUTest() {}
+    ~PythonInitFiniUTest() {}
+    void setUp() {}
+    void tearDown() {}
+
+    void testPythonInitFini()
+    {
+        // Initialize Python.
+        global_python_initialize();
+
+        // Stop Python.
+        global_python_finalize();
+
+        // Do it again.
+        global_python_initialize();
+        global_python_finalize();
+
+        global_python_initialize();
+        global_python_finalize();
+
+        global_python_initialize();
+        global_python_finalize();
+   }
+};

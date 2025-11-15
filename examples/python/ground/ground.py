@@ -8,15 +8,10 @@ Both regular function calls, and class instance method calls are demoed.
 """
 
 import sys
-from opencog.atomspace import AtomSpace, TruthValue
 from opencog.atomspace import types
 from opencog.type_constructors import *
 
 import mymodule as mm
-
-a = AtomSpace()
-
-set_default_atomspace(a)
 
 def local_func(x1, x2, x3):
     print("Entering local function with\n", x1, x2, x3)

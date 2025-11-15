@@ -86,7 +86,7 @@ print("Closed the connection to storage")
 
 # Define a utility printer
 def prt_atomspace_contents(asp) :
-	print("AtomSpace contains a total of " + str(len(space)) + " Atoms")
+	print("AtomSpace contains a total of " + str(len(asp)) + " Atoms")
 	if 0 < len(asp) :
 		print("These are:")
 	count = 0

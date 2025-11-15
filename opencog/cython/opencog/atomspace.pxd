@@ -255,3 +255,10 @@ cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
         size_t size() nogil
         void clear() nogil
         const vector[cValuePtr]& value() nogil
+
+
+# VoidValue
+cdef extern from "opencog/atoms/value/VoidValue.h" namespace "opencog":
+    cdef cppclass cVoidValue "opencog::VoidValue":
+        pass
+    cValuePtr c_createVoidValue "opencog::createVoidValue" [T]() nogil

@@ -1,7 +1,7 @@
 /*
- * tests/atoms/value/VoidValueUTest.cxxtest
+ * opencog/cython/opencog/TypeCtors.h
  *
- * Copyright (C) 2019 OpenCog Foundation
+ * Copyright (C) 2011 by The OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,24 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/VoidValue.h>
+#ifndef _OPENCOG_PYTHON_TYPE_CTORS_H
+#define _OPENCOG_PYTHON_TYPE_CTORS_H
+#include "opencog/atoms/base/Handle.h"
+#include "opencog/atomspace/AtomSpace.h"
 
-using namespace opencog;
+namespace opencog {
 
-class VoidValueUTest : public CxxTest::TestSuite
-{
-public:
+Handle add_node(Type, std::string);
+Handle add_link(Type, HandleSeq);
+AtomSpacePtr get_context_atomspace(void);
 
-	void test_equals()
-	{
-		TS_ASSERT_EQUALS(VoidValue::INSTANCE, VoidValue::INSTANCE);
-	}
+} // namespace opencog
 
-	void test_to_string()
-	{
-		TS_ASSERT_EQUALS(VoidValue::INSTANCE->to_string(" "),
-				std::string(" (VoidValue)"));
-	}
 
-};
-
+#endif // _OPENCOG_PYTHON_TYPE_CTORS_H

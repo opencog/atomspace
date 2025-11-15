@@ -19,10 +19,7 @@ from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )
-from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace,
-    finalize_opencog
-)
+from opencog.type_ctors import push_thread_atomspace
 
 # Import the test helper module
 import test_helper_module
@@ -50,11 +47,11 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_grounded_schema_multithread_external_module(self):
         """
@@ -81,7 +78,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
 
                 # Create a new AtomSpace for this thread
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create and execute GroundedSchema with external module
                 exec_link = ExecutionOutputLink(
@@ -89,7 +86,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
                     ListLink()
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result
                 if result.name == "success":
@@ -163,7 +160,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
 
                 # Create a new AtomSpace for this thread
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create test atoms
                 arg1 = ConceptNode(f"arg1_{thread_id}")
@@ -175,7 +172,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
                     ListLink(arg1, arg2)
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result contains expected pattern
                 expected_name = f"result_arg1_{thread_id}_arg2_{thread_id}"
@@ -247,7 +244,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
 
                 # Create a new AtomSpace for this thread
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Execute GroundedSchema with __main__ module function
                 exec_link = ExecutionOutputLink(
@@ -255,7 +252,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
                     ListLink()
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result
                 if result.name == "main_success":
@@ -323,7 +320,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
                 for iteration in range(iterations_per_thread):
                     # Create new AtomSpace for each iteration
                     thread_atomspace = AtomSpace()
-                    push_default_atomspace(thread_atomspace)
+                    push_thread_atomspace(thread_atomspace)
 
                     # Execute GroundedSchema
                     exec_link = ExecutionOutputLink(
@@ -331,7 +328,7 @@ class GroundedSchemaThreadingTest(unittest.TestCase):
                         ListLink()
                     )
 
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
 
                     if result.name == "success":
                         successes += 1

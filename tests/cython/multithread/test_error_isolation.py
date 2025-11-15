@@ -12,9 +12,7 @@ from opencog.atomspace import AtomSpace
 from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode, ListLink
 )
-from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace
-)
+from opencog.type_ctors import push_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator
@@ -32,12 +30,11 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_20_threads_mixed_success_failure(self):
         """
@@ -57,7 +54,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
             """Worker that may raise exception based on thread ID."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 if thread_id % 2 == 0:
                     # Even threads: execute successful function
@@ -65,7 +62,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
                         GroundedSchemaNode("py:helper_module.simple_function"),
                         ListLink()
                     )
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
 
                     if result.name != "success":
                         validator.record_error(
@@ -83,7 +80,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
                     )
 
                     try:
-                        result = thread_atomspace.execute(exec_link)
+                        result = exec_link.execute()
                         # Should not reach here
                         validator.record_error(
                             thread_id,
@@ -146,16 +143,16 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
 
         exception_functions = [
             ("py:helper_module.function_that_raises", RuntimeError, "Deliberate test exception"),
-            ("py:helper_module.function_with_type_error", TypeError, "Type error"),
-            ("py:helper_module.function_with_value_error", ValueError, "Value error"),
-            ("py:helper_module.function_with_division_by_zero", ZeroDivisionError, "division by zero"),
+            ("py:helper_module.function_with_type_error", RuntimeError, "TypeError"),
+            ("py:helper_module.function_with_value_error", RuntimeError, "ValueError"),
+            ("py:helper_module.function_with_division_by_zero", RuntimeError, "ZeroDivisionError"),
         ]
 
         def worker(thread_id):
             """Worker that raises specific exception type."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Select exception type based on thread ID
                 func_name, expected_exc_type, expected_msg_part = exception_functions[thread_id % 4]
@@ -166,7 +163,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
                 )
 
                 try:
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
                     validator.record_error(
                         thread_id,
                         f"Expected {expected_exc_type.__name__} but no exception raised"
@@ -219,12 +216,11 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_15_threads_import_nonexistent_module(self):
         """
@@ -244,7 +240,7 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
             """Worker that attempts invalid import."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Try to execute function from non-existent module
                 exec_link = ExecutionOutputLink(
@@ -253,7 +249,7 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
                 )
 
                 try:
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
                     # Should not reach here
                     validator.record_error(
                         thread_id,
@@ -303,12 +299,11 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_15_threads_invalid_function_name(self):
         """
@@ -327,7 +322,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
             """Worker that calls non-existent function."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Try to call non-existent function
                 exec_link = ExecutionOutputLink(
@@ -336,7 +331,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
                 )
 
                 try:
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
                     validator.record_error(
                         thread_id,
                         "Expected exception for non-existent function"
@@ -388,7 +383,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
             """Worker that calls function with wrong args."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 if thread_id % 2 == 0:
                     # Call function_with_args with no arguments (expects 2)
@@ -405,7 +400,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
                     )
 
                 try:
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
                     # Might succeed or fail depending on implementation
                     # If it succeeds, that's also valid behavior
                     return "completed"

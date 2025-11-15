@@ -14,9 +14,7 @@ from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )
-from opencog.utilities import (
-    set_default_atomspace, push_default_atomspace
-)
+from opencog.type_ctors import push_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator, check_memory_leaks
@@ -35,12 +33,11 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_concurrent_eval_creation_50_threads(self):
         """
@@ -61,7 +58,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             try:
                 # Create new AtomSpace (triggers PythonEval creation)
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Execute a simple GroundedSchema
                 exec_link = ExecutionOutputLink(
@@ -69,7 +66,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
                     ListLink()
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result
                 if result.name != "success":
@@ -121,7 +118,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
             try:
                 # Create ONE long-lived AtomSpace per thread (realistic usage)
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Repeatedly execute using the same atomspace
                 for iteration in range(iterations_per_thread):
@@ -129,7 +126,7 @@ class Test_1_1_ConcurrentEvalCreation(ThreadTestCase):
                         GroundedSchemaNode("py:helper_module.simple_function"),
                         ListLink()
                     )
-                    result = thread_atomspace.execute(exec_link)
+                    result = exec_link.execute()
 
                     if result.name == "success":
                         success_count += 1
@@ -169,12 +166,11 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_30_threads_same_function(self):
         """
@@ -189,7 +185,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
             """Worker calling same function."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # All threads call the same function
                 exec_link = ExecutionOutputLink(
@@ -197,7 +193,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
                     ListLink()
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 if result.name != "success":
                     validator.record_error(
@@ -237,7 +233,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
             """Worker calling function with thread-specific args."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Create thread-specific arguments
                 arg1 = ConceptNode(f"arg1_{thread_id}")
@@ -248,7 +244,7 @@ class Test_1_2_ConcurrentSameFunction(ThreadTestCase):
                     ListLink(arg1, arg2)
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 # Verify result is correct for this thread
                 expected = f"result_arg1_{thread_id}_arg2_{thread_id}"
@@ -287,12 +283,11 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.main_atomspace = AtomSpace()
-        set_default_atomspace(self.main_atomspace)
+        pass
 
     def tearDown(self):
         """Clean up after test."""
-        del self.main_atomspace
+        pass
 
     def test_30_threads_different_functions(self):
         """
@@ -316,7 +311,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
             """Worker calling function based on thread ID."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 # Select function based on thread ID
                 func_name, expected_result = functions[thread_id % len(functions)]
@@ -326,7 +321,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
                     ListLink()
                 )
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 if result.name != expected_result:
                     validator.record_error(
@@ -375,7 +370,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
             """Worker calling function based on thread ID mod 3."""
             try:
                 thread_atomspace = AtomSpace()
-                push_default_atomspace(thread_atomspace)
+                push_thread_atomspace(thread_atomspace)
 
                 case = thread_id % 3
 
@@ -406,7 +401,7 @@ class Test_1_3_ConcurrentDifferentFunctions(ThreadTestCase):
                     )
                     expected = f"result_a_{thread_id}_b_{thread_id}"
 
-                result = thread_atomspace.execute(exec_link)
+                result = exec_link.execute()
 
                 if result.name != expected:
                     validator.record_error(

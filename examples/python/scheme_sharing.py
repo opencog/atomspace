@@ -13,7 +13,7 @@ from opencog.scheme_wrapper import *
 # Create an AtomSpace, and let the python type constructors
 # know about it.
 asp = AtomSpace()
-set_default_atomspace(asp)
+set_thread_atomspace(asp)
 
 # Add an Atom to the AtomSpace, using python
 ConceptNode("this is a test")
