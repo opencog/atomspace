@@ -19,7 +19,7 @@ from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )
-from opencog.utilities import push_default_atomspace, finalize_opencog
+from opencog.utilities import push_default_atomspace
 
 # Import the test helper module
 import test_helper_module

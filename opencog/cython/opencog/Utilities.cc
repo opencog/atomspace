@@ -17,12 +17,6 @@ void opencog::initialize_python()
     global_python_initialize();
 }
 
-void opencog::finalize_python()
-{
-    // Cleanup Python.
-    global_python_finalize();
-}
-
 Handle opencog::add_node(Type t, std::string name) {
     AtomSpacePtr atomspace = get_context_atomspace();
     if (atomspace == nullptr){

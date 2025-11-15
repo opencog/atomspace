@@ -60,16 +60,8 @@ class BindlinkTest(unittest.TestCase):
         # Remember the starting atomspace size.
         self.starting_size = self.atomspace.size()
 
-
     def tearDown(self):
         print ("tearDown - atomspace = ", self.atomspace)
-
-        # Can't do this; finalize can be called only once, ever, and
-        # then never again.  The second call will never follow through.
-        # Also, cannot create and delete atomspaces here; this will
-        # confuse the PythonEval singletonInstance.
-        # finalize_opencog()
-        # del self.atomspace
 
     def _check_result_setlink(self, value, expected_arity):
 

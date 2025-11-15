@@ -35,14 +35,6 @@ def initialize_opencog(AtomSpace atomspace=None):
     c_initialize_python()
 
 
-def finalize_opencog():
-    global is_initialized
-    if is_initialized:
-        c_clear_context()
-        c_finalize_python()
-    is_initialized = False
-
-
 @contextmanager
 def tmp_atomspace():
     """
