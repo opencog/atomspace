@@ -2,7 +2,7 @@ import unittest
 
 from opencog.atomspace import (types, decl_type, type_decl_context, AtomSpace,
         get_type_name)
-from opencog.type_ctors import add_node, add_link
+from opencog.type_ctors import add_node, add_link, push_thread_atomspace, pop_thread_atomspace
 from opencog.type_constructors import *
 
 # Types must be declared once per module
@@ -19,10 +19,11 @@ def SomeLink(*args):
 class NameserverTest(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.atomspace = AtomSpace()
+        push_thread_atomspace(self.atomspace)
 
     def tearDown(self):
-        pass
+        pop_thread_atomspace()
 
     def _get_atoms_by_type(self, type):
         type_name = get_type_name(type)
