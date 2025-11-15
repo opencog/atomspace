@@ -2,16 +2,15 @@
 
 using namespace opencog;
 
-class PythonUtilitiesUTest :  public CxxTest::TestSuite
+class PythonInitFiniUTest :  public CxxTest::TestSuite
 {
-
 public:
-    PythonUtilitiesUTest() {}
-    ~PythonUtilitiesUTest() {}
+    PythonInitFiniUTest() {}
+    ~PythonInitFiniUTest() {}
     void setUp() {}
     void tearDown() {}
 
-    void testPythonInitnFini()
+    void testPythonInitFini()
     {
         // Initialize Python.
         global_python_initialize();
@@ -20,6 +19,9 @@ public:
         global_python_finalize();
 
         // Do it again.
+        global_python_initialize();
+        global_python_finalize();
+
         global_python_initialize();
         global_python_finalize();
 
