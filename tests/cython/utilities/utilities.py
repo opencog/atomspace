@@ -1,6 +1,6 @@
 
 from opencog.atomspace import AtomSpace, types
-from opencog.utilities import get_default_atomspace
+from opencog.utilities import get_thread_atomspace
 import opencog.scheme as scheme
 from opencog.scheme import scheme_eval
 from opencog.type_constructors import *
@@ -14,7 +14,7 @@ def add_link(atom1, atom2):
     return link
 
 # Module that defines cog-execute!
-atomspace = get_default_atomspace()
+atomspace = get_thread_atomspace()
 scheme_eval(atomspace, '(use-modules (opencog exec))')
 
 execute_code = \

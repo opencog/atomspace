@@ -13,7 +13,7 @@ from opencog.type_constructors import (
     ConceptNode, PredicateNode, ListLink, ExecutionOutputLink,
     GroundedSchemaNode
 )
-from opencog.utilities import set_default_atomspace, push_default_atomspace
+from opencog.utilities import set_thread_atomspace, push_default_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator
@@ -166,7 +166,7 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.shared_atomspace = AtomSpace()
-        set_default_atomspace(self.shared_atomspace)
+        set_thread_atomspace(self.shared_atomspace)
 
         # Pre-populate with atoms for reading
         for i in range(20):
@@ -239,7 +239,7 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.shared_atomspace = AtomSpace()
-        set_default_atomspace(self.shared_atomspace)
+        set_thread_atomspace(self.shared_atomspace)
 
         # Pre-populate with some base atoms
         for i in range(10):
@@ -315,7 +315,7 @@ class Test_2_4_ParentChildRelationships(ThreadTestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.parent_atomspace = AtomSpace()
-        set_default_atomspace(self.parent_atomspace)
+        set_thread_atomspace(self.parent_atomspace)
 
         # Add atoms to parent
         for i in range(5):

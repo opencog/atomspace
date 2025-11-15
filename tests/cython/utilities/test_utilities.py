@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import set_default_atomspace, finalize_opencog
+from opencog.utilities import set_thread_atomspace, finalize_opencog
 
 __author__ = 'Curtis Faith'
 
@@ -28,5 +28,5 @@ class UtilitiesTest(TestCase):
         del self.atomspace
 
     def test_initialize_finalize(self):
-        set_default_atomspace(self.atomspace)
+        set_thread_atomspace(self.atomspace)
         finalize_opencog()

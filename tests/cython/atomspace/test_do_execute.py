@@ -3,7 +3,7 @@ import threading
 
 from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
-from opencog.utilities import push_default_atomspace, get_default_atomspace
+from opencog.utilities import push_default_atomspace, get_thread_atomspace
 
 
 class DoExecuteTest(unittest.TestCase):
@@ -44,7 +44,7 @@ class DoExecuteTest(unittest.TestCase):
         self.assertEqual(NumberNode("7"), res)
 
     def test_add_atom_from_grounded_schema_node(self):
-        parent_as = get_default_atomspace()
+        parent_as = get_thread_atomspace()
         test_as = create_child_atomspace(parent_as)
         test_as.execute(
                 ExecutionOutputLink(

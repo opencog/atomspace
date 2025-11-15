@@ -5,7 +5,7 @@ from opencog.atomspace import Atom, tvkey
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, tmp_atomspace
+from opencog.utilities import get_thread_atomspace, set_thread_atomspace, tmp_atomspace
 
 from time import sleep
 
@@ -13,7 +13,7 @@ class AtomSpaceTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
+        set_thread_atomspace(self.space)
 
     def tearDown(self):
         del self.space
@@ -193,7 +193,7 @@ class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
+        set_thread_atomspace(self.space)
 
     def tearDown(self):
         del self.space

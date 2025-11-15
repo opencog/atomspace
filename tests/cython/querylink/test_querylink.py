@@ -4,7 +4,7 @@ import os
 from opencog.atomspace import Atom, types
 
 from opencog.type_constructors import *
-from opencog.utilities import get_default_atomspace
+from opencog.utilities import get_thread_atomspace
 
 from test_functions import green_count, red_count
 import test_functions
@@ -19,7 +19,7 @@ class BindlinkTest(unittest.TestCase):
     starting_size = 0
 
     def setUp(self):
-        self.atomspace = get_default_atomspace()
+        self.atomspace = get_thread_atomspace()
         print ("setUp - atomspace = ", self.atomspace)
 
         # Clear atoms from previous test
