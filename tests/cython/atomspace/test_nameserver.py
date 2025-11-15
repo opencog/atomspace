@@ -2,7 +2,7 @@ import unittest
 
 from opencog.atomspace import (types, decl_type, type_decl_context, AtomSpace,
         get_type_name)
-from opencog.utilities import add_node, add_link
+from opencog.type_ctors import add_node, add_link
 from opencog.type_constructors import *
 
 # Types must be declared once per module

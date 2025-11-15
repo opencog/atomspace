@@ -7,7 +7,7 @@ from unittest import TestCase
 
 from opencog.type_constructors import *
 from opencog.atomspace import AtomSpace
-from opencog.utilities import set_thread_atomspace
+from opencog.type_ctors import set_thread_atomspace
 
 __author__ = 'Curtis Faith'
 

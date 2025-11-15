@@ -3,7 +3,7 @@ import threading
 
 from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
-from opencog.utilities import push_thread_atomspace, get_thread_atomspace
+from opencog.type_ctors import push_thread_atomspace, get_thread_atomspace
 
 
 class DoExecuteTest(unittest.TestCase):

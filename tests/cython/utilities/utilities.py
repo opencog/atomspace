@@ -1,6 +1,6 @@
 
 from opencog.atomspace import AtomSpace, types
-from opencog.utilities import get_thread_atomspace
+from opencog.type_ctors import get_thread_atomspace
 import opencog.scheme as scheme
 from opencog.scheme import scheme_eval
 from opencog.type_constructors import *
