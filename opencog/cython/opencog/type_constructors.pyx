@@ -14,7 +14,7 @@ from opencog.atomspace import (createBoolValue,
                                createQueueValue,
                                createStringValue,
                                createUnisetValue,
-                               # createVoidValue,
+                               createVoidValue,
                                # createRandomStream
                                )
 from opencog.atomspace import types, AtomSpace
@@ -55,9 +55,9 @@ def StringValue(arg):
 def UnisetValue(arg=None):
     return createUnisetValue(arg)
 
-# Argh. Need to hand-craft a pyx file for these. XXX FIXME
-# def VoidValue():
-#     return createVoidValue()
-#
+def VoidValue():
+    return createVoidValue()
+
+# Argh. Need to hand-craft a pyx file for this. XXX FIXME
 # def RandomStream(arg):
 #     return createRandomStream(arg)
