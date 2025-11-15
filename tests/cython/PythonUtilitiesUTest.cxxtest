@@ -2,6 +2,7 @@
 #include <cstdio>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/PythonEval.h>
 #include <opencog/cython/opencog/Utilities.h>
 
 
@@ -37,13 +38,12 @@ public:
         initialize_python();
 
         // Stop Python.
-        finalize_python();
+        global_python_finalize();
 
         // Do it again.
 
         // Stop Python.
-        finalize_python();
-
+        global_python_finalize();
    }
 
 
