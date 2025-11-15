@@ -26,9 +26,6 @@ from opencog.logger import Logger, log
 log.set_level('DEBUG')
 log.info("Starting the stop-go demo")
 
-# Tell the python type constructors where to find the AtomSpace.
-set_default_atomspace(AtomSpace())
-
 # The callback counts the number of red and green lights.
 # It returns a TruthValue of TRUE for green lights and FALSE for the
 # red lights.  FALSE is interpreted as a mismatch (failure to satisfy)

@@ -37,11 +37,7 @@
 #
 # ------------------------------------------------------------------
 # Python setup.
-
-from opencog.atomspace import AtomSpace, types
 from opencog.type_constructors import *
-
-set_default_atomspace(AtomSpace())
 
 # ------------------------------------------------------------------
 # Start by populating the AtomSpace with some data.
