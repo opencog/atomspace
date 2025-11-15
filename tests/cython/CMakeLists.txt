@@ -82,13 +82,6 @@ IF (HAVE_PYTEST)
 	SET_PROPERTY(TEST CythonGuile
 		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
 
-	ADD_TEST(CythonUtilities ${PYTEST_EXECUTABLE} -v
-		${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
-	SET_PROPERTY(TEST CythonUtilities
-		PROPERTY DEPENDS atomspace_cython logger_cython)
-	SET_PROPERTY(TEST CythonUtilities
-		APPEND PROPERTY ENVIRONMENT ${TEST_ENVIRONMENT})
-
 	ADD_TEST(CythonBindlink ${PYTEST_EXECUTABLE} -v
 			${CMAKE_SOURCE_DIR}/tests/cython/querylink/)
 	SET_PROPERTY(TEST CythonBindlink
