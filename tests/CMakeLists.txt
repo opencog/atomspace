@@ -10,10 +10,7 @@ SET(GUILE_LOAD_PATH "${PROJECT_BINARY_DIR}/opencog/scm")
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-LINK_LIBRARIES(
-	atombase
-	atomspace
-)
+LINK_LIBRARIES(atomspace)
 
 IF (HAVE_GUILE)
 	LINK_LIBRARIES(smob)
