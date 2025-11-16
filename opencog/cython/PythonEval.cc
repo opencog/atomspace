@@ -86,7 +86,8 @@ using namespace std::chrono_literals;
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
 
-PythonEval::PythonEval(void)
+PythonEval::PythonEval(void) :
+	_atomspace(nullptr)
 {
 	_eval_done = true;
 	_paren_count = 0;
@@ -102,13 +103,12 @@ PythonEval::~PythonEval()
 
 void PythonEval::set_atomspace(const AtomSpacePtr& asp)
 {
-	// clear_context();   // ???
-	push_context_atomspace(asp);
+	_atomspace = asp;
 }
 
 AtomSpacePtr PythonEval::get_atomspace(void)
 {
-	return get_context_atomspace();
+	return _atomspace;
 }
 
 PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)

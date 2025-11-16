@@ -86,6 +86,9 @@ class PythonEval : public GenericEval
         void eval_expr_line(const std::string&);
         bool check_for_error();
 
+    protected:
+        AtomSpacePtr _atomspace;
+
     public:
         PythonEval(void);
         ~PythonEval();
