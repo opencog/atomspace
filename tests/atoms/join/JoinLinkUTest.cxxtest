@@ -42,13 +42,12 @@ public:
 		logger().set_sync_flag(true);
 
 		_as = createAtomSpace();
-		eval = new SchemeEval(_as);
+		eval = SchemeEval::get_scheme_evaluator(_as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~JoinLinkUTest()
 	{
-		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());

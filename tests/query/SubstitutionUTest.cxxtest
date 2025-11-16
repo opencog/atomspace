@@ -41,7 +41,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
+		eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 		eval->eval("(load-from-path \"tests/query/substitution.scm\")");

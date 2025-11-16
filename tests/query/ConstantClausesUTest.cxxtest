@@ -35,18 +35,18 @@ class ConstantClausesUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr as;
-	SchemeEval eval;
+	SchemeEval* eval;
 	Handle A, B, C, AB, IdAA, P, Q, X, LP, LQ;
 
 public:
-	ConstantClausesUTest() : as(createAtomSpace()), eval(as)
+	ConstantClausesUTest() : as(createAtomSpace()), eval(SchemeEval::get_scheme_evaluator(as))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
 		string dir = string(PROJECT_SOURCE_DIR) + "/tests/query";
-		eval.eval(string("(add-to-load-path \"") + dir + string("\")"));
+		eval->eval(string("(add-to-load-path \"") + dir + string("\")"));
 	}
 
 	~ConstantClausesUTest()
@@ -256,9 +256,9 @@ void ConstantClausesUTest::test_mixed_clauses_1()
 	Handle mary = an(CONCEPT_NODE, "Mary"),
 		edward = an(CONCEPT_NODE, "Edward");
 
-	eval.eval("(load-from-path \"constant-clauses.scm\")");
+	eval->eval("(load-from-path \"constant-clauses.scm\")");
 
-	Handle result = eval.eval_h("(cog-execute! mixed-clauses)"),
+	Handle result = eval->eval_h("(cog-execute! mixed-clauses)"),
 		expected = al(SET_LINK, edward, mary);
 
 	TS_ASSERT_EQUALS(result, expected);
@@ -272,9 +272,9 @@ void ConstantClausesUTest::test_mixed_clauses_1()
 void ConstantClausesUTest::test_mixed_clauses_2()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"blair-witch.scm\")");
+	eval->eval("(load-from-path \"blair-witch.scm\")");
 
-	Handle query = eval.eval_h("find-something");
+	Handle query = eval->eval_h("find-something");
 	Handle result = HandleCast(query->execute(as.get()));
 	Handle expected = al(SET_LINK, A);
 
@@ -283,7 +283,7 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 
 	TS_ASSERT_EQUALS(result, expected);
 
-	query = eval.eval_h("find-nothing"),
+	query = eval->eval_h("find-nothing"),
 	result = HandleCast(query->execute(as.get())),
 	expected = al(SET_LINK);
 
@@ -300,11 +300,11 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 void ConstantClausesUTest::test_mixed_clauses_3()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"constant-scope.scm\")");
+	eval->eval("(load-from-path \"constant-scope.scm\")");
 
-	Handle query = eval.eval_h("query"),
+	Handle query = eval->eval_h("query"),
 		result = HandleCast(query->execute(as.get())),
-		expected = eval.eval_h("expected");
+		expected = eval->eval_h("expected");
 	HandleSet results(result->getOutgoingSet().begin(),
 	                  result->getOutgoingSet().end()),
 		more_expected(expected->getOutgoingSet().begin(),
@@ -324,10 +324,10 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 void ConstantClausesUTest::test_constant_present()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"constant-present.scm\")");
+	eval->eval("(load-from-path \"constant-present.scm\")");
 
-	Handle results = eval.eval_h("(cog-execute! query)");
-	Handle expected = eval.eval_h("expected");
+	Handle results = eval->eval_h("(cog-execute! query)");
+	Handle expected = eval->eval_h("expected");
 
 	logger().debug() << " results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);

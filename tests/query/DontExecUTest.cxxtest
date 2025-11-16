@@ -35,16 +35,16 @@ class DontExecUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr as;
-	SchemeEval eval;
+	SchemeEval* eval;
 
 public:
-	DontExecUTest() : as(createAtomSpace()), eval(as)
+	DontExecUTest() : as(createAtomSpace()), eval(SchemeEval::get_scheme_evaluator(as))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
 
-		eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~DontExecUTest()
@@ -75,17 +75,17 @@ void DontExecUTest::setUp()
 void DontExecUTest::test_DontExecLink_simple()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+	eval->eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
 
-	Handle band = eval.eval_h("bad-and");
-	Handle dand = eval.eval_h("dont-and");
-	Handle want_band = eval.eval_h("(cog-execute! dont-and)");
+	Handle band = eval->eval_h("bad-and");
+	Handle dand = eval->eval_h("dont-and");
+	Handle want_band = eval->eval_h("(cog-execute! dont-and)");
 
 	logger().debug() << "simple result = " << oc_to_string(want_band);
 	logger().debug() << "simple expected = " << oc_to_string(band);
 	TS_ASSERT_EQUALS(want_band, band);
 
-	Handle put_band = eval.eval_h("(cog-execute! put-and)");
+	Handle put_band = eval->eval_h("(cog-execute! put-and)");
 
 	logger().debug() << "put result = " << oc_to_string(put_band);
 	logger().debug() << "put expected = " << oc_to_string(band);
@@ -101,10 +101,10 @@ void DontExecUTest::test_DontExecLink_simple()
 void DontExecUTest::test_DontExecLink_multi()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval.eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+	eval->eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
 
-	Handle got = eval.eval_h("(cog-execute! put-eval)");
-	Handle want = eval.eval_h("eval-expected");
+	Handle got = eval->eval_h("(cog-execute! put-eval)");
+	Handle want = eval->eval_h("eval-expected");
 
 	TS_ASSERT_EQUALS(got, want);
 

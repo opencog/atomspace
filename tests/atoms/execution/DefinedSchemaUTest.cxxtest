@@ -41,7 +41,7 @@ public:
 		logger().set_sync_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
+		eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 		eval->eval("(load-from-path \"tests/atoms/execution/defined-schema.scm\")");
 	}

@@ -33,15 +33,15 @@ class NestedClauseUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _as;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 
 public:
-	NestedClauseUTest() : _as(createAtomSpace()),_eval(_as)
+	NestedClauseUTest() : _as(createAtomSpace()),_eval(SchemeEval::get_scheme_evaluator(_as))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	~NestedClauseUTest()
@@ -73,21 +73,21 @@ void NestedClauseUTest::test_nested_and()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	_eval.eval("(load-from-path \"tests/query/nested-and.scm\")");
+	_eval->eval("(load-from-path \"tests/query/nested-and.scm\")");
 
-	std::string boo = _eval.eval("did-call");
+	std::string boo = _eval->eval("did-call");
 	logger().debug() << "Start: " << boo;
 	TS_ASSERT_EQUALS(boo, "#f\n");
 
-	Handle results = _eval.eval_h("(cog-execute! (CollectionOf nestand))");
-	Handle expected = _eval.eval_h("(Set (Concept \"battery\"))");
+	Handle results = _eval->eval_h("(cog-execute! (CollectionOf nestand))");
+	Handle expected = _eval->eval_h("(Set (Concept \"battery\"))");
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
 
-	boo = _eval.eval("did-call");
+	boo = _eval->eval("did-call");
 	logger().debug() << "End: " << boo;
 	TS_ASSERT_EQUALS(boo, "#t\n");
 

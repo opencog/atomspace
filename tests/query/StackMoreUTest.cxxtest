@@ -72,7 +72,7 @@ class StackMoreUTest :  public CxxTest::TestSuite
 void StackMoreUTest::setUp(void)
 {
 	as = createAtomSpace();
-	SchemeEval* eval = new SchemeEval(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
@@ -93,7 +93,6 @@ void StackMoreUTest::setUp(void)
 	bind_uo = eval->apply("bind_uo", Handle::UNDEFINED);
 	bind_uu = eval->apply("bind_uu", Handle::UNDEFINED);
 	bind_uuu = eval->apply("bind_uuu", Handle::UNDEFINED);
-	delete eval;
 }
 
 /*

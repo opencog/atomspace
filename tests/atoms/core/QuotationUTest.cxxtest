@@ -38,15 +38,15 @@ class QuotationUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 
 public:
-	QuotationUTest() :_asp(createAtomSpace()), _eval(_asp)
+	QuotationUTest() :_asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	}
 
@@ -67,11 +67,11 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
+	std::string rs = _eval->eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(_asp.get());
-	Handle and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+	Handle and_sha_abs = _eval->eval_h("and-shallow-abstraction"),
 		result = HandleCast(inst.execute(and_sha_abs)),
 		expected = and_sha_abs;
 
@@ -104,11 +104,11 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
+	std::string rs = _eval->eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(_asp.get());
-	Handle quoted_lambda = _eval.eval_h("quoted-lambda"),
+	Handle quoted_lambda = _eval->eval_h("quoted-lambda"),
 		result = HandleCast(inst.execute(quoted_lambda)),
 		expected = quoted_lambda;
 

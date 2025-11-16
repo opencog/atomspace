@@ -469,23 +469,23 @@ void StreamUTest::test_guile()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(_asp);
-	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	eval.eval("(load-from-path \"tests/atoms/value/stream.scm\")");
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	eval->eval("(load-from-path \"tests/atoms/value/stream.scm\")");
 
 	FloatValuePtr voex = createFloatValue(std::vector<double>{1.0, 2.0, 3.0});
-	ValuePtr vo = eval.eval_v("(cog-execute! vo)");
+	ValuePtr vo = eval->eval_v("(cog-execute! vo)");
 	printf("     got: %s", vo->to_string().c_str());
 	printf("expected: %s\n", voex->to_string().c_str());
 	TS_ASSERT(*voex == *FloatValueCast(vo));
 
 	FloatValuePtr tymex = createFloatValue(std::vector<double>{14.0, 16.0, 18.0});
-	ValuePtr tym = eval.eval_v("(cog-execute! tym)");
+	ValuePtr tym = eval->eval_v("(cog-execute! tym)");
 	printf("     got: %s", tym->to_string().c_str());
 	printf("expected: %s\n", tymex->to_string().c_str());
 	TS_ASSERT(*tymex == *FloatValueCast(tym));
 
-	ValuePtr tymb = eval.eval_v("(cog-execute! tymb)");
+	ValuePtr tymb = eval->eval_v("(cog-execute! tymb)");
 	printf("     got: %s", tymb->to_string().c_str());
 	FloatValuePtr ftymb = FloatValueCast(tymb);
 	const std::vector<double>& vals = ftymb->value();

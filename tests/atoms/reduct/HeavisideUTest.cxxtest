@@ -40,13 +40,12 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
+		eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~HeavisideUTest()
 	{
-		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());

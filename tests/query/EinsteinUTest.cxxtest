@@ -43,7 +43,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 #include "test-types.cc"
 
 			as = createAtomSpace();
-			eval = new SchemeEval(as);
+			eval = SchemeEval::get_scheme_evaluator(as);
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 			eval->eval("(load-from-path \"tests/query/test_types.scm\")");
@@ -51,8 +51,6 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 		~EinsteinPuzzle()
 		{
-			delete eval;
-
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());

@@ -42,7 +42,7 @@ class BuggyNot :  public CxxTest::TestSuite
 #include "test-types.cc"
 
 			as = createAtomSpace();
-			eval = new SchemeEval(as);
+			eval = SchemeEval::get_scheme_evaluator(as);
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 		}
@@ -87,7 +87,6 @@ void BuggyNot::test_bugnot(void)
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
 	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
-	delete eval;
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
