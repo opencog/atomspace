@@ -1,6 +1,6 @@
 
 INSTALL (FILES
    GenericEval.h
-   EvalaluatorPool.h
+   EvaluatorPool.h
    DESTINATION "include/opencog/eval"
 )
