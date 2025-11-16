@@ -97,19 +97,21 @@ T* GenericEvalPool<T>::get_from_pool()
 		return ev;
 	}
 
-	// Pool is empty; user needs to uhhh
-	return nullptr;
+	// Pool is empty; make a new one.
+	return new T(nullptr);
 }
 
 template <typename T>
 void GenericEvalPool<T>::return_to_pool(T* ev)
 {
+	ev->set_atomspace(nullptr);
 	ev->clear_pending();
 
 	std::lock_guard<std::mutex> lock(_pool_mtx);
 	_pool.push(ev);
 }
 
+// Return evaluator for this AtomSpace/thread combo.
 template <typename T>
 T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 {
@@ -124,7 +126,6 @@ T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 				T* evaluator = ev.second;
 
 				// Return to pool instead of delete to avoid GC conflicts
-				evaluator->set_atomspace(nullptr);
 				GenericEvalPool<T>::return_to_pool(evaluator);
 			}
 		}
@@ -137,9 +138,6 @@ T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 
 	// Try to get from pool, or create new if pool is empty
 	T* evaluator = GenericEvalPool<T>::get_from_pool();
-	if (!evaluator)
-		evaluator = new T(nullptr);
-
 	evaluator->set_atomspace(asp);
 	issued[asp] = evaluator;
 
