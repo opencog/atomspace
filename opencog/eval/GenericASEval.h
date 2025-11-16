@@ -35,9 +35,21 @@ namespace opencog {
  */
 
 /**
- * Template-based pool for evaluators.
- * Each evaluator type (SchemeEval, PythonEval, etc.) gets its own pool
- * through template instantiation, avoiding mixing of different evaluator types.
+ * Evaluator pool. Using a pool, instead of new/delete, is required in
+ * order to work around nasty garbage-collection issues in scheme, and
+ * also potentially in newer byte-code compiled python.
+ *
+ * Every thread gets it's own evaluator; when threads exit, one imagines
+ * the evaluator can be freed. Not so easy -- the TLS thread destructor
+ * has already run, and already passed through GC, before the Evaluator
+ * dtor gets to run. This ends with an ugly crash in the dtor. Solution?
+ * Don't dtor. Stick the Evaluator back into the pool, where it can be
+ * recycled elsewhere. Minnor benefit? Avoids to overhead of running the
+ * Evaluator ctor.
+ *
+ * Template? Well, each type needs to have its own pool; we can't mix
+ * Scheme and Python evaluators in the same pool. Tried that already :-)
+ * Wasn't happy about it :-)
  */
 template <typename T>
 class GenericEvalPool
@@ -50,9 +62,6 @@ private:
 	static void return_to_pool(T* ev);
 
 public:
-	// Return evaluator for this thread and atomspace combination.
-	// Uses thread-local storage and pool to avoid repeatedly
-	// creating and destroying evaluators.
 	static T* get_evaluator(const AtomSpacePtr& asp);
 	static T* get_evaluator(AtomSpace* as);
 };
@@ -71,9 +80,6 @@ class GenericASEval : public GenericEval
 		virtual AtomSpacePtr get_atomspace(void);
 };
 
-/** @}*/
-
-// Template implementation must be in header
 template <typename T>
 std::stack<T*> GenericEvalPool<T>::_pool;
 
@@ -91,7 +97,7 @@ T* GenericEvalPool<T>::get_from_pool()
 		return ev;
 	}
 
-	// Pool is empty, return nullptr to signal caller should create new instance
+	// Pool is empty; user needs to uhhh
 	return nullptr;
 }
 
@@ -150,6 +156,7 @@ T* GenericEvalPool<T>::get_evaluator(AtomSpace* as)
 	return get_evaluator(asp);
 }
 
+/** @}*/
 }
 
 #endif // _OPENCOG_GENERIC_AS_EVAL_H
