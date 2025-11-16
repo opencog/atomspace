@@ -32,6 +32,7 @@ TARGET_LINK_LIBRARIES(smob
 	clearbox
 	join
 	pattern
+	grounded
 	execution
 	columnvec
 	atomflow
