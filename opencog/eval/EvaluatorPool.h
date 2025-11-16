@@ -1,7 +1,7 @@
 /*
- * GenericASEval.h
+ * EvaluatorPool.h
  *
- * Template for a generic AtomSpace-aware evaluator
+ * Pool for per-thread evaluators.
  * Copyright (c) 2025 BrainyBlaze Dynamics, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_GENERIC_AS_EVAL_H
-#define _OPENCOG_GENERIC_AS_EVAL_H
+#ifndef _OPENCOG_EVALUATOR_POOL_H
+#define _OPENCOG_EVALUATOR_POOL_H
 
 #include "GenericEval.h"
 #include <opencog/atomspace/AtomSpace.h>
@@ -52,7 +52,7 @@ namespace opencog {
  * Wasn't happy about it :-)
  */
 template <typename T>
-class GenericEvalPool
+class EvaluatorPool
 {
 private:
 	static std::stack<T*> _pool;
@@ -66,28 +66,17 @@ public:
 	static T* get_evaluator(AtomSpace* as);
 };
 
-class GenericASEval : public GenericEval
-{
-	protected:
-		AtomSpacePtr _atomspace;
+/** @}*/
 
-	public:
-		GenericASEval(AtomSpace*);
-		GenericASEval(AtomSpacePtr&);
-		virtual ~GenericASEval() {}
-
-		virtual void set_atomspace(const AtomSpacePtr&);
-		virtual AtomSpacePtr get_atomspace(void);
-};
+// Template implementation
+template <typename T>
+std::stack<T*> EvaluatorPool<T>::_pool;
 
 template <typename T>
-std::stack<T*> GenericEvalPool<T>::_pool;
+std::mutex EvaluatorPool<T>::_pool_mtx;
 
 template <typename T>
-std::mutex GenericEvalPool<T>::_pool_mtx;
-
-template <typename T>
-T* GenericEvalPool<T>::get_from_pool()
+T* EvaluatorPool<T>::get_from_pool()
 {
 	std::lock_guard<std::mutex> lock(_pool_mtx);
 
@@ -102,7 +91,7 @@ T* GenericEvalPool<T>::get_from_pool()
 }
 
 template <typename T>
-void GenericEvalPool<T>::return_to_pool(T* ev)
+void EvaluatorPool<T>::return_to_pool(T* ev)
 {
 	ev->set_atomspace(nullptr);
 	ev->clear_pending();
@@ -113,7 +102,7 @@ void GenericEvalPool<T>::return_to_pool(T* ev)
 
 // Return evaluator for this AtomSpace/thread combo.
 template <typename T>
-T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
+T* EvaluatorPool<T>::get_evaluator(const AtomSpacePtr& asp)
 {
 	static thread_local std::map<AtomSpacePtr, T*> issued;
 
@@ -124,9 +113,7 @@ T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 			for (auto ev : issued)
 			{
 				T* evaluator = ev.second;
-
-				// Return to pool instead of delete to avoid GC conflicts
-				GenericEvalPool<T>::return_to_pool(evaluator);
+				EvaluatorPool<T>::return_to_pool(evaluator);
 			}
 		}
 	};
@@ -137,7 +124,7 @@ T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 		return ev->second;
 
 	// Try to get from pool, or create new if pool is empty
-	T* evaluator = GenericEvalPool<T>::get_from_pool();
+	T* evaluator = EvaluatorPool<T>::get_from_pool();
 	evaluator->set_atomspace(asp);
 	issued[asp] = evaluator;
 
@@ -145,7 +132,7 @@ T* GenericEvalPool<T>::get_evaluator(const AtomSpacePtr& asp)
 }
 
 template <typename T>
-T* GenericEvalPool<T>::get_evaluator(AtomSpace* as)
+T* EvaluatorPool<T>::get_evaluator(AtomSpace* as)
 {
 	OC_ASSERT(nullptr != as,
 		"Cannot create evaluator without an AtomSpace!");
@@ -154,7 +141,6 @@ T* GenericEvalPool<T>::get_evaluator(AtomSpace* as)
 	return get_evaluator(asp);
 }
 
-/** @}*/
 }
 
-#endif // _OPENCOG_GENERIC_AS_EVAL_H
+#endif // _OPENCOG_EVALUATOR_POOL_H

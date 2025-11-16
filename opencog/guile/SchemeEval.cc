@@ -39,6 +39,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/atoms/value/BoolValue.h>
+#include <opencog/eval/EvaluatorPool.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -312,18 +313,21 @@ static void init_only_once(void)
 	while (not done_with_init) { usleep(1000); }
 }
 
-SchemeEval::SchemeEval(AtomSpace* as)
-	: GenericASEval(as)
+SchemeEval::SchemeEval(AtomSpace* as) :
+	_atomspace(nullptr)
 {
 	init_only_once();
 	scm_with_guile(c_wrap_init, this);
+	if (as)
+		set_atomspace(AtomSpaceCast(as));
 }
 
-SchemeEval::SchemeEval(AtomSpacePtr& asp)
-	: GenericASEval(asp)
+SchemeEval::SchemeEval(AtomSpacePtr& asp) :
+	_atomspace(asp)
 {
 	init_only_once();
 	scm_with_guile(c_wrap_init, this);
+	set_atomspace(asp);
 }
 
 /* This should be called once for every new thread. */
@@ -1132,12 +1136,12 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 
 SchemeEval* SchemeEval::get_scheme_evaluator(const AtomSpacePtr& asp)
 {
-	return GenericEvalPool<SchemeEval>::get_evaluator(asp);
+	return EvaluatorPool<SchemeEval>::get_evaluator(asp);
 }
 
 SchemeEval* SchemeEval::get_scheme_evaluator(AtomSpace* as)
 {
-	return GenericEvalPool<SchemeEval>::get_evaluator(as);
+	return EvaluatorPool<SchemeEval>::get_evaluator(as);
 }
 
 /* ============================================================== */
@@ -1179,6 +1183,7 @@ void SchemeEval::set_scheme_as(AtomSpace* as)
 
 void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 {
+	_atomspace = as;
 	scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 

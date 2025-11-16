@@ -33,6 +33,7 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/EvaluatorPool.h>
 #include "PythonEval.h"
 #include "PyGILGuard.h"
 
@@ -86,21 +87,21 @@ using namespace std::chrono_literals;
  */
 
 PythonEval::PythonEval(AtomSpace* as)
-	: GenericASEval(as)
 {
 	_eval_done = true;
 	_paren_count = 0;
 	global_python_initialize();
 	initialize_python_objects_and_imports();
+	set_atomspace(AtomSpaceCast(as));
 }
 
 PythonEval::PythonEval(AtomSpacePtr& asp)
-	: GenericASEval(asp)
 {
 	_eval_done = true;
 	_paren_count = 0;
 	global_python_initialize();
 	initialize_python_objects_and_imports();
+	set_atomspace(asp);
 }
 
 PythonEval::~PythonEval()
@@ -109,14 +110,25 @@ PythonEval::~PythonEval()
     Py_DECREF(_pyRootModule);
 }
 
+void PythonEval::set_atomspace(const AtomSpacePtr& asp)
+{
+	// clear_context();   // ???
+	push_context_atomspace(asp);
+}
+
+AtomSpacePtr PythonEval::get_atomspace(void)
+{
+	return get_context_atomspace();
+}
+
 PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)
 {
-	return GenericEvalPool<PythonEval>::get_evaluator(asp);
+	return EvaluatorPool<PythonEval>::get_evaluator(asp);
 }
 
 PythonEval* PythonEval::get_python_evaluator(AtomSpace* as)
 {
-	return GenericEvalPool<PythonEval>::get_evaluator(as);
+	return EvaluatorPool<PythonEval>::get_evaluator(as);
 }
 
 // ===========================================================
