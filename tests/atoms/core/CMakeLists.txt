@@ -1,9 +1,4 @@
 
-LINK_LIBRARIES(
-	atomcore
-	atomspace
-)
-
 ADD_CXXTEST(CheckersUTest)
 ADD_CXXTEST(FindUtilsUTest)
 ADD_CXXTEST(NumberNodeUTest)
@@ -16,8 +11,6 @@ ADD_CXXTEST(DeleteLinkUTest)
 ADD_CXXTEST(StateLinkUTest)
 
 IF(HAVE_GUILE)
-	LINK_LIBRARIES(execution smob)
-
 	ADD_CXXTEST(FreeLinkUTest)
 	ADD_CXXTEST(CondLinkUTest)
 	ADD_CXXTEST(ScopeLinkUTest)
