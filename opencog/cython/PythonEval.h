@@ -95,8 +95,8 @@ class PythonEval : public GenericEval
         static PythonEval* get_python_evaluator(AtomSpace*);
         static PythonEval* get_python_evaluator(const AtomSpacePtr&);
 
-        void set_atomspace(const AtomSpacePtr&);
-        AtomSpacePtr get_atomspace(void);
+        virtual void set_atomspace(const AtomSpacePtr&);
+        virtual AtomSpacePtr get_atomspace(void);
 
         // The async-output interface.
         virtual void begin_eval(void);
