@@ -36,6 +36,10 @@
 #include <opencog/eval/GenericEval.h>
 
 namespace opencog {
+
+// Forward declaration for friend
+template <typename T> class EvaluatorPool;
+
 /** \addtogroup grp_smob
  *  @{
  *
@@ -151,6 +155,9 @@ class SchemeEval : public GenericEval
 	protected:
 		AtomSpacePtr _atomspace;
 
+		friend class EvaluatorPool<SchemeEval>;
+		SchemeEval(void);
+
 	public:
 		// Call before first use. Cogserver needs this!
 		static void init_scheme(void);
@@ -160,7 +167,6 @@ class SchemeEval : public GenericEval
 		void set_atomspace(const AtomSpacePtr&);
 		AtomSpacePtr get_atomspace(void);
 
-		SchemeEval(void);
 		virtual ~SchemeEval();
 		virtual std::string get_name(void) const { return "SchemeEval"; }
 
