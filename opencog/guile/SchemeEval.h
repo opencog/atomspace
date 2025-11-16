@@ -160,8 +160,7 @@ class SchemeEval : public GenericEval
 		void set_atomspace(const AtomSpacePtr&);
 		AtomSpacePtr get_atomspace(void);
 
-		SchemeEval(AtomSpace*);
-		SchemeEval(AtomSpacePtr&);
+		SchemeEval(void);
 		virtual ~SchemeEval();
 		virtual std::string get_name(void) const { return "SchemeEval"; }
 

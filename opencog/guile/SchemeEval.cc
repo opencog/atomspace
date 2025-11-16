@@ -313,21 +313,11 @@ static void init_only_once(void)
 	while (not done_with_init) { usleep(1000); }
 }
 
-SchemeEval::SchemeEval(AtomSpace* as) :
+SchemeEval::SchemeEval(void) :
 	_atomspace(nullptr)
 {
 	init_only_once();
 	scm_with_guile(c_wrap_init, this);
-	if (as)
-		set_atomspace(AtomSpaceCast(as));
-}
-
-SchemeEval::SchemeEval(AtomSpacePtr& asp) :
-	_atomspace(asp)
-{
-	init_only_once();
-	scm_with_guile(c_wrap_init, this);
-	set_atomspace(asp);
 }
 
 /* This should be called once for every new thread. */
@@ -1194,7 +1184,7 @@ void SchemeEval::init_scheme(void)
 	// the calls to SchemeSmob::init(); and PrimitiveEnviron::init();
 	// (which must be called by scm_with_guile()). But whatever, not
 	// a big deal.
-	SchemeEval sch(nullptr);
+	SchemeEval sch;
 }
 
 extern "C" {

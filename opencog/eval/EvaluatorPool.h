@@ -87,7 +87,7 @@ T* EvaluatorPool<T>::get_from_pool()
 	}
 
 	// Pool is empty; make a new one.
-	return new T(nullptr);
+	return new T();
 }
 
 template <typename T>

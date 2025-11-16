@@ -86,22 +86,12 @@ using namespace std::chrono_literals;
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
 
-PythonEval::PythonEval(AtomSpace* as)
+PythonEval::PythonEval(void)
 {
 	_eval_done = true;
 	_paren_count = 0;
 	global_python_initialize();
 	initialize_python_objects_and_imports();
-	set_atomspace(AtomSpaceCast(as));
-}
-
-PythonEval::PythonEval(AtomSpacePtr& asp)
-{
-	_eval_done = true;
-	_paren_count = 0;
-	global_python_initialize();
-	initialize_python_objects_and_imports();
-	set_atomspace(asp);
 }
 
 PythonEval::~PythonEval()

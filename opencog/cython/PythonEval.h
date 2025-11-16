@@ -87,8 +87,7 @@ class PythonEval : public GenericEval
         bool check_for_error();
 
     public:
-        PythonEval(AtomSpace*);
-        PythonEval(AtomSpacePtr&);
+        PythonEval(void);
         ~PythonEval();
         virtual std::string get_name(void) const { return "PythonEval"; }
 
