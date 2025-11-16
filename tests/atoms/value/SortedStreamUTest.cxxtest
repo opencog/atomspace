@@ -67,12 +67,12 @@ void SortedStreamUTest::test_basic_sorted(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(_asp);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
 
 	// Perform numerical compare. The default sort order that's
 	// built into Handles will sort this smallest first; so use
 	// GreaterThanLink to swap the order.
-	ValuePtr sorted_val = eval.eval_v(R"(
+	ValuePtr sorted_val = eval->eval_v(R"(
 		(SortedStream
 			(Lambda
 				(VariableList (Variable "$A") (Variable "$B"))
@@ -83,9 +83,9 @@ void SortedStreamUTest::test_basic_sorted(void)
 	TS_ASSERT(svp != nullptr);
 
 	// Add numbers in unsorted order: 3, 2, 4
-	Handle num3 = eval.eval_h("(Number 3 3 3)");
-	Handle num2 = eval.eval_h("(Number 2 2)");
-	Handle num4 = eval.eval_h("(Number 4 4 4 4)");
+	Handle num3 = eval->eval_h("(Number 3 3 3)");
+	Handle num2 = eval->eval_h("(Number 2 2)");
+	Handle num4 = eval->eval_h("(Number 4 4 4 4)");
 
 	svp->add(num3);
 	svp->add(num2);
@@ -126,10 +126,10 @@ void SortedStreamUTest::test_bare_greater_than(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(_asp);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
 
 	// Use bare GreaterThan without Lambda wrapper
-	ValuePtr sorted_val = eval.eval_v(R"(
+	ValuePtr sorted_val = eval->eval_v(R"(
 		(SortedStream (GreaterThan))
 	)");
 
@@ -137,9 +137,9 @@ void SortedStreamUTest::test_bare_greater_than(void)
 	TS_ASSERT(svp != nullptr);
 
 	// Add numbers in unsorted order: 3, 2, 4
-	Handle num3 = eval.eval_h("(Number 3 3 3)");
-	Handle num2 = eval.eval_h("(Number 2 2)");
-	Handle num4 = eval.eval_h("(Number 4 4 4 4)");
+	Handle num3 = eval->eval_h("(Number 3 3 3)");
+	Handle num2 = eval->eval_h("(Number 2 2)");
+	Handle num4 = eval->eval_h("(Number 4 4 4 4)");
 
 	svp->add(num3);
 	svp->add(num2);
@@ -180,22 +180,22 @@ void SortedStreamUTest::test_deduplication(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(_asp);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
 
 	// Use bare GreaterThan for descending sort
-	ValuePtr sorted_val = eval.eval_v(R"(
+	ValuePtr sorted_val = eval->eval_v(R"(
 		(SortedStream (GreaterThan))
 	)");
 
 	SortedStreamPtr svp = SortedStreamCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
-	ValuePtr num2 = eval.eval_v("(FloatValue 2 2)");
-	ValuePtr num3 = eval.eval_v("(FloatValue 3 3 3)");
-	ValuePtr num4 = eval.eval_v("(FloatValue 4 4 4 4)");
-	ValuePtr num5 = eval.eval_v("(FloatValue 5 5 5 5 5)");
-	ValuePtr num6 = eval.eval_v("(FloatValue 6)");
-	ValuePtr voiv = eval.eval_v("(VoidValue)");
+	ValuePtr num2 = eval->eval_v("(FloatValue 2 2)");
+	ValuePtr num3 = eval->eval_v("(FloatValue 3 3 3)");
+	ValuePtr num4 = eval->eval_v("(FloatValue 4 4 4 4)");
+	ValuePtr num5 = eval->eval_v("(FloatValue 5 5 5 5 5)");
+	ValuePtr num6 = eval->eval_v("(FloatValue 6)");
+	ValuePtr voiv = eval->eval_v("(VoidValue)");
 
 	// Add 12 items in "random" order.
 	svp->add(num2);
@@ -247,11 +247,11 @@ void SortedStreamUTest::test_queue_source(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval eval(_asp);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
 
 	// Create the greater-or-equal comparison relation
 	// This is the same as in sorting-test.scm
-	Handle greater_or_equal = eval.eval_h(R"(
+	Handle greater_or_equal = eval->eval_h(R"(
 		(Lambda
 			(VariableList (Variable "$left") (Variable "$right"))
 			(Or
@@ -269,12 +269,12 @@ void SortedStreamUTest::test_queue_source(void)
 
 	// Attach the queue to an atom so we can pass it to SortedStream
 	// SortedStream needs a Handle as the source
-	Handle queue_anchor = eval.eval_h("(Anchor \"queue-source\")");
-	Handle queue_key = eval.eval_h("(Predicate \"queue-data\")");
+	Handle queue_anchor = eval->eval_h("(Anchor \"queue-source\")");
+	Handle queue_key = eval->eval_h("(Predicate \"queue-data\")");
 	queue_anchor->setValue(queue_key, queue);
 
 	// Create a ValueOf link to access the queue
-	Handle queue_source = eval.eval_h(R"(
+	Handle queue_source = eval->eval_h(R"(
 		(ValueOf (Anchor "queue-source") (Predicate "queue-data"))
 	)");
 
@@ -286,22 +286,22 @@ void SortedStreamUTest::test_queue_source(void)
 	TS_ASSERT(sorted != nullptr);
 
 	// Create the items to add (same as in sorting-test.scm)
-	Handle item_a = eval.eval_h("(Item \"a\")");
-	Handle item_b = eval.eval_h("(Item \"b\")");
-	Handle edge1 = eval.eval_h(R"(
+	Handle item_a = eval->eval_h("(Item \"a\")");
+	Handle item_b = eval->eval_h("(Item \"b\")");
+	Handle edge1 = eval->eval_h(R"(
 		(Edge
 			(Predicate "relation")
 			(List (Item "c") (Item "d")))
 	)");
-	Handle item_e = eval.eval_h("(Item \"e\")");
-	Handle item_f = eval.eval_h("(Item \"f\")");
-	Handle link3 = eval.eval_h(R"(
+	Handle item_e = eval->eval_h("(Item \"e\")");
+	Handle item_f = eval->eval_h("(Item \"f\")");
+	Handle link3 = eval->eval_h(R"(
 		(Link
 			(Item "p")
 			(Predicate "q")
 			(TagNode "z"))
 	)");
-	Handle edge2 = eval.eval_h(R"(
+	Handle edge2 = eval->eval_h(R"(
 		(Edge
 			(Predicate "relation")
 			(List (Item "g") (Item "h")))

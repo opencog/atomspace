@@ -41,11 +41,11 @@ class ScopeLinkUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 	Handle X, Y, Z, S, T, P, Q, CT;
 
 public:
-	ScopeLinkUTest() : _asp(createAtomSpace()), _eval(_asp)
+	ScopeLinkUTest() : _asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
@@ -59,7 +59,7 @@ public:
 		Q = an(PREDICATE_NODE, "Q");
 		CT = an(TYPE_NODE, "ConceptNode");
 
-		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
 	void setUp() {}

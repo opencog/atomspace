@@ -67,15 +67,13 @@ class SCMUtf8StringUTest :  public CxxTest::TestSuite
 void SCMUtf8StringUTest::setUp(void)
 {
 	as = createAtomSpace();
-	evaluator = new SchemeEval(as);
+	evaluator = SchemeEval::get_scheme_evaluator(as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
 }
 
 void SCMUtf8StringUTest::tearDown(void)
 {
-	delete evaluator;
-	evaluator = NULL;
 }
 
 #define CHKERR \

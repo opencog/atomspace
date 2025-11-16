@@ -26,7 +26,7 @@ class DynamicUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 	
 public:
 	DynamicUTest(void);
@@ -42,15 +42,15 @@ public:
 	void test_futures();
 };
 
-DynamicUTest::DynamicUTest(void) : _asp(createAtomSpace()), _eval(_asp)
+DynamicUTest::DynamicUTest(void) : _asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 	logger().set_timestamp_flag(false);
 	logger().set_sync_flag(true);
 
-	_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	_eval.eval("(load-from-path \"tests/atoms/flow/dynamic.scm\")");
+	_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	_eval->eval("(load-from-path \"tests/atoms/flow/dynamic.scm\")");
 }
 
 void DynamicUTest::setUp(void)
@@ -65,7 +65,7 @@ void DynamicUTest::test_predicate_formula()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr result = _eval.eval_v("fututv");
+	ValuePtr result = _eval->eval_v("fututv");
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
@@ -75,23 +75,23 @@ void DynamicUTest::test_predicate_formula()
 	FloatValuePtr stv = FloatValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.99) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.81) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.98) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.72) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.94) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.56) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.96) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.54) <= EPSI);
 
@@ -104,7 +104,7 @@ void DynamicUTest::test_formula_define()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr result = _eval.eval_v("tv-stream");
+	ValuePtr result = _eval->eval_v("tv-stream");
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
@@ -114,23 +114,23 @@ void DynamicUTest::test_formula_define()
 	FloatValuePtr stv = FloatValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.99) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.81) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.98) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.72) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.94) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.56) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.96) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.54) <= EPSI);
 
@@ -143,7 +143,7 @@ void DynamicUTest::test_dynamic_predicate()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr result = _eval.eval_v("(fake-tv a-implies-b)");
+	ValuePtr result = _eval->eval_v("(fake-tv a-implies-b)");
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
@@ -153,23 +153,23 @@ void DynamicUTest::test_dynamic_predicate()
 	FloatValuePtr stv = FloatValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.99) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.81) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.98) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.72) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.94) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.56) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.96) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.54) <= EPSI);
 
@@ -182,7 +182,7 @@ void DynamicUTest::test_defined_dynamic()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr result = _eval.eval_v("(fake-tv p-implies-q)");
+	ValuePtr result = _eval->eval_v("(fake-tv p-implies-q)");
 	// printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
@@ -192,23 +192,23 @@ void DynamicUTest::test_defined_dynamic()
 	FloatValuePtr stv = FloatValueCast(result);
 	// printf("stv: %s\n", stv->to_string().c_str());
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.99) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.81) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.98) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.72) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.2 0.8))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.3 0.7))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.94) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.56) <= EPSI);
 
-	_eval.eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
-	_eval.eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
+	_eval->eval("(set-fake-tv! A (FloatValue 0.4 0.6))");
+	_eval->eval("(set-fake-tv! B (FloatValue 0.1 0.9))");
 	TS_ASSERT(fabs(stv->value()[0] - 0.96) <= EPSI);
 	TS_ASSERT(fabs(stv->value()[1] - 0.54) <= EPSI);
 
@@ -221,7 +221,7 @@ void DynamicUTest::test_formula_stream()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr result = _eval.eval_v("(cog-value bar bkey)");
+	ValuePtr result = _eval->eval_v("(cog-value bar bkey)");
 	printf("result: %s\n", result->to_string().c_str());
 	printf("Got type=%s\n",
 		nameserver().getTypeName(result->get_type()).c_str());
@@ -238,7 +238,7 @@ void DynamicUTest::test_formula_stream()
 
 		foo->setValue(akey, createFloatValue(std::vector<double>(rv)));
 
-		ValuePtr vp = _eval.eval_v("(cog-value bar bkey)");
+		ValuePtr vp = _eval->eval_v("(cog-value bar bkey)");
 		TS_ASSERT_EQUALS(vp->get_type(), FORMULA_STREAM);
 
 		FloatValuePtr fvp = FloatValueCast(vp);
@@ -260,16 +260,16 @@ void DynamicUTest::test_formula_stream()
 void DynamicUTest::test_futures()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	_eval.eval("(load-from-path \"tests/atoms/flow/futures.scm\")");
+	_eval->eval("(load-from-path \"tests/atoms/flow/futures.scm\")");
 
-	ValuePtr scalar = _eval.eval_v("(get-mi-scalar \"hello\" \"world\")");
+	ValuePtr scalar = _eval->eval_v("(get-mi-scalar \"hello\" \"world\")");
 	printf("scalar: %s\n", scalar->to_string().c_str());
 	FloatValuePtr fvp = FloatValueCast(scalar);
 	TS_ASSERT(nullptr != fvp);
 	double smi = fvp->value()[0];
 	TS_ASSERT(fabs(smi - 0.7369655941662062) <= EPSI);
 
-	ValuePtr flvect = _eval.eval_v("(get-mi-stream \"hello\" \"world\")");
+	ValuePtr flvect = _eval->eval_v("(get-mi-stream \"hello\" \"world\")");
 	printf("flvect: %s\n", flvect->to_string().c_str());
 	fvp = FloatValueCast(flvect);
 	TS_ASSERT(nullptr != fvp);
@@ -277,17 +277,17 @@ void DynamicUTest::test_futures()
 	TS_ASSERT(fabs(vmi - 0.7369655941662062) <= EPSI);
 
 	// Bump the numbers
-	_eval.eval("(observe \"Hey\" \"Joe\")");
-	_eval.eval("(observe \"whazzup\" \"Joe\")");
+	_eval->eval("(observe \"Hey\" \"Joe\")");
+	_eval->eval("(observe \"whazzup\" \"Joe\")");
 
-	scalar = _eval.eval_v("(get-mi-scalar \"hello\" \"world\")");
+	scalar = _eval->eval_v("(get-mi-scalar \"hello\" \"world\")");
 	printf("scalar: %s\n", scalar->to_string().c_str());
 	fvp = FloatValueCast(scalar);
 	TS_ASSERT(nullptr != fvp);
 	smi = fvp->value()[0];
 	TS_ASSERT(fabs(smi - 1.222392421336448) <= EPSI);
 
-	flvect = _eval.eval_v("(get-mi-stream \"hello\" \"world\")");
+	flvect = _eval->eval_v("(get-mi-stream \"hello\" \"world\")");
 	printf("flvect: %s\n", flvect->to_string().c_str());
 	fvp = FloatValueCast(flvect);
 	TS_ASSERT(nullptr != fvp);

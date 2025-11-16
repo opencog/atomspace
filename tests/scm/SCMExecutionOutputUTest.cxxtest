@@ -78,14 +78,12 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 void SCMExecutionOutputUTest::setUp(void)
 {
 	as = createAtomSpace();
-	eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(use-modules (opencog exec))");
 }
 
 void SCMExecutionOutputUTest::tearDown(void)
 {
-	delete eval;
-	eval = NULL;
 }
 
 #define CHKEV(ev) \

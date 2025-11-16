@@ -108,7 +108,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 void BasicSCMUTest::setUp(void)
 {
 	as = createAtomSpace();
-	eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric
@@ -122,8 +122,6 @@ void BasicSCMUTest::setUp(void)
 
 void BasicSCMUTest::tearDown(void)
 {
-	delete eval;
-	eval = NULL;
 }
 
 // ============================================================

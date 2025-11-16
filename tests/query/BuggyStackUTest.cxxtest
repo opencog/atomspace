@@ -54,7 +54,7 @@ class BuggyStackUTest :  public CxxTest::TestSuite
 void BuggyStackUTest::setUp(void)
 {
 	as = createAtomSpace();
-	SchemeEval* eval = new SchemeEval(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
@@ -62,7 +62,6 @@ void BuggyStackUTest::setUp(void)
 
 	// Create an implication link that will be tested.
 	restrict = eval->apply("impy", Handle::UNDEFINED);
-	delete eval;
 }
 
 /*

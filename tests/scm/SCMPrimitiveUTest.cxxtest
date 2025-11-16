@@ -120,12 +120,11 @@ class MyExampleClass
 void SCMPrimitiveUTest::setUp(void)
 {
 	as = createAtomSpace();
-	eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 }
 
 void SCMPrimitiveUTest::tearDown(void)
 {
-	delete eval;
 	eval = NULL;
 }
 

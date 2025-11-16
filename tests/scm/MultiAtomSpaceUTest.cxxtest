@@ -71,14 +71,13 @@ public:
 void MultiAtomSpace::setUp(void)
 {
 	main_as = createAtomSpace();
-	evaluator = new SchemeEval(main_as);
+	evaluator = SchemeEval::get_scheme_evaluator(main_as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
 }
 
 void MultiAtomSpace::tearDown(void)
 {
-	delete evaluator;
 	evaluator = nullptr;
 	main_as = nullptr;
 }
@@ -148,9 +147,9 @@ void MultiAtomSpace::test_three(void)
 	AtomSpacePtr as1 = createAtomSpace();
 	AtomSpacePtr as2 = createAtomSpace();
 	AtomSpacePtr as3 = createAtomSpace();
-	SchemeEval* ev1 = new SchemeEval(as1);
-	SchemeEval* ev2 = new SchemeEval(as2);
-	SchemeEval* ev3 = new SchemeEval(as3);
+	SchemeEval* ev1 = SchemeEval::get_scheme_evaluator(as1);
+	SchemeEval* ev2 = SchemeEval::get_scheme_evaluator(as2);
+	SchemeEval* ev3 = SchemeEval::get_scheme_evaluator(as3);
 
 	Handle h1 = ev1->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev1);
@@ -197,9 +196,6 @@ void MultiAtomSpace::test_three(void)
 	CHKEV(ev2);
 	TSM_ASSERT("Expect to find atom", h5 == h9);
 
-	delete ev3;
-	delete ev2;
-	delete ev1;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -210,8 +206,8 @@ void MultiAtomSpace::test_load(void)
 	AtomSpacePtr as1 = createAtomSpace();
 	AtomSpacePtr as2 = createAtomSpace();
 
-	SchemeEval* ev1 = new SchemeEval(as1);
-	SchemeEval* ev2 = new SchemeEval(as2);
+	SchemeEval* ev1 = SchemeEval::get_scheme_evaluator(as1);
+	SchemeEval* ev2 = SchemeEval::get_scheme_evaluator(as2);
 	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
@@ -280,8 +276,6 @@ void MultiAtomSpace::test_load(void)
 	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, tv3->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 2, (int)(fvp3->value()[2]));
 
-	delete ev1;
-	delete ev2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -290,7 +284,7 @@ void MultiAtomSpace::test_nest(void)
 {
 	main_as->clear();
 	AtomSpacePtr locas = createAtomSpace(main_as);
-	SchemeEval* lev = new SchemeEval(locas);
+	SchemeEval* lev = SchemeEval::get_scheme_evaluator(locas);
 
 	// Push some atoms into the main space
 	Handle ha = evaluator->eval_h("(ConceptNode \"aaa\")");
@@ -321,7 +315,6 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Expect atom a in position 0", ha == hl->getOutgoingAtom(0));
 	TSM_ASSERT("Expect atom b in position 1", hb == hl->getOutgoingAtom(1));
 
-	delete lev;
 
 	// Above deletion should not affect the main atomspace
 	TSM_ASSERT("Still two atoms in main atomspace",

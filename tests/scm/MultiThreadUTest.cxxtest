@@ -52,7 +52,6 @@ class MultiThreadUTest :  public CxxTest::TestSuite
 
 		void test_init_race(void);
 		void threadedInit(int thread_id);
-		void test_three_evals_one_thread(void);
 		void test_multi_threads(void);
 		void threadedAdd(int thread_id, int N);
 };
@@ -109,63 +108,11 @@ void MultiThreadUTest::threadedInit(int thread_id)
 	start_cnt ++;
 	while (hold) {} // spin
 
-	SchemeEval* ev = new SchemeEval(as);
+	SchemeEval* ev = SchemeEval::get_scheme_evaluator(as);
 
 	Handle h1 = ev->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
-
-	delete ev;
-}
-
-/*
- * Test three evaluators writing to a single atomspace, in the same thread.
- */
-void MultiThreadUTest::test_three_evals_one_thread(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	// Three evaluators all touching one atomspace.
-	as = createAtomSpace();
-	SchemeEval* ev1 = new SchemeEval(as);
-	SchemeEval* ev2 = new SchemeEval(as);
-	SchemeEval* ev3 = new SchemeEval(as);
-
-	Handle h1 = ev1->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
-	CHKEV(ev1);
-	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
-
-	Handle h2 = ev2->eval_h("(cog-node 'ConceptNode \"stuff\")");
-	CHKEV(ev2);
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != h2);
-
-	Handle h3 = ev3->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
-	CHKEV(ev3);
-	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h3);
-	delete ev3;
-	ev3 = NULL;
-
-	Handle h4 = ev2->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
-	CHKEV(ev2);
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != h4);
-	delete ev2;
-	ev2 = NULL;
-
-	Handle h5 = ev1->eval_h("(cog-node 'ConceptNode \"stuff\")");
-	CHKEV(ev1);
-	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h5);
-	delete ev1;
-	ev1 = NULL;
-
-	// We expect the handles to be the same.
-	TSM_ASSERT("Bad handles", h1 == h2);
-	TSM_ASSERT("Bad handles", h1 == h3);
-	TSM_ASSERT("Bad handles", h1 == h4);
-	TSM_ASSERT("Bad handles", h1 == h5);
-
-	printf ("h1 = %llu %p\n", (long long unsigned int) h1.value(), h1.operator->());
-
-	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 
@@ -180,7 +127,7 @@ void MultiThreadUTest::test_three_evals_one_thread(void)
 // creation and binding of the symbol.
 void MultiThreadUTest::threadedAdd(int thread_id, int N)
 {
-	SchemeEval* ev = new SchemeEval(as);
+	SchemeEval* ev = SchemeEval::get_scheme_evaluator(as);
 	int counter = 0;
 	for (int i = 0; i < N; i++) {
 		double strength = 0.7 * ((double) i) / ((double) N);
@@ -198,7 +145,6 @@ void MultiThreadUTest::threadedAdd(int thread_id, int N)
 		CHKEV(ev);
 		TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h);
 	}
-	delete ev;
 }
 
 /*
