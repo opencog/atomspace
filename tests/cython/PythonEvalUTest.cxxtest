@@ -205,7 +205,8 @@ public:
 
 #ifdef HAVE_GUILE
         // Create a scheme evaluator to trigger cog-execute.
-        SchemeEval* scheme = SchemeEval::get_scheme_evaluator(as);
+        // SchemeEval* scheme = SchemeEval::get_scheme_evaluator(as);
+        SchemeEval* scheme = new SchemeEval(as);
 
         scheme->eval("(use-modules (opencog exec))");
 
