@@ -1,4 +1,3 @@
-ENABLE_TESTING()
 INCLUDE(AddCxxtest)
 
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
@@ -10,6 +9,19 @@ SET(GUILE_LOAD_PATH "${PROJECT_BINARY_DIR}/opencog/scm")
 
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
+LINK_LIBRARIES(
+	atombase
+	atomspace
+)
+
+IF (HAVE_GUILE)
+	LINK_LIBRARIES(smob)
+ENDIF (HAVE_GUILE)
+
+IF (HAVE_CYTHON)
+	LINK_LIBRARIES(PythonEval)
+ENDIF (HAVE_CYTHON)
 
 # Perform tests in component-dependency order, as much as possible.
 # For example, since most things depends on the atomspace,

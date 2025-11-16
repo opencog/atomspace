@@ -3,7 +3,6 @@
 
 ADD_GUILE_TEST(SexprQueryTest sexpr-query-test.scm)
 
-
 # Comment out until someone cares.
 # This works great, except that it depends on getting linked to
 # code that is provided by the storage module, which is done only

@@ -15,16 +15,10 @@ ADD_SUBDIRECTORY (pattern)
 ADD_SUBDIRECTORY (foreign)
 ADD_SUBDIRECTORY (grounded)
 
-LINK_LIBRARIES(
-   atombase
-   atomspace
-)
-
 ADD_CXXTEST(AlphaConvertUTest)
 ADD_CXXTEST(BetaReduceUTest)
 
 IF (HAVE_GUILE)
-	LINK_LIBRARIES(smob)
 	ADD_CXXTEST(HashUTest)
 	ADD_CXXTEST(RandomUTest)
 ENDIF (HAVE_GUILE)

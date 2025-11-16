@@ -1,9 +1,4 @@
 
-LINK_LIBRARIES(
-	atombase
-	atomspace
-)
-
 ADD_CXXTEST(HashMixUTest)
 ADD_CXXTEST(AtomTableUTest)
 ADD_CXXTEST(AtomSpaceUTest)
