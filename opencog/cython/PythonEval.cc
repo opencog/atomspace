@@ -109,23 +109,14 @@ PythonEval::~PythonEval()
     Py_DECREF(_pyRootModule);
 }
 
-// Factory function for pool management
-GenericASEval* PythonEval::create_evaluator()
-{
-	return new PythonEval(nullptr);
-}
-
-// Return per-thread, per-atomspace evaluator using pool management
 PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)
 {
-	return static_cast<PythonEval*>(
-		GenericASEval::get_evaluator(asp, &PythonEval::create_evaluator));
+	return GenericEvalPool<PythonEval>::get_evaluator(asp);
 }
 
 PythonEval* PythonEval::get_python_evaluator(AtomSpace* as)
 {
-	return static_cast<PythonEval*>(
-		GenericASEval::get_evaluator(as, &PythonEval::create_evaluator));
+	return GenericEvalPool<PythonEval>::get_evaluator(as);
 }
 
 // ===========================================================

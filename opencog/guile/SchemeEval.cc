@@ -1130,29 +1130,14 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 
 /* ============================================================== */
 
-// Factory function for creating new SchemeEval instances
-GenericASEval* SchemeEval::create_evaluator()
-{
-	return new SchemeEval(nullptr);
-}
-
-/// Return evaluator, for this thread and atomspace combination.
-/// If called with NULL, it will use the current atomspace for
-/// this thread.
-///
-/// Use thread-local storage (TLS) in order to avoid repeatedly
-/// creating and destroying the evaluator.
-///
 SchemeEval* SchemeEval::get_scheme_evaluator(const AtomSpacePtr& asp)
 {
-	return static_cast<SchemeEval*>(
-		GenericASEval::get_evaluator(asp, &SchemeEval::create_evaluator));
+	return GenericEvalPool<SchemeEval>::get_evaluator(asp);
 }
 
 SchemeEval* SchemeEval::get_scheme_evaluator(AtomSpace* as)
 {
-	return static_cast<SchemeEval*>(
-		GenericASEval::get_evaluator(as, &SchemeEval::create_evaluator));
+	return GenericEvalPool<SchemeEval>::get_evaluator(as);
 }
 
 /* ============================================================== */
