@@ -1155,20 +1155,9 @@ AtomSpacePtr SchemeEval::get_atomspace(void)
 
 void* SchemeEval::c_wrap_set_atomspace(void * vas)
 {
-	if (nullptr == vas) return vas;
 	AtomSpace* as = (AtomSpace*) vas;
 	SchemeSmob::ss_set_env_as(AtomSpaceCast(as));
 	return vas;
-}
-
-/**
- * Set the current atomspace for this thread.  From this point on, all
- * scheme code executing in this thread will use this atomspace (unless
- * it is changed in the course of execution...)
- */
-void SchemeEval::set_scheme_as(AtomSpace* as)
-{
-	scm_with_guile(c_wrap_set_atomspace, as);
 }
 
 void SchemeEval::set_atomspace(const AtomSpacePtr& as)
