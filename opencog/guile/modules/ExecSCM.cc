@@ -38,16 +38,14 @@ void opencog_exec_init(void);
 using namespace opencog;
 
 /**
- * cog-execute! executes any/all FunctionLinks
+ * cog-execute! executes any/all Ececutable and Evaluatable Links
  */
 static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
 	ValuePtr pap(inst.execute(h));
 	if (pap and pap->is_atom())
-	{
-		pap = atomspace->add_atom(HandleCast(pap));
-	}
+		return atomspace->add_atom(HandleCast(pap));
 	return pap;
 }
 
