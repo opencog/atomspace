@@ -1163,7 +1163,10 @@ void* SchemeEval::c_wrap_set_atomspace(void * vas)
 void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 {
 	_atomspace = as;
-	scm_with_guile(c_wrap_set_atomspace, as.get());
+
+	// EvaluatorPool::return_to_pool nulls out the atomspace.
+	if (as)
+		scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 
 void SchemeEval::init_scheme(void)
