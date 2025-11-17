@@ -1,24 +1,41 @@
 ;
 ; or-eval-test.scm -- Verify OrLink with GroundedPredicates in it
 ; Tests for problem reported in opencog/atomspace#2931
+;
+; This test is kind of bizarre. The OrLink has one term that
+; is always true, so it will always pass. The second term
+; tries to look up a TruthValue, but one is never even set,
+; so it will always return false, because .. there's no truth
+; value. So that's funky.
+;
+; However, this does expose a certain weirdness: While running,
+; this test creates an EdgeLink in a scratch space. And that's
+; fine -- that is what scratch spaces are for. But if scratch
+; spaces get mis-handled, this test bombs out. So, although it
+; is superficially bizarre, it is testing a bug that actually
+; shows up.
 
 (use-modules (opencog) (opencog exec))
 (use-modules (opencog test-runner))
 
 ;; Functions
 (define tvkey (Predicate "*-TruthValueKey-*"))
+
 (define (tv->bool tv)
   (cond
-    ((equal? tv #t) #t)
-    ((equal? tv #f) #f)
+    ((equal? tv (BoolValue #t)) #t)
+    ((equal? tv (BoolValue #f)) #f)
     (else #f)))
+
 (define (true? A)
   (tv->bool (cog-value A tvkey)))
+
 (define (always-true) #t)
 
 ;; KB
-(cog-set-value! (Inheritance (Concept "human") (Concept "person"))
-  (Predicate "*-TruthValueKey-*") (BoolValue #t))
+(cog-set-value!
+  (Inheritance (Concept "human") (Concept "person"))
+  tvkey (BoolValue #t))
 
 ;; Query
 (define query-plain
@@ -28,7 +45,7 @@
     (Or
       (Evaluation
         (GroundedPredicate "scm: true?")
-        (Evaluation
+        (Edge
           (Predicate "P")
           (List
             (Concept "dog")
@@ -48,7 +65,7 @@
     (Or
       (Evaluation
         (GroundedPredicate "scm: true?")
-        (Evaluation
+        (Edge
           (Predicate "P")
           (List
             (Concept "dog")
