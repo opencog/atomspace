@@ -158,8 +158,7 @@ class SchemeEval : public GenericASEval
 		// Call before first use. Cogserver needs this!
 		static void init_scheme(void);
 
-		// Set per-thread global
-		static void set_scheme_as(AtomSpace*);
+		// Set AtomSpace that this evaluator will be using.
 		virtual void set_atomspace(const AtomSpacePtr&);
 		virtual AtomSpacePtr get_atomspace(void);
 
