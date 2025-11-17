@@ -55,13 +55,15 @@ static void throwSyntaxEx(bool silent, const char* message...)
 // ----------------------------------------------------------
 
 /// `execute()` -- evaluate a LibraryRunner with arguments.
+/// Execution happens in the provided scratch space.
 ///
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
 ValuePtr LibraryRunner::execute(AtomSpace* as,
-                               const ValuePtr& vargs,
-                               bool silent)
+                                AtomSpace* scratch,
+                                const ValuePtr& vargs,
+                                bool silent)
 {
 	if (not vargs->is_atom())
 		throw SyntaxException(TRACE_INFO,
@@ -69,7 +71,7 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 			vargs->to_string().c_str());
 
 	Handle cargs = HandleCast(vargs);
-	Handle args(as->add_atom(cargs));
+	Handle args(scratch->add_atom(cargs));
 
 	// Convert the void* pointer to the correct function type.
 	// Functions can return either Handle* or ValuePtr*.
@@ -80,7 +82,7 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	ValuePtr result;
 
 	// Execute the function
-	ValuePtr* res = func(as, &args);
+	ValuePtr* res = func(scratch, &args);
 	if (nullptr != res)
 	{
 		result = *res;

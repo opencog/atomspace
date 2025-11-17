@@ -24,7 +24,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/VoidValue.h>
 #include "ValueOfLink.h"

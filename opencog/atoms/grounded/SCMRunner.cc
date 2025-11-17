@@ -49,7 +49,8 @@ SCMRunner::SCMRunner(std::string s)
 /// do it itself. The arguments are then inserted into the predicate,
 /// and the predicate as a whole is then evaluated.
 ///
-ValuePtr SCMRunner::execute(AtomSpace* as,
+ValuePtr SCMRunner::execute(AtomSpace* base_as,
+                            AtomSpace* scratch,
                             const ValuePtr& vargs,
                             bool silent)
 {
@@ -66,20 +67,22 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 		if (vargs->get_type() == VALUE_SHIM_LINK)
 			asargs = HandleCast(vargs)->execute();
 		else
-			asargs = as->add_atom(HandleCast(vargs));
+			asargs = scratch->add_atom(HandleCast(vargs));
 	}
 
-	SchemeEval* applier = get_evaluator_for_scheme(as);
-	AtomSpacePtr saved_as = applier->get_atomspace();
+	SchemeEval* applier = get_evaluator_for_scheme(scratch);
 	ValuePtr vp = applier->apply_v(_fname, asargs);
 
-	// Recursive lollapalooza means someone might have messed
-	// with our atomspace and not set it back. So we reset.
-	// Explicitly tested in MultiAtomSpaceUTest.
-	// If we are here due to ParallelLink, then brand new fresh
-	// threads will have saved_as==nullptr, so don't mess with those.
-	if (saved_as)
-		applier->set_atomspace(saved_as);
+	// The Scheme evaluator uses a fluid to hold "the current
+	// atomspace", and this fluid is typically set to the scratch
+	// space (in this thread). Set it back to "what it was", which
+	// should be the provided base_as.
+	//
+	// Thus happens during the recursive lollapalooza tested in
+	// MultiAtomSpaceUTest, and also trips in a few other unit
+	// tests.
+	SchemeEval* ev = get_evaluator_for_scheme(base_as);
+	ev->set_atomspace(AtomSpaceCast(base_as));
 
 	// In general, we expect the scheme fuction to return some Value.
 	// But user-written functions can return anything, e.g. scheme
