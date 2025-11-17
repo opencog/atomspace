@@ -75,8 +75,11 @@ ValuePtr SCMRunner::execute(AtomSpace* as,
 
 	// Recursive lollapalooza means someone might have messed
 	// with our atomspace and not set it back. So we reset.
-	// Explicitly tested in MultiAtomSpaceUTest
-	applier->set_atomspace(saved_as);
+	// Explicitly tested in MultiAtomSpaceUTest.
+	// If we are here due to ParallelLink, then brand new fresh
+	// threads will have saved_as==nullptr, so don't mess with those.
+	if (saved_as)
+		applier->set_atomspace(saved_as);
 
 	// In general, we expect the scheme fuction to return some Value.
 	// But user-written functions can return anything, e.g. scheme
