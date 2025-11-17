@@ -42,9 +42,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/eval/GenericASEval.h>
-
-#include <filesystem>
+#include <opencog/eval/GenericEval.h>
 
 namespace opencog {
 
@@ -53,7 +51,7 @@ namespace opencog {
  * It also provides some handy functions, such as getPyAtomspace. These helper
  * functions may need python GIL and you should do this manually.
  */
-class PythonEval : public GenericASEval
+class PythonEval : public GenericEval
 {
     private:
         void initialize_python_objects_and_imports(void);
@@ -74,9 +72,6 @@ class PythonEval : public GenericASEval
         std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
 
-        // Factory function for pool management
-        static GenericASEval* create_evaluator();
-
         // Computed results are typically polled in a distinct thread.
         bool _eval_done;
         std::mutex _poll_mtx;
@@ -91,15 +86,20 @@ class PythonEval : public GenericASEval
         void eval_expr_line(const std::string&);
         bool check_for_error();
 
+    protected:
+        AtomSpacePtr _atomspace;
+
     public:
-        PythonEval(AtomSpace*);
-        PythonEval(AtomSpacePtr&);
+        PythonEval(void);
         ~PythonEval();
         virtual std::string get_name(void) const { return "PythonEval"; }
 
         // Return per-thread, per-atomspace evaluator using pool management
         static PythonEval* get_python_evaluator(AtomSpace*);
         static PythonEval* get_python_evaluator(const AtomSpacePtr&);
+
+        virtual void set_atomspace(const AtomSpacePtr&);
+        virtual AtomSpacePtr get_atomspace(void);
 
         // The async-output interface.
         virtual void begin_eval(void);

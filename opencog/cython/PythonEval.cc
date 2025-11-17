@@ -33,6 +33,7 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/EvaluatorPool.h>
 #include "PythonEval.h"
 #include "PyGILGuard.h"
 
@@ -85,17 +86,8 @@ using namespace std::chrono_literals;
  * Remember to look to verify the behavior of each and every Py_ API call.
  */
 
-PythonEval::PythonEval(AtomSpace* as)
-	: GenericASEval(as)
-{
-	_eval_done = true;
-	_paren_count = 0;
-	global_python_initialize();
-	initialize_python_objects_and_imports();
-}
-
-PythonEval::PythonEval(AtomSpacePtr& asp)
-	: GenericASEval(asp)
+PythonEval::PythonEval(void) :
+	_atomspace(nullptr)
 {
 	_eval_done = true;
 	_paren_count = 0;
@@ -109,23 +101,24 @@ PythonEval::~PythonEval()
     Py_DECREF(_pyRootModule);
 }
 
-// Factory function for pool management
-GenericASEval* PythonEval::create_evaluator()
+void PythonEval::set_atomspace(const AtomSpacePtr& asp)
 {
-	return new PythonEval(nullptr);
+	_atomspace = asp;
 }
 
-// Return per-thread, per-atomspace evaluator using pool management
+AtomSpacePtr PythonEval::get_atomspace(void)
+{
+	return _atomspace;
+}
+
 PythonEval* PythonEval::get_python_evaluator(const AtomSpacePtr& asp)
 {
-	return static_cast<PythonEval*>(
-		GenericASEval::get_evaluator(asp, &PythonEval::create_evaluator));
+	return EvaluatorPool<PythonEval>::get_evaluator(asp);
 }
 
 PythonEval* PythonEval::get_python_evaluator(AtomSpace* as)
 {
-	return static_cast<PythonEval*>(
-		GenericASEval::get_evaluator(as, &PythonEval::create_evaluator));
+	return EvaluatorPool<PythonEval>::get_evaluator(as);
 }
 
 // ===========================================================

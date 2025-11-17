@@ -33,9 +33,13 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/eval/GenericASEval.h>
+#include <opencog/eval/GenericEval.h>
 
 namespace opencog {
+
+// Forward declaration for friend
+template <typename T> class EvaluatorPool;
+
 /** \addtogroup grp_smob
  *  @{
  *
@@ -73,9 +77,7 @@ namespace opencog {
  *
  */
 
-class AtomSpace;
-
-class SchemeEval : public GenericASEval
+class SchemeEval : public GenericEval
 {
 	private:
 		// Initialization stuff
@@ -150,9 +152,11 @@ class SchemeEval : public GenericASEval
 		static void * c_wrap_set_atomspace(void *);
 		static void * c_wrap_get_atomspace(void *);
 		bool _in_eval;
+	protected:
+		AtomSpacePtr _atomspace;
 
-		// Factory function for pool management
-		static GenericASEval* create_evaluator();
+		friend class EvaluatorPool<SchemeEval>;
+		SchemeEval(void);
 
 	public:
 		// Call before first use. Cogserver needs this!
@@ -162,8 +166,6 @@ class SchemeEval : public GenericASEval
 		virtual void set_atomspace(const AtomSpacePtr&);
 		virtual AtomSpacePtr get_atomspace(void);
 
-		SchemeEval(AtomSpace*);
-		SchemeEval(AtomSpacePtr&);
 		virtual ~SchemeEval();
 		virtual std::string get_name(void) const { return "SchemeEval"; }
 

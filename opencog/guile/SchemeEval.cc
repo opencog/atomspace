@@ -39,6 +39,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/atoms/value/BoolValue.h>
+#include <opencog/eval/EvaluatorPool.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -312,15 +313,8 @@ static void init_only_once(void)
 	while (not done_with_init) { usleep(1000); }
 }
 
-SchemeEval::SchemeEval(AtomSpace* as)
-	: GenericASEval(as)
-{
-	init_only_once();
-	scm_with_guile(c_wrap_init, this);
-}
-
-SchemeEval::SchemeEval(AtomSpacePtr& asp)
-	: GenericASEval(asp)
+SchemeEval::SchemeEval(void) :
+	_atomspace(nullptr)
 {
 	init_only_once();
 	scm_with_guile(c_wrap_init, this);
@@ -1130,29 +1124,14 @@ void * SchemeEval::c_wrap_apply_v(void * p)
 
 /* ============================================================== */
 
-// Factory function for creating new SchemeEval instances
-GenericASEval* SchemeEval::create_evaluator()
-{
-	return new SchemeEval(nullptr);
-}
-
-/// Return evaluator, for this thread and atomspace combination.
-/// If called with NULL, it will use the current atomspace for
-/// this thread.
-///
-/// Use thread-local storage (TLS) in order to avoid repeatedly
-/// creating and destroying the evaluator.
-///
 SchemeEval* SchemeEval::get_scheme_evaluator(const AtomSpacePtr& asp)
 {
-	return static_cast<SchemeEval*>(
-		GenericASEval::get_evaluator(asp, &SchemeEval::create_evaluator));
+	return EvaluatorPool<SchemeEval>::get_evaluator(asp);
 }
 
 SchemeEval* SchemeEval::get_scheme_evaluator(AtomSpace* as)
 {
-	return static_cast<SchemeEval*>(
-		GenericASEval::get_evaluator(as, &SchemeEval::create_evaluator));
+	return EvaluatorPool<SchemeEval>::get_evaluator(as);
 }
 
 /* ============================================================== */
@@ -1183,7 +1162,11 @@ void* SchemeEval::c_wrap_set_atomspace(void * vas)
 
 void SchemeEval::set_atomspace(const AtomSpacePtr& as)
 {
-	scm_with_guile(c_wrap_set_atomspace, as.get());
+	_atomspace = as;
+
+	// EvaluatorPool::return_to_pool nulls out the atomspace.
+	if (as)
+		scm_with_guile(c_wrap_set_atomspace, as.get());
 }
 
 void SchemeEval::init_scheme(void)
@@ -1193,7 +1176,7 @@ void SchemeEval::init_scheme(void)
 	// the calls to SchemeSmob::init(); and PrimitiveEnviron::init();
 	// (which must be called by scm_with_guile()). But whatever, not
 	// a big deal.
-	SchemeEval sch(nullptr);
+	SchemeEval sch;
 }
 
 extern "C" {
