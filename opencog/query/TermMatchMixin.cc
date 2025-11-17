@@ -414,9 +414,7 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// does not contain any variables, and so does not need any
 		// further grounding. This actually seems reasonable. The second
 		// assumption is that the EvaluationLink is actually evaluatable,
-		// which seems reasonable, except that everything else in the
-		// default callback ignores the TV on EvaluationLinks. So this
-		// is kind-of schizophrenic here.  Not sure what else to do.
+		// which seems reasonable.
 		_temp_aspace->clear();
 		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
 
