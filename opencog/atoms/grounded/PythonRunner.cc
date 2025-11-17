@@ -43,11 +43,13 @@ PythonRunner::PythonRunner(std::string s)
 // ----------------------------------------------------------
 
 /// `execute()` -- evaluate a PythonRunner with arguments.
+/// Execution happens in the scratch space.
 ///
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
 ValuePtr PythonRunner::execute(AtomSpace* as,
+                               AtomSpace* scratch,
                                const ValuePtr& vargs,
                                bool silent)
 {
@@ -63,15 +65,9 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	// draw the line here: the callee necesssarily expects
 	// arguments to be in the atomspace. So we add now.
 	Handle cargs = HandleCast(vargs);
-	Handle asargs = as->add_atom(cargs);
+	Handle asargs = scratch->add_atom(cargs);
 
-	PythonEval* applier = get_evaluator_for_python(as);
-	AtomSpacePtr saved_as = applier->get_atomspace();
-	ValuePtr vp(applier->apply_v(as, _fname, asargs));
-
-	// Recursive mania means that someone else may have messed with our
-	// AtomSpace. Set it back. Scheme certainly does this in the
-	// MultiAtomSpaceUTest but python doesn't test this. Yet ...
-	applier->set_atomspace(saved_as);
+	PythonEval* applier = get_evaluator_for_python(scratch);
+	ValuePtr vp(applier->apply_v(scratch, _fname, asargs));
 	return vp;
 }
