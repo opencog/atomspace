@@ -63,7 +63,6 @@ class scope_exit
 		~scope_exit() { _callback(); }
 };
 
-#define SCOPE_GUARD0 scope_exit scope_guard_void([](void)
 #define SCOPE_GUARD4(A,B,C,D) scope_exit scope_guard([&](void)
 #define SCOPE_GUARD_END )
 
@@ -104,10 +103,6 @@ PythonEval::~PythonEval()
 void PythonEval::set_atomspace(const AtomSpacePtr& asp)
 {
 	_atomspace = asp;
-	if (asp)
-		push_context_atomspace(asp);
-	else
-		clear_context();  // Clear, when returning to pool.
 }
 
 AtomSpacePtr PythonEval::get_atomspace(void)
@@ -168,7 +163,7 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
  * Apply the user function to the arguments passed in varargs and
  * return the extracted Value.
  */
-ValuePtr PythonEval::apply_v(AtomSpace * as,
+ValuePtr PythonEval::apply_v(AtomSpace* as,
                              const std::string& func,
                              Handle args)
 {
@@ -177,12 +172,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
 
-    // push_context_atomspace sets the as for this thread.
-    // That is where we want to perform our evaluations.
-    push_context_atomspace(AtomSpaceCast(as));
-    SCOPE_GUARD0 {
-        pop_context_atomspace();
-    } SCOPE_GUARD_END;
+    ASGuard asg(as);
 
     // Get the python value object returned by this user function.
     PyObject *pyValue = call_user_function(func, args->getOutgoingSet());
@@ -193,6 +183,7 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
             "Python function '%s' did not return Atomese!",
             func.c_str());
 
+    // Why is the GIL needed here, and not earlier? Or later?
     GILGuard gil;
 
     // Check if the return value is a Python boolean (True or False)
@@ -251,6 +242,10 @@ ValuePtr PythonEval::apply_v(AtomSpace * as,
 void PythonEval::apply_as(const std::string& moduleFunction,
                           AtomSpace* as_argument)
 {
+    // What if the user is working in one AtomSpace, but is manipulating
+    // another? Then setting the context AtomSpace would be wrong.
+    // I'm confused; I don't know what to do here.
+    // ASGuard asg(as_argument);
     GILGuard gil;
 
     // Create the Python tuple for the function call with python
@@ -322,6 +317,9 @@ std::string PythonEval::execute_string(const char* command)
 /// Exactly the same as execute_string, but the GIL lock is taken.
 std::string PythonEval::execute_script(const std::string& script)
 {
+    OC_ASSERT(nullptr != _atomspace, "PythonEval AtomSpace not set!");
+    ASGuard asg(_atomspace);
+
     GILGuard gil;
     check_for_error();
     std::string rc = execute_string(script.c_str());
