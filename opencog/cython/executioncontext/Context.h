@@ -31,7 +31,7 @@ struct ASGuard
 {
 	ASGuard(AtomSpace* as)
 	{ push_context_atomspace(AtomSpaceCast(as)); }
-	ASGuard(AtomSpacePtr& asp)
+	ASGuard(const AtomSpacePtr& asp)
 	{ push_context_atomspace(asp); }
 	~ASGuard() { pop_context_atomspace(); }
 	ASGuard(const ASGuard&) = delete;
