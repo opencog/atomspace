@@ -25,7 +25,7 @@ namespace opencog {
        return result;
    }
 
-   void clear_context(){
+   void clear_context() {
        current.clear();
    }
 

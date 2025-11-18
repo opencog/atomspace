@@ -104,6 +104,10 @@ PythonEval::~PythonEval()
 void PythonEval::set_atomspace(const AtomSpacePtr& asp)
 {
 	_atomspace = asp;
+	if (asp)
+		push_context_atomspace(asp);
+	else
+		clear_context();  // Clear, when returning to pool.
 }
 
 AtomSpacePtr PythonEval::get_atomspace(void)
