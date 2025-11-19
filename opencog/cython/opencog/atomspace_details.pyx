@@ -205,11 +205,13 @@ cdef class AtomSpace(Value):
 
     def set_value(self, Atom atom, Atom key, Value value):
         """ Set the value on the atom at key
+        Returns the atom (which may be a new atom instance)
         """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        self.atomspace.set_value(deref(atom.handle), deref(key.handle),
+        cdef cHandle result = self.atomspace.set_value(deref(atom.handle), deref(key.handle),
                                  value.get_c_value_ptr())
+        return Atom.createAtom(result)
 
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):

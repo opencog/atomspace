@@ -81,7 +81,7 @@ class AtomTest(TestCase):
 
     def test_invalid_key(self):
         string_node = Concept("String")
-        error_str = "key should be an instance of Atom, got {0} instead".format(str)
+        error_str = "Argument 'key' has incorrect type"
         with self.assertRaisesRegex(TypeError, error_str):
             self.space.set_value(string_node, "bad key", StringValue("Hello, World!"))
 
