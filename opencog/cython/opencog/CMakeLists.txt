@@ -22,6 +22,9 @@ INCLUDE_DIRECTORIES(
 )
 
 # SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+# Modern version of cython spew a warning about nogil vs except ordering,
+# but this warning is insane. If fixed, it breaks older versions of python!
+# We want to suppress this message; its stunningly annoying and useless.
 SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
 
 ###################### logger ##########################################
