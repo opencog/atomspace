@@ -22,19 +22,19 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
     cdef cppclass cLogger "opencog::Logger":
         cLogger()
         cLogger(string s)
-        void set_level(loglevel lvl)
-        void set_component(string c)
-        loglevel get_level()
-        void set_print_to_stdout_flag(bool flag)
-        void set_sync_flag(bool flag)
+        void set_level(loglevel lvl) nogil
+        void set_component(string c) nogil
+        loglevel get_level() nogil
+        void set_print_to_stdout_flag(bool flag) nogil
+        void set_sync_flag(bool flag) nogil
 
-        void log(loglevel lvl, string txt)
+        void log(loglevel lvl, string txt) nogil
 
-        bool is_enabled(loglevel lvl)
+        bool is_enabled(loglevel lvl) nogil
 
-    cdef loglevel string_to_log_level "opencog::Logger::get_level_from_string"(string s)
-    cdef string log_level_to_string "opencog::Logger::get_level_string"(loglevel lvl)
-    cLogger& logger()
+    cdef loglevel string_to_log_level "opencog::Logger::get_level_from_string"(string s) nogil
+    cdef string log_level_to_string "opencog::Logger::get_level_string"(loglevel lvl) nogil
+    cLogger& logger() nogil
 
 
 cdef class Logger:
