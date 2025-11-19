@@ -34,7 +34,9 @@
 #include "PythonEval.h"
 #include "PyGILGuard.h"
 
-// This is an header in the build directory, auto-gened by cython
+// This is a header in the build directory, auto-gened by cython.
+// It can only ever be included just once, over all c++ files.
+// More than one inclusion leads to obscure runtime errors.
 #include "opencog/atomspace_api.h"
 
 #include <dlfcn.h>
@@ -265,11 +267,6 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
 PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
                                          const HandleSeq& args)
 {
-    // Thread-local instance, no mutex needed.
-
-    // Grab the GIL.
-    GILGuard gil;
-
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
     size_t nargs = args.size();

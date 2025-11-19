@@ -173,6 +173,7 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
             "Expecting arguments to be a ListLink!");
 
     ASGuard asg(as);
+    GILGuard gil;
 
     // Get the python value object returned by this user function.
     PyObject *pyValue = call_user_function(func, args->getOutgoingSet());
@@ -182,9 +183,6 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atomese!",
             func.c_str());
-
-    // Why is the GIL needed here, and not earlier? Or later?
-    GILGuard gil;
 
     // Check if the return value is a Python boolean (True or False)
     // and convert to BoolValue
