@@ -207,4 +207,5 @@ ENDIF (HAVE_GUILE)
 
 INSTALL (FILES
 	__init__.py
+	utilities.py
 	DESTINATION "${PYTHON_DEST}")
