@@ -26,14 +26,14 @@ ctypedef short Type
 
 cdef extern from "opencog/atoms/atom_types/NameServer.h" namespace "opencog":
     cdef cppclass cNameServer "opencog::NameServer":
-        bint isNode(Type t) nogil
-        bint isLink(Type t) nogil
-        bint isA(Type t, Type t) nogil
+        bint isNode(Type t) nogil const
+        bint isLink(Type t) nogil const
+        bint isA(Type t, Type t) nogil const
 
-        bint isDefined(string typename) nogil
-        Type getType(string typename) nogil
-        string getTypeName(Type t) nogil
-        Type getNumberOfClasses() nogil
+        bint isDefined(string typename) nogil const
+        Type getType(string typename) nogil const
+        string getTypeName(Type t) nogil const
+        Type getNumberOfClasses() nogil const
 
         bint beginTypeDecls(const char* module) nogil
         void endTypeDecls() nogil
@@ -47,15 +47,15 @@ cdef extern from "opencog/atoms/atom_types/atom_types.h" namespace "opencog":
 # Value
 cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
     cdef cppclass cValue "opencog::Value":
-        Type get_type() nogil
-        bint is_atom() nogil
-        bint is_node() nogil
-        bint is_link() nogil
+        Type get_type() nogil const
+        bint is_atom() nogil const
+        bint is_node() nogil const
+        bint is_link() nogil const
 
-        string to_string() nogil
-        string to_short_string() nogil
-        bint operator==(const cValue&) nogil
-        bint operator!=(const cValue&) nogil
+        string to_string() nogil const
+        string to_short_string() nogil const
+        bint operator==(const cValue&) nogil const
+        bint operator!=(const cValue&) nogil const
 
     ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
@@ -87,27 +87,27 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
         void setValue(const cHandle& key, const cValuePtr& value) nogil
         cValuePtr getValue(const cHandle& key) nogil const
-        cpp_set[cHandle] getKeys() nogil
+        cpp_set[cHandle] getKeys() nogil const
 
-        vector[cHandle] getIncomingSet() nogil
-        vector[cHandle] getIncomingSetByType(Type type) nogil
+        vector[cHandle] getIncomingSet() nogil const
+        vector[cHandle] getIncomingSetByType(Type type) nogil const
 
-        bool is_executable() nogil
+        bool is_executable() nogil const
         cValuePtr execute() nogil except +
 
-        string to_string() nogil
-        string to_short_string() nogil
-        string id_to_string() nogil
+        string to_string() nogil const
+        string to_short_string() nogil const
+        string id_to_string() nogil const
 
         # Conditionally-valid methods. Not defined for all atoms.
-        string get_name() nogil
-        vector[cHandle] getOutgoingSet() nogil
-        ContentHash get_hash() nogil
+        string get_name() nogil const
+        vector[cHandle] getOutgoingSet() nogil const
+        ContentHash get_hash() nogil const
 
-        bool operator==(cAtom&) nogil
-        bool operator<(cAtom&) nogil
+        bool operator==(const cAtom&) nogil const
+        bool operator<(const cAtom&) nogil const
 
-        cAtomSpace* getAtomSpace() nogil
+        cAtomSpace* getAtomSpace() nogil const
 
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) nogil except +
@@ -156,18 +156,18 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle xadd_node(Type t, string s) nogil except +
         cHandle xadd_link(Type t, vector[cHandle]) nogil except +
 
-        cHandle xget_handle(Type t, string s) nogil
-        cHandle xget_handle(Type t, vector[cHandle]) nogil
+        cHandle xget_handle(Type t, string s) nogil const
+        cHandle xget_handle(Type t, vector[cHandle]) nogil const
 
         cHandle set_value(cHandle h, cHandle key, cValuePtr value) nogil
-        cHandle get_atom(cHandle & h) nogil
-        bint is_valid_handle(cHandle h) nogil
-        int get_size() nogil
-        string get_name() nogil
+        cHandle get_atom(cHandle & h) nogil const
+        bint is_valid_handle(cHandle h) nogil const
+        int get_size() nogil const
+        string get_name() nogil const
 
         # ==== query methods ====
         # get by type
-        void get_handles_by_type(vector[cHandle], Type t, bint subclass) nogil
+        void get_handles_by_type(vector[cHandle], Type t, bint subclass) nogil const
 
         void clear() nogil
         bint extract_atom(cHandle h, bint recursive) nogil
@@ -245,12 +245,12 @@ cdef extern from "opencog/atoms/value/QueueValue.h" namespace "opencog":
         cQueueValue(const vector[cValuePtr]& values) nogil
         void open() nogil
         void close() nogil
-        bint is_closed() nogil
+        bint is_closed() nogil const
         void add(const cValuePtr&) nogil except +
         cValuePtr remove() nogil except +
-        size_t size() nogil
+        size_t size() nogil const
         void clear() nogil
-        const vector[cValuePtr]& value() nogil
+        const vector[cValuePtr]& value() nogil const
 
     cdef shared_ptr[cQueueValue] c_createQueueValue_empty "opencog::createQueueValue" () nogil
     cdef shared_ptr[cQueueValue] c_createQueueValue_vector "opencog::createQueueValue" (const vector[cValuePtr]&) nogil
@@ -263,12 +263,12 @@ cdef extern from "opencog/atoms/value/UnisetValue.h" namespace "opencog":
         cUnisetValue(const vector[cValuePtr]& values) nogil
         void open() nogil
         void close() nogil
-        bint is_closed() nogil
+        bint is_closed() nogil const
         void add(const cValuePtr&) nogil except +
         cValuePtr remove() nogil except +
-        size_t size() nogil
+        size_t size() nogil const
         void clear() nogil
-        const vector[cValuePtr]& value() nogil
+        const vector[cValuePtr]& value() nogil const
 
     cdef shared_ptr[cUnisetValue] c_createUnisetValue_empty "opencog::createUnisetValue" () nogil
     cdef shared_ptr[cUnisetValue] c_createUnisetValue_vector "opencog::createUnisetValue" (const vector[cValuePtr]&) nogil

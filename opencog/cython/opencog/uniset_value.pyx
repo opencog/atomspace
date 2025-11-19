@@ -70,10 +70,8 @@ cdef class UnisetValue(Value):
         cdef cValuePtr c_value
         cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
 
-        # Release the GIL while waiting for values, so other Python threads can run
         try:
-            with nogil:
-                c_value = set_ptr.remove()
+            c_value = deref(set_ptr).remove()
         except:
             # Convert any exception from remove() to our RuntimeError
             raise RuntimeError("Cannot remove from closed empty set")
@@ -89,10 +87,7 @@ cdef class UnisetValue(Value):
     def __len__(self):
         """Return the number of values in the set."""
         cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
-        cdef size_t result
-        with nogil:
-            result = set_ptr.size()
-        return result
+        return deref(set_ptr).size()
 
     def to_list(self):
         """Convert the set contents to a Python list."""
