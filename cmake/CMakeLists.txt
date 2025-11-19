@@ -11,5 +11,6 @@ INSTALL(FILES
 	OpenCogOCaml.cmake
 	OpenCogMacros.cmake
 	OpenCogFunctions.cmake
+	cython-wrapper.sh
 	DESTINATION
 	${DATADIR}/cmake/)

@@ -1,6 +1,10 @@
 # Cythonizes one .pyx file into a .cpp file
 # Additional arguments are dependencies
 
+# Capture the directory where this .cmake file is located.
+# This will work both in the source tree and when installed.
+SET(_OPENCOG_CYTHON_WRAPPER "${CMAKE_CURRENT_LIST_DIR}/cython-wrapper.sh")
+
 MACRO(CYTHON_ADD_MODULE_PYX name)
     SET(DEPENDS ${name}.pyx)
 
@@ -13,8 +17,8 @@ MACRO(CYTHON_ADD_MODULE_PYX name)
 
     ADD_CUSTOM_COMMAND(
         OUTPUT ${name}.cpp
-        COMMAND ${CYTHON_EXECUTABLE}
-        ARGS ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR}
+        COMMAND ${_OPENCOG_CYTHON_WRAPPER}
+                ${CYTHON_EXECUTABLE} ${CYTHON_FLAGS} -I ${PROJECT_BINARY_DIR}
                 -I ${CMAKE_CURRENT_SOURCE_DIR} -o ${name}.cpp
                 --cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
         DEPENDS ${DEPENDS}
