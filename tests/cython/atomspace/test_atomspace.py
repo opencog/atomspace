@@ -62,7 +62,8 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(caught, True)
 
         # Test adding with a truthvalue
-        a3 = Node("test_w_tv").set_value(tvkey, FloatValue([0.5, 0.8]))
+        a3 = Node("test_w_tv")
+        a3 = self.space.set_value(a3, tvkey, FloatValue([0.5, 0.8]))
         self.assertEqual(self.space.size(), 3)
 
     def test_add_link(self):
@@ -77,7 +78,7 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3)
         self.assertTrue(l3 is not None)
-        l3.set_value(tvkey, FloatValue([0.5, 0.8]))
+        l3 = self.space.set_value(l3, tvkey, FloatValue([0.5, 0.8]))
 
         # Should fail when adding an intentionally bad type
         caught = False
@@ -214,7 +215,7 @@ class AtomTest(TestCase):
     def test_w_truthvalue(self):
         a = Node("test2")
         tv = FloatValue([0.5, 100])
-        a.set_value(tvkey, tv)
+        a = self.space.set_value(a, tvkey, tv)
         self.assertEqual(a.get_value(tvkey), tv)
 
     def test_out(self):
@@ -225,7 +226,7 @@ class AtomTest(TestCase):
 
         a2 = Node("test3")
         tv = FloatValue([0.5, 100])
-        a2.set_value(tvkey, tv)
+        a2 = self.space.set_value(a2, tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.out, [a1, a2])
@@ -240,7 +241,7 @@ class AtomTest(TestCase):
 
         a2 = Node("test3")
         tv = FloatValue([0.5, 100])
-        a2.set_value(tvkey, tv)
+        a2 = self.space.set_value(a2, tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.arity, 2)

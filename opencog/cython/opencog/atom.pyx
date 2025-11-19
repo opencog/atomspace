@@ -78,12 +78,6 @@ cdef class Atom(Value):
     def id_string(self):
         return self.get_c_handle().get().id_to_string().decode('UTF-8')
 
-    def set_value(self, key, value):
-        if not isinstance(key, Atom):
-            raise TypeError("key should be an instance of Atom, got {0} instead".format(type(key)))
-        self.get_c_handle().get().setValue(deref((<Atom>key).handle),
-                                (<Value>value).get_c_value_ptr())
-
     def get_value(self, key):
         cdef cValuePtr value = self.get_c_handle().get().getValue(
             deref((<Atom>key).handle))

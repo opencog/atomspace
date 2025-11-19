@@ -64,7 +64,7 @@ func_one_result = FloatValue([0,0,1])
 def func_one(v):
     thing = ConceptNode("barleycorn")
     thang = ListLink(thing, v)
-    thang.set_value(tvkey, func_one_result)
+    thang = thang.atomspace.set_value(thang, tvkey, func_one_result)
     print(f"func_one: set {func_one_result} on {thang}")
     if (func_one_result == FloatValue([0,0,1])):
         return False

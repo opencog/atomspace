@@ -17,7 +17,7 @@ class DoExecuteTest(unittest.TestCase):
     def test_do_execute_value(self):
         key = PredicateNode("key")
         atom = ConceptNode("atom")
-        atom.set_value(key, FloatValue([1, 2, 3]))
+        atom = atom.atomspace.set_value(atom, key, FloatValue([1, 2, 3]))
 
         value_of_link = ValueOfLink(atom, key)
 

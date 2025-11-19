@@ -33,7 +33,7 @@ class BoolValueTest(unittest.TestCase):
         atom = ConceptNode('foo')
         key = PredicateNode('bar')
         value = BoolValue([False, True, False])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         self.assertEqual(BoolValue([False, True, False]), atom.get_value(key))
 
     def test_get_list_of_items_from_value(self):

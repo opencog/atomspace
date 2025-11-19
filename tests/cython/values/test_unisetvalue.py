@@ -104,7 +104,7 @@ class UnisetValueTest(unittest.TestCase):
         atom = ConceptNode('foo')
         key = PredicateNode('bar')
         value = UnisetValue([StringValue('a'), FloatValue(42)])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
 
         retrieved = atom.get_value(key)
         self.assertTrue(retrieved.is_a(types.UnisetValue))

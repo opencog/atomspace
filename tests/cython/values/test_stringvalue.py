@@ -31,7 +31,7 @@ class StringValueTest(unittest.TestCase):
         atom = ConceptNode('object')
         key = PredicateNode('predicate')
         value = StringValue(['foo', 'bar'])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         self.assertEqual(StringValue(['foo', 'bar']), atom.get_value(key))
 
     def test_get_list_of_items_from_value(self):

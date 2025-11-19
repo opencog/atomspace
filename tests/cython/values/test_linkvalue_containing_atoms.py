@@ -40,7 +40,7 @@ class LinkValueContainingAtomsTest(unittest.TestCase):
         key = PredicateNode('bar')
         value = LinkValue([StringValue('a'), FloatValue(1),
                            ConceptNode('bar')])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         self.assertEqual(LinkValue([StringValue('a'), FloatValue(1),
                                     ConceptNode('bar')]),
                          atom.get_value(key))

@@ -24,7 +24,7 @@ class AtomTest(TestCase):
         atom = Concept('foo')
         key = Predicate('bar')
         value = FloatValue([1.0, 2.0, 3.0])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         self.assertEqual(value, atom.get_value(key))
 
     def test_get_keys(self):
@@ -33,7 +33,7 @@ class AtomTest(TestCase):
         self.assertEqual(0, len(keys))
 
         tv = FloatValue([0.7, 0.7])
-        atom.set_value(tvkey, tv)
+        atom = self.space.set_value(atom, tvkey, tv)
         keys = atom.get_keys()
         self.assertEqual(1, len(keys))
         # Check that the value it refers to is the same.
@@ -41,7 +41,7 @@ class AtomTest(TestCase):
 
         key = Predicate('bar')
         value = FloatValue([1.0, 2.0, 3.0])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         keys = atom.get_keys()
         self.assertEqual(2, len(keys))
         self.assertIn(key, keys)
@@ -83,7 +83,7 @@ class AtomTest(TestCase):
         string_node = Concept("String")
         error_str = "key should be an instance of Atom, got {0} instead".format(str)
         with self.assertRaisesRegex(TypeError, error_str):
-            string_node.set_value("bad key", StringValue("Hello, World!"))
+            self.space.set_value(string_node, "bad key", StringValue("Hello, World!"))
 
     def test_grounded_cond(self):
         grounded_cond = CondLink(
