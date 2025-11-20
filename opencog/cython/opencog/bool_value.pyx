@@ -11,7 +11,7 @@ cdef class BoolValue(Value):
 
     def to_list(self):
         return BoolValue.vector_of_bool_to_list(
-            (<cBoolValue*>self.get_c_value_ptr().get()).value())
+            (<cBoolValue*>self.get_c_raw_ptr()).value())
 
     @staticmethod
     cdef vector[bool] list_of_bool_to_vector(list python_list):

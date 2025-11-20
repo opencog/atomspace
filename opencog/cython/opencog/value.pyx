@@ -29,21 +29,20 @@ cdef class Value:
             raise AttributeError('PtrHolder contains NULL reference')
         self.ptr_holder = ptr_holder
 
-    cdef cValuePtr get_c_value_ptr(self):
+    cdef inline cValuePtr get_c_value_ptr(self) nogil:
         """Return C++ shared_ptr from PtrHolder instance"""
-        if self.ptr_holder == None:
-            raise AttributeError('Uninitialized ValuePtr holder')
-        shrptr = (<PtrHolder>self.ptr_holder).shared_ptr
-        if shrptr.get() == NULL:
-            raise AttributeError('PtrHolder contains NULL reference')
-        return <cValuePtr&>shrptr
+        return <cValuePtr&>(self.ptr_holder.shared_ptr)
+
+    cdef inline cValue* get_c_raw_ptr(self) nogil:
+        """Return C++ raw_ptr from PtrHolder instance"""
+        return <cValue*>(self.ptr_holder.shared_ptr.get())
 
     def value_ptr(self):
         return PyLong_FromVoidPtr(<cValuePtr*>&(self.ptr_holder.shared_ptr))
 
     @property
     def type(self):
-        return self.get_c_value_ptr().get().get_type()
+        return self.get_c_raw_ptr().get_type()
 
     @property
     def type_name(self):
@@ -68,10 +67,10 @@ cdef class Value:
         return self.to_list().__iter__()
 
     def long_string(self):
-        return self.get_c_value_ptr().get().to_string().decode('UTF-8')
+        return self.get_c_raw_ptr().to_string().decode('UTF-8')
 
     def short_string(self):
-        return self.get_c_value_ptr().get().to_short_string().decode('UTF-8')
+        return self.get_c_raw_ptr().to_short_string().decode('UTF-8')
 
     # long_string() provides the atom, together with the hash, and
     # the AtomSpace that the atom belongs to. This is perhaps more
@@ -96,8 +95,8 @@ cdef class Value:
             if op == Py_NE:
                 return True
 
-        cdef cValue* self_ptr = (<Value>self).get_c_value_ptr().get()
-        cdef cValue* other_ptr = (<Value>other).get_c_value_ptr().get()
+        cdef cValue* self_ptr = (<Value>self).get_c_raw_ptr()
+        cdef cValue* other_ptr = (<Value>other).get_c_raw_ptr()
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         if op == Py_NE:

@@ -90,18 +90,18 @@ cdef class AtomSpace(Value):
     # cdef cAtomSpace *atomspace
     # cdef object parent_atomspace
 
-    # A tacky hack to pass in a pointer to an atomspace from C++-land.
-    # basically, pass an int, and cast it to the C++ pointer.  This
-    # works, but is not very safe, and has a certain feeling of "ick"
-    # about it.  But I can't find any better way.
-    def __init__(self, long addr = 0, object parent=None):
-        if (addr == 0) :
-            self.asp = createAtomSpace(<cAtomSpace*> NULL)
-        else :
-            self.asp = as_cast(<cAtomSpace*> PyLong_AsVoidPtr(addr))
+    def __init__(self, object parent=None):
+        """Create a new AtomSpace.
+
+        If parent is provided, stores it as a Python reference (but does not
+        create a C++ child atomspace - use create_child_atomspace() for that).
+
+        To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
+        """
+        self.asp = createAtomSpace(<cAtomSpace*> NULL)
         self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
-        self.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>self.asp);
+        self.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>self.asp)
 
     cdef cAtomSpacePtr get_atomspace_ptr(self):
         # Cast the ValuePtr to AtomSpacePtr
@@ -111,7 +111,7 @@ cdef class AtomSpace(Value):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
             return NotImplemented
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
-        cdef AtomSpace atomspace_2 = <AtomSpace>as_1
+        cdef AtomSpace atomspace_2 = <AtomSpace>as_2
 
         cdef cValuePtr c_atomspace_1 = atomspace_1.asp
         cdef cValuePtr c_atomspace_2 = atomspace_2.asp

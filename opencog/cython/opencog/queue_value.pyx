@@ -16,19 +16,19 @@ cdef class QueueValue(Value):
 
     def open(self):
         """Open the queue for adding/removing values."""
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
         with nogil:
             queue_ptr.open()
 
     def close(self):
         """Close the queue. No more values can be added after closing."""
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
         with nogil:
             queue_ptr.close()
 
     def is_closed(self):
         """Check if the queue is closed."""
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
         cdef bool result
         with nogil:
             result = queue_ptr.is_closed()
@@ -36,7 +36,7 @@ cdef class QueueValue(Value):
 
     def clear(self):
         """Remove all values from the queue."""
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
         with nogil:
             queue_ptr.clear()
 
@@ -47,7 +47,7 @@ cdef class QueueValue(Value):
             RuntimeError: If the queue is closed.
         """
         cdef cValuePtr val_ptr = value.get_c_value_ptr()
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
 
         # Release the GIL since the C++ method is thread-safe
         with nogil:
@@ -60,7 +60,7 @@ cdef class QueueValue(Value):
             RuntimeError: If the queue is closed and empty.
         """
         cdef cValuePtr c_value
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
 
         # Release the GIL while waiting for values, so other Python threads can run
         try:
@@ -80,7 +80,7 @@ cdef class QueueValue(Value):
 
     def __len__(self):
         """Return the number of values in the queue."""
-        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_value_ptr().get()
+        cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()
         cdef size_t result
         with nogil:
             result = queue_ptr.size()
@@ -89,7 +89,7 @@ cdef class QueueValue(Value):
     def to_list(self):
         """Convert the queue contents to a Python list."""
         return QueueValue.vector_of_values_to_list(
-            &((<cQueueValue*>self.get_c_value_ptr().get()).value()))
+            &((<cQueueValue*>self.get_c_raw_ptr()).value()))
 
     @staticmethod
     cdef vector[cValuePtr] list_of_values_to_vector(list python_list):

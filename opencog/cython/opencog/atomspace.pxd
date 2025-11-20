@@ -7,13 +7,8 @@ from cython.operator cimport dereference as deref
 
 
 cdef extern from "Python.h":
-    # Tacky hack to pass atomspace pointer to AtomSpace ctor.
-    cdef void* PyLong_AsVoidPtr(object)
-
-    # Needed to return truth value pointers to C++ callers.
+    # Needed to return Value pointers to C++ callers. (i.e. PythonEval.cc)
     cdef object PyLong_FromVoidPtr(void *p)
-
-ctypedef public long PANDLE
 
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
@@ -67,20 +62,17 @@ cdef class PtrHolder:
 
 cdef class Value:
     cdef PtrHolder ptr_holder
-    cdef cValuePtr get_c_value_ptr(self)
+    cdef inline cValuePtr get_c_value_ptr(self) nogil
+    cdef inline cValue* get_c_raw_ptr(self) nogil
 
     @staticmethod
     cdef Value create(cValuePtr& ptr)
 
 
 # ContentHash
-
 ctypedef size_t ContentHash;
 
 # Atom
-cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
-    pass
-
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
@@ -130,7 +122,7 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         bint operator<=(cHandle h) nogil
         bint operator>=(cHandle h) nogil
         cHandle UNDEFINED
-# HandleSeq
+
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
 cdef class Atom(Value):
@@ -178,6 +170,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
 
 cdef AtomSpace_factoid(cValuePtr to_wrap)
+cdef object py_atomspace(cValuePtr c_atomspace) with gil
 
 cdef class AtomSpace(Value):
     cdef cValuePtr asp
