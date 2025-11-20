@@ -133,7 +133,10 @@ cdef class AtomSpace(Value):
         return atom
 
     def add_atom(self, Atom atom):
-        cdef cHandle result = self.atomspace.add_atom(atom.get_c_handle())
+        cdef cHandle h = atom.get_c_handle()
+        cdef cHandle result
+        with nogil:
+            result = self.atomspace.add_atom(h)
         if result == result.UNDEFINED:
             return None
         return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
@@ -180,9 +183,10 @@ cdef class AtomSpace(Value):
             assert isinstance(atom, Atom)
         except AssertionError:
             raise TypeError("Need Atom object")
-        if self.atomspace.is_valid_handle(deref((<Atom>atom).handle)):
-            return True
-        return False
+        cdef bint result
+        with nogil:
+            result = self.atomspace.is_valid_handle(deref((<Atom>atom).handle))
+        return result
 
     def remove(self, Atom atom, recursive=False):
         """ Removes an atom from the atomspace
@@ -198,7 +202,10 @@ cdef class AtomSpace(Value):
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
         cdef bint recurse = recursive
-        return self.atomspace.extract_atom(deref(atom.handle),recurse)
+        cdef bint result
+        with nogil:
+            result = self.atomspace.extract_atom(deref(atom.handle),recurse)
+        return result
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
@@ -223,15 +230,19 @@ cdef class AtomSpace(Value):
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
         cdef cHandle result
-        result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
+        with nogil:
+            result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
         return result != result.UNDEFINED
 
     # Maybe this should be called __repr__ ???
     def __str__(self):
         """ Description of the atomspace """
+        cdef string name
+        with nogil:
+            name = self.atomspace.get_name()
         return ("<AtomSpace\n" +
                 "   addr: " + hex(<long>self.atomspace) + "\n" +
-                "   name: " + self.atomspace.get_name().decode('UTF-8') + ">\n"
+                "   name: " + name.decode('UTF-8') + ">\n"
                )
 
     def __len__(self):
