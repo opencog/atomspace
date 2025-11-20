@@ -75,13 +75,9 @@ cdef class Value:
 
 
 # ContentHash
-
 ctypedef size_t ContentHash;
 
 # Atom
-cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
-    pass
-
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom" (cValue):
         cAtom()
@@ -131,7 +127,7 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         bint operator<=(cHandle h) nogil
         bint operator>=(cHandle h) nogil
         cHandle UNDEFINED
-# HandleSeq
+
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
 cdef class Atom(Value):
