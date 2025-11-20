@@ -118,6 +118,7 @@ cdef class Atom(Value):
     cdef object _name
     cdef object _outgoing
     cdef object _atomspace
+    cdef object _hash
     # Cython compiler complains that signature of the method should be
     # compatible with one from the parent class. It is the reason why we cannot
     # have Atom.create and Value.create at same time.

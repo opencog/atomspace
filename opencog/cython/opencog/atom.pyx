@@ -41,6 +41,7 @@ cdef class Atom(Value):
         self._name = None
         self._outgoing = None
         self._atomspace = None
+        self._hash = None
 
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
@@ -58,6 +59,7 @@ cdef class Atom(Value):
         instance._name = None
         instance._outgoing = None
         instance._atomspace = None
+        instance._hash = None
         return instance
 
     @property
@@ -191,4 +193,6 @@ cdef class Atom(Value):
         return deref(p) == deref(o)
 
     def __hash__(self):
-        return PyLong_FromLongLong((<cAtom*>self.shared_ptr.get()).get_hash())
+        if self._hash is None:
+            self._hash = PyLong_FromLongLong((<cAtom*>self.shared_ptr.get()).get_hash())
+        return self._hash
