@@ -123,67 +123,46 @@ def decl_type(parent, name):
     setattr(types, name, type_id)
     return type_id
 
-# Cache for type-to-class mapping
-cdef dict _type_class_cache = {}
-
-cdef inline object _get_cached_class(Type value_type):
-    """Get cached class for a type"""
-    global _type_class_cache
-
-    # Check cache first
-    cdef object clazz = _type_class_cache.get(value_type)
-    if clazz is not None:
-        return clazz
-
-    # Cache miss - look up the class by name
-    cdef str type_name = get_type_name(value_type)
-    thismodule = sys.modules[__name__]
-    clazz = getattr(thismodule, type_name, None)
-    if clazz is not None:
-        _type_class_cache[value_type] = clazz
-
-    return clazz
+# Cache for Value type hierarchy checks
+# is_a() results never change, so they can be cached permanently
+cdef dict _value_type_cache = {}
 
 cdef create_python_value_from_c_value(const cValuePtr& value):
     if value.get() == NULL:
         return None
 
-    cdef Type value_type = value.get().get_type()
+    cdef cValue* val_ptr = value.get()
+    cdef Type value_type = val_ptr.get_type()
     cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
 
-    # Fast path: Check most common base types first (avoid string conversion)
-    # For handling Atom types (most common case - nodes and links)
-    if is_a(value_type, types.Atom):
-        # Try to get specific Atom subclass
-        clazz = _get_cached_class(value_type)
-        if clazz is not None:
-            return clazz(ptr_holder=ptr_holder)
-        # Fall back to generic Atom
+    # Use C++ method for ground truth (most common case first)
+    if val_ptr.is_atom():
         return Atom(ptr_holder=ptr_holder)
 
-    # For handling LinkValue types
+    # Not an atom - determine which Value subclass
+    # Check cache first
+    cdef object value_class = _value_type_cache.get(value_type)
+    if value_class is not None:
+        return value_class(ptr_holder=ptr_holder)
+
+    # Cache miss - determine the Value class using type hierarchy
+    # Check most common Value types first
     if is_a(value_type, types.LinkValue):
-        clazz = _get_cached_class(value_type)
-        if clazz is not None:
-            return clazz(ptr_holder=ptr_holder)
-        return LinkValue(ptr_holder=ptr_holder)
+        value_class = LinkValue
+    elif is_a(value_type, types.QueueValue):
+        value_class = QueueValue
+    elif is_a(value_type, types.FloatValue):
+        value_class = FloatValue
+    elif is_a(value_type, types.StringValue):
+        value_class = StringValue
+    elif is_a(value_type, types.BoolValue):
+        value_class = BoolValue
+    else:
+        # Generic Value fallback
+        value_class = Value
 
-    # For handling QueueValue types
-    if is_a(value_type, types.QueueValue):
-        clazz = _get_cached_class(value_type)
-        if clazz is not None:
-            return clazz(ptr_holder=ptr_holder)
-        return QueueValue(ptr_holder=ptr_holder)
-
-    # For handling generic Value types
-    if is_a(value_type, types.Value):
-        clazz = _get_cached_class(value_type)
-        if clazz is not None:
-            return clazz(ptr_holder=ptr_holder)
-        return Value(ptr_holder=ptr_holder)
-
-    # Unknown type
-    cdef str type_name = get_type_name(value_type)
-    raise TypeError("Python API for " + type_name + " is not implemented yet")
+    # Cache the result (is_a() results never change)
+    _value_type_cache[value_type] = value_class
+    return value_class(ptr_holder=ptr_holder)
 
 # ========================== END OF FILE =========================
