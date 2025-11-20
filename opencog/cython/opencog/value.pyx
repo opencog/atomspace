@@ -10,6 +10,12 @@ cdef class Value:
 
         Uses __new__ to bypass __init__, allowing direct assignment of C++ shared_ptr.
         """
+        # Well ... We can get null pointers, because asking for
+        # a value on an atom at a non-existant key weill return
+        # nullptr. So, currently, null pointers do occur.
+        # if ptr.get() == NULL:
+        #     raise RuntimeError("Value pointer cannot be null!")
+
         cdef Value instance = Value.__new__(Value)
         instance.shared_ptr = ptr
         return instance

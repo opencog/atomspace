@@ -49,8 +49,12 @@ cdef class Atom(Value):
         Uses __new__ to bypass constructors, then directly assigns the shared_ptr.
         """
         cdef cHandle nch = handle
+        cdef cAtom* atom_ptr = nch.get()
+        if atom_ptr == NULL:
+            raise RuntimeError("Atom cannot be a null pointer")
+
         cdef Atom instance = Atom.__new__(Atom)
-        instance.shared_ptr = <cValuePtr&>(nch, nch.get())
+        instance.shared_ptr = <cValuePtr&>(nch, atom_ptr)
         instance._name = None
         instance._outgoing = None
         instance._atomspace = None
