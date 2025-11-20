@@ -123,33 +123,23 @@ def decl_type(parent, name):
     setattr(types, name, type_id)
     return type_id
 
-# Cache for type-to-class mapping with invalidation support
+# Cache for type-to-class mapping
 cdef dict _type_class_cache = {}
-cdef Type _cached_num_types = 0
 
 cdef inline object _get_cached_class(Type value_type):
-    """Get cached class for a type, handling cache invalidation if types were added"""
+    """Get cached class for a type"""
     global _type_class_cache
-    global _cached_num_types
 
+    # Check cache first
     cdef object clazz = _type_class_cache.get(value_type)
     if clazz is not None:
         return clazz
 
-    # Cache miss - check if new types were added
-    cdef Type current_num_types = nameserver().getNumberOfClasses()
-    if current_num_types != _cached_num_types:
-        # Types were added - invalidate cache
-        _type_class_cache.clear()
-        _cached_num_types = current_num_types
-
-    # Try to find the class by name
+    # Cache miss - look up the class by name
     cdef str type_name = get_type_name(value_type)
     thismodule = sys.modules[__name__]
     clazz = getattr(thismodule, type_name, None)
-
     if clazz is not None:
-        # Cache it for next time (name never changes for a given type ID)
         _type_class_cache[value_type] = clazz
 
     return clazz
