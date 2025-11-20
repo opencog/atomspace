@@ -122,16 +122,6 @@ cdef class AtomSpace(Value):
         elif op == 3: # !=
             return not is_equal
 
-    def add(self, Type t, name=None, out=None):
-        """ add method that determines exact method to call from type """
-        if is_a(t, types.Node):
-            assert out is None, "Nodes can't have outgoing sets"
-            atom = self.add_node(t, name)
-        else:
-            assert name is None, "Links can't have names"
-            atom = self.add_link(t, out)
-        return atom
-
     def add_atom(self, Atom atom):
         cdef cHandle h = atom.get_c_handle()
         cdef cHandle result
