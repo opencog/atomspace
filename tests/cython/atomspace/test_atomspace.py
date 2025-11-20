@@ -5,7 +5,7 @@ from opencog.atomspace import Atom, tvkey
 from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
 
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace, tmp_atomspace
+from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
 
 from time import sleep
 
@@ -178,16 +178,48 @@ class AtomSpaceTest(TestCase):
 
         self.assertEqual(len(self.space), 3)
 
-    def test_context_mgr_tmp(self):
+    def test_push_pop(self):
         a = ConceptNode('a')
-        with tmp_atomspace() as tmp_as:
-             b = ConceptNode('b')
-             self.assertTrue(a in self.space)
-             # verify that current default atomspace is tmp_as
-             self.assertFalse(b in self.space)
+
+        # Create temporary workspace
+        current_as = push_thread_atomspace()
+        self.assertFalse(get_thread_atomspace() == self.space)
+        b = ConceptNode('b')
+        # verify that 'b' is only in the current space.
+        self.assertTrue(a in current_as)
+        self.assertTrue(b in current_as)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
+        pop_thread_atomspace()
+
+        self.assertTrue(get_thread_atomspace() == self.space)
         c = ConceptNode('c')
         # verify that current default atomspace is self.space
         self.assertTrue(c in self.space)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
+
+
+    def test_push_pop_new(self):
+        a = ConceptNode('a')
+
+        # Create temporary workspace
+        current_as = push_thread_atomspace(AtomSpace())
+        self.assertFalse(get_thread_atomspace() == self.space)
+        b = ConceptNode('b')
+        # verify that 'a' is NOT in the current space.
+        self.assertFalse(a in current_as)
+        self.assertTrue(b in current_as)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
+        pop_thread_atomspace()
+
+        self.assertTrue(get_thread_atomspace() == self.space)
+        c = ConceptNode('c')
+        # verify that current default atomspace is self.space
+        self.assertTrue(c in self.space)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
 
 
 class AtomTest(TestCase):

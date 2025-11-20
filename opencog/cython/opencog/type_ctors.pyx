@@ -9,23 +9,6 @@ from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
 import warnings
 
-
-@contextmanager
-def tmp_atomspace():
-    """
-    Context manager, to create child atomspace from current default
-    """
-    parent_atomspace = get_thread_atomspace()
-    if parent_atomspace is None:
-        raise RuntimeError("Default atomspace is None")
-    atomspace = create_child_atomspace(parent_atomspace)
-    set_thread_atomspace(atomspace)
-    try:
-        yield atomspace
-    finally:
-        set_thread_atomspace(parent_atomspace)
-
-
 def add_link(Type t, outgoing):
 
     # Unwrap double-wrapped lists. The type constructors create these.
@@ -86,11 +69,17 @@ def set_thread_atomspace(AtomSpace atomspace):
         push_context_atomspace(atomspace.asp)
 
 
-def push_thread_atomspace(AtomSpace new_atomspace):
+def push_thread_atomspace(AtomSpace new_atomspace = None):
     """
     Set default atomspace for current thread
     """
+    if new_atomspace is None:
+        parent_atomspace = get_thread_atomspace()
+        if parent_atomspace is None:
+            raise RuntimeError("Atomspace is not set!")
+        new_atomspace = create_child_atomspace(parent_atomspace)
     push_context_atomspace(new_atomspace.asp)
+    return new_atomspace
 
 
 def get_thread_atomspace():
