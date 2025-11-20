@@ -5,7 +5,9 @@ def createFloatValue(arg):
         c_ptr = c_createFloatValue_vector(FloatValue.list_of_doubles_to_vector(arg))
     else:
         c_ptr = c_createFloatValue_single(<double>arg)
-    return FloatValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+    cdef FloatValue instance = FloatValue.__new__(FloatValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class FloatValue(Value):
 

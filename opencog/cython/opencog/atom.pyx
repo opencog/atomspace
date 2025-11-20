@@ -37,27 +37,30 @@ cdef void cpp_except_to_pyerr(object e):
 # Atom wrapper object
 cdef class Atom(Value):
 
-    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
-        self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
+    def __cinit__(self):
         self._name = None
         self._outgoing = None
         self._atomspace = None
-    
+
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
-        # Create temporary Handle that is not const, so that we can then
-        # use it to create the desired ValuePtr. If we don't do this,
-        # then cython warns either of failing to use the correct
-        # C++ shared_ptr casting methods, or ir errors out with
-        # casting away constness.
+        """Factory method to construct Atom from C++ Handle.
+
+        Uses __new__ to bypass constructors, then directly assigns the shared_ptr.
+        """
         cdef cHandle nch = handle
-        return Atom(PtrHolder.create(<shared_ptr[cValue]&>(nch, nch.get())))
+        cdef Atom instance = Atom.__new__(Atom)
+        instance.shared_ptr = <cValuePtr&>(nch, nch.get())
+        instance._name = None
+        instance._outgoing = None
+        instance._atomspace = None
+        return instance
 
     @property
     def atomspace(self):
         cdef cAtomSpace* a
         if self._atomspace is None:
-            a = deref(self.handle).get().getAtomSpace()
+            a = (<cHandle&>self.shared_ptr).get().getAtomSpace()
             self._atomspace = AtomSpace_factoid(as_cast(a))
         return self._atomspace
 
@@ -65,7 +68,7 @@ cdef class Atom(Value):
     def name(self):
         cdef cAtom* atom_ptr
         if self._name is None:
-            atom_ptr = self.handle.atom_ptr()
+            atom_ptr = <cAtom*>self.shared_ptr.get()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 raise RuntimeError("Null Atom!")
             if atom_ptr.is_node():
@@ -75,8 +78,8 @@ cdef class Atom(Value):
         return self._name
 
     def get_value(self, key):
-        cdef cHandle key_handle = deref((<Atom>key).handle)
-        cdef cHandle self_handle = deref(self.handle)
+        cdef cHandle key_handle = <cHandle&>(<Atom>key).shared_ptr
+        cdef cHandle self_handle = <cHandle&>self.shared_ptr
         cdef cValuePtr value
         with nogil:
             value = self_handle.get().getValue(key_handle)
@@ -90,14 +93,14 @@ cdef class Atom(Value):
 
         :returns: A list of Atoms.
         """
-        cdef cHandle self_handle = deref(self.handle)
+        cdef cHandle self_handle = <cHandle&>self.shared_ptr
         cdef cpp_set[cHandle] keys
         with nogil:
             keys = self_handle.get().getKeys()
         return convert_handle_set_to_python_list(keys)
 
     def get_out(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
         cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
@@ -105,7 +108,7 @@ cdef class Atom(Value):
 
     def to_list(self):
         if self._outgoing is None:
-            atom_ptr = self.handle.atom_ptr()
+            atom_ptr = <cAtom*>self.shared_ptr.get()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 raise RuntimeError("Null Atom!")
             if atom_ptr.is_link():
@@ -125,7 +128,7 @@ cdef class Atom(Value):
     @property
     def incoming(self):
         cdef vector[cHandle] handle_vector
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
         with nogil:
@@ -134,7 +137,7 @@ cdef class Atom(Value):
 
     def incoming_by_type(self, Type type):
         cdef vector[cHandle] handle_vector
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
         with nogil:
@@ -142,7 +145,7 @@ cdef class Atom(Value):
         return convert_handle_seq_to_python_list(handle_vector)
 
     def is_executable(self):
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
         return atom_ptr.is_executable()
@@ -153,7 +156,7 @@ cdef class Atom(Value):
 
         :returns: A Value
         """
-        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
 
@@ -189,16 +192,16 @@ cdef class Atom(Value):
 
     def __lt(self, other):
         assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
-        cdef cAtom* p = deref(self.handle).get()
-        cdef cAtom* o = deref((<Atom>other).handle).get()
+        cdef cAtom* p = <cAtom*>self.shared_ptr.get()
+        cdef cAtom* o = <cAtom*>(<Atom>other).shared_ptr.get()
         return deref(p) < deref(o)
 
     def __eq(self, other):
         if not isinstance(other, Atom):
             return False
-        cdef cAtom* p = deref(self.handle).get()
-        cdef cAtom* o = deref((<Atom>other).handle).get()
+        cdef cAtom* p = <cAtom*>self.shared_ptr.get()
+        cdef cAtom* o = <cAtom*>(<Atom>other).shared_ptr.get()
         return deref(p) == deref(o)
 
     def __hash__(self):
-        return PyLong_FromLongLong(deref(self.handle).get().get_hash())
+        return PyLong_FromLongLong((<cAtom*>self.shared_ptr.get()).get_hash())

@@ -264,8 +264,8 @@ PyObject* PythonEval::get_function(const std::string& moduleFunction)
  *
  * On error throws an exception.
  */
-PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
-                                         const HandleSeq& args)
+ValuePtr PythonEval::call_user_function(const std::string& func,
+                                        const HandleSeq& args)
 {
     // Create the Python tuple for the function call with python
     // atoms for each of the atoms in the link arguments.
@@ -274,7 +274,22 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     for (size_t i=0; i<nargs; i++)
         PyTuple_SetItem(pyArguments, i, py_atom(args[i]));
 
-    return do_call_user_function(moduleFunction, pyArguments);
+    // Execute the user function and store its return value.
+    PyObject* pyValue = do_call_user_function(func, pyArguments);
+
+    // Get the C++ ValuePtr directly via the API.
+    ValuePtr vptr = py_value_ptr(pyValue);
+
+    Py_DECREF(pyValue);
+
+    // The pyx wrapper code will return a null ValuePtr if it
+    // stumbled on anything unexpected.
+    if (nullptr == vptr)
+        throw RuntimeException(TRACE_INFO,
+            "Python function '%s' did not return Atomese!",
+            func.c_str());
+
+    return vptr;
 }
 
 // =========== END OF FILE =========

@@ -5,7 +5,9 @@ def createLinkValue(arg):
         c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector(arg))
     else:
         c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector([arg]))
-    return LinkValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+    cdef LinkValue instance = LinkValue.__new__(LinkValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class LinkValue(Value):
 

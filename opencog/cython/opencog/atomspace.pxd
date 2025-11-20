@@ -5,11 +5,6 @@ from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
-
-cdef extern from "Python.h":
-    # Needed to return Value pointers to C++ callers. (i.e. PythonEval.cc)
-    cdef object PyLong_FromVoidPtr(void *p)
-
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
@@ -54,14 +49,8 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
 
     ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
-cdef class PtrHolder:
-    cdef cValuePtr shared_ptr
-
-    @staticmethod
-    cdef PtrHolder create(cValuePtr& ptr)
-
 cdef class Value:
-    cdef PtrHolder ptr_holder
+    cdef cValuePtr shared_ptr
     cdef inline cValuePtr get_c_value_ptr(self) nogil
     cdef inline cValue* get_c_raw_ptr(self) nogil
 
@@ -126,7 +115,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
 cdef class Atom(Value):
-    cdef cHandle* handle
     cdef object _name
     cdef object _outgoing
     cdef object _atomspace
@@ -168,10 +156,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cValuePtr createAtomSpace(cAtomSpace *parent) nogil
     cdef cValuePtr as_cast "AtomSpaceCast"(cAtomSpace *) nogil except +
 
-
-cdef AtomSpace_factoid(cValuePtr to_wrap)
-cdef object py_atomspace(cValuePtr c_atomspace) with gil
-
 cdef class AtomSpace(Value):
     cdef cValuePtr asp
     cdef cAtomSpace *atomspace
@@ -181,7 +165,20 @@ cdef class AtomSpace(Value):
     cdef cAtomSpacePtr get_atomspace_ptr(self)
 
 
-cdef create_python_value_from_c_value(const cValuePtr& value)
+# The py_atomspace and py_atom are used by the c++ PythonEval class
+# to convert C++ instances into python objects so that they can be
+# handed as arguments to python functions called from C++.
+#
+# The py_value_ptr is used by the c++ PythonEval class to get a
+# straight-up c++ ValuePtr with all the right reference counts, etc.
+cdef object py_atomspace(cValuePtr c_atomspace) with gil
+cdef object py_atom(const cHandle& h)
+cdef cValuePtr py_value_ptr(object py_value) noexcept with gil
+
+# The two below are used by cython code to work with the C++
+# incstances flowing across the cython declarations.
+cdef object AtomSpace_factoid(cValuePtr to_wrap)
+cdef object create_python_value_from_c_value(const cValuePtr& value)
 
 
 # BoolValue

@@ -2,43 +2,33 @@ from cpython.object cimport Py_EQ, Py_NE
 from cython.operator cimport dereference as deref, preincrement as inc
 
 
-cdef class PtrHolder:
-    """C++ shared_ptr object wrapper for Python clients. Cython cannot create
-    Python object constructor which gets C++ pointer. This class is used to
-    wrap pointer and make it possible to initialize Value in usual
-    constructor (see
-    http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers)."""
-
-    @staticmethod
-    cdef PtrHolder create(shared_ptr[cValue]& ptr):
-        """Factory method to construct PtrHolder from C++ shared_ptr"""
-        cdef PtrHolder ptr_holder = PtrHolder.__new__(PtrHolder)
-        ptr_holder.shared_ptr = ptr
-        return ptr_holder
-
 cdef class Value:
 
     @staticmethod
     cdef Value create(cValuePtr& ptr):
-        """Factory method to construct Value from C++ cValuePtr using
-        PtrHolder instance."""
-        return Value(PtrHolder.create(<shared_ptr[cValue]&>ptr))
+        """Factory method to construct Value from C++ cValuePtr.
 
-    def __init__(self, ptr_holder):
-        if (<PtrHolder>ptr_holder).shared_ptr.get() == NULL:
-            raise AttributeError('PtrHolder contains NULL reference')
-        self.ptr_holder = ptr_holder
+        Uses __new__ to bypass __init__, allowing direct assignment of C++ shared_ptr.
+        """
+        cdef Value instance = Value.__new__(Value)
+        instance.shared_ptr = ptr
+        return instance
+
+    def __init__(self):
+        """Default constructor - creates empty/null Value.
+
+        To create Value from C++ pointer, use Value.create() factory method.
+        """
+        # Leave shared_ptr uninitialized (will be null)
+        pass
 
     cdef inline cValuePtr get_c_value_ptr(self) nogil:
-        """Return C++ shared_ptr from PtrHolder instance"""
-        return <cValuePtr&>(self.ptr_holder.shared_ptr)
+        """Return C++ shared_ptr directly"""
+        return self.shared_ptr
 
     cdef inline cValue* get_c_raw_ptr(self) nogil:
-        """Return C++ raw_ptr from PtrHolder instance"""
-        return <cValue*>(self.ptr_holder.shared_ptr.get())
-
-    def value_ptr(self):
-        return PyLong_FromVoidPtr(<cValuePtr*>&(self.ptr_holder.shared_ptr))
+        """Return C++ raw pointer"""
+        return self.shared_ptr.get()
 
     @property
     def type(self):

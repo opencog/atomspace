@@ -2,7 +2,9 @@
 def createVoidValue():
     """Create and return the VoidValue singleton instance."""
     cdef cValuePtr c_ptr = c_createVoidValue[int]()
-    return VoidValue(PtrHolder.create(c_ptr))
+    cdef VoidValue instance = VoidValue.__new__(VoidValue)
+    instance.shared_ptr = c_ptr
+    return instance
 
 cdef class VoidValue(Value):
 

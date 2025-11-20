@@ -5,7 +5,9 @@ def createStringValue(arg):
         c_ptr = c_createStringValue_vector(StringValue.list_of_strings_to_vector(arg))
     else:
         c_ptr = c_createStringValue_single(<string>(arg.encode('UTF-8')))
-    return StringValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+    cdef StringValue instance = StringValue.__new__(StringValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class StringValue(Value):
 
