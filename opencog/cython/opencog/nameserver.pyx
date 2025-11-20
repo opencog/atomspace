@@ -147,10 +147,12 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
 
     # Cache miss - determine the Value class using type hierarchy
     # Check most common Value types first
-    if is_a(value_type, types.LinkValue):
-        value_class = LinkValue
-    elif is_a(value_type, types.QueueValue):
+    if is_a(value_type, types.QueueValue):
         value_class = QueueValue
+    elif is_a(value_type, types.UnisetValue):
+        value_class = UnisetValue
+    elif is_a(value_type, types.LinkValue):
+        value_class = LinkValue
     elif is_a(value_type, types.FloatValue):
         value_class = FloatValue
     elif is_a(value_type, types.StringValue):
