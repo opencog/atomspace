@@ -23,7 +23,8 @@ def foo(atom_a, atom_b) :
     atomspace = atom_a.atomspace
     key = PredicateNode('my-key')
     fv = FloatValue([0.2, 0.69])
-    atomspace.add_node(types.ConceptNode, 'Apple').set_value(key, fv)
+    apple = atomspace.add_node(types.ConceptNode, 'Apple')
+    appl = atomspace.set_value(apple, key, fv)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return True
 ")

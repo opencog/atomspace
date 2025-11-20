@@ -25,7 +25,7 @@ def foo(atom_a, atom_b):
     atomspace = get_default_atomspace()
     apple = atomspace.add_node(types.ConceptNode, 'Apple')
     TV = createFloatValue([0.2, 0.69])
-    apple.set_value(tvkey, TV)
+    apple = atomspace.set_value(apple, tvkey, TV)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return createFloatValue([0.42, 0.24])
 ")
@@ -61,7 +61,7 @@ def test_call_with_as(atomspace):
     orange = atomspace.add_node(types.ConceptNode, 'Orange')
     key = atomspace.add_node(types.PredicateNode, 'test-key')
     value = createFloatValue([3.14, 2.71])
-    orange.set_value(key, value)
+    orange = atomspace.set_value(orange, key, value)
     return atomspace.size()
 ")
 
