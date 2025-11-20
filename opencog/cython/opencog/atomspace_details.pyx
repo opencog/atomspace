@@ -9,7 +9,6 @@ from opencog.type_ctors cimport cPythonException
 # from atomspace cimport *
 
 cdef extern from "Python.h":
-    void* PyLong_AsVoidPtr(object)
     bint PyBool_Check(object)
 
 # tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*").

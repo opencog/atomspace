@@ -5,11 +5,6 @@ from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string
 from cython.operator cimport dereference as deref
 
-
-cdef extern from "Python.h":
-    # Needed to return Value pointers to C++ callers. (i.e. PythonEval.cc)
-    cdef object PyLong_FromVoidPtr(void *p)
-
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
