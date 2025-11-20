@@ -29,14 +29,9 @@ cdef class Value:
             raise AttributeError('PtrHolder contains NULL reference')
         self.ptr_holder = ptr_holder
 
-    cdef cValuePtr get_c_value_ptr(self):
+    cdef inline cValuePtr get_c_value_ptr(self) nogil:
         """Return C++ shared_ptr from PtrHolder instance"""
-        if self.ptr_holder == None:
-            raise AttributeError('Uninitialized ValuePtr holder')
-        shrptr = (<PtrHolder>self.ptr_holder).shared_ptr
-        if shrptr.get() == NULL:
-            raise AttributeError('PtrHolder contains NULL reference')
-        return <cValuePtr&>shrptr
+        return <cValuePtr&>((<PtrHolder>self.ptr_holder).shared_ptr)
 
     def value_ptr(self):
         return PyLong_FromVoidPtr(<cValuePtr*>&(self.ptr_holder.shared_ptr))

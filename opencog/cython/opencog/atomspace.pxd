@@ -67,7 +67,7 @@ cdef class PtrHolder:
 
 cdef class Value:
     cdef PtrHolder ptr_holder
-    cdef cValuePtr get_c_value_ptr(self)
+    cdef inline cValuePtr get_c_value_ptr(self) nogil
 
     @staticmethod
     cdef Value create(cValuePtr& ptr)
