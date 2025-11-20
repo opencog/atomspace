@@ -111,7 +111,7 @@ cdef class AtomSpace(Value):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
             return NotImplemented
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
-        cdef AtomSpace atomspace_2 = <AtomSpace>as_1
+        cdef AtomSpace atomspace_2 = <AtomSpace>as_2
 
         cdef cValuePtr c_atomspace_1 = atomspace_1.asp
         cdef cValuePtr c_atomspace_2 = atomspace_2.asp
