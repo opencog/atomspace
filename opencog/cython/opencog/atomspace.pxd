@@ -7,9 +7,6 @@ from cython.operator cimport dereference as deref
 
 
 cdef extern from "Python.h":
-    # Tacky hack to pass atomspace pointer to AtomSpace ctor.
-    cdef void* PyLong_AsVoidPtr(object)
-
     # Needed to return Value pointers to C++ callers. (i.e. PythonEval.cc)
     cdef object PyLong_FromVoidPtr(void *p)
 
