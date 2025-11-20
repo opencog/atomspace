@@ -10,11 +10,6 @@ cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
     cdef void* PyLong_AsVoidPtr(object)
 
-    # Needed to return truth value pointers to C++ callers.
-    cdef object PyLong_FromVoidPtr(void *p)
-
-ctypedef public long PANDLE
-
 # Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
