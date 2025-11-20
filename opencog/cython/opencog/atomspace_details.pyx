@@ -20,13 +20,15 @@ tvkey = create_python_value_from_c_value(<cValuePtr>(truth_key()))
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
     cdef cHandle handle
-    result = []
+    cdef Py_ssize_t size = <Py_ssize_t>handles.size()
+    cdef list result = [None] * size
+    cdef Py_ssize_t idx = 0
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        value = create_python_value_from_c_value(<cValuePtr&>(handle, handle.get()))
-        result.append(value)
+        result[idx] = create_python_value_from_c_value(<cValuePtr&>(handle, handle.get()))
         inc(handle_iter)
+        idx += 1
     return result
 
 cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
