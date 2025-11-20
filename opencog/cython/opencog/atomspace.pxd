@@ -135,9 +135,9 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
 
 cdef class Atom(Value):
     cdef cHandle* handle
-    cdef object _atom_type
     cdef object _name
     cdef object _outgoing
+    cdef object _atomspace
     cdef cHandle get_c_handle(Atom self)
     # Cython compiler complains that signature of the method should be
     # compatible with one from the parent class. It is the reason why we cannot

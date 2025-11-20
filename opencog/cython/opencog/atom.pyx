@@ -39,9 +39,9 @@ cdef class Atom(Value):
 
     def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
         self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
-        self._atom_type = None
         self._name = None
         self._outgoing = None
+        self._atomspace = None
     
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
@@ -59,8 +59,11 @@ cdef class Atom(Value):
 
     @property
     def atomspace(self):
-        cdef cAtomSpace* a = self.get_c_handle().get().getAtomSpace()
-        return AtomSpace_factoid(as_cast(a))
+        cdef cAtomSpace* a
+        if self._atomspace is None:
+            a = self.get_c_handle().get().getAtomSpace()
+            self._atomspace = AtomSpace_factoid(as_cast(a))
+        return self._atomspace
 
     @property
     def name(self):
@@ -75,12 +78,12 @@ cdef class Atom(Value):
                 self._name = ""
         return self._name
 
-    def id_string(self):
-        return self.get_c_handle().get().id_to_string().decode('UTF-8')
-
     def get_value(self, key):
-        cdef cValuePtr value = self.get_c_handle().get().getValue(
-            deref((<Atom>key).handle))
+        cdef cHandle key_handle = deref((<Atom>key).handle)
+        cdef cHandle self_handle = self.get_c_handle()
+        cdef cValuePtr value
+        with nogil:
+            value = self_handle.get().getValue(key_handle)
         if value.get() == NULL:
             return None
         return create_python_value_from_c_value(value)
@@ -91,7 +94,10 @@ cdef class Atom(Value):
 
         :returns: A list of Atoms.
         """
-        cdef cpp_set[cHandle] keys = self.get_c_handle().get().getKeys()
+        cdef cHandle self_handle = self.get_c_handle()
+        cdef cpp_set[cHandle] keys
+        with nogil:
+            keys = self_handle.get().getKeys()
         return convert_handle_set_to_python_list(keys)
 
     def get_out(self):
@@ -126,7 +132,8 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        handle_vector = atom_ptr.getIncomingSet()
+        with nogil:
+            handle_vector = atom_ptr.getIncomingSet()
         return convert_handle_seq_to_python_list(handle_vector)
 
     def incoming_by_type(self, Type type):
@@ -134,7 +141,8 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
-        handle_vector = atom_ptr.getIncomingSetByType(type)
+        with nogil:
+            handle_vector = atom_ptr.getIncomingSetByType(type)
         return convert_handle_seq_to_python_list(handle_vector)
 
     def is_executable(self):
@@ -152,12 +160,14 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             raise RuntimeError("Null Atom!")
+
         if not atom_ptr.is_executable():
             return self
 
         cdef cValuePtr c_value_ptr
         try:
-            c_value_ptr = atom_ptr.execute()
+            with nogil:
+                c_value_ptr = atom_ptr.execute()
             return create_python_value_from_c_value(c_value_ptr)
         except RuntimeError as e:
             cpp_except_to_pyerr(e)
