@@ -40,11 +40,12 @@ cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
 
 cdef vector[cHandle] atom_list_to_vector(list lst):
     cdef vector[cHandle] handle_vector
+    handle_vector.reserve(len(lst))
     for atom in lst:
         if isinstance(atom, Atom):
             handle_vector.push_back(<cHandle&>(<Atom>atom).shared_ptr)
         else:
-            raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
+            raise TypeError("Outgoing set should contain atoms, got {0} instead".format(type(atom)))
     return handle_vector
 
 
