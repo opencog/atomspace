@@ -69,8 +69,6 @@ cdef class Atom(Value):
         cdef cAtom* atom_ptr
         if self._name is None:
             atom_ptr = <cAtom*>self.shared_ptr.get()
-            if atom_ptr == NULL:   # avoid null-pointer deref
-                raise RuntimeError("Null Atom!")
             if atom_ptr.is_node():
                 self._name = atom_ptr.get_name().decode('UTF-8')
             else:
@@ -99,20 +97,14 @@ cdef class Atom(Value):
             keys = self_handle.get().getKeys()
         return convert_handle_set_to_python_list(keys)
 
-    def get_out(self):
-        cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
-        cdef vector[cHandle] handle_vector = atom_ptr.getOutgoingSet()
-        return convert_handle_seq_to_python_list(handle_vector)
-
     def to_list(self):
+        cdef cAtom* atom_ptr
+        cdef vector[cHandle] hvec
         if self._outgoing is None:
             atom_ptr = <cAtom*>self.shared_ptr.get()
-            if atom_ptr == NULL:   # avoid null-pointer deref
-                raise RuntimeError("Null Atom!")
             if atom_ptr.is_link():
-                self._outgoing = self.get_out()
+                hvec = atom_ptr.getOutgoingSet()
+                self._outgoing = convert_handle_seq_to_python_list(hvec)
             else:
                 self._outgoing = []
         return self._outgoing
@@ -129,8 +121,6 @@ cdef class Atom(Value):
     def incoming(self):
         cdef vector[cHandle] handle_vector
         cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
         with nogil:
             handle_vector = atom_ptr.getIncomingSet()
         return convert_handle_seq_to_python_list(handle_vector)
@@ -138,16 +128,12 @@ cdef class Atom(Value):
     def incoming_by_type(self, Type type):
         cdef vector[cHandle] handle_vector
         cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
         with nogil:
             handle_vector = atom_ptr.getIncomingSetByType(type)
         return convert_handle_seq_to_python_list(handle_vector)
 
     def is_executable(self):
         cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
         return atom_ptr.is_executable()
 
     def execute(self):
@@ -157,9 +143,6 @@ cdef class Atom(Value):
         :returns: A Value
         """
         cdef cAtom* atom_ptr = <cAtom*>self.shared_ptr.get()
-        if atom_ptr == NULL:   # avoid null-pointer deref
-            raise RuntimeError("Null Atom!")
-
         if not atom_ptr.is_executable():
             return self
 
