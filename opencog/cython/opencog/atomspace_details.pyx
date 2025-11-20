@@ -10,6 +10,7 @@ from opencog.type_ctors cimport cPythonException
 
 cdef extern from "Python.h":
     void* PyLong_AsVoidPtr(object)
+    bint PyBool_Check(object)
 
 # tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*").
 # This is technically obsolete, but is heavily used in the unit tests.
@@ -310,6 +311,25 @@ cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
 cdef api object py_atom(const cHandle& h):
     cdef Atom atom = Atom.createAtom(h)
     return atom
+
+cdef api cValuePtr py_value_ptr(object py_value) noexcept with gil:
+    """Extract C++ ValuePtr from Python Value object.
+
+    Handles Python booleans by converting them to BoolValue.
+    Returns a copy of the C++ shared_ptr (24-byte smart pointer).
+    The copy increments the refcount, so the C++ object stays alive.
+    """
+    cdef bool bval
+
+    # Handle Python boolean (True or False) -> BoolValue
+    if PyBool_Check(py_value):
+        bval = (py_value == True)
+        return <cValuePtr>c_createBoolValue_single(bval)
+
+    # Handle Value objects (Atoms, BoolValue, etc.)
+    if not isinstance(py_value, Value):
+        return cValuePtr()  # Return null/empty shared_ptr
+    return (<Value>py_value).shared_ptr
 
 def create_child_atomspace(object atomspace):
     cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)

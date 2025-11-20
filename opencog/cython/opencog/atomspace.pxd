@@ -164,6 +164,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
 cdef AtomSpace_factoid(cValuePtr to_wrap)
 cdef object py_atomspace(cValuePtr c_atomspace) with gil
+cdef object py_atom(const cHandle& h)
+cdef cValuePtr py_value_ptr(object py_value) noexcept with gil
 
 cdef class AtomSpace(Value):
     cdef cValuePtr asp

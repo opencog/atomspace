@@ -145,19 +145,19 @@ PyObject* PythonEval::do_call_user_function(const std::string& moduleFunction,
     // Execute the user function and store its return value.
     PyObject* pyReturnValue = PyObject_CallObject(pyUserFunc, pyArguments);
 
-    // Cleanup the reference counts for Python objects we no longer reference.
-    // Since we promoted the borrowed pyExecuteUserFunc reference, we need
-    // to decrement it here. Do this before error checking below since we'll
-    // need to decrement these references even if there is an error.
     Py_DECREF(pyUserFunc);
     Py_DECREF(pyArguments);
 
     // Check for errors and throw with proper exception type preserved
     if (PyErr_Occurred())
+    {
+        if (pyReturnValue) Py_DECREF(pyReturnValue);
         throw_python_exception(moduleFunction);
+    }
 
     return pyReturnValue;
 }
+
 
 /**
  * Apply the user function to the arguments passed in varargs and
@@ -176,57 +176,16 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
     GILGuard gil;
 
     // Get the python value object returned by this user function.
-    PyObject *pyValue = call_user_function(func, args->getOutgoingSet());
+    ValuePtr vptr = call_user_function(func, args->getOutgoingSet());
 
-    // If we got a non-null Value there were no errors.
-    if (NULL == pyValue)
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return Atomese!",
-            func.c_str());
-
-    // Check if the return value is a Python boolean (True or False)
-    // and convert to BoolValue
-    if (PyBool_Check(pyValue))
+    // Check if we got a valid ValuePtr
+    if (not vptr)
     {
-        bool bval = (pyValue == Py_True);
-        Py_DECREF(pyValue);
-        return createBoolValue(bval);
-    }
-
-    // Did we actually get a Value?
-    // One way to do this would be to say
-    //    PyObject *vtype = find_object("Value");
-    //    if (0 == PyObject_IsInstance(pyValue, vtype)) ...
-    // but just grabbing the attr is easier, for now.
-    if (0 == PyObject_HasAttrString(pyValue, "value_ptr"))
-    {
-        Py_DECREF(pyValue);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atomese!",
             func.c_str());
     }
 
-    // Get the ValuePtr from the object (will be encoded
-    // as a long by PyVoidPtr_asLong)
-    PyObject *pyValuePtrPtr = PyObject_CallMethod(pyValue,
-                                    (char*) "value_ptr", NULL);
-    // Make sure we got a ValuePtr.
-    PyObject *pyError = PyErr_Occurred();
-    if (pyError or nullptr == pyValuePtrPtr)
-    {
-        Py_DECREF(pyValue);
-        if (pyValuePtrPtr) Py_DECREF(pyValuePtrPtr);
-        throw RuntimeException(TRACE_INFO,
-            "Python function '%s' did not return Atomese!",
-            func.c_str());
-    }
-
-    // Get the ValuePtr. Static cast, we were passed a ulong int.
-    ValuePtr vptr(*(static_cast<ValuePtr*>
-            (PyLong_AsVoidPtr(pyValuePtrPtr))));
-
-    Py_DECREF(pyValuePtrPtr);
-    Py_DECREF(pyValue);
     return vptr;
 }
 
@@ -237,7 +196,7 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
  *
  * On error throws an exception.
  */
-void PythonEval::apply_as(const std::string& moduleFunction,
+void PythonEval::apply_as(const std::string& func,
                           AtomSpace* as_argument)
 {
     // What if the user is working in one AtomSpace, but is manipulating
@@ -254,7 +213,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
 
     // Execute the user function.
-    do_call_user_function(moduleFunction, pyArguments);
+    PyObject* pyReturnValue = do_call_user_function(func, pyArguments);
+    Py_DECREF(pyReturnValue);
 }
 
 // ===================================================================

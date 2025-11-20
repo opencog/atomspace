@@ -30,13 +30,6 @@ cdef class Value:
         """Return C++ raw pointer"""
         return self.shared_ptr.get()
 
-    def value_ptr(self):
-        """Legacy method for PythonEval.cc compatibility.
-
-        Returns pointer to the shared_ptr as a PyLong.
-        """
-        return PyLong_FromVoidPtr(<cValuePtr*>&self.shared_ptr)
-
     @property
     def type(self):
         return self.get_c_raw_ptr().get_type()
