@@ -36,7 +36,7 @@ def add_link(Type t, outgoing):
     cdef vector[cHandle] handle_vector
     for atom in outgoing:
         if isinstance(atom, Atom):
-            handle_vector.push_back(deref((<Atom>(atom)).handle))
+            handle_vector.push_back(<cHandle&>(<Atom>atom).shared_ptr)
         else:
             raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
 

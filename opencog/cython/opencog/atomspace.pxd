@@ -120,7 +120,6 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandleSeq "opencog::HandleSeq"
 
 cdef class Atom(Value):
-    cdef cHandle* handle
     cdef object _name
     cdef object _outgoing
     cdef object _atomspace
