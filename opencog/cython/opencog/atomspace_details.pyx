@@ -5,6 +5,7 @@ from libcpp.memory cimport static_pointer_cast
 from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.type_ctors cimport cPythonException
+import cython
 
 # from atomspace cimport *
 
@@ -20,6 +21,8 @@ tvkey = create_python_value_from_c_value(<cValuePtr>(truth_key()))
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
     cdef cHandle handle
@@ -38,6 +41,8 @@ cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
     return [create_python_value_from_c_value(<cValuePtr&>(h, h.get())) for h in handles]
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef vector[cHandle] atom_list_to_vector(list lst):
     cdef vector[cHandle] handle_vector
     handle_vector.reserve(len(lst))
