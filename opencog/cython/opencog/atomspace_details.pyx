@@ -44,7 +44,7 @@ cdef vector[cHandle] atom_list_to_vector(list lst):
 
 
 cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
-    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
+    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) nogil except +
 
 
 cdef AtomSpace_factoid(cValuePtr to_wrap):
@@ -149,7 +149,9 @@ cdef class AtomSpace(Value):
         # See comments on encoding "invalid" bytes in type_ctors.pyx
         # These bytes are from Microsoft Windows doggie litter.
         cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
-        cdef cHandle result = self.atomspace.xadd_node(t, name)
+        cdef cHandle result
+        with nogil:
+            result = self.atomspace.xadd_node(t, name)
 
         if result == result.UNDEFINED: return None
         return Atom.createAtom(result);
@@ -164,7 +166,8 @@ cdef class AtomSpace(Value):
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
-        result = self.atomspace.xadd_link(t, handle_vector)
+        with nogil:
+            result = self.atomspace.xadd_link(t, handle_vector)
         if result == result.UNDEFINED: return None
         return Atom.createAtom(result);
 
@@ -201,7 +204,8 @@ cdef class AtomSpace(Value):
         """ Remove all atoms from the AtomSpace """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        self.atomspace.clear()
+        with nogil:
+            self.atomspace.clear()
 
     def set_value(self, Atom atom, Atom key, Value value):
         """ Set the value on the atom at key
@@ -209,8 +213,10 @@ cdef class AtomSpace(Value):
         """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        cdef cHandle result = self.atomspace.set_value(deref(atom.handle), deref(key.handle),
-                                 value.get_c_value_ptr())
+        cdef cHandle result
+        cdef cValuePtr val_ptr = value.get_c_value_ptr()
+        with nogil:
+            result = self.atomspace.set_value(deref(atom.handle), deref(key.handle), val_ptr)
         return Atom.createAtom(result)
 
     # Methods to make the atomspace act more like a standard Python container
@@ -242,7 +248,10 @@ cdef class AtomSpace(Value):
         """ Return the number of atoms in the AtomSpace """
         if self.atomspace == NULL:
             raise RuntimeError("Null AtomSpace!")
-        return self.atomspace.get_size()
+        cdef int result
+        with nogil:
+            result = self.atomspace.get_size()
+        return result
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
@@ -250,17 +259,22 @@ cdef class AtomSpace(Value):
             raise RuntimeError("Null AtomSpace!")
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.get_handles_by_type(handle_vector,t,subt)
+        with nogil:
+            self.atomspace.get_handles_by_type(handle_vector,t,subt)
         return convert_handle_seq_to_python_list(handle_vector)
 
     def is_node_in_atomspace(self, Type t, s):
         cdef string name = s.encode('UTF-8', 'surrogateescape')
-        result = self.atomspace.xget_handle(t, name)
+        cdef cHandle result
+        with nogil:
+            result = self.atomspace.xget_handle(t, name)
         return result != result.UNDEFINED
 
     def is_link_in_atomspace(self, Type t, outgoing):
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
-        result = self.atomspace.xget_handle(t, handle_vector)
+        cdef cHandle result
+        with nogil:
+            result = self.atomspace.xget_handle(t, handle_vector)
         return result != result.UNDEFINED
 
     def execute(self, Atom atom):
@@ -268,7 +282,8 @@ cdef class AtomSpace(Value):
             raise ValueError("No atom provided!")
         cdef cValuePtr c_value_ptr
         try:
-            c_value_ptr = c_do_execute_atom(self.atomspace, deref(atom.handle))
+            with nogil:
+                c_value_ptr = c_do_execute_atom(self.atomspace, deref(atom.handle))
             return create_python_value_from_c_value(c_value_ptr)
         except RuntimeError as e:
             cpp_except_to_pyerr(e)
