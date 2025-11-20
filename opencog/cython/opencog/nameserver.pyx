@@ -133,6 +133,7 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     cdef cValue* val_ptr = value.get()
     cdef Type value_type = val_ptr.get_type()
     cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
+    cdef str type_name
 
     # Check cache first
     cdef object py_class_ctor = _python_ctor_cache.get(value_type)
@@ -157,9 +158,9 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     elif is_a(value_type, types.VoidValue):
         py_class_ctor = VoidValue
     else:
-        # Generic Value fallback XXX ??? What the heck?
-        # There's no such thing as a "generic value"...
-        py_class_ctor = Value
+        # Can't build one of these - this should never happen
+        type_name = get_type_name(value_type)
+        raise TypeError("Non-constructible Type: " + type_name)
 
     # Cache the result (is_a() results never change)
     _python_ctor_cache[value_type] = py_class_ctor

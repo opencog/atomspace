@@ -29,4 +29,3 @@ cdef class FloatValue(Value):
             list.append(deref(it))
             inc(it)
         return list
-
