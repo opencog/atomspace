@@ -132,13 +132,15 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
 
     cdef cValue* val_ptr = value.get()
     cdef Type value_type = val_ptr.get_type()
-    cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
     cdef str type_name
+    cdef Value instance
 
     # Check cache first
     cdef object py_class_ctor = _python_ctor_cache.get(value_type)
     if py_class_ctor is not None:
-        return py_class_ctor(ptr_holder=ptr_holder)
+        instance = py_class_ctor.__new__(py_class_ctor)
+        instance.shared_ptr = value
+        return instance
 
     # Cache miss - find the correct python ctor to use.
     if is_a(value_type, types.Atom):
@@ -164,6 +166,8 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
 
     # Cache the result (is_a() results never change)
     _python_ctor_cache[value_type] = py_class_ctor
-    return py_class_ctor(ptr_holder=ptr_holder)
+    instance = py_class_ctor.__new__(py_class_ctor)
+    instance.shared_ptr = value
+    return instance
 
 # ========================== END OF FILE =========================

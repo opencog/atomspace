@@ -8,6 +8,9 @@ from opencog.type_ctors cimport cPythonException
 
 # from atomspace cimport *
 
+cdef extern from "Python.h":
+    void* PyLong_AsVoidPtr(object)
+
 # tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*").
 # This is technically obsolete, but is heavily used in the unit tests.
 # So, for now, leave it as a weirdo backwards compatibility hack,
@@ -51,9 +54,9 @@ cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
 
 cdef AtomSpace_factoid(cValuePtr to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
+    instance.shared_ptr = to_wrap  # Inherited from Value
     instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
-    instance.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>to_wrap)
     instance.parent_atomspace = None
     # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
@@ -93,15 +96,18 @@ cdef class AtomSpace(Value):
     def __init__(self, object parent=None):
         """Create a new AtomSpace.
 
-        If parent is provided, stores it as a Python reference (but does not
-        create a C++ child atomspace - use create_child_atomspace() for that).
+        Args:
+            parent: Optional parent atomspace reference (for Python tracking only)
+
+        Creates a new C++ AtomSpace. Does NOT create a child atomspace -
+        use create_child_atomspace() for that.
 
         To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
         """
         self.asp = createAtomSpace(<cAtomSpace*> NULL)
+        self.shared_ptr = self.asp  # Inherited from Value
         self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
-        self.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>self.asp)
 
     cdef cAtomSpacePtr get_atomspace_ptr(self):
         # Cast the ValuePtr to AtomSpacePtr

@@ -37,21 +37,26 @@ cdef void cpp_except_to_pyerr(object e):
 # Atom wrapper object
 cdef class Atom(Value):
 
-    def __cinit__(self, PtrHolder ptr_holder, *args, **kwargs):
-        self.handle = <cHandle*>&((<PtrHolder>ptr_holder).shared_ptr)
+    def __cinit__(self):
+        self.handle = <cHandle*>&self.shared_ptr
         self._name = None
         self._outgoing = None
         self._atomspace = None
-    
+
     @staticmethod
     cdef Atom createAtom(const cHandle& handle):
-        # Create temporary Handle that is not const, so that we can then
-        # use it to create the desired ValuePtr. If we don't do this,
-        # then cython warns either of failing to use the correct
-        # C++ shared_ptr casting methods, or ir errors out with
-        # casting away constness.
+        """Factory method to construct Atom from C++ Handle.
+
+        Uses __new__ to bypass constructors, then directly assigns the shared_ptr.
+        """
         cdef cHandle nch = handle
-        return Atom(PtrHolder.create(<shared_ptr[cValue]&>(nch, nch.get())))
+        cdef Atom instance = Atom.__new__(Atom)
+        instance.shared_ptr = <cValuePtr&>(nch, nch.get())
+        instance.handle = <cHandle*>&instance.shared_ptr
+        instance._name = None
+        instance._outgoing = None
+        instance._atomspace = None
+        return instance
 
     @property
     def atomspace(self):

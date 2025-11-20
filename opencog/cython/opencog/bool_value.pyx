@@ -5,7 +5,9 @@ def createBoolValue(arg):
         c_ptr = c_createBoolValue_vector(BoolValue.list_of_bool_to_vector(arg))
     else:
         c_ptr = c_createBoolValue_single(<bool>arg)
-    return BoolValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+    cdef BoolValue instance = BoolValue.__new__(BoolValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class BoolValue(Value):
 

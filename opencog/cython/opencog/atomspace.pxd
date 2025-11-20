@@ -54,14 +54,8 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
 
     ctypedef shared_ptr[cValue] cValuePtr "opencog::ValuePtr"
 
-cdef class PtrHolder:
-    cdef cValuePtr shared_ptr
-
-    @staticmethod
-    cdef PtrHolder create(cValuePtr& ptr)
-
 cdef class Value:
-    cdef PtrHolder ptr_holder
+    cdef cValuePtr shared_ptr
     cdef inline cValuePtr get_c_value_ptr(self) nogil
     cdef inline cValue* get_c_raw_ptr(self) nogil
 
