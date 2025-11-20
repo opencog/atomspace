@@ -311,7 +311,11 @@ cdef api object py_atom(const cHandle& h):
     cdef Atom atom = Atom.createAtom(h)
     return atom
 
-cdef api cValuePtr py_value_ptr(object py_value) noexcept with gil:
+# Older cythons (before 2024) get compiler errors with the noexcept
+# keyword. Newer cythons without it get nag notes about optimization.
+# ubuntu-24.04 works; ubuntu-22.04 fails; debian-bokworm (2023) fails
+# cdef api cValuePtr py_value_ptr(object py_value) noexcept with gil:
+cdef api cValuePtr py_value_ptr(object py_value) with gil:
     """Extract C++ ValuePtr from Python Value object.
 
     Handles Python booleans by converting them to BoolValue.

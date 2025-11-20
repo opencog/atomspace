@@ -173,7 +173,12 @@ cdef class AtomSpace(Value):
 # straight-up c++ ValuePtr with all the right reference counts, etc.
 cdef object py_atomspace(cValuePtr c_atomspace) with gil
 cdef object py_atom(const cHandle& h)
-cdef cValuePtr py_value_ptr(object py_value) noexcept with gil
+
+# Older cythons (before 2024) get compiler errors with the noexcept
+# keyword. Newer cythons without it get nag notes about optimization.
+# ubuntu-24.04 works; ubuntu-22.04 fails; debian-bookworm (2023) fails
+# cdef cValuePtr py_value_ptr(object py_value) noexcept with gil
+cdef cValuePtr py_value_ptr(object py_value) with gil
 
 # The two below are used by cython code to work with the C++
 # incstances flowing across the cython declarations.
