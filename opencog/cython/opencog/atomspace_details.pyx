@@ -123,7 +123,7 @@ cdef class AtomSpace(Value):
             return not is_equal
 
     def add_atom(self, Atom atom):
-        cdef cHandle h = atom.get_c_handle()
+        cdef cHandle h = deref(atom.handle)
         cdef cHandle result
         with nogil:
             result = self.atomspace.add_atom(h)

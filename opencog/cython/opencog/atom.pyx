@@ -53,15 +53,11 @@ cdef class Atom(Value):
         cdef cHandle nch = handle
         return Atom(PtrHolder.create(<shared_ptr[cValue]&>(nch, nch.get())))
 
-    cdef cHandle get_c_handle(Atom self):
-        """Return C++ shared_ptr from PtrHolder instance"""
-        return <cHandle&>(self.ptr_holder.shared_ptr)
-
     @property
     def atomspace(self):
         cdef cAtomSpace* a
         if self._atomspace is None:
-            a = self.get_c_handle().get().getAtomSpace()
+            a = deref(self.handle).get().getAtomSpace()
             self._atomspace = AtomSpace_factoid(as_cast(a))
         return self._atomspace
 
@@ -80,7 +76,7 @@ cdef class Atom(Value):
 
     def get_value(self, key):
         cdef cHandle key_handle = deref((<Atom>key).handle)
-        cdef cHandle self_handle = self.get_c_handle()
+        cdef cHandle self_handle = deref(self.handle)
         cdef cValuePtr value
         with nogil:
             value = self_handle.get().getValue(key_handle)
@@ -94,7 +90,7 @@ cdef class Atom(Value):
 
         :returns: A list of Atoms.
         """
-        cdef cHandle self_handle = self.get_c_handle()
+        cdef cHandle self_handle = deref(self.handle)
         cdef cpp_set[cHandle] keys
         with nogil:
             keys = self_handle.get().getKeys()
@@ -193,16 +189,16 @@ cdef class Atom(Value):
 
     def __lt(self, other):
         assert isinstance(other, Atom), "Only Atom instances are comparable with atoms"
-        cdef cAtom* p = self.get_c_handle().get()
-        cdef cAtom* o = ((<Atom>other).get_c_handle()).get()
+        cdef cAtom* p = deref(self.handle).get()
+        cdef cAtom* o = deref((<Atom>other).handle).get()
         return deref(p) < deref(o)
 
     def __eq(self, other):
         if not isinstance(other, Atom):
             return False
-        cdef cAtom* p = self.get_c_handle().get()
-        cdef cAtom* o = (<Atom>other).get_c_handle().get()
+        cdef cAtom* p = deref(self.handle).get()
+        cdef cAtom* o = deref((<Atom>other).handle).get()
         return deref(p) == deref(o)
 
     def __hash__(self):
-        return PyLong_FromLongLong(self.get_c_handle().get().get_hash())
+        return PyLong_FromLongLong(deref(self.handle).get().get_hash())
