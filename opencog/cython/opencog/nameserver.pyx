@@ -123,9 +123,8 @@ def decl_type(parent, name):
     setattr(types, name, type_id)
     return type_id
 
-# Cache for Value type hierarchy checks
-# is_a() results never change, so they can be cached permanently
-cdef dict _value_type_cache = {}
+# Cache for Python constructors
+cdef dict _python_ctor_cache = {}
 
 cdef create_python_value_from_c_value(const cValuePtr& value):
     if value.get() == NULL:
@@ -135,36 +134,35 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
     cdef Type value_type = val_ptr.get_type()
     cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
 
-    # Use C++ method for ground truth (most common case first)
-    if val_ptr.is_atom():
-        return Atom(ptr_holder=ptr_holder)
-
-    # Not an atom - determine which Value subclass
     # Check cache first
-    cdef object value_class = _value_type_cache.get(value_type)
-    if value_class is not None:
-        return value_class(ptr_holder=ptr_holder)
+    cdef object py_class_ctor = _python_ctor_cache.get(value_type)
+    if py_class_ctor is not None:
+        return py_class_ctor(ptr_holder=ptr_holder)
 
-    # Cache miss - determine the Value class using type hierarchy
-    # Check most common Value types first
-    if is_a(value_type, types.QueueValue):
-        value_class = QueueValue
+    # Cache miss - find the correct python ctor to use.
+    if is_a(value_type, types.Atom):
+        py_class_ctor = Atom
+    elif is_a(value_type, types.QueueValue):
+        py_class_ctor = QueueValue
     elif is_a(value_type, types.UnisetValue):
-        value_class = UnisetValue
+        py_class_ctor = UnisetValue
     elif is_a(value_type, types.LinkValue):
-        value_class = LinkValue
+        py_class_ctor = LinkValue
     elif is_a(value_type, types.FloatValue):
-        value_class = FloatValue
+        py_class_ctor = FloatValue
     elif is_a(value_type, types.StringValue):
-        value_class = StringValue
+        py_class_ctor = StringValue
     elif is_a(value_type, types.BoolValue):
-        value_class = BoolValue
+        py_class_ctor = BoolValue
+    elif is_a(value_type, types.VoidValue):
+        py_class_ctor = VoidValue
     else:
-        # Generic Value fallback
-        value_class = Value
+        # Generic Value fallback XXX ??? What the heck?
+        # There's no such thing as a "generic value"...
+        py_class_ctor = Value
 
     # Cache the result (is_a() results never change)
-    _value_type_cache[value_type] = value_class
-    return value_class(ptr_holder=ptr_holder)
+    _python_ctor_cache[value_type] = py_class_ctor
+    return py_class_ctor(ptr_holder=ptr_holder)
 
 # ========================== END OF FILE =========================
