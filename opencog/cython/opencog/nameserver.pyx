@@ -123,33 +123,77 @@ def decl_type(parent, name):
     setattr(types, name, type_id)
     return type_id
 
+# Cache for type-to-class mapping with invalidation support
+cdef dict _type_class_cache = {}
+cdef Type _cached_num_types = 0
+
+cdef inline object _get_cached_class(Type value_type):
+    """Get cached class for a type, handling cache invalidation if types were added"""
+    global _type_class_cache
+    global _cached_num_types
+
+    cdef object clazz = _type_class_cache.get(value_type)
+    if clazz is not None:
+        return clazz
+
+    # Cache miss - check if new types were added
+    cdef Type current_num_types = nameserver().getNumberOfClasses()
+    if current_num_types != _cached_num_types:
+        # Types were added - invalidate cache
+        _type_class_cache.clear()
+        _cached_num_types = current_num_types
+
+    # Try to find the class by name
+    cdef str type_name = get_type_name(value_type)
+    thismodule = sys.modules[__name__]
+    clazz = getattr(thismodule, type_name, None)
+
+    if clazz is not None:
+        # Cache it for next time (name never changes for a given type ID)
+        _type_class_cache[value_type] = clazz
+
+    return clazz
+
 cdef create_python_value_from_c_value(const cValuePtr& value):
     if value.get() == NULL:
         return None
 
-    value_type = value.get().get_type()
-    type_name = get_type_name(value_type)
-    ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
+    cdef Type value_type = value.get().get_type()
+    cdef PtrHolder ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
 
-    thismodule = sys.modules[__name__]
-    clazz = getattr(thismodule, type_name, None)
-    if clazz is not None:
-        return clazz(ptr_holder=ptr_holder)
-
-    # For handling the children types of LinkValue.
-    if is_a(value_type, types.LinkValue):
-        return LinkValue(ptr_holder=ptr_holder)
-    # For handling the children types of QueueValue.
-    if is_a(value_type, types.QueueValue):
-        return QueueValue(ptr_holder=ptr_holder)
-    # For handling the children types of Atom.
+    # Fast path: Check most common base types first (avoid string conversion)
+    # For handling Atom types (most common case - nodes and links)
     if is_a(value_type, types.Atom):
+        # Try to get specific Atom subclass
+        clazz = _get_cached_class(value_type)
+        if clazz is not None:
+            return clazz(ptr_holder=ptr_holder)
+        # Fall back to generic Atom
         return Atom(ptr_holder=ptr_holder)
 
-    # For handling the children types of Value.
+    # For handling LinkValue types
+    if is_a(value_type, types.LinkValue):
+        clazz = _get_cached_class(value_type)
+        if clazz is not None:
+            return clazz(ptr_holder=ptr_holder)
+        return LinkValue(ptr_holder=ptr_holder)
+
+    # For handling QueueValue types
+    if is_a(value_type, types.QueueValue):
+        clazz = _get_cached_class(value_type)
+        if clazz is not None:
+            return clazz(ptr_holder=ptr_holder)
+        return QueueValue(ptr_holder=ptr_holder)
+
+    # For handling generic Value types
     if is_a(value_type, types.Value):
+        clazz = _get_cached_class(value_type)
+        if clazz is not None:
+            return clazz(ptr_holder=ptr_holder)
         return Value(ptr_holder=ptr_holder)
 
+    # Unknown type
+    cdef str type_name = get_type_name(value_type)
     raise TypeError("Python API for " + type_name + " is not implemented yet")
 
 # ========================== END OF FILE =========================
