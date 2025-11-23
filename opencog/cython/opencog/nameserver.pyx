@@ -96,11 +96,6 @@ def regenerate_types():
     # print("Exit regenerate_types")
     return types
 
-def get_refreshed_types():
-    warnings.warn('get_refreshed_types is deprecated; use regenerate_types instead',
-            DeprecationWarning)
-    return regenerate_types()
-
 # Provide API so that new atom types can be added with python.
 def begin_type_decls(module):
     return nameserver().beginTypeDecls(module.encode('UTF-8'))
