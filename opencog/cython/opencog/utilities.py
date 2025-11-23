@@ -26,8 +26,13 @@ warnings.warn(
 # Re-export everything from opencog.atomspace
 from opencog.atomspace import *
 
+# Re-export everything from opencog.type_ctors
+from opencog.type_ctors import *
+
 # Ensure __all__ is propagated if it exists
 try:
-    from opencog.atomspace import __all__
+    from opencog.atomspace import __all__ as _atomspace_all
+    from opencog.type_ctors import __all__ as _type_ctors_all
+    __all__ = list(set(_atomspace_all + _type_ctors_all))
 except ImportError:
     pass
