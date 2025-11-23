@@ -7,7 +7,6 @@ from opencog.atomspace cimport AtomSpace_factoid
 
 from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
-import warnings
 
 def add_link(Type t, outgoing):
 
@@ -92,26 +91,3 @@ def get_thread_atomspace():
 
 def pop_thread_atomspace():
     return AtomSpace_factoid(pop_context_atomspace())
-
-
-# Backwards-compatibility wrappers (deprecated)
-def set_default_atomspace(AtomSpace atomspace):
-    """
-    Deprecated: Use set_thread_atomspace instead.
-
-    Set the default atomspace for the current thread.
-    """
-    warnings.warn("set_default_atomspace is deprecated, use set_thread_atomspace instead",
-                  DeprecationWarning, stacklevel=2)
-    set_thread_atomspace(atomspace)
-
-
-def get_default_atomspace():
-    """
-    Deprecated: Use get_thread_atomspace instead.
-
-    Get the default atomspace for the current thread.
-    """
-    warnings.warn("get_default_atomspace is deprecated, use get_thread_atomspace instead",
-                  DeprecationWarning, stacklevel=2)
-    return get_thread_atomspace()
