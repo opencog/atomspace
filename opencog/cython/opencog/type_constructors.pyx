@@ -25,7 +25,6 @@ from opencog.type_ctors import add_node, add_link
 # and expect to get these functions below.
 from opencog.type_ctors import push_thread_atomspace, pop_thread_atomspace
 from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
-from opencog.type_ctors import get_default_atomspace, set_default_atomspace  # deprecated
 
 # -----------------------------------------------------------------
 # The core Atom types are taken from an auto-generated file
