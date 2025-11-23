@@ -17,12 +17,12 @@
 ; Define a python func returning a FloatValue
 (python-eval "
 from opencog.atomspace import AtomSpace, types, tvkey, createFloatValue
-from opencog.type_constructors import get_default_atomspace
+from opencog.type_constructors import get_thread_atomspace
 
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b):
-    atomspace = get_default_atomspace()
+    atomspace = get_thread_atomspace()
     apple = atomspace.add_node(types.ConceptNode, 'Apple')
     TV = createFloatValue([0.2, 0.69])
     apple = atomspace.set_value(apple, tvkey, TV)
