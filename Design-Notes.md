@@ -395,11 +395,21 @@ changes need to be implemented, or at least considered:
   as a preliminary exploration of security: if you know the uuid, then
   you have access to the Atomspace, and if yout don't, you don't.
   The current system won't actually be secure; it was never designed
-  to be. However, a "secret" uuid would be an improviement in managing
+  to be. However, a "secret" uuid would be an improvement in managing
   multiple AtomSpaces.
+
+But how would this work? ...
+
+Other TODO items:
 
 * Replace `cog-atomspace-ro!` and the 6 other `cog-atomspace`
   scheme calls with an ObjectNode API.
 
+But how does this work for `cog-set-atomspace!`, which sets the current
+AtomSpace in the current thread?
+
+* Rocks:  maybe this load-frames thing be automated?
+
 * Possibley remove `cog-add-atomspace`
-  
+
+Bug --- rocks did not store AtomSpace ref correctly...
