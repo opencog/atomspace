@@ -1,5 +1,5 @@
 Design Notes
-------------
+============
 The design and implementation of the AtomSpace has been ongoing since
 about 2002, when it was first created as a workspace for controlling
 small animated virtual creatures. In the decades since, it has seen
@@ -27,7 +27,7 @@ Plenty of simple stream processing demos have been created, but new
 problems keep popping up.
 
 7 November 2025
----------------
+===============
 Today's issue: FilterLink vs. CollectionOfLink. They seem to conceptually
 overlap, but its not clear if they can be unified or should be unified.
 
@@ -385,3 +385,21 @@ So lets recap the issues:
    resembling a filter.
 
  * UnisetValue and QueueValue don't stream; should they?
+
+23 November 2025
+================
+The handling of multiple AtomSpaces could be cleaner. The following
+changes need to be implemented, or at least considered:
+
+* Issue 64-bit uuid's, or maybe even 256-bit ids. This is motivated
+  as a preliminary exploration of security: if you know the uuid, then
+  you have access to the Atomspace, and if yout don't, you don't.
+  The current system won't actually be secure; it was never designed
+  to be. However, a "secret" uuid would be an improviement in managing
+  multiple AtomSpaces.
+
+* Replace `cog-atomspace-ro!` and the 6 other `cog-atomspace`
+  scheme calls with an ObjectNode API.
+
+* Possibley remove `cog-add-atomspace`
+  
