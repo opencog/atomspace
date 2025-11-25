@@ -578,6 +578,9 @@ public:
     /// Get the set of all object messages supported by this Atom.
     virtual HandleSeq getMessages() const { return HandleSeq(); }
 
+    /// Return true if handle appears in the list of getMessages().
+    virtual bool usesMessage(const Handle&) const { return false; }
+
     /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);
 
