@@ -627,6 +627,7 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 	size_t nv = vsq.size();
 	// Format:
 	// [AtomSpace, Query, Key, Metadata, Fresh] or
+	// [AtomSpace, Query, Key] or
 	// [Query, Key, Metadata, Fresh] or
 	// [Query, Key]
 	// This is a blargle-mess but I don't feel like cleaning up today.
@@ -638,6 +639,11 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 		Handle metadata = HandleCast(vsq[3]);
 		bool fresh = vsq[4]->get_type() == TRUE_LINK;
 		fetch_query(query, key, metadata, fresh, as);
+	} else if (3 == nv && vsq[0]->is_type(ATOM_SPACE)) {
+		AtomSpace* as = AtomSpaceCast(vsq[0]).get();
+		Handle query = HandleCast(vsq[1]);
+		Handle key = HandleCast(vsq[2]);
+		fetch_query(query, key, Handle::UNDEFINED, false, as);
 	} else if (4 == nv) {
 		Handle query = HandleCast(vsq[0]);
 		Handle key = HandleCast(vsq[1]);
