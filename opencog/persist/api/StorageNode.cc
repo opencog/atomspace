@@ -637,7 +637,7 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 		Handle query = HandleCast(vsq[1]);
 		Handle key = HandleCast(vsq[2]);
 		Handle metadata = HandleCast(vsq[3]);
-		bool fresh = vsq[4]->get_type() == TRUE_LINK;
+		bool fresh = vsq[4]->is_type(BOOL_VALUE) && BoolValueCast(vsq[4])->get_bit(0);
 		fetch_query(query, key, metadata, fresh, as);
 	} else if (3 == nv && vsq[0]->is_type(ATOM_SPACE)) {
 		AtomSpace* as = AtomSpaceCast(vsq[0]).get();
@@ -648,7 +648,7 @@ void StorageNode::fetch_query_msg(const ValuePtr& value)
 		Handle query = HandleCast(vsq[0]);
 		Handle key = HandleCast(vsq[1]);
 		Handle metadata = HandleCast(vsq[2]);
-		bool fresh = vsq[3]->get_type() == TRUE_LINK;
+		bool fresh = vsq[3]->is_type(BOOL_VALUE) && BoolValueCast(vsq[3])->get_bit(0);
 		fetch_query(query, key, metadata, fresh);
 	} else if (2 == nv) {
 		Handle query = HandleCast(vsq[0]);
