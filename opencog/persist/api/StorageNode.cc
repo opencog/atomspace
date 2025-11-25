@@ -47,9 +47,28 @@ StorageNode::~StorageNode()
 {
 }
 
+HandleSeq StorageNode::getMessages() const
+{
+	HandleSeq msgs;
+	// XXX TODO the rest of them
+	msgs.emplace_back(createNode(PREDICATE_NODE, "*-open-*"));
+	return msgs;
+}
+
+bool StorageNode::usesMessage(const Handle& key) const
+{
+	if (PREDICATE_NODE != key->get_type()) return false;
+
+	// XXX TODO the rest of them
+	const std::string& pred = key->get_name();
+	uint32_t dhsh = dispatch_hash(pred.c_str());
+	if (dispatch_hash("*-open-*") == dhsh) return true;
+	return false;
+}
+
 void StorageNode::setValue(const Handle& key, const ValuePtr& value)
 {
-	// The value must be store only if it is not one of the values
+	// The value must be stored only if it is not one of the values
 	// that causes an action to be taken. Action messages must not be
 	// recorded, as otherwise, restore from disk/net will cause the
 	// action to be triggered!
