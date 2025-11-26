@@ -43,7 +43,6 @@ cog-atomspace-env
 cog-atomspace-readonly?
 cog-atomspace-ro!
 cog-atomspace-rw!
-cog-atomspace-uuid
 cog-count-atoms
 cog-equal?
 cog-extract!

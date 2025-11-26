@@ -1036,7 +1036,6 @@
        AtomSpace -- create an AtomSpace and insert it into this one.
        cog-atomspace -- Get the current AtomSpace in this thread.
        cog-atomspace-env -- Get the subspaces.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
        cog-atomspace-ro! -- Mark the AtomSpace as read-only.
        cog-atomspace-cow! -- Mark the AtomSpace as copy-on-write.
 ")
@@ -1050,7 +1049,6 @@
     See also:
        cog-new-atomspace -- Create a new AtomSpace.
        cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-env 'documentation
@@ -1061,18 +1059,6 @@
 
     See also:
        cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
-")
-
-(set-procedure-property! cog-atomspace-uuid 'documentation
-"
- cog-atomspace-uuid [ATOMSPACE]
-    Return the UUID of ATOMSPACE. The ATOMSPACE argument is
-    optional; if not specified, the current atomspace is assumed.
-
-    See also:
-       cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-env -- Get the subspaces.
 ")
 
 (set-procedure-property! cog-atomspace-clear 'documentation

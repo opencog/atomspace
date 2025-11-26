@@ -118,22 +118,6 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 
 /* ============================================================== */
 /**
- * Return UUID of the atomspace
- */
-SCM SchemeSmob::ss_as_uuid(SCM sas)
-{
-	const AtomSpacePtr& asg = ss_to_atomspace(sas);
-	const AtomSpacePtr& asp = asg ? asg :
-		ss_get_env_as("cog-atomspace-uuid");
-
-	UUID uuid = asp->get_uuid();
-	scm_remember_upto_here_1(sas);
-
-	return scm_from_ulong(uuid);
-}
-
-/* ============================================================== */
-/**
  * Return parent of the atomspace, or an empty list if there is no parent
  */
 SCM SchemeSmob::ss_as_env(SCM sas)

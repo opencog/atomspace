@@ -166,7 +166,6 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_set_as(SCM);
 	static SCM ss_as_env(SCM);
-	static SCM ss_as_uuid(SCM);
 	static SCM ss_as_clear(SCM);
 	static SCM ss_as_mark_readonly(SCM);
 	static SCM ss_as_mark_readwrite(SCM);
