@@ -320,17 +320,13 @@ protected:
     static MutexPool _mutex_pool;
 
     #define _MTX (_mutex_pool.get_mutex(_content_hash))
-    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
-    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
-    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
-    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
 #else
     #define _MTX _mtx
+#endif
     #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
     #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
-#endif
 
     // Packed flas. Single byte per atom.
     enum AtomFlags : uint8_t {
