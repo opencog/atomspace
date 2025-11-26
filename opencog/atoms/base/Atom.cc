@@ -225,7 +225,16 @@ void Atom::copyValues(const Handle& other)
 	{
 		HandleSet okeys(other->getKeys());
 		for (const Handle& k: okeys)
-			setValue(k, other->getValue(k));
+		{
+			const ValuePtr& vp(other->getValue(k));
+
+			// Direct copy, without the erase semantics of setValue().
+			// I think this is OK. This seems to minimize some rare
+			// race conditions exposed in rocks ThreadCountUTest.
+			KVP_UNIQUE_LOCK;
+			if (nullptr != vp)
+				_values[k] = vp;
+		}
 		return;
 	}
 
