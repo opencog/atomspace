@@ -158,13 +158,13 @@ bool Node::operator<(const Atom& other) const
     ContentHash cho = other.get_hash();
     if (cht != cho) return cht < cho;
 
-    // We get to here only if the hashes are equal.
-    // Compare the contents directly, for this
-    // (hopefully rare) case.
-    if (get_type() == other.get_type())
-        return get_name() < other.get_name();
-    else
+    // We get to here only if the hashes are equal. This is
+    // extremely unlikely; it requires a 64-bit hash collision.
+    // Compare the contents directly, for this case.
+    if (get_type() != other.get_type())
         return get_type() < other.get_type();
+
+    return get_name() < other.get_name();
 }
 
 ContentHash Node::compute_hash() const

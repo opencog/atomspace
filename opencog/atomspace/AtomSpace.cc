@@ -211,14 +211,23 @@ bool AtomSpace::operator==(const Atom& other) const
     return get_name() == other.get_name();
 }
 
+// Imlementation is the same as Node::operator<()
 bool AtomSpace::operator<(const Atom& other) const
 {
     // If other points to this, then have equality.
     if (this == &other) return false;
 
-    if (ATOM_SPACE != other.get_type()) return false;
-    AtomSpace* asp = (AtomSpace*) &other;
-    return _uuid  < (asp->_uuid);
+    ContentHash cht = get_hash();
+    ContentHash cho = other.get_hash();
+    if (cht != cho) return cht < cho;
+
+    // We get to here only if the hashes are equal. This is
+    // extremely unlikely; it requires a 64-bit hash collision.
+    // Compare the contents directly, for this case.
+    if (get_type() != other.get_type())
+        return get_type() < other.get_type();
+
+    return get_name() < other.get_name();
 }
 
 ContentHash AtomSpace::compute_hash() const
