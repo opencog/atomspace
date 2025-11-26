@@ -49,15 +49,46 @@ StorageNode::~StorageNode()
 
 HandleSeq StorageNode::getMessages() const
 {
-	HandleSeq msgs;
-	// XXX TODO the rest of them
-	msgs.emplace_back(createNode(PREDICATE_NODE, "*-open-*"));
+	static const HandleSeq msgs({
+		createNode(PREDICATE_NODE, "*-open-*"),
+		createNode(PREDICATE_NODE, "*-close-*"),
+		createNode(PREDICATE_NODE, "*-load-atomspace-*"),
+		createNode(PREDICATE_NODE, "*-store-atomspace-*"),
+		createNode(PREDICATE_NODE, "*-load-atoms-of-type-*"),
+		createNode(PREDICATE_NODE, "*-store-atom-*"),
+		createNode(PREDICATE_NODE, "*-store-value-*"),
+		createNode(PREDICATE_NODE, "*-update-value-*"),
+
+		createNode(PREDICATE_NODE, "*-fetch-atom-*"),
+		createNode(PREDICATE_NODE, "*-fetch-value-*"),
+		createNode(PREDICATE_NODE, "*-fetch-incoming-set-*"),
+		createNode(PREDICATE_NODE, "*-fetch-incoming-by-type-*"),
+		createNode(PREDICATE_NODE, "*-fetch-query-*"),
+
+		createNode(PREDICATE_NODE, "*-delete-*"),
+		createNode(PREDICATE_NODE, "*-delete-recursive-*"),
+		createNode(PREDICATE_NODE, "*-barrier-*"),
+
+		createNode(PREDICATE_NODE, "*-store-frames-*"),
+		createNode(PREDICATE_NODE, "*-delete-frame-*"),
+		createNode(PREDICATE_NODE, "*-erase-*"),
+
+		createNode(PREDICATE_NODE, "*-proxy-open-*"),
+		createNode(PREDICATE_NODE, "*-proxy-close-*"),
+		createNode(PREDICATE_NODE, "*-set-proxy-*"),
+
+		// Used only in getValue
+		createNode(PREDICATE_NODE, "*-load-frames-*"),
+		createNode(PREDICATE_NODE, "*-connected?-*"),
+		createNode(PREDICATE_NODE, "*-load-frames-*"),
+		createNode(PREDICATE_NODE, "*-monitor-*")
+	});
 	return msgs;
 }
 
 bool StorageNode::usesMessage(const Handle& key) const
 {
-	static std::unordered_set<uint32_t> msgs({
+	static const std::unordered_set<uint32_t> msgset({
 		dispatch_hash("*-open-*"),
 		dispatch_hash("*-close-*"),
 		dispatch_hash("*-load-atomspace-*"),
@@ -97,7 +128,7 @@ bool StorageNode::usesMessage(const Handle& key) const
 
 	const std::string& pred = key->get_name();
 	uint32_t dhsh = dispatch_hash(pred.c_str());
-	if (msgs.find(dhsh) != msgs.end()) return true;
+	if (msgset.find(dhsh) != msgset.end()) return true;
 	return false;
 }
 
