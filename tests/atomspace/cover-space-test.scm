@@ -16,9 +16,9 @@
 ; Common setup, used by all tests.
 
 (define base-space (cog-atomspace))
-(define mid1-space (cog-new-atomspace base-space))
-(define mid2-space (cog-new-atomspace mid1-space))
-(define surface-space (cog-new-atomspace mid2-space))
+(define mid1-space (AtomSpace base-space))
+(define mid2-space (AtomSpace mid1-space))
+(define surface-space (AtomSpace mid2-space))
 
 ; Splatter some atoms into the various spaces.
 (cog-set-atomspace! base-space)

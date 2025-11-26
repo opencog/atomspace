@@ -12,7 +12,7 @@
 ; Common setup, used by all tests.
 
 (define lower-space (cog-atomspace))
-(define upper-space (cog-new-atomspace lower-space))
+(define upper-space (AtomSpace lower-space))
 
 ; ===================================================================
 ; Test basic extraction.

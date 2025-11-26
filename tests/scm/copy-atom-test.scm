@@ -13,7 +13,7 @@
 (test-assert "its an atom" (cog-atom? ca))
 (test-assert "concept exists" (equal? ca (cog-atom ca)))
 
-(define spacex (cog-new-atomspace))
+(define spacex (AtomSpace))
 (test-assert "new atomspace is different"
 	(not (equal? spacex (cog-atomspace))))
 

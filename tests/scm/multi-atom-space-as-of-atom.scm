@@ -14,7 +14,7 @@
 (define initial-as (cog-atomspace))
 
 ;; Define an auxiliary atomspace
-(define auxiliary-as (cog-new-atomspace))
+(define auxiliary-as (AtomSpace))
 
 ;; Switch to the auxiliary atomspace
 (define pre-pre-as (cog-set-atomspace! auxiliary-as))

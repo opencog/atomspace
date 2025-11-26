@@ -16,7 +16,7 @@
 ; Create a list of atomspaces, each a child of the last.
 (define (make-space-list LST NUM)
 	(if (<= NUM 0) LST
-		(let ((newspace (cog-new-atomspace (cog-atomspace))))
+		(let ((newspace (AtomSpace (cog-atomspace))))
 			(cog-set-atomspace! newspace)
 			(make-space-list (cons newspace LST) (- NUM 1)))))
 

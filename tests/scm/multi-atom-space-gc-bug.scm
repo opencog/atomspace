@@ -7,11 +7,11 @@
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
-(define post-init-as (cog-new-atomspace))
+(define post-init-as (AtomSpace))
 
 ;; AtomSpace use to produce the bug. It crashes as soon as it gets
 ;; prematurely deleted
-(define bug-as (cog-new-atomspace))
+(define bug-as (AtomSpace))
 (cog-set-atomspace! bug-as) ;; <--- bug
 
 (define (my-precondition X)

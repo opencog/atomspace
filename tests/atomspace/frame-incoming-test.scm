@@ -11,11 +11,11 @@
 ; Common setup, used by all tests.
 
 (define level0 (cog-atomspace))
-(define level1a (cog-new-atomspace level0))
-(define level1b (cog-new-atomspace level0))
-(define level1c (cog-new-atomspace level0))
-(define level2a (cog-new-atomspace level1a level1b level1c))
-(define level2b (cog-new-atomspace level1a))
+(define level1a (AtomSpace level0))
+(define level1b (AtomSpace level0))
+(define level1c (AtomSpace level0))
+(define level2a (AtomSpace level1a level1b level1c))
+(define level2b (AtomSpace level1a))
 
 ; -------------------------------------------------------------------
 ; Test that incoming sets work.

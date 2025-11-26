@@ -93,7 +93,7 @@ void MultiAtomSpace::test_two_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define an alternate atomspace
-	evaluator->eval("(define alt-as (cog-new-atomspace))");
+	evaluator->eval("(define alt-as (AtomSpace))");
 	std::string msg = evaluator->eval("alt-as");
 	printf("New atomspace is: %s\n", msg.c_str());
 
@@ -335,7 +335,7 @@ void MultiAtomSpace::test_nest_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define an alternate atomspace
-	evaluator->eval("(define nest-as (cog-new-atomspace (cog-atomspace)))");
+	evaluator->eval("(define nest-as (AtomSpace (cog-atomspace)))");
 	std::string msg = evaluator->eval("nest-as");
 	printf("Nested atomspace is: %s\n", msg.c_str());
 
