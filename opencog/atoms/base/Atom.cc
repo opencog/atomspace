@@ -758,8 +758,8 @@ std::string Atom::id_to_string() const
 {
     std::stringstream ss;
     ss << "[" << std::hex << get_hash() << "][";
-    if (_atom_space) ss << _atom_space->get_uuid();
-    else ss << "-1";
+    if (_atom_space) ss << _atom_space->get_name();
+    else ss << "-";
     ss << "]";
     if (isAbsent()) ss << "[absent]";
     if (isMarkedForRemoval()) ss << " !!! ERROR: marked for removal!";
