@@ -32,12 +32,15 @@
 	; Test ---
 	(cog-set-atomspace! lower-space)
 
-	(test-equal "lower-size" 2 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "lower-node-size" 2 (length (cog-get-atoms 'Node #t)))
+	(test-equal "lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
 	(test-assert "extract-fail" (not (cog-extract! a)))
-	(test-equal "ex-lower-size" 2 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "ex-lower-node-size" 2 (length (cog-get-atoms 'Node #t)))
+	(test-equal "ex-lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
 
 	(test-assert "extract-works" (cog-extract-recursive! a))
-	(test-equal "post-ex-lower-size" 1 (length (cog-get-atoms 'Atom #t)))
+	(test-equal "post-ex-lower-node-size" 1 (length (cog-get-atoms 'Node #t)))
+	(test-equal "post-ex-lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
 
 	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
 
@@ -45,8 +48,9 @@
 	; delete to have blown away the link. Protection requires configing
 	; the COW flag correctly.
 	(cog-set-atomspace! upper-space)
-	(test-equal "upper-blown" 1 (length (cog-get-atoms 'Atom #t)))
-	(test-equal "upper-b-only" (list b) (cog-get-atoms 'Atom #t))
+	(test-equal "upper-blown-node" 1 (length (cog-get-atoms 'Node #t)))
+	(test-equal "upper-blown-link" 0 (length (cog-get-atoms 'Link #t)))
+	(test-equal "upper-b-only" (list b) (cog-get-atoms 'Node #t))
 )
 (test-end basic-lo-delete)
 

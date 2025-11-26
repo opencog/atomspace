@@ -82,8 +82,10 @@
 
 		; Each atomspace should contain just two atoms.
 		; One, plus (Predicate "*-TruthValueKey-*")
-		(test-equal "atomspace-size" 2 (count-all))
-		(set! cnt (+ 1 cnt)))
+		; It also contains the atomspaces there were created,
+		; which we count.
+		(if (not (eq? cnt num-spaces)) (set! cnt (+ 1 cnt)))
+		(test-equal "atomspace-size" (+ 2 cnt) (count-all)))
 	space-list)
 
 (test-end vstack)
@@ -98,6 +100,7 @@
 (cog-set-atomspace! base-space)
 (Concept "foo")
 
+(set! cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
 
@@ -105,8 +108,11 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
+		(if (not (eq? cnt num-spaces)) (set! cnt (+ 1 cnt)))
 		; Two atoms, plus (Predicate "*-TruthValueKey-*")
-		(test-equal "atomspace-size" 3 (count-all))
+		; It also contains the atomspaces there were created,
+		; which we count.
+		(test-equal "atomspace-size" (+ 3 cnt) (count-all))
 	)
 	space-list)
 

@@ -53,41 +53,20 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
-	AtomSpacePtr as = createAtomSpace(spaces);
+	// Create new AtomSpace with the indicated decendents.
+	AtomSpacePtr asp = createAtomSpace(spaces);
 
+	// If a name was provided, set that name.
 	if (0 < name.size())
-		as->set_name(name);
+		asp->set_name(name);
 
-	return protom_to_scm(as);
-}
+	Handle hasp(HandleCast(asp));
 
-/* ============================================================== */
-/**
- * Add an AtomSpace to the current AtomSpace. Unlike ss_new_node,
- * the ss_new_as() call above does NOT add the new AtomSpace to any
- * existing AtomSpace. It just ... hangs there in the void. This is
- * usually just fine, and is the historic behavior. But in order to
- * get naming uniqueness guarantees, it has to be actually inserted
- * somewhere, where naming uniqueness is provided. So that's what this
- * method does.
- *
- * Note that this might be crazy-making for a naive user: if two
- * atomspaces are created with exactly the same name, and both are
- * inserted, the second insert will return the first atomspace.
- * Which is exactly the whole point of this function; but it also
- * means that the second atomspace might be garbage-collected, which
- * might come as a surprise to the user, esp. if it isn't empty.
- */
-SCM SchemeSmob::ss_add_as (SCM sas)
-{
-	Handle hasp(verify_handle(sas, "cog-add-atomspace"));
+	// Insert it nto the current AtomSpace
+	const AtomSpacePtr& env = ss_get_env_as("cog-new-atomspace");
+	if (env) hasp = env->add_atom(hasp);
 
-	if (hasp->get_type() != ATOM_SPACE)
-		scm_wrong_type_arg_msg("cog-add-atomspace", 1, sas, "opencog atomspace");
-
-	const AtomSpacePtr& asp = ss_get_env_as("cog-add-atomspace");
-	Handle h(asp->add_atom(hasp));
-	return handle_to_scm(h);
+	return protom_to_scm(hasp);
 }
 
 /* ============================================================== */
