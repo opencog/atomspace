@@ -420,7 +420,10 @@ Handle AtomSpace::set_value(const Handle& h,
 {
 	// Skip R/O and COW checking if key is a message.
 	if (h->usesMessage(key))
+	{
 		h->setValue(key, value);
+		return h;
+	}
 
 	#define SETV(atm) atm->setValue(key, value);
 	COWBOY_CODE(SETV);
