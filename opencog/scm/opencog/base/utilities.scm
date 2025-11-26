@@ -355,6 +355,10 @@
 
 	(fluid-set! cog-atomspace-stack
 		(cons base-as (fluid-ref cog-atomspace-stack)))
+
+	; This assumes that cog-new-atomspace will assign a new,
+	; unique name to each created AtomSpace. If this doesn't
+	; happen, then multiple users might end up sharing it!
 	(cog-set-atomspace! (cog-new-atomspace base-as))
 	(fluid-set! cog-atomspace-stack-top (cog-atomspace))
 
@@ -379,17 +383,24 @@
 		; who-knows-where, so go back to the stack to now.
 		(cog-set-atomspace! stk-top)
 
-		; Guile gc should eventually garbage-collect this atomspace,
-		; which will clear it. But ... even when brute-forcing the
-		; gc to run (as done below), the atomspace seems to hang
-		; around anyway, undeleted. So we brute-force clear it now,
-		; so that at least the atoms do not chew up RAM.
+		; Clear temp space contents. Not strictly needed,
+		; but provides easier debug.
 		(cog-atomspace-clear)
 		(cog-set-atomspace! (car stk-nxt))
+
+		; The push placed the temp space in the parent. Remove it
+		; now, as otherwise the pointer to it will sit there,
+		; more or less forever, creating an effective memleak.
+		(cog-extract! stk-top)
+
 		(fluid-set! cog-atomspace-stack-top (car stk-nxt))
 		(fluid-set! cog-atomspace-stack (cdr stk-nxt))
 
-		; Try to force garbage-collection of the atomspace.
+		; Null out remaining pointers that point to the temp space
+		; and force garbage collection. Without this, the temp spaces
+		; hang around indefinitely. During rapid push-pop a dozen GB
+		; of junk will easily accumulate. The ThreadCountUTest in the
+		; atomspace-rocks unit test suite will expose this.
 		(set-car! stk-nxt '())
 		(set-cdr! stk-nxt '())
 		(gc))
