@@ -219,8 +219,8 @@ HandleSet Atom::getKeys() const
 
 void Atom::copyValues(const Handle& other)
 {
-	// A quasi-merge-like copy. But if this is empty, a fast-path
-	// is given further below.
+	// A quasi-merge-like copy. But if `this` is empty,
+	// a fast-path is given further below.
 	if (haveValues())
 	{
 		HandleSet okeys(other->getKeys());
@@ -229,8 +229,7 @@ void Atom::copyValues(const Handle& other)
 			const ValuePtr& vp(other->getValue(k));
 
 			// Direct copy, without the erase semantics of setValue().
-			// I think this is OK. This seems to minimize some rare
-			// race conditions exposed in rocks ThreadCountUTest.
+			// I think this is OK.
 			KVP_UNIQUE_LOCK;
 			if (nullptr != vp)
 				_values[k] = vp;
@@ -239,12 +238,6 @@ void Atom::copyValues(const Handle& other)
 	}
 
 	// Provide a fast-path copy, if this atom has nothing in it yet.
-	// This is of course racey: if another thread adds something to
-	// this Atom while we are cipying, it will get clobbered. But
-	// this is no different than the key-by-key copy above, which
-	// also races in this way. So the main documentation for this
-	// call remains correct.
-
 	KVPMap vcpy;
 	{
 		// Lock the other atom while we access it's map.
@@ -257,8 +250,25 @@ void Atom::copyValues(const Handle& other)
 		vcpy = other->_values;
 	}
 
-	KVP_UNIQUE_LOCK;
-	_values.swap(vcpy);
+	// Check again, under the lock. Things might have changed.
+	{
+		KVP_UNIQUE_LOCK;
+		if (_values.empty())
+		{
+			_values.swap(vcpy);
+			return;
+		}
+	}
+
+	// Oh no, Mr. Bill!!!!
+	// There is a rare race exposed by the rocks ThreadCountUTest,
+	// in the 'pushy' test. It goes like this. Two threads are trying
+	// to create the same Atom. Both have an empty original, passed
+	// here as `other`. The first thread creates an atom (with no
+	// Values on it, yet). We are the second thread, we get that Atom.
+	// It was empty when we first checked, but when we looked again,
+	// its not. So now we try again.
+	copyValues(other);
 }
 
 void Atom::bulkCopyValues(const Handle& other)
