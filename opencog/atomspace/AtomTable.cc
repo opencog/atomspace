@@ -353,11 +353,8 @@ Handle AtomSpace::add(const Handle& orig, bool force,
             // Now that the outgoing set is correct, check again to
             // see if we already have this atom in the atomspace.
             const Handle& hc(check(atom, force));
-            if (hc and (not _copy_on_write or this == hc->getAtomSpace())) {
-                if (not recurse)
-                    hc->copyValues(orig);
+            if (hc and (not _copy_on_write or this == hc->getAtomSpace()))
                 return hc;
-            }
 
         } else {
             atom->unsetRemovalFlag();
