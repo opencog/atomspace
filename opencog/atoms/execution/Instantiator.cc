@@ -560,8 +560,8 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	AtomSpace* exas = expr->getAtomSpace();
 	if (nullptr != exas and not _as->in_environ(expr))
 		throw RuntimeException(TRACE_INFO,
-			"Can't execute: current AtomSpace is %lu but atom is in AtomSpace %lu",
-			_as->get_uuid(), exas->get_uuid());
+			"Can't execute: current AtomSpace is %s but atom is in AtomSpace %s",
+			_as->get_name().c_str(), exas->get_name().c_str());
 
 	// Expand on the spot.
 	if (expr->is_type(DEFINED_SCHEMA_NODE))
