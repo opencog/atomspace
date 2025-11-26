@@ -219,11 +219,37 @@ HandleSet Atom::getKeys() const
 
 void Atom::copyValues(const Handle& other)
 {
-    HandleSet okeys(other->getKeys());
-    for (const Handle& k: okeys)
-    {
-        setValue(k, other->getValue(k));
-    }
+	// A quasi-merge-like copy. But if this is empty, a fast-path
+	// is given further below.
+	if (haveValues())
+	{
+		HandleSet okeys(other->getKeys());
+		for (const Handle& k: okeys)
+			setValue(k, other->getValue(k));
+		return;
+	}
+
+	// Provide a fast-path copy, if this atom has nothing in it yet.
+	// This is of course racey: if another thread adds something to
+	// this Atom while we are cipying, it will get clobbered. But
+	// this is no different than the key-by-key copy above, which
+	// also races in this way. So the main documentation for this
+	// call remains correct.
+
+	KVPMap vcpy;
+	{
+		// Lock the other atom while we access it's map.
+#if USE_MUTEX_POOL
+		std::shared_lock<std::shared_mutex>
+			lck(_mutex_pool.get_mutex(other->_content_hash));
+#else
+		std::shared_lock<std::shared_mutex> lck(other->_mtx);
+#endif
+		vcpy = other->_values;
+	}
+
+	KVP_UNIQUE_LOCK;
+	_values.swap(vcpy);
 }
 
 void Atom::bulkCopyValues(const Handle& other)

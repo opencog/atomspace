@@ -593,6 +593,8 @@ public:
     /// Return true if the set of values on this atom isn't empty.
     bool haveValues() const {
         // I think its safe to call empty() without holding a lock...!?
+        // But I'm paranoid. So... grab a lock.
+        KVP_SHARED_LOCK
         return not _values.empty();
     }
 
