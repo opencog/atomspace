@@ -232,7 +232,6 @@ bool AtomSpace::operator<(const Atom& other) const
 
 ContentHash AtomSpace::compute_hash() const
 {
-	if (_name.empty()) return _uuid;
 	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// Nodes will never have the MSB set.

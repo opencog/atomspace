@@ -211,8 +211,8 @@ void MultiAtomSpace::test_load(void)
 	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
-	printf("as1 is uuid=%lu %s\n", as1->get_uuid(), as1->get_name().c_str());
-	printf("as2 is uuid=%lu %s\n", as2->get_uuid(), as2->get_name().c_str());
+	printf("as1 is %s\n", as1->get_name().c_str());
+	printf("as2 is %s\n", as2->get_name().c_str());
 
 	// The below is a complicated multi-atom-space version of part of
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...

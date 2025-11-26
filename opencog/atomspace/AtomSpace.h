@@ -88,7 +88,6 @@ public:
 private:
 #endif
 
-    UUID _uuid;
     bool _read_only;
     bool _copy_on_write;
     bool _transient;
@@ -163,7 +162,6 @@ public:
 
     bool is_node(void) const { return true; }
     bool is_link(void) const { return true; }
-    UUID get_uuid(void) const { return _uuid; }
 
     /// Transient atomspaces are lighter-weight, faster, but are missing
     /// some features. They are used during pattern matching, to hold

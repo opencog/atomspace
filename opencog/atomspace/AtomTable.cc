@@ -28,8 +28,11 @@
 
 #include "AtomSpace.h"
 
-#include <atomic>
 #include <stdlib.h>
+#include <string.h>
+#include <cstdio>
+#include <ctime>
+#include <sys/time.h>
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -44,15 +47,15 @@
 using namespace opencog;
 
 // ====================================================================
-// Nothing should ever get the uuid of zero. Zero is reserved for
-// "no atomspace" (in the persist code).
-static std::atomic<UUID> _id_pool(1);
-
 void AtomSpace::init(void)
 {
-    _uuid = _id_pool.fetch_add(1, std::memory_order_relaxed);
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    char buf[64];
+    strftime(buf, sizeof(buf), "/%Y-%m-%d %H:%M:%S", gmtime(&ts.tv_sec));
+    sprintf(buf + strlen(buf), ".%09ld/", ts.tv_nsec);
 
-    _name = "(uuid . " + std::to_string(_uuid) + ")";
+    _name = buf;
 
     // Connect signal to find out about type additions
     addedTypeConnection =
