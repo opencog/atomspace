@@ -222,7 +222,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// back to true for the remaining tree
 		ist._needless_quotation = true;
 		Handle nexp(createLink(t, walked_child));
-		nexp->copyValues(expr);
+		nexp->bulkCopyValues(expr);
 		return nexp;
 	}
 
@@ -393,7 +393,7 @@ mere_recursive_call:
 	if (changed)
 	{
 		Handle subl(createLink(std::move(oset_results), t));
-		subl->copyValues(expr);
+		subl->bulkCopyValues(expr);
 		return subl;
 	}
 	return expr;

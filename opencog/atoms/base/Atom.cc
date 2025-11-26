@@ -226,6 +226,21 @@ void Atom::copyValues(const Handle& other)
     }
 }
 
+void Atom::bulkCopyValues(const Handle& other)
+{
+	// No lock is taken; we assume we have been given a brand new
+	// clean atom that is not visible in any other thread.
+	// Do, however, lock the other atom, to keep it from changing
+	// while we copy it.
+#if USE_MUTEX_POOL
+	std::shared_lock<std::shared_mutex>
+		lck(_mutex_pool.get_mutex(other->_content_hash));
+#else
+	std::shared_lock<std::shared_mutex> lck(other->_mtx);
+#endif
+	_values = other->_values;
+}
+
 void Atom::clearValues(void)
 {
     KVP_UNIQUE_LOCK;

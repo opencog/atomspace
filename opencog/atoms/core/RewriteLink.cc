@@ -362,7 +362,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 			// needless_quotation to true for the remaining tree
 			needless_quotation = true;
 			Handle new_con_child = createLink(t, con_child);
-			new_con_child->copyValues(con_child);
+			new_con_child->bulkCopyValues(con_child);
 			return new_con_child;
 		}
 	}
@@ -421,7 +421,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 	                                   quotation, needless_quotation,
 	                                   clause_root);
 	Handle ch = createLink(std::move(chs), h->get_type());
-	ch->copyValues(h);
+	ch->bulkCopyValues(h);
 	return ch;
 }
 

@@ -578,7 +578,17 @@ public:
     virtual bool usesMessage(const Handle&) const { return false; }
 
     /// Copy all the values from the other atom to this one.
+    /// It is thread-safe but racey. Values are copied one at a time.
+    /// Multiple updaters in multiple threads can race with one another,
+    /// and alter Values here, or on the other Atom, even as the copy
+    /// is proceeding. The only thread-safety guarantee here is to not
+    /// crash and to not corrupt internal data structures.
     void copyValues(const Handle&);
+
+    /// Lock-free, thread-unsafe copy of all the values from the
+    /// other atom to this one, assuming this Atom if fresh, empty,
+    /// and not visible from any other threads.
+    void bulkCopyValues(const Handle&);
 
     /// Return true if the set of values on this atom isn't empty.
     bool haveValues() const {
