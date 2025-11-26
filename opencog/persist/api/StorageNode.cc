@@ -57,12 +57,47 @@ HandleSeq StorageNode::getMessages() const
 
 bool StorageNode::usesMessage(const Handle& key) const
 {
+	static std::unordered_set<uint32_t> msgs({
+		dispatch_hash("*-open-*"),
+		dispatch_hash("*-close-*"),
+		dispatch_hash("*-load-atomspace-*"),
+		dispatch_hash("*-store-atomspace-*"),
+		dispatch_hash("*-load-atoms-of-type-*"),
+		dispatch_hash("*-store-atom-*"),
+		dispatch_hash("*-store-value-*"),
+		dispatch_hash("*-update-value-*"),
+
+		dispatch_hash("*-fetch-atom-*"),
+		dispatch_hash("*-fetch-value-*"),
+		dispatch_hash("*-fetch-incoming-set-*"),
+		dispatch_hash("*-fetch-incoming-by-type-*"),
+		dispatch_hash("*-fetch-query-*"),
+
+		dispatch_hash("*-delete-*"),
+		dispatch_hash("*-delete-recursive-*"),
+		dispatch_hash("*-barrier-*"),
+
+		dispatch_hash("*-store-frames-*"),
+		dispatch_hash("*-delete-frame-*"),
+		dispatch_hash("*-erase-*"),
+
+		dispatch_hash("*-proxy-open-*"),
+		dispatch_hash("*-proxy-close-*"),
+		dispatch_hash("*-set-proxy-*")
+	});
+
+	// Messages used in getValue only don't need to be published here,
+	// because only the setValue ones need the COW, R/O work-around.
+	// ("*-load-frames-*")
+	// ("*-connected?-*")
+	// ("*-load-frames-*")
+	// ("*-monitor-*")
+
 	if (PREDICATE_NODE != key->get_type()) return false;
 
-	// XXX TODO the rest of them
 	const std::string& pred = key->get_name();
 	uint32_t dhsh = dispatch_hash(pred.c_str());
-	if (dispatch_hash("*-open-*") == dhsh) return true;
+	if (msgs.find(dhsh) != msgs.end()) return true;
 	return false;
 }
 
