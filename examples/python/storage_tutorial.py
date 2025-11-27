@@ -26,7 +26,7 @@ from opencog.storage import *
 from opencog.storage_rocks import *
 
 space = AtomSpace()
-set_default_atomspace(space)
+set_thread_atomspace(space)
 
 # Record a photograph stored in a directory.
 #
