@@ -319,7 +319,7 @@ protected:
     };
     static MutexPool _mutex_pool;
 
-    #define _MTX (_mutex_pool.get_mutex(_content_hash))
+    #define _MTX (_mutex_pool.get_mutex(get_hash()))
 #else
     #define _MTX _mtx
 #endif
@@ -358,6 +358,11 @@ protected:
     // we are using a lock-per-atom, even though this makes the atom
     // fatter.
     mutable std::shared_mutex _mtx;
+
+    // copyValues() assumes it can use the same mutex to lock both the
+    // source and destination atoms with the same mutex. That would need
+    // to be fixed to use this. And I'm lazy so lets halt compilation.
+    #error "Current implementation of copyValues() assumes mutex pool!"
 #endif // NOT USE_MUEX_POOL
 
     /**

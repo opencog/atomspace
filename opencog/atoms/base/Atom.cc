@@ -221,23 +221,11 @@ void Atom::copyValues(const Handle& other)
 {
 	// Avoid any accidental crazy-making.
 	if (this == other.get()) return;
+	OC_ASSERT (get_hash() == other->get_hash(), "Internal error!");
 
-	// Grab everything in `other`, in bulk. This is "atomic",
-	// in that whatever it was when we grabbed it, that is what
-	// it is.
-	KVPMap vcpy;
-	{
-		// Lock the other atom while we access it's map.
-#if USE_MUTEX_POOL
-		std::shared_lock<std::shared_mutex>
-			lck(_mutex_pool.get_mutex(other->_content_hash));
-#else
-		std::shared_lock<std::shared_mutex> lck(other->_mtx);
-#endif
-		vcpy = other->_values;
-	}
-
+	// Grab everything in `other`, in bulk.
 	KVP_UNIQUE_LOCK;
+	KVPMap vcpy(other->_values);
 
 	// Are we empty? The do a fast-path bulk replace.
 	if (_values.empty())
@@ -255,16 +243,9 @@ void Atom::copyValues(const Handle& other)
 
 void Atom::bulkCopyValues(const Handle& other)
 {
-	// No lock is taken; we assume we have been given a brand new
-	// clean atom that is not visible in any other thread.
-	// Do, however, lock the other atom, to keep it from changing
-	// while we copy it.
-#if USE_MUTEX_POOL
-	std::shared_lock<std::shared_mutex>
-		lck(_mutex_pool.get_mutex(other->_content_hash));
-#else
-	std::shared_lock<std::shared_mutex> lck(other->_mtx);
-#endif
+	// Note that other has exactly the same content hash as we do,
+	// and thus the same lock protects `other` as well as `this`.
+	KVP_UNIQUE_LOCK;
 	_values = other->_values;
 }
 
