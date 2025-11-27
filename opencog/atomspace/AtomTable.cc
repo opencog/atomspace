@@ -28,12 +28,6 @@
 
 #include "AtomSpace.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <cstdio>
-#include <ctime>
-#include <sys/time.h>
-
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
@@ -44,16 +38,33 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
+#include <atomic>
+#include <cstdio>
+#include <ctime>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+
 using namespace opencog;
 
 // ====================================================================
+
 void AtomSpace::init(void)
 {
+    // Timestamp provides the primary ID, which the user might
+    // over-write with a given name. Normally, the timestamp is
+    // (almost) enough to provide a distinct, unique name...
+    // expect in cases of extreme multi-threading, when multiple
+    // thread can end up with the same timestamp, even at the
+    // nanosecond level, dependong on the OS, scheduling, interrupts,
+    // etc. So we further disambiguate (DAB) with a per-session counter.
+    static std::atomic_uint64_t dabcnt(1);
+
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     char buf[64];
     strftime(buf, sizeof(buf), "/%Y-%m-%d %H:%M:%S", gmtime(&ts.tv_sec));
-    sprintf(buf + strlen(buf), ".%09ld/", ts.tv_nsec);
+    sprintf(buf + strlen(buf), ".%09ld/%ld", ts.tv_nsec, dabcnt.fetch_add(1));
 
     _name = buf;
 
