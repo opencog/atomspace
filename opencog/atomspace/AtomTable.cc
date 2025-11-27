@@ -391,10 +391,11 @@ Handle AtomSpace::add(const Handle& orig, bool force,
         {
             // Just one darn tootin moment ... check again.
             // If another thread is racing, the first check() earlier
-            // above may have failed, but has since then inseerted this
-            // atom. If this happens, then lookup for `covered` suceeds.
+            // above may have failed, but has since then inserted this
+            // atom. If this happens, then lookup for `covered` succeeds.
             // Rule out this case by checking again. Yes, this happens.
             // It happens in the atomspace-rocks CountThreadedUTest.
+            // (Approx. once out of every 30 runs, so its rare.)
             //
             // Multiple threads are adding atoms to an upper COW space,
             // then incrementing counts in the lower space. If there's
