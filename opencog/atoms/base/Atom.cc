@@ -219,25 +219,9 @@ HandleSet Atom::getKeys() const
 
 void Atom::copyValues(const Handle& other)
 {
-	// A quasi-merge-like copy. But if `this` is empty,
-	// a fast-path is given further below.
-	if (haveValues())
-	{
-		HandleSet okeys(other->getKeys());
-		for (const Handle& k: okeys)
-		{
-			const ValuePtr& vp(other->getValue(k));
-
-			// Direct copy, without the erase semantics of setValue().
-			// I think this is OK.
-			KVP_UNIQUE_LOCK;
-			if (nullptr != vp)
-				_values[k] = vp;
-		}
-		return;
-	}
-
-	// Provide a fast-path copy, if this atom has nothing in it yet.
+	// Grab everything in `other`, in bulk. This is "atomic",
+	// in that whatever it was when we grabbed it, that is what
+	// it is.
 	KVPMap vcpy;
 	{
 		// Lock the other atom while we access it's map.
@@ -250,25 +234,20 @@ void Atom::copyValues(const Handle& other)
 		vcpy = other->_values;
 	}
 
-	// Check again, under the lock. Things might have changed.
+	KVP_UNIQUE_LOCK;
+
+	// Are we empty? The do a fast-path bulk replace.
+	if (_values.empty())
 	{
-		KVP_UNIQUE_LOCK;
-		if (_values.empty())
-		{
-			_values.swap(vcpy);
-			return;
-		}
+		_values.swap(vcpy);
+		return;
 	}
 
-	// Oh no, Mr. Bill!!!!
-	// There is a rare race exposed by the rocks ThreadCountUTest,
-	// in the 'pushy' test. It goes like this. Two threads are trying
-	// to create the same Atom. Both have an empty original, passed
-	// here as `other`. The first thread creates an atom (with no
-	// Values on it, yet). We are the second thread, we get that Atom.
-	// It was empty when we first checked, but when we looked again,
-	// its not. So now we try again.
-	copyValues(other);
+	// Cannot use _values.merge(vcpy) because it fails to clobber
+	// existing keys. Doing _values[pr.first] = pr.second; works fine
+	// but the insert_or_assign is slightly faster.
+	for (const auto& pr : vcpy)
+		_values.insert_or_assign(std::move(pr.first), std::move(pr.second));
 }
 
 void Atom::bulkCopyValues(const Handle& other)
