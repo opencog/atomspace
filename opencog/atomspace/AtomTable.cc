@@ -384,10 +384,29 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     }
 
     // If we are shadowing a deeper atom, copy it's values.
-    if (_transient or _copy_on_write)
+    if ((_transient or _copy_on_write) and atom == orig)
     {
-        Handle covered(lookupHandle(atom));
-        if (covered) atom->copyValues(covered);
+        Handle covered(lookupHandle(orig));
+        if (covered)
+        {
+            // Just one darn tootin moment ... check again.
+            // If another thread is racing, the first check() earlier
+            // above may have failed, but has since then inseerted this
+            // atom. If this happens, then lookup for `covered` suceeds.
+            // Rule out this case by checking again. Yes, this happens.
+            // It happens in the atomspace-rocks CountThreadedUTest.
+            //
+            // Multiple threads are adding atoms to an upper COW space,
+            // then incrementing counts in the lower space. If there's
+            // a race here, then `covered` will be the base space, and
+            // the copyValues() below will incorrectly copy those counts
+            // into the top space. So, before we copy anything, check
+            // again to see if we already have this atom.
+            const Handle& hc(check(orig, force));
+            if (hc) return hc;
+
+            orig->copyValues(covered);
+         }
     }
 
     if (atom != orig)
