@@ -219,6 +219,9 @@ HandleSet Atom::getKeys() const
 
 void Atom::copyValues(const Handle& other)
 {
+	// Avoid any accidental crazy-making.
+	if (this == other.get()) return;
+
 	// Grab everything in `other`, in bulk. This is "atomic",
 	// in that whatever it was when we grabbed it, that is what
 	// it is.
