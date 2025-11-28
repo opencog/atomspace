@@ -62,11 +62,9 @@ cdef AtomSpace_factoid(cHandle to_wrap):
     if to_wrap.get() == NULL:
         raise RuntimeError("Cannot create AtomSpace from null pointer")
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.asp = to_wrap
     instance.shared_ptr = static_pointer_cast[cValue, cAtom](to_wrap)
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     instance.parent_atomspace = None
-    # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
     return instance
 
 
@@ -112,9 +110,9 @@ cdef class AtomSpace(Atom):
 
         To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
         """
-        self.asp = createAtomSpace(<cAtomSpace*> NULL)
-        self.shared_ptr = self.asp  # Inherited from Value
-        self.atomspace = <cAtomSpace*> self.asp.get()
+        cdef cHandle new_as = createAtomSpace(<cAtomSpace*> NULL)
+        self.shared_ptr = static_pointer_cast[cValue, cAtom](new_as)
+        self.atomspace = <cAtomSpace*> new_as.get()
         self.parent_atomspace = parent
 
     def __richcmp__(as_1, as_2, int op):
@@ -123,11 +121,8 @@ cdef class AtomSpace(Atom):
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
         cdef AtomSpace atomspace_2 = <AtomSpace>as_2
 
-        cdef cHandle c_atomspace_1 = atomspace_1.asp
-        cdef cHandle c_atomspace_2 = atomspace_2.asp
-
         is_equal = True
-        if c_atomspace_1 != c_atomspace_2:
+        if atomspace_1.shared_ptr != atomspace_2.shared_ptr:
             is_equal = False
         if op == 2: # ==
             return is_equal

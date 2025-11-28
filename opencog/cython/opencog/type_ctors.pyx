@@ -65,7 +65,7 @@ def set_thread_atomspace(AtomSpace atomspace):
     """
     c_clear_context()
     if atomspace is not None:
-        push_context_atomspace(atomspace.asp)
+        push_context_atomspace(handle_cast(atomspace.shared_ptr))
 
 
 def push_thread_atomspace(AtomSpace new_atomspace = None):
@@ -77,7 +77,7 @@ def push_thread_atomspace(AtomSpace new_atomspace = None):
         if parent_atomspace is None:
             raise RuntimeError("Atomspace is not set!")
         new_atomspace = create_child_atomspace(parent_atomspace)
-    push_context_atomspace(new_atomspace.asp)
+    push_context_atomspace(handle_cast(new_atomspace.shared_ptr))
     return new_atomspace
 
 
