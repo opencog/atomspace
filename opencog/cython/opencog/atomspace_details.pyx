@@ -228,18 +228,6 @@ cdef class AtomSpace(Atom):
             result = asp.get_atom(h)
         return result != result.UNDEFINED
 
-    # Maybe this should be called __repr__ ???
-    def __str__(self):
-        """ Description of the atomspace """
-        cdef string name
-        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
-        with nogil:
-            name = asp.get_name()
-        return ("<AtomSpace\n" +
-                "   addr: " + hex(<long>asp) + "\n" +
-                "   name: " + name.decode('UTF-8') + ">\n"
-               )
-
     def __len__(self):
         """ Return the number of atoms in the AtomSpace """
         return self.size()
