@@ -160,13 +160,12 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 cdef class AtomSpace(Atom):
     cdef object parent_atomspace
 
-# The py_atomspace and py_atom are used by the c++ PythonEval class
-# to convert C++ instances into python objects so that they can be
-# handed as arguments to python functions called from C++.
+# The py_atom is used by the c++ PythonEval class to convert C++
+# instances into python objects so that they can be handed as
+# arguments to python functions called from C++.
 #
 # The py_value_ptr is used by the c++ PythonEval class to get a
 # straight-up c++ ValuePtr with all the right reference counts, etc.
-cdef object py_atomspace(cHandle c_atomspace) with gil
 cdef object py_atom(const cHandle& h)
 
 # Older cythons (before 2024) get compiler errors with the noexcept
