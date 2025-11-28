@@ -31,6 +31,6 @@ cdef void _init_default_atomspace():
     default_as = handle_cast(get_context_atomspace())
     if default_as.get() == NULL:
         new_as = createAtomSpace(<cAtomSpace*> NULL)
-        push_context_atomspace(<cValuePtr&>new_as)
+        push_context_atomspace(new_as)
 
 _init_default_atomspace()

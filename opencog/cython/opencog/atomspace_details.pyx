@@ -62,8 +62,8 @@ cdef AtomSpace_factoid(cHandle to_wrap):
     if to_wrap.get() == NULL:
         raise RuntimeError("Cannot create AtomSpace from null pointer")
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.shared_ptr = <cValuePtr&>to_wrap  # Inherited from Value
     instance.asp = to_wrap
+    instance.shared_ptr = static_pointer_cast[cValue, cAtom](to_wrap)
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     instance.parent_atomspace = None
     # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
