@@ -82,16 +82,16 @@ Start a python3 shell in your favorite way.
 
 * You can run the examples from your shell. For example,
   ```
-      python3 storage_tutorial.py
+      python3 graph_edges.py
   ```
 
 ### [create_atoms.py](create_atoms.py)
 The most basic example of creating Atoms in an AtomSpace, and attaching
 weights to them.
 
-### [storage_tutorial.py](storage_tutorial.py)
-A relatively simple all-in-one tutorial introducing basic concepts,
-a practical example, and the use of the store-to-disk StorageNode API.
+### [graph_edges.py](graph_edges.py)
+Another very basic example, showing the canonical form for representing
+graph edges.
 
 ### [vector_tutorial.py](vector_tutorial.py)
 A more complex example, showing how to perform queries, how to use the
