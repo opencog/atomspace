@@ -199,10 +199,6 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
 void PythonEval::apply_as(const std::string& func,
                           AtomSpace* as_argument)
 {
-    // What if the user is working in one AtomSpace, but is manipulating
-    // another? Then setting the context AtomSpace would be wrong.
-    // I'm confused; I don't know what to do here.
-    // ASGuard asg(as_argument);
     GILGuard gil;
     call_user_function(func, HandleSeq({HandleCast(as_argument)}));
 }
