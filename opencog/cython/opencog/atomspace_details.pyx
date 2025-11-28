@@ -94,7 +94,7 @@ cdef object raise_python_exception_from_cpp(const cPythonException& exc):
     raise exc_class(exc_message)
 
 
-cdef class AtomSpace(Value):
+cdef class AtomSpace(Atom):
     # these are defined in atomspace.pxd:
     # cdef cAtomSpace *atomspace
     # cdef object parent_atomspace

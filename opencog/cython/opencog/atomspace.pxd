@@ -157,7 +157,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cValuePtr createAtomSpace(cAtomSpace *parent) nogil
     cdef cValuePtr as_cast "AtomSpaceCast"(cAtomSpace *) nogil except +
 
-cdef class AtomSpace(Value):
+cdef class AtomSpace(Atom):
     cdef cValuePtr asp
     cdef cAtomSpace *atomspace
     cdef object parent_atomspace
