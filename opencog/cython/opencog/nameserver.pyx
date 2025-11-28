@@ -138,7 +138,10 @@ cdef create_python_value_from_c_value(const cValuePtr& value):
         return instance
 
     # Cache miss - find the correct python ctor to use.
-    if is_a(value_type, types.Atom):
+    # AtomSpace must be checked before Atom since AtomSpace is-a Atom
+    if is_a(value_type, types.AtomSpace):
+        py_class_ctor = AtomSpace
+    elif is_a(value_type, types.Atom):
         py_class_ctor = Atom
     elif is_a(value_type, types.QueueValue):
         py_class_ctor = QueueValue
