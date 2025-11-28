@@ -39,9 +39,9 @@ def scheme_eval(AtomSpace a, str pys):
     """
     cdef string ret
     cdef string expr
+    cdef cAtomSpace* asp = <cAtomSpace*>a.shared_ptr.get()
     expr = pys.encode('UTF-8')
-    # print "Debug: called scheme eval with atomspace {0:x}".format(<unsigned long int>a.atomspace)
-    ret = eval_scheme(a.atomspace, expr)
+    ret = eval_scheme(asp, expr)
     return ret.c_str()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
@@ -59,8 +59,9 @@ def scheme_eval_v(AtomSpace a, str pys):
     """
     cdef cValuePtr ret
     cdef string expr
+    cdef cAtomSpace* asp = <cAtomSpace*>a.shared_ptr.get()
     expr = pys.encode('UTF-8')
-    ret = eval_scheme_v(a.atomspace, expr)
+    ret = eval_scheme_v(asp, expr)
     return Value.create(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
@@ -78,8 +79,9 @@ def scheme_eval_h(AtomSpace a, str pys):
     """
     cdef cHandle ret
     cdef string expr
+    cdef cAtomSpace* asp = <cAtomSpace*>a.shared_ptr.get()
     expr = pys.encode('UTF-8')
-    ret = eval_scheme_h(a.atomspace, expr)
+    ret = eval_scheme_h(asp, expr)
     return Atom.createAtom(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
