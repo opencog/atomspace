@@ -204,17 +204,7 @@ void PythonEval::apply_as(const std::string& func,
     // I'm confused; I don't know what to do here.
     // ASGuard asg(as_argument);
     GILGuard gil;
-
-    // Create the Python tuple for the function call with python
-    // atomspace.
-    PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = atomspace_py_object(AtomSpaceCast(as_argument));
-
-    PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
-
-    // Execute the user function.
-    PyObject* pyReturnValue = do_call_user_function(func, pyArguments);
-    Py_DECREF(pyReturnValue);
+    call_user_function(func, HandleSeq({HandleCast(as_argument)}));
 }
 
 // ===================================================================

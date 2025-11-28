@@ -57,7 +57,6 @@ class PythonEval : public GenericEval
         void initialize_python_objects_and_imports(void);
 
         // Python utility functions
-        PyObject* atomspace_py_object(AtomSpacePtr);
         PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
