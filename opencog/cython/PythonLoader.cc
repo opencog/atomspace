@@ -178,7 +178,7 @@ PyObject* PythonEval::atomspace_py_object(AtomSpacePtr asp)
         return NULL;
     }
 
-    PyObject * pyAtomSpace = py_atomspace(asp);
+    PyObject * pyAtomSpace = py_atomspace(HandleCast(asp));
 
     if (!pyAtomSpace) {
         if (PyErr_Occurred())

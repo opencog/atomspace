@@ -58,9 +58,9 @@ cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
     cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) nogil except +
 
 
-cdef AtomSpace_factoid(cValuePtr to_wrap):
+cdef AtomSpace_factoid(cHandle to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.shared_ptr = to_wrap  # Inherited from Value
+    instance.shared_ptr = <cValuePtr&>to_wrap  # Inherited from Value
     instance.asp = to_wrap
     instance.atomspace = <cAtomSpace*> to_wrap.get()
     instance.parent_atomspace = None
@@ -94,7 +94,7 @@ cdef object raise_python_exception_from_cpp(const cPythonException& exc):
     raise exc_class(exc_message)
 
 
-cdef class AtomSpace(Value):
+cdef class AtomSpace(Atom):
     # these are defined in atomspace.pxd:
     # cdef cAtomSpace *atomspace
     # cdef object parent_atomspace
@@ -116,8 +116,8 @@ cdef class AtomSpace(Value):
         self.parent_atomspace = parent
 
     cdef cAtomSpacePtr get_atomspace_ptr(self):
-        # Cast the ValuePtr to AtomSpacePtr
-        return static_pointer_cast[cAtomSpace, cValue](self.asp)
+        # Cast the Handle to AtomSpacePtr
+        return static_pointer_cast[cAtomSpace, cAtom](self.asp)
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -125,8 +125,8 @@ cdef class AtomSpace(Value):
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
         cdef AtomSpace atomspace_2 = <AtomSpace>as_2
 
-        cdef cValuePtr c_atomspace_1 = atomspace_1.asp
-        cdef cValuePtr c_atomspace_2 = atomspace_2.asp
+        cdef cHandle c_atomspace_1 = atomspace_1.asp
+        cdef cHandle c_atomspace_2 = atomspace_2.asp
 
         is_equal = True
         if c_atomspace_1 != c_atomspace_2:
@@ -309,7 +309,7 @@ cdef class AtomSpace(Value):
         except RuntimeError as e:
             cpp_except_to_pyerr(e)
 
-cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
+cdef api object py_atomspace(cHandle c_atomspace) with gil:
     cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
     return atomspace
 
@@ -341,7 +341,7 @@ cdef api cValuePtr py_value_ptr(object py_value) with gil:
     return (<Value>py_value).shared_ptr
 
 def create_child_atomspace(object atomspace):
-    cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
+    cdef cHandle asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
     cdef AtomSpace result = AtomSpace_factoid(asp)
     result.parent_atomspace = atomspace
     return result

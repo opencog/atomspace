@@ -2,8 +2,8 @@ from cython.operator cimport dereference as deref
 from libcpp.string cimport string
 from libcpp.set cimport set as cpp_set
 from opencog.atomspace cimport AtomSpace, Atom, Value
-from opencog.atomspace cimport cValuePtr, create_python_value_from_c_value
-from opencog.atomspace cimport AtomSpace_factoid
+from opencog.atomspace cimport cHandle, cValuePtr, create_python_value_from_c_value
+from opencog.atomspace cimport AtomSpace_factoid, handle_cast
 
 from contextlib import contextmanager
 from opencog.atomspace import create_child_atomspace
@@ -65,7 +65,7 @@ def set_thread_atomspace(AtomSpace atomspace):
     """
     c_clear_context()
     if atomspace is not None:
-        push_context_atomspace(atomspace.asp)
+        push_context_atomspace(<cValuePtr&>atomspace.asp)
 
 
 def push_thread_atomspace(AtomSpace new_atomspace = None):
@@ -77,7 +77,7 @@ def push_thread_atomspace(AtomSpace new_atomspace = None):
         if parent_atomspace is None:
             raise RuntimeError("Atomspace is not set!")
         new_atomspace = create_child_atomspace(parent_atomspace)
-    push_context_atomspace(new_atomspace.asp)
+    push_context_atomspace(<cValuePtr&>new_atomspace.asp)
     return new_atomspace
 
 
@@ -86,8 +86,8 @@ def get_thread_atomspace():
     Get the default atomspace for the current thread
     """
     cdef cValuePtr context = get_context_atomspace()
-    return AtomSpace_factoid(context)
+    return AtomSpace_factoid(handle_cast(context))
 
 
 def pop_thread_atomspace():
-    return AtomSpace_factoid(pop_context_atomspace())
+    return AtomSpace_factoid(handle_cast(pop_context_atomspace()))

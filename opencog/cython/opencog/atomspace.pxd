@@ -154,11 +154,11 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
     ctypedef shared_ptr[cAtomSpace] cAtomSpacePtr "opencog::AtomSpacePtr"
 
-    cdef cValuePtr createAtomSpace(cAtomSpace *parent) nogil
-    cdef cValuePtr as_cast "AtomSpaceCast"(cAtomSpace *) nogil except +
+    cdef cHandle createAtomSpace(cAtomSpace *parent) nogil
+    cdef cHandle as_cast "AtomSpaceCast"(cAtomSpace *) nogil except +
 
-cdef class AtomSpace(Value):
-    cdef cValuePtr asp
+cdef class AtomSpace(Atom):
+    cdef cHandle asp
     cdef cAtomSpace *atomspace
     cdef object parent_atomspace
 
@@ -172,7 +172,7 @@ cdef class AtomSpace(Value):
 #
 # The py_value_ptr is used by the c++ PythonEval class to get a
 # straight-up c++ ValuePtr with all the right reference counts, etc.
-cdef object py_atomspace(cValuePtr c_atomspace) with gil
+cdef object py_atomspace(cHandle c_atomspace) with gil
 cdef object py_atom(const cHandle& h)
 
 # Older cythons (before 2024) get compiler errors with the noexcept
@@ -183,7 +183,7 @@ cdef cValuePtr py_value_ptr(object py_value) with gil
 
 # The two below are used by cython code to work with the C++
 # incstances flowing across the cython declarations.
-cdef object AtomSpace_factoid(cValuePtr to_wrap)
+cdef object AtomSpace_factoid(cHandle to_wrap)
 cdef object create_python_value_from_c_value(const cValuePtr& value)
 
 
