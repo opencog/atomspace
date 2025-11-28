@@ -294,13 +294,13 @@ cdef class AtomSpace(Atom):
         except RuntimeError as e:
             cpp_except_to_pyerr(e)
 
-cdef api object py_atomspace(cHandle c_atomspace) with gil:
-    cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
-    return atomspace
-
 cdef api object py_atom(const cHandle& h):
-    cdef Atom atom = Atom.createAtom(h)
-    return atom
+    cdef cHandle hc = h  # copy to avoid const issues with reference cast
+    return create_python_value_from_c_value(<cValuePtr&>(hc, hc.get()))
+
+# Backwards compatibility alias - py_atomspace now just calls py_atom
+cdef api object py_atomspace(cHandle c_atomspace) with gil:
+    return py_atom(c_atomspace)
 
 # Older cythons (before 2024) get compiler errors with the noexcept
 # keyword. Newer cythons without it get nag notes about optimization.
