@@ -152,9 +152,6 @@ cdef class AtomSpace(Atom):
         @todo support type name for type.
         @returns the newly created Atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-
         # See comments on encoding "invalid" bytes in type_ctors.pyx
         # These bytes are from Microsoft Windows doggie litter.
         cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
@@ -170,8 +167,6 @@ cdef class AtomSpace(Atom):
         @todo support type name for type.
         @returns handle referencing the newly created Atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
@@ -183,8 +178,6 @@ cdef class AtomSpace(Atom):
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         try:
             assert isinstance(atom, Atom)
         except AssertionError:
@@ -206,8 +199,6 @@ cdef class AtomSpace(Atom):
         Returns True if the Atom was successfully removed. False, otherwise.
 
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef bint recurse = recursive
         cdef bint result
         cdef cHandle h = <cHandle&>atom.shared_ptr
@@ -217,8 +208,6 @@ cdef class AtomSpace(Atom):
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         with nogil:
             self.atomspace.clear()
 
@@ -226,8 +215,6 @@ cdef class AtomSpace(Atom):
         """ Set the value on the atom at key
         Returns the atom (which may be a new atom instance)
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef cHandle result
         cdef cHandle atom_h = <cHandle&>atom.shared_ptr
         cdef cHandle key_h = <cHandle&>key.shared_ptr
@@ -262,14 +249,10 @@ cdef class AtomSpace(Atom):
 
     def __iter__(self):
         """ Support iterating across all atoms in the atomspace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         return iter(self.get_atoms_by_type(types.Atom))
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef int result
         with nogil:
             result = self.atomspace.get_size()
@@ -277,8 +260,6 @@ cdef class AtomSpace(Atom):
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
         with nogil:
