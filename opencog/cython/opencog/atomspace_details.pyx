@@ -117,10 +117,6 @@ cdef class AtomSpace(Atom):
         self.atomspace = <cAtomSpace*> self.asp.get()
         self.parent_atomspace = parent
 
-    cdef cAtomSpacePtr get_atomspace_ptr(self):
-        # Cast the Handle to AtomSpacePtr
-        return static_pointer_cast[cAtomSpace, cAtom](self.asp)
-
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
             return NotImplemented

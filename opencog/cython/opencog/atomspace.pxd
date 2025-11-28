@@ -162,10 +162,6 @@ cdef class AtomSpace(Atom):
     cdef cAtomSpace *atomspace
     cdef object parent_atomspace
 
-    # Method to get the AtomSpacePtr
-    cdef cAtomSpacePtr get_atomspace_ptr(self)
-
-
 # The py_atomspace and py_atom are used by the c++ PythonEval class
 # to convert C++ instances into python objects so that they can be
 # handed as arguments to python functions called from C++.
