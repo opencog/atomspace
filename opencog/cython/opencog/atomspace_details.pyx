@@ -59,6 +59,8 @@ cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
 
 
 cdef AtomSpace_factoid(cHandle to_wrap):
+    if to_wrap.get() == NULL:
+        raise RuntimeError("Cannot create AtomSpace from null pointer")
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.shared_ptr = <cValuePtr&>to_wrap  # Inherited from Value
     instance.asp = to_wrap
