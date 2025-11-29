@@ -49,40 +49,46 @@ StorageNode::~StorageNode()
 
 HandleSeq StorageNode::getMessages() const
 {
-	static const HandleSeq msgs({
-		createNode(PREDICATE_NODE, "*-open-*"),
-		createNode(PREDICATE_NODE, "*-close-*"),
-		createNode(PREDICATE_NODE, "*-load-atomspace-*"),
-		createNode(PREDICATE_NODE, "*-store-atomspace-*"),
-		createNode(PREDICATE_NODE, "*-load-atoms-of-type-*"),
-		createNode(PREDICATE_NODE, "*-store-atom-*"),
-		createNode(PREDICATE_NODE, "*-store-value-*"),
-		createNode(PREDICATE_NODE, "*-update-value-*"),
+	static const HandleSeq msgs = []() {
+		HandleSeq m({
+			createNode(PREDICATE_NODE, "*-open-*"),
+			createNode(PREDICATE_NODE, "*-close-*"),
+			createNode(PREDICATE_NODE, "*-load-atomspace-*"),
+			createNode(PREDICATE_NODE, "*-store-atomspace-*"),
+			createNode(PREDICATE_NODE, "*-load-atoms-of-type-*"),
+			createNode(PREDICATE_NODE, "*-store-atom-*"),
+			createNode(PREDICATE_NODE, "*-store-value-*"),
+			createNode(PREDICATE_NODE, "*-update-value-*"),
 
-		createNode(PREDICATE_NODE, "*-fetch-atom-*"),
-		createNode(PREDICATE_NODE, "*-fetch-value-*"),
-		createNode(PREDICATE_NODE, "*-fetch-incoming-set-*"),
-		createNode(PREDICATE_NODE, "*-fetch-incoming-by-type-*"),
-		createNode(PREDICATE_NODE, "*-fetch-query-*"),
+			createNode(PREDICATE_NODE, "*-fetch-atom-*"),
+			createNode(PREDICATE_NODE, "*-fetch-value-*"),
+			createNode(PREDICATE_NODE, "*-fetch-incoming-set-*"),
+			createNode(PREDICATE_NODE, "*-fetch-incoming-by-type-*"),
+			createNode(PREDICATE_NODE, "*-fetch-query-*"),
 
-		createNode(PREDICATE_NODE, "*-delete-*"),
-		createNode(PREDICATE_NODE, "*-delete-recursive-*"),
-		createNode(PREDICATE_NODE, "*-barrier-*"),
+			createNode(PREDICATE_NODE, "*-delete-*"),
+			createNode(PREDICATE_NODE, "*-delete-recursive-*"),
+			createNode(PREDICATE_NODE, "*-barrier-*"),
 
-		createNode(PREDICATE_NODE, "*-store-frames-*"),
-		createNode(PREDICATE_NODE, "*-delete-frame-*"),
-		createNode(PREDICATE_NODE, "*-erase-*"),
+			createNode(PREDICATE_NODE, "*-store-frames-*"),
+			createNode(PREDICATE_NODE, "*-delete-frame-*"),
+			createNode(PREDICATE_NODE, "*-erase-*"),
 
-		createNode(PREDICATE_NODE, "*-proxy-open-*"),
-		createNode(PREDICATE_NODE, "*-proxy-close-*"),
-		createNode(PREDICATE_NODE, "*-set-proxy-*"),
+			createNode(PREDICATE_NODE, "*-proxy-open-*"),
+			createNode(PREDICATE_NODE, "*-proxy-close-*"),
+			createNode(PREDICATE_NODE, "*-set-proxy-*"),
 
-		// Used only in getValue
-		createNode(PREDICATE_NODE, "*-load-frames-*"),
-		createNode(PREDICATE_NODE, "*-connected?-*"),
-		createNode(PREDICATE_NODE, "*-load-frames-*"),
-		createNode(PREDICATE_NODE, "*-monitor-*")
-	});
+			// Used only in getValue
+			createNode(PREDICATE_NODE, "*-load-frames-*"),
+			createNode(PREDICATE_NODE, "*-connected?-*"),
+			createNode(PREDICATE_NODE, "*-load-frames-*"),
+			createNode(PREDICATE_NODE, "*-monitor-*")
+		});
+		// Mark each message predicate as a message, once at load time.
+		for (const Handle& h : m)
+			h->markIsMessage();
+		return m;
+	}();
 	return msgs;
 }
 
