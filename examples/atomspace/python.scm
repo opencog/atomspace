@@ -15,21 +15,20 @@
 (python-eval "exec(open('my_py_func.py').read())")
 
 ; -------------------------------------------------------------------
-; AtomSpaces are (more or less) automatically shared between scheme and
-; python. This is demonstrated below.
+; AtomSpaces are automatically shared between scheme and python. This is
+; demonstrated below.
 (python-eval "
-from opencog.scheme import scheme_eval_as
+from opencog.type_constructors import *
+from opencog.type_ctors import get_thread_atomspace
 from opencog.atomspace import createFloatValue
-from opencog.atomspace import types
 
-# Get the atomspace...
-asp = scheme_eval_as('(cog-atomspace)')
+# Create atoms in the current (scheme) atomspace
+banana = Concept('Banana')
+mykey = Predicate('My Key')
+
+# Attach a value
 FV = createFloatValue([0.444, 0.777])
-
-# Do something with it ...
-banana = asp.add_node(types.ConceptNode, 'Banana')
-mykey = asp.add_node(types.PredicateNode, 'My Key')
-asp.set_value(banana, mykey, FV)
+get_thread_atomspace().set_value(banana, mykey, FV)
 ")
 
 ; Verify that the "Bannana" atom was created, as expected.
