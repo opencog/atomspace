@@ -8,7 +8,7 @@
 // unused!  Be sure to grep for the CamelCase names, to see if they
 // show up elsewhere!
 //
-// ===========================================================
+// ==============================================================
 
 // Special type designating that no Atom type has been assigned. It is
 // equivalent to the bottom type in type theory, see
@@ -43,7 +43,7 @@ HANDLE_VEC_ARG <-  ARG
 STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
 
-// --------------------------------------------------------------
+// ==============================================================
 // Executable Atom type declarations. Almost all executable Atoms are
 // Links. The oset of the Link serves as "function arguments" for that
 // link. The result of execution is a Value of some kind, usually of
@@ -122,7 +122,19 @@ TYPE_INPUT_SIG <- SIG
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_SIG <- SIG
 
-// --------------------------------------------------------------
+// Alpha-convertible links are those that bind variables, and, per
+// conventional theory, the bound variable names have no significance
+// outside of the link. Typical examples are the lambda of lambda
+// calculus, the bound variables in a for-all or there-exists
+// declaration. In Atomese, any "scoped" link.
+//
+// The issue being solved here is that Atoms are "universally unique",
+// depending only on the Atom Type, the name of a Node, or the oset of
+// a Link. Alpha-equivalent links are those that are exactly the same,
+// irrespective of the names given to the variables that they bind.
+ALPHA_CONVERTIBLE_SIG <- SIG
+
+// ==============================================================
 // Values are collections of data that can be associated with Atoms.
 // Think of them as decorations that can be hung on an Atom.
 VALUE <- TOP_TYPE
@@ -265,12 +277,6 @@ EVALUATABLE_LINK <- LINK
 // https://web.cs.wpi.edu/~jshutt/kernel.html
 // http://lambda-the-ultimate.org/node/4093
 EXECUTABLE_LINK <- LINK
-
-// Alpha-convertible links are those that may have multiple different
-// representations that are alpha-equivalent. This mixin helps checkers
-// know whether they have to explicitly check for alpha-equivalence
-// (e.g. the storage backends)
-ALPHA_CONVERTIBLE_LINK <- LINK
 
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
@@ -672,7 +678,7 @@ GRANT_LINK <- UNIQUE_LINK
 // entry with connector definitions inside of it. Viz, the scope
 // body is the lexical entry, and the variable declarations are the
 // connector declarations.
-SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_LINK
+SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_SIG
 
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
@@ -810,7 +816,7 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // correct", but clunkier to the user, so we don't force it.
 // TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_SIG,TYPE_INPUT_SIG
 // See https://en.wikipedia.org/wiki/Union_type
-TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_SIG,ALPHA_CONVERTIBLE_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_SIG,ALPHA_CONVERTIBLE_SIG
 
 // Type constructor. Forces a set-intersection of all of the type
 // definitions (signatures) that it contains. Useful for computing
@@ -855,7 +861,7 @@ LINK_SIGNATURE_LINK <- SIGNATURE_LINK, EXECUTABLE_LINK
 //
 // The inherits from Connector, as it is a special case...
 // The variable name is not lexical -- its a wild-card.
-TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_LINK
+TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_SIG
 
 // A type binder for non-variable Atoms. It binds a type to an Atom
 // at a "global" level.  Always arity-2, the first position cannot be
