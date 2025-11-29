@@ -175,32 +175,23 @@ PREDICATE_NODE <- NODE
 // So... deficient in many ways, but basically, it works for now, and it
 // handles most of the basic cases in a fairly straightforward fashion.
 
-// ValuableLink. Any link type which might be executed, resulting
-// in a Value, should inherit from this type.  This is a mixin-type,
-// it does nothing by itself, but is used to identify link types that
-// are executable - that is, they return Values when they are executed.
-VALUABLE_LINK <- LINK
-
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a TruthValue, should inherit from this type.  This is a
-// mixin-type, it does nothing by itself, but is used to identify
-// link types that are evaluatable - that is, they return TruthValues
-// when they are evaluated.
-EVALUATABLE_LINK <- VALUABLE_LINK
+// in a TruthValue, should inherit from this type.
+// XXX this is going away.
+EVALUATABLE_LINK <- LINK
 
-// Bogus placeholder. Used by Instantiator.cc. At this time, not every
-// atom that has an `virtual ValuePtr Atom::execute()` method on it
-// can do "the right thing", i.e. $vau it's way through life, and
-// instead needs to be helped along the way by Instantiator. This
-// link type identifies good links, the ones that can actually run
-// correctly.
-EXECUTABLE_LINK <- VALUABLE_LINK
+// ExecutableLink. Any link type which might be executed, resulting
+// in a Value, should inherit from this type. These are all $vau link
+// types (John N. Shutt, "The Kernel Programming Language")
+// https://web.cs.wpi.edu/~jshutt/kernel.html
+// http://lambda-the-ultimate.org/node/4093
+EXECUTABLE_LINK <- LINK
 
 // Boolean-input link. Accepts BoolValues (vectors of bools).
 BOOLEAN_INPUT_LINK <- LINK
 
 // Boolean-output link. Generates BoolValues upon execution.
-BOOLEAN_OUTPUT_LINK <- VALUABLE_LINK
+BOOLEAN_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
 
 // Crisp (scalar-valued) boolean-input link.  This link type forces
 // type-checking on it's "inputs" (it's outgoing set): they must be
@@ -221,14 +212,14 @@ NUMERIC_INPUT_LINK <- LINK
 
 // Numeric-output link. Generates either NumberNodes or FloatValues
 // upon execution.
-NUMERIC_OUTPUT_LINK <- VALUABLE_LINK
+NUMERIC_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
 
 // Type-input link.  This link type forces type-checking on it's
 // "inputs" (it's outgoing set): they must be types.
 TYPE_INPUT_LINK <- LINK
 
 // Type-output link. Generates Types upon execution.
-TYPE_OUTPUT_LINK <- VALUABLE_LINK
+TYPE_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
 
 // Alpha-convertible links are those that may have multiple different
 // representations that are alpha-equivalent. This mixin helps checkers
