@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/TypedVariableLink.cc
+ * opencog/atoms/scope/TypedVariableLink.cc
  *
  * Copyright (C) 2020 Linas Vepstas
  *

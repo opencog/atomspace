@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/Context.cc
+ * opencog/atoms/scope/Context.cc
  *
  * Copyright (C) 2017 OpenCog Foundation
  * All Rights Reserved
