@@ -27,11 +27,7 @@
 #include <opencog/atoms/core/TypeChoice.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/scope/VariableList.h>
-#include <opencog/atoms/scope/VariableSet.h>
 #include <opencog/atoms/value/LinkValue.h>
-
-#include "FindUtils.h"
 
 #include "TypeUtils.h"
 
@@ -322,64 +318,6 @@ ValuePtr type_compose(const Handle& left, const ValuePtr& right)
 	// Interesting. XXX FIXME. This is not yet implemented!
 	throw RuntimeException(TRACE_INFO, "Not implemented!");
 	return nullptr;
-}
-
-Handle filter_vardecl(const Handle& vardecl, const Handle& body)
-{
-	return filter_vardecl(vardecl, HandleSeq{body});
-}
-
-// See also `Variables::trim()`, which does the same thing,
-// conceptually. The difference is trim() cuts down the vardecl
-// in-place, instead of building a new one, like below.
-Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
-{
-	// Base cases
-
-	if (not vardecl)
-		// Return Handle::UNDEFINED to indicate that this variable
-		// declaration is nonexistent.
-		return Handle::UNDEFINED;
-
-	Type t = vardecl->get_type();
-	if ((VARIABLE_NODE == t) || (GLOB_NODE == t))
-	{
-		if (is_free_in_any_tree(hs, vardecl))
-			return vardecl;
-	}
-
-	// Recursive cases
-
-	else if (TYPED_VARIABLE_LINK == t)
-	{
-		Handle var = vardecl->getOutgoingAtom(0);
-		Type t = var->get_type();
-		if (((t == VARIABLE_NODE) || (t == GLOB_NODE)) and filter_vardecl(var, hs))
-			return vardecl;
-	}
-
-	else if (VARIABLE_LIST == t or VARIABLE_SET == t)
-	{
-		HandleSeq subvardecls;
-		HandleSet subvars;      // avoid duplicating variables
-		for (const Handle& v : vardecl->getOutgoingSet())
-		{
-			if (filter_vardecl(v, hs) and subvars.find(v) == subvars.end()) {
-				subvardecls.push_back(v);
-				subvars.insert(v);
-			}
-		}
-		if (subvardecls.empty() and get_free_variables(hs).empty())
-			return Handle::UNDEFINED;
-		if (subvardecls.size() == 1)
-			return subvardecls[0];
-		return createLink(std::move(subvardecls), t);
-	}
-
-	// If we're here we have failed to recognize vardecl as a useful
-	// and well-formed variable declaration, so Handle::UNDEFINED is
-	// returned. XXX FIXME -- surely this should be a throw, instead!!!
-	return Handle::UNDEFINED;
 }
 
 bool is_well_typed(Type t)

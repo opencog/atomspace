@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (scope
 	Context.cc
+	FilterVardecl.cc
 	LambdaLink.cc
 	PrenexLink.cc
 	PutLink.cc
@@ -32,6 +33,7 @@ INSTALL (TARGETS scope EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	Context.h
+	FilterVardecl.h
 	LambdaLink.h
 	PrenexLink.h
 	PutLink.h

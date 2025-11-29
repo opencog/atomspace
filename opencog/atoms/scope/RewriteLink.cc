@@ -24,7 +24,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include "FilterVardecl.h"
 
 #include <opencog/atoms/scope/LambdaLink.h>
 #include "RewriteLink.h"

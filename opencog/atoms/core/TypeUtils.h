@@ -26,8 +26,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/scope/VariableList.h>
-#include <opencog/atoms/scope/VariableSet.h>
+#include <opencog/atoms/value/Value.h>
 
 namespace opencog
 {
@@ -108,61 +107,6 @@ bool type_match(const Handle&, const ValuePtr&);
  *   result = (Arrow (Type "Evaluation") (Type "Number"))
  */
 ValuePtr type_compose(const Handle&, const ValuePtr&);
-
-/**
- * Given a variable declaration (`VariableList`) and a pattern body,
- * remove all variables in the declaration that are not present in
- * the pattern body, and return the smaller (minimal) `VariableList`.
- * (That is, return the list of only those variables that appear in
- * the body).
- *
- * For instance, `filter_vardecl()` applied to
- *
- * var_decl
- * =
- * (VariableList
- *    (TypedVariableLink
- *       (VariableNode "$X")
- *       (TypeNode "ConceptNode"))
- *    (TypedVariableLink
- *       (VariableNode "$Y")
- *       (TypeNode "ConceptNode")))
- *
- * body
- * =
- * (InheritanceLink
- *    (ConceptNode "human")
- *    (VariableNode "$Y"))
- *
- * will return
- *
- * (TypedVariableLink
- *    (VariableNode "$Y")
- *    (TypeNode "ConceptNode"))
- *
- * Special cases:
- *
- * 1. The `VariableList` is discarded if the resulting variable
- *    declaration contains only one variable.
- *
- * 2. If nothing is left after filtering it returns Handle::UNDEFINED
- *
- * 3. If vardecl is Handle::UNDEFINED, then return Handle::UNDEFINED
- *
- * The resulting variable declaration will not be added to any
- * AtomSpace, it's up to the user to do that.
- *
- * FYI, the Variables::trim() method does almost the same thing, except
- * that it cuts down the vardecl "in-place", instead of bulding a new
- * one, like this does.
- */
-Handle filter_vardecl(const Handle& vardecl, const Handle& body);
-
-/**
- * Like filter_vardecl(const Handle& vardecl, const Handle& body)
- * except that the variable needs to be in at least one body of hs.
- */
-Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
 
 /**
  * Return true if t is different than NOTYPE.
