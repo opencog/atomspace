@@ -488,7 +488,7 @@ bool is_constant(const Handle& h, Quotation quotation)
 
 	if (contains_atomtype(h, TYPE_NODE, quotation)) return false;
 	if (contains_atomtype(h, TYPE_CHOICE, quotation)) return false;
-	if (contains_atomtype(h, TYPE_OUTPUT_LINK, quotation)) return false;
+	if (contains_atomtype(h, TYPE_OUTPUT_SIG, quotation)) return false;
 
 	return true;
 }

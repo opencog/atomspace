@@ -89,8 +89,8 @@ void JoinLink::validate(void)
 
 		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
-		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_SIG)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_SIG)) continue;
 
 		// Variable decls are allowed only in the first location.
 		if (0 == i and nameserver().isA(t, VARIABLE_LIST)) continue;
@@ -118,8 +118,8 @@ void JoinLink::setup_meet(void)
 		Type t = clause->get_type();
 		if (REPLACEMENT_LINK == t) continue;
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
-		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_SIG)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_SIG)) continue;
 
 		// If variable declarations are missing, then
 		// we insist on the first link being a PresentLink
@@ -248,8 +248,8 @@ void JoinLink::setup_top_types(void)
 
 		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE) or
-		    nameserver().isA(t, TYPE_INPUT_LINK) or
-		    nameserver().isA(t, TYPE_OUTPUT_LINK))
+		    nameserver().isA(t, TYPE_INPUT_SIG) or
+		    nameserver().isA(t, TYPE_OUTPUT_SIG))
 		{
 			_top_types.push_back(clause);
 		}
@@ -428,7 +428,7 @@ void JoinLink::principal_filter(Traverse& trav,
 	// Ignore type specifications, other containers!
 	Type t = h->get_type();
 	if (nameserver().isA(t, PRESENT_LINK) or
-	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_SIG) or
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 
@@ -447,7 +447,7 @@ void JoinLink::principal_filter_map(Traverse& trav,
 	// Ignore type specifications, other containers!
 	Type t = h->get_type();
 	if (nameserver().isA(t, PRESENT_LINK) or
-	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_SIG) or
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 

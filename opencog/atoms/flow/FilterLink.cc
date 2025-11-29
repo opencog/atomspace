@@ -170,7 +170,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// Let the conventional type-checker deal with complicated types.
 	// LinkSignatureLinks might contain vars; deal with these below.
 	if (termpat->is_type(TYPE_NODE) or
-	    (termpat->is_type(TYPE_OUTPUT_LINK) and
+	    (termpat->is_type(TYPE_OUTPUT_SIG) and
 	       (not termpat->is_type(LINK_SIGNATURE_LINK))))
 		return value_is_type(termpat, vgnd);
 
@@ -393,7 +393,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// mis-matches, if any. Thus, we are done, here.
 	const Handle& body(_pattern->get_body());
 	if (body->is_type(TYPE_NODE) or
-	    (body->is_type(TYPE_OUTPUT_LINK) and
+	    (body->is_type(TYPE_OUTPUT_SIG) and
 	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
 

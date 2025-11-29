@@ -696,7 +696,7 @@ static Type find_plain_type(const Handle& h)
 	Type t = h->get_type();
 	if (not nameserver().isA(t, TYPE_NODE) and
 	    not nameserver().isA(t, TYPE_CHOICE) and
-	    not nameserver().isA(t, TYPE_OUTPUT_LINK))
+	    not nameserver().isA(t, TYPE_OUTPUT_SIG))
 		return t;
 	if (h->is_node()) return NOTYPE;
 	for (const Handle& ho: h->getOutgoingSet())

@@ -43,6 +43,16 @@ HANDLE_VEC_ARG <-  ARG
 STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
 
+// Static type-checking declarations.
+SIG <- TOP_TYPE
+
+// Type-input signature.  This signature type forces type-checking
+// on it's "inputs" (it's outgoing set): they must be types.
+TYPE_INPUT_SIG <- SIG
+
+// Type-output link. Generates Types upon execution.
+TYPE_OUTPUT_SIG <- SIG
+
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with Atoms.
 // Think of them as decorations that can be hung on an Atom.
@@ -213,13 +223,6 @@ NUMERIC_INPUT_LINK <- LINK
 // Numeric-output link. Generates either NumberNodes or FloatValues
 // upon execution.
 NUMERIC_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
-
-// Type-input link.  This link type forces type-checking on it's
-// "inputs" (it's outgoing set): they must be types.
-TYPE_INPUT_LINK <- LINK
-
-// Type-output link. Generates Types upon execution.
-TYPE_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
 
 // Alpha-convertible links are those that may have multiple different
 // representations that are alpha-equivalent. This mixin helps checkers
@@ -763,9 +766,9 @@ DEFINED_TYPE_NODE <- TYPE_NODE
 // such a "constant" type is wanted. I dunno. Not sure. Changing this
 // causes DeepTypeUTest to fail. ... Forcing use of Signature is "more
 // correct", but clunkier to the user, so we don't force it.
-// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_INPUT_LINK
+// TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_SIG,TYPE_INPUT_SIG
 // See https://en.wikipedia.org/wiki/Union_type
-TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,ALPHA_CONVERTIBLE_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_SIG,ALPHA_CONVERTIBLE_LINK
 
 // Type constructor. Forces a set-intersection of all of the type
 // definitions (signatures) that it contains. Useful for computing
@@ -780,11 +783,11 @@ TYPE_INTERSECTION_LINK <- TYPE_CHOICE
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.  It is a ConnectorSeq, since it specifies a pair of
 // connectors (the input, and the output).
-ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_LINK
+ARROW_LINK <- CONNECTOR_SEQ,TYPE_OUTPUT_SIG
 
 // Type constructor compound structured types.
 // It is a Connector, as it specifies only one connectable thing at a time.
-SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_LINK
+SIGNATURE_LINK <- CONNECTOR,TYPE_OUTPUT_SIG
 
 // Short-hand for above: (SignNode 'BlahLink) is shorthand for
 // (SignatureLink (TypeNode 'BlahLink)). This can be used in any

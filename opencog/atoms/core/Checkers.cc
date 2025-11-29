@@ -173,7 +173,7 @@ static bool check_type_ctors(const Handle& bool_atom)
 		// Intervals are commonly used with GlobNodes.
 		if (INTERVAL_LINK == t) continue;
 
-		if (not h->is_type(TYPE_OUTPUT_LINK)) return false;
+		if (not h->is_type(TYPE_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -184,5 +184,5 @@ static __attribute__ ((constructor)) void init(void)
 	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
 	classserver().addValidator(BOOLEAN_INPUT_LINK, check_bool_vect);
 	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
-	classserver().addValidator(TYPE_INPUT_LINK, check_type_ctors);
+	classserver().addValidator(TYPE_INPUT_SIG, check_type_ctors);
 }
