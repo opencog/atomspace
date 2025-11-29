@@ -37,6 +37,7 @@ set(ATOMSPACE_execution_LIBRARY execution)
 set(ATOMSPACE_grounded_LIBRARY grounded)
 set(ATOMSPACE_join_LIBRARY join)
 set(ATOMSPACE_pattern_LIBRARY pattern)
+set(ATOMSPACE_scope_LIBRARY scope)
 set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_value_LIBRARY value)
 
@@ -50,6 +51,7 @@ set(ATOMSPACE_LIBRARIES
 	atomflow
 	columnvec
 	clearbox
+	scope
 	join
 	pattern
 	query-engine

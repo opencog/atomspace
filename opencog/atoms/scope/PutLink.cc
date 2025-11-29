@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/PutLink.cc
+ * opencog/atoms/scope/PutLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "DefineLink.h"
+#include <opencog/atoms/core/DefineLink.h>
 #include "LambdaLink.h"
 #include "PutLink.h"
 

@@ -14,11 +14,9 @@ ADD_LIBRARY (atomcore
 	FreeVariables.cc
 	FunctionLink.cc
 	GrantLink.cc
-	LambdaLink.cc
 	NumberNode.cc
 	PrenexLink.cc
 	PresentLink.cc
-	PutLink.cc
 	Quotation.cc
 	RandomChoice.cc
 	Replacement.cc
@@ -62,11 +60,9 @@ INSTALL (FILES
 	FreeVariables.h
 	FunctionLink.h
 	GrantLink.h
-	LambdaLink.h
 	NumberNode.h
 	PrenexLink.h
 	PresentLink.h
-	PutLink.h
 	Quotation.h
 	RandomChoice.h
 	Replacement.h

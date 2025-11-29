@@ -23,8 +23,8 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/LambdaLink.h>
-#include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/scope/LambdaLink.h>
+#include <opencog/atoms/scope/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/flow/ValueShimLink.h>

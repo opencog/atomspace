@@ -26,7 +26,7 @@
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
 
-#include "LambdaLink.h"
+#include <opencog/atoms/scope/LambdaLink.h>
 #include "RewriteLink.h"
 
 using namespace opencog;

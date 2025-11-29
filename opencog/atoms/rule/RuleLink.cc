@@ -24,7 +24,7 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "RuleLink.h"

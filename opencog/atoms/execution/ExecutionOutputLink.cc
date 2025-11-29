@@ -26,7 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Transient.h>
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "ExecutionOutputLink.h"
