@@ -21,6 +21,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include "EvaluatableLink.h"
+#include "EvaluationLink.h"
 
 using namespace opencog;
 
@@ -35,9 +36,10 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 	}
 }
 
-bool EvaluatableLink::bevaluate(AtomSpace* as, bool silent)
+bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 {
-	return true;
+	return EvaluationLink::crisp_eval_scratch(_atom_space,
+	           get_handle(), scratch, silent);
 }
 
 // ---------------------------------------------------------------
