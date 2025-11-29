@@ -58,6 +58,7 @@ set(ATOMSPACE_LIBRARIES
 	execution
 	grounded
 	grant
+	signature
 	smob
 	backing
 	atomspace

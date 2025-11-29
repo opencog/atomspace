@@ -29,8 +29,8 @@
 #include <opencog/atoms/base/hash.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/scope/LambdaLink.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/signature/TypeNode.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/scope/VariableList.h>
 #include <opencog/atoms/scope/VariableSet.h>
 

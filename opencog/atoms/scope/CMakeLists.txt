@@ -22,6 +22,7 @@ ADD_LIBRARY (scope
 ADD_DEPENDENCIES(scope opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(scope
+	signature
 	grant
 	atomcore
 	${COGUTIL_LIBRARY}

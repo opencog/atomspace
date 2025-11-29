@@ -23,8 +23,8 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/signature/TypeNode.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/scope/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>

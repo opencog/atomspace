@@ -28,7 +28,7 @@ class TypeUtilsSCM : public ModuleWrap
 
 }
 
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>

@@ -24,8 +24,8 @@
 #include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include "TypeNode.h"
+#include "TypeUtils.h"
 
 #include "TypeIntersectionLink.h"
 

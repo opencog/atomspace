@@ -23,8 +23,8 @@
 
 #include <opencog/util/random.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/signature/TypeNode.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 
 #include "PrenexLink.h"
 

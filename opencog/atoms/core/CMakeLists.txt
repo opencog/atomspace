@@ -15,10 +15,6 @@ ADD_LIBRARY (atomcore
 	PresentLink.cc
 	RandomChoice.cc
 	TimeLink.cc
-	TypeChoice.cc
-	TypeIntersectionLink.cc
-	TypeNode.cc
-	TypeUtils.cc
 	UnorderedLink.cc
 )
 
@@ -46,10 +42,6 @@ INSTALL (FILES
 	PresentLink.h
 	RandomChoice.h
 	TimeLink.h
-	TypeChoice.h
-	TypeIntersectionLink.h
-	TypeNode.h
-	TypeUtils.h
 	UnorderedLink.h
 	DESTINATION "include/opencog/atoms/core"
 )

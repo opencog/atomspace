@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TYPE_INTERSECTION_H
 #define _OPENCOG_TYPE_INTERSECTION_H
 
-#include <opencog/atoms/core/TypeChoice.h>
+#include "TypeChoice.h"
 
 namespace opencog
 {

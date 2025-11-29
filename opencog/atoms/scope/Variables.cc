@@ -32,8 +32,8 @@
 
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/TypedVariableLink.h>
-#include <opencog/atoms/core/TypeIntersectionLink.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/signature/TypeIntersectionLink.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 
 #include "VariableSet.h"
 #include "VariableList.h"

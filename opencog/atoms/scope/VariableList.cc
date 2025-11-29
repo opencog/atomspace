@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/signature/TypeNode.h>
 
 #include "VariableList.h"
 

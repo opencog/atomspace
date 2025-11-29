@@ -2,8 +2,6 @@
 ADD_CXXTEST(CheckersUTest)
 ADD_CXXTEST(FindUtilsUTest)
 ADD_CXXTEST(NumberNodeUTest)
-ADD_CXXTEST(TypeIntersectionUTest)
-ADD_CXXTEST(TypeUtilsUTest)
 
 ADD_CXXTEST(DeleteLinkUTest)
 

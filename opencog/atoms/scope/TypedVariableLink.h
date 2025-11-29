@@ -24,7 +24,7 @@
 #define _OPENCOG_TYPED_VARIABLE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/TypeChoice.h>
+#include <opencog/atoms/signature/TypeChoice.h>
 
 namespace opencog
 {

@@ -28,6 +28,7 @@ ADD_LIBRARY (atomflow
 ADD_DEPENDENCIES(atomflow opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomflow
+	signature
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}

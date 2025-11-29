@@ -24,7 +24,7 @@
 #include <string>
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>

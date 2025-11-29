@@ -10,6 +10,7 @@ ADD_LIBRARY (join
 ADD_DEPENDENCIES(join opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(join
+	signature
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
