@@ -294,10 +294,10 @@ SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 // See also the section of relation-links below (including equality,
 // etc.) Perhaps the definition of MemberLink and SubsetLink should
 // be moved to that section!?
-MEMBER_LINK <- ORDERED_LINK
+MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // Indicates a subset relationship.
-SUBSET_LINK <- ORDERED_LINK
+SUBSET_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
