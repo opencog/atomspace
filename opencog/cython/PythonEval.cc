@@ -189,20 +189,6 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
     return vptr;
 }
 
-/**
- * Call the user defined function with the provide atomspace argument.
- * This is a cut-n-paste of PythonEval::call_user_function but with
- * assorted hacks to handle the different argument type.
- *
- * On error throws an exception.
- */
-void PythonEval::apply_as(const std::string& func,
-                          AtomSpace* as_argument)
-{
-    GILGuard gil;
-    call_user_function(func, HandleSeq({HandleCast(as_argument)}));
-}
-
 // ===================================================================
 // Private Execution helper functions
 
