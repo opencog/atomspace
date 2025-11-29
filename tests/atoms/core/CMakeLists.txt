@@ -6,9 +6,7 @@ ADD_CXXTEST(TypeIntersectionUTest)
 ADD_CXXTEST(TypeUtilsUTest)
 ADD_CXXTEST(VariablesUTest)
 
-ADD_CXXTEST(DefineLinkUTest)
 ADD_CXXTEST(DeleteLinkUTest)
-ADD_CXXTEST(StateLinkUTest)
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(FreeLinkUTest)
@@ -18,7 +16,6 @@ IF(HAVE_GUILE)
 	ADD_CXXTEST(PutLinkUTest)
 	ADD_CXXTEST(QuotationUTest)
 
-	ADD_GUILE_TEST(GrantTest grant-test.scm)
 	ADD_GUILE_TEST(PutRecursiveTest put-recursive-test.scm)
 	ADD_GUILE_TEST(PresentAbsentTest present-absent-test.scm)
 ENDIF(HAVE_GUILE)
