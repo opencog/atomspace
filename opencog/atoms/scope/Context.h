@@ -31,7 +31,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/scope/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include <opencog/atoms/scope/Variables.h>
 
 namespace opencog

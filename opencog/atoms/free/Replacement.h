@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/scope/Replacement.h
+ * opencog/atoms/free/Replacement.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/scope/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 
 namespace opencog
 {

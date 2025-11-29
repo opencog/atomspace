@@ -26,7 +26,7 @@
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/scope/PutLink.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>

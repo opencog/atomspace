@@ -22,7 +22,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/scope/VariableSet.h>

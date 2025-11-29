@@ -27,7 +27,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/hash.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/signature/TypeUtils.h>

@@ -24,7 +24,7 @@
 #define _OPENCOG_DELETE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/free/FreeLink.h>
 
 namespace opencog
 {

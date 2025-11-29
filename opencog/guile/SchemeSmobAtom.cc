@@ -31,7 +31,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;

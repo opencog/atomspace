@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/FreeLink.cc
+ * opencog/atoms/free/FreeLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/scope/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include "FreeLink.h"
 
 using namespace opencog;

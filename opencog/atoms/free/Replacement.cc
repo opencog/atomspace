@@ -1,5 +1,5 @@
 /*
- * atoms/scope/Replacement.cc
+ * atoms/free/Replacement.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *               2019 SingularityNET Foundation

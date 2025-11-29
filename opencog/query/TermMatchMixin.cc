@@ -24,8 +24,8 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/scope/Replacement.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/free/Replacement.h>
 #include <opencog/atoms/grant/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomspace/Transient.h>

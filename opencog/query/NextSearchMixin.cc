@@ -23,7 +23,7 @@
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 
 #include "InitiateSearchMixin.h"
 #include "PatternMatchEngine.h"

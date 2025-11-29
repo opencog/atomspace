@@ -9,7 +9,7 @@
 #define _OPENCOG_EVALUATION_LINK_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/free/FreeLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog

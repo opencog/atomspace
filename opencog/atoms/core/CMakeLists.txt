@@ -7,9 +7,6 @@ ADD_LIBRARY (atomcore
 	Checkers.cc
 	CondLink.cc
 	DeleteLink.cc
-	FindUtils.cc
-	FreeLink.cc
-	FreeVariables.cc
 	FunctionLink.cc
 	NumberNode.cc
 	PresentLink.cc
@@ -22,6 +19,7 @@ ADD_LIBRARY (atomcore
 ADD_DEPENDENCIES(atomcore opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomcore
+	free
 	atombase
 	${COGUTIL_LIBRARY}
 )
@@ -34,9 +32,6 @@ INSTALL (FILES
 	AbsentLink.h
 	CondLink.h
 	DeleteLink.h
-	FindUtils.h
-	FreeLink.h
-	FreeVariables.h
 	FunctionLink.h
 	NumberNode.h
 	PresentLink.h

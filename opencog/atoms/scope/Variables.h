@@ -29,7 +29,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/core/FreeVariables.h>
+#include <opencog/atoms/free/FreeVariables.h>
 #include <opencog/atoms/scope/TypedVariableLink.h>
 
 namespace opencog

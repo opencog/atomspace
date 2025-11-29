@@ -8,8 +8,6 @@ ADD_LIBRARY (scope
 	LambdaLink.cc
 	PrenexLink.cc
 	PutLink.cc
-	Quotation.cc
-	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	TypedVariableLink.cc
@@ -22,6 +20,7 @@ ADD_LIBRARY (scope
 ADD_DEPENDENCIES(scope opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(scope
+	free
 	signature
 	grant
 	atomcore
@@ -38,8 +37,6 @@ INSTALL (FILES
 	LambdaLink.h
 	PrenexLink.h
 	PutLink.h
-	Quotation.h
-	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
 	TypedVariableLink.h

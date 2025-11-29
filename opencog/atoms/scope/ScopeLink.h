@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_SCOPE_LINK_H
 #define _OPENCOG_SCOPE_LINK_H
 
-#include <opencog/atoms/scope/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include <opencog/atoms/scope/VariableList.h>
 
 namespace opencog

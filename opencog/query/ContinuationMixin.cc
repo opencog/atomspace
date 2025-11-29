@@ -22,7 +22,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/scope/Replacement.h>
+#include <opencog/atoms/free/Replacement.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "ContinuationMixin.h"

@@ -26,8 +26,8 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/free/FreeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atomspace/AtomSpace.h>

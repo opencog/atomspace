@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/Quotation.cc
+ * opencog/atoms/free/Quotation.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved

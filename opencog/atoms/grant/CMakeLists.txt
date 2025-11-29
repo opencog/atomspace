@@ -12,6 +12,7 @@ ADD_LIBRARY (grant
 ADD_DEPENDENCIES(grant opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(grant
+	free
 	atomcore
 	${COGUTIL_LIBRARY}
 )

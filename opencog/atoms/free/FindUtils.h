@@ -1,5 +1,5 @@
 /**
- * opencog/atoms/core/FindUtils.h
+ * opencog/atoms/free/FindUtils.h
  *
  * Utilities for finding atoms in trees.
  *
@@ -35,7 +35,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/scope/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include <opencog/atoms/scope/ScopeLink.h>
 
 namespace opencog {

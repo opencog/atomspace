@@ -1,5 +1,5 @@
 /*
- * atoms/core/FreeVariables.cc
+ * atoms/free/FreeVariables.cc
  *
  * Copyright (C) 2009, 2014, 2015 Linas Vepstas
  *               2019 SingularityNET Foundation
@@ -29,7 +29,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/scope/Context.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include "FreeVariables.h"
 
 namespace opencog {

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/FreeVariables.h
+ * opencog/atoms/free/FreeVariables.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -30,7 +30,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/scope/Replacement.h>
+#include <opencog/atoms/free/Replacement.h>
 
 namespace opencog
 {

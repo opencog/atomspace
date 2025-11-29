@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/FreeLink.h
+ * opencog/atoms/free/FreeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,7 +24,7 @@
 #define _OPENCOG_FREE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/FreeVariables.h>
+#include <opencog/atoms/free/FreeVariables.h>
 
 namespace opencog
 {
