@@ -22,7 +22,7 @@ cdef extern from "<string>" namespace "std":
     cdef cppclass string:
         string()
         string(char *)
-        char * c_str()
+        const char * c_str()
         int size()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
@@ -43,7 +43,7 @@ def scheme_eval(AtomSpace a, str pys):
     cdef cAtomSpace* asp = <cAtomSpace*>a.shared_ptr.get()
     expr = pys.encode('UTF-8')
     ret = eval_scheme(asp, expr)
-    return ret.c_str()
+    return ret.c_str().decode('UTF-8')
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cValuePtr eval_scheme_v(cAtomSpace* as, const string& s) except +
