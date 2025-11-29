@@ -3,7 +3,7 @@ from unittest import TestCase
 from opencog.atomspace import AtomSpace, Atom, tvkey
 from opencog.type_constructors import FloatValue
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme import scheme_eval, scheme_eval_h
+from opencog.scheme import *
 import os
 
 
@@ -77,7 +77,7 @@ class SchemeTest(TestCase):
 
     # Run some basic evaluation tests
     def test_d_eval(self):
-        basic = scheme_eval_h(self.space,
+        basic = scheme_eval_v(self.space,
             "(cog-set-value! (ConceptNode \"whatever\") (Predicate \"*-TruthValueKey-*\") (FloatValue 0.5 0.5))")
 
         a1 = self.space.add_node(types.ConceptNode, "whatever")
@@ -91,7 +91,7 @@ class SchemeTest(TestCase):
         self.assertEqual(a1, basic)
 
         # Do it again, from a define in the scm file.
-        again = scheme_eval_h(self.space, "wobbly")
+        again = scheme_eval_v(self.space, "wobbly")
         a2 = self.space.add_node(types.ConceptNode, "wobbly")
         self.assertTrue(a2)
         self.assertEqual(a2, again)
@@ -101,11 +101,11 @@ class SchemeTest(TestCase):
     def test_unifier(self):
 
         scheme_eval(self.space, "(use-modules (opencog exec))")
-        question = scheme_eval_h(self.space, "find-animals")
+        question = scheme_eval_v(self.space, "find-animals")
         self.assertTrue(question)
         print ("\nThe question is:", question)
 
-        answer = scheme_eval_h(self.space, "(cog-execute! find-animals)")
+        answer = scheme_eval_v(self.space, "(cog-execute! find-animals)")
         self.assertTrue(answer)
         print ("\nThe answer is:", answer)
         self.assertEqual(answer.type, types.SetLink)
