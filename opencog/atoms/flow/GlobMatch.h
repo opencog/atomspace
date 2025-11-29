@@ -25,7 +25,7 @@
 #include <functional>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/Value.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/Variables.h>
 
 namespace opencog
 {

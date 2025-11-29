@@ -26,8 +26,8 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/core/VariableList.h>
-#include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/scope/VariableList.h>
+#include <opencog/atoms/scope/VariableSet.h>
 
 namespace opencog
 {

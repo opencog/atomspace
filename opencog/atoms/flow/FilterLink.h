@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/scope/ScopeLink.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/scope/Quotation.h>
 #include "GlobMatch.h"
 
 namespace opencog

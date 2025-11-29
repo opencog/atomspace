@@ -27,8 +27,8 @@
 #include <opencog/atoms/core/TypeChoice.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/VariableList.h>
-#include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/scope/VariableList.h>
+#include <opencog/atoms/scope/VariableSet.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "FindUtils.h"

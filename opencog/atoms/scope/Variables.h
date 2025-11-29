@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/Variables.h
+ * opencog/atoms/scope/Variables.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -30,7 +30,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/core/FreeVariables.h>
-#include <opencog/atoms/core/TypedVariableLink.h>
+#include <opencog/atoms/scope/TypedVariableLink.h>
 
 namespace opencog
 {

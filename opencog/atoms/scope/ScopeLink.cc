@@ -31,8 +31,8 @@
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>
-#include <opencog/atoms/core/VariableList.h>
-#include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/scope/VariableList.h>
+#include <opencog/atoms/scope/VariableSet.h>
 
 #include "ScopeLink.h"
 

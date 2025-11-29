@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/VariableList.h
+ * opencog/atoms/scope/VariableList.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -26,7 +26,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/Variables.h>
 
 namespace opencog
 {

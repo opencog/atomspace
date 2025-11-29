@@ -3,11 +3,18 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (scope
+	Context.cc
 	LambdaLink.cc
 	PrenexLink.cc
 	PutLink.cc
+	Quotation.cc
+	Replacement.cc
 	RewriteLink.cc
 	ScopeLink.cc
+	TypedVariableLink.cc
+	Variables.cc
+	VariableList.cc
+	VariableSet.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -23,10 +30,17 @@ INSTALL (TARGETS scope EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	Context.h
 	LambdaLink.h
 	PrenexLink.h
 	PutLink.h
+	Quotation.h
+	Replacement.h
 	RewriteLink.h
 	ScopeLink.h
+	TypedVariableLink.h
+	Variables.h
+	VariableList.h
+	VariableSet.h
 	DESTINATION "include/opencog/atoms/scope"
 )

@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/scope/Quotation.h>
 #include "FreeLink.h"
 
 using namespace opencog;

@@ -30,7 +30,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/core/Replacement.h>
+#include <opencog/atoms/scope/Replacement.h>
 
 namespace opencog
 {

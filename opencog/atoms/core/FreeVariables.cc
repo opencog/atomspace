@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/Context.h>
+#include <opencog/atoms/scope/Context.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include "FreeVariables.h"
 

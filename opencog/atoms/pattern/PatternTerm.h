@@ -18,7 +18,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/scope/Quotation.h>
 
 namespace opencog {
 

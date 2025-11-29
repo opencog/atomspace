@@ -25,7 +25,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/Replacement.h>
+#include <opencog/atoms/scope/Replacement.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atomspace/Transient.h>

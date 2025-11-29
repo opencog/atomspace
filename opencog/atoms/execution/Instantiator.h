@@ -26,7 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/core/Context.h>
+#include <opencog/atoms/scope/Context.h>
 
 /**
  * class Instantiator -- create grounded expressions from ungrounded ones.

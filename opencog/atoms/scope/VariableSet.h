@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/VariableSet.h
+ * opencog/atoms/scope/VariableSet.h
  *
  * Copyright (C) 2019 SingularityNET Foundation
  * All Rights Reserved
@@ -27,7 +27,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/Variables.h>
 #include <opencog/atoms/core/UnorderedLink.h>
 
 namespace opencog

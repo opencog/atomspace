@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/Quotation.h
+ * opencog/atoms/scope/Quotation.h
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved

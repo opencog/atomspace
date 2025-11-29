@@ -26,7 +26,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/Variables.h>
 #include <opencog/atoms/scope/ScopeLink.h>
 
 #include <sstream>

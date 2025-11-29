@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/Variables.h>
-#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/scope/Variables.h>
+#include <opencog/atoms/scope/VariableList.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <cxxtest/TestSuite.h>

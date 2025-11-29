@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/scope/ScopeLink.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/Variables.h>
 
 #include <tests/atoms/base/test_types.h>
 

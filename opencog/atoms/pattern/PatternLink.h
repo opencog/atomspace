@@ -25,7 +25,7 @@
 
 #include <unordered_map>
 
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/scope/Quotation.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/pattern/Pattern.h>
 
