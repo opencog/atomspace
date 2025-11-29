@@ -13,7 +13,8 @@ Also refer to the list of .scm type definition files in opencog.conf
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport (cValuePtr, Value, cAtomSpace,
                                 Atom, AtomSpace, cAtom, cHandle,
-                                AtomSpace_factoid, handle_cast)
+                                AtomSpace_factoid, handle_cast,
+                                create_python_value_from_c_value)
 
 
 # basic wrapping for std::string conversion
@@ -62,7 +63,7 @@ def scheme_eval_v(AtomSpace a, str pys):
     cdef cAtomSpace* asp = <cAtomSpace*>a.shared_ptr.get()
     expr = pys.encode('UTF-8')
     ret = eval_scheme_v(asp, expr)
-    return Value.create(ret)
+    return create_python_value_from_c_value(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cHandle eval_scheme_h(cAtomSpace* as, const string& s) except +
