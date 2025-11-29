@@ -28,13 +28,15 @@ FV = createFloatValue([0.444, 0.777])
 
 # Do something with it ...
 banana = asp.add_node(types.ConceptNode, 'Banana')
-tvkey = asp.add_node(types.PredicateNode, 'My Key')
-banana.set_value(tvkey, FV)
+mykey = asp.add_node(types.PredicateNode, 'My Key')
+banana.set_value(mykey, FV)
 ")
 
-; As before, verify that an atom was created, as expected.
-(define banana (cog-node 'ConceptNode "Banana"))
-(define banana-fv (cog-value banana tvkey))
-(display "Banana FloatValue: ") (display banana-fv) (newline)
+; Verify that the "Bannana" atom was created, as expected.
+(define banana (cog-node 'Concept "Banana"))
+(format #t "The AtomSpace now contains this: ~A\n" banana)
+(define banana-fv (cog-value banana (Predicate "My Key")))
+(format #t "The Value on 'banana' is: ~A\n" banana-fv)
 
+; THE END. That's All, Folks!
 ; -------------------------------------------------------------------
