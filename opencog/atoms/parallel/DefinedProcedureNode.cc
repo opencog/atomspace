@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/parallel/DefinedProcedureNode.h>
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;

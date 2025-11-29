@@ -30,7 +30,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/TypedVariableLink.h>
 #include <opencog/atoms/core/TypeIntersectionLink.h>
 #include <opencog/atoms/core/TypeUtils.h>

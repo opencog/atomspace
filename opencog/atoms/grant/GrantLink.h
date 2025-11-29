@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/GrantLink.h
+ * opencog/atoms/grant/GrantLink.h
  *
  * Copyright (C) 2015, 2023 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_GRANT_LINK_H
 #define _OPENCOG_GRANT_LINK_H
 
-#include <opencog/atoms/core/UniqueLink.h>
+#include <opencog/atoms/grant/UniqueLink.h>
 
 namespace opencog
 {

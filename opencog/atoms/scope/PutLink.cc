@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include "LambdaLink.h"
 #include "PutLink.h"
 

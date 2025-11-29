@@ -21,7 +21,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/core/FindUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/TypeUtils.h>

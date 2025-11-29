@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/UniqueLink.cc
+ * opencog/atoms/grant/UniqueLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *

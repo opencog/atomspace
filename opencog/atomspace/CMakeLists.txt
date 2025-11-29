@@ -28,6 +28,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
+	grant
 	join
 	pattern
 	grounded

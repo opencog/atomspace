@@ -6,24 +6,19 @@ ADD_LIBRARY (atomcore
 	AbsentLink.cc
 	Checkers.cc
 	CondLink.cc
-	DefineLink.cc
 	DeleteLink.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
 	FunctionLink.cc
-	GrantLink.cc
 	NumberNode.cc
 	PresentLink.cc
 	RandomChoice.cc
-	StateLink.cc
 	TimeLink.cc
 	TypeChoice.cc
-	TypedAtomLink.cc
 	TypeIntersectionLink.cc
 	TypeNode.cc
 	TypeUtils.cc
-	UniqueLink.cc
 	UnorderedLink.cc
 )
 
@@ -42,24 +37,19 @@ INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 INSTALL (FILES
 	AbsentLink.h
 	CondLink.h
-	DefineLink.h
 	DeleteLink.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h
 	FunctionLink.h
-	GrantLink.h
 	NumberNode.h
 	PresentLink.h
 	RandomChoice.h
-	StateLink.h
 	TimeLink.h
 	TypeChoice.h
-	TypedAtomLink.h
 	TypeIntersectionLink.h
 	TypeNode.h
 	TypeUtils.h
-	UniqueLink.h
 	UnorderedLink.h
 	DESTINATION "include/opencog/atoms/core"
 )

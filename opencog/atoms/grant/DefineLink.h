@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/DefineLink.h
+ * opencog/atoms/grant/DefineLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_DEFINE_LINK_H
 #define _OPENCOG_DEFINE_LINK_H
 
-#include <opencog/atoms/core/UniqueLink.h>
+#include <opencog/atoms/grant/UniqueLink.h>
 
 namespace opencog
 {

@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>

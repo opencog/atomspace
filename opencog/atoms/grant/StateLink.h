@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/StateLink.h
+ * opencog/atoms/grant/StateLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_STATE_LINK_H
 #define _OPENCOG_STATE_LINK_H
 
-#include <opencog/atoms/core/UniqueLink.h>
+#include <opencog/atoms/grant/UniqueLink.h>
 
 namespace opencog
 {
