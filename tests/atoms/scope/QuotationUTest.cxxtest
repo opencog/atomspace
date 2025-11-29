@@ -67,7 +67,7 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval->eval("(load-from-path \"tests/atoms/core/put-and.scm\")");
+	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(_asp.get());
@@ -104,7 +104,7 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval->eval("(load-from-path \"tests/atoms/core/quotations.scm\")");
+	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(_asp.get());

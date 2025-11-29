@@ -1,5 +1,5 @@
 /*
- * tests/atoms/core/VariablesUTest.cxxtest
+ * tests/atoms/scope/VariablesUTest.cxxtest
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
