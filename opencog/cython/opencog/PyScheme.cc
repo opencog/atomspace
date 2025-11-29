@@ -97,30 +97,3 @@ Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 	return Handle();
 #endif // HAVE_GUILE
 }
-
-// Convenience wrapper, for stand-alone usage.
-ValuePtr opencog::eval_scheme_as(const std::string &s)
-{
-#ifdef HAVE_GUILE
-	AtomSpacePtr ctx_asp = get_context_atomspace();
-	if (nullptr == ctx_asp) {
-		throw RuntimeException(TRACE_INFO,
-		       "Python-Scheme Wrapper: No context atomspace for eval_as");
-	}
-	SchemeEval* evaluator = SchemeEval::get_scheme_evaluator(ctx_asp.get());
-	evaluator->clear_pending();
-	const AtomSpacePtr& result_asp = evaluator->eval_as(s);
-
-	if (nullptr == result_asp)
-		throw RuntimeException(TRACE_INFO,
-		       "Python-Scheme Wrapper: Null atomspace for '%s'", s.c_str());
-
-	if (evaluator->eval_error())
-		throw RuntimeException(TRACE_INFO,
-		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
-
-	return result_asp;
-#else // HAVE_GUILE
-	return nullptr;
-#endif // HAVE_GUILE
-}

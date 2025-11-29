@@ -83,22 +83,3 @@ def scheme_eval_h(AtomSpace a, str pys):
     expr = pys.encode('UTF-8')
     ret = eval_scheme_h(asp, expr)
     return Atom.createAtom(ret)
-
-cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    cValuePtr eval_scheme_as(const string& s) except +
-
-def scheme_eval_as(str pys):
-    """Evaluate Scheme program when expected result is AtomSpace.
-    Args:
-        pys (str): Scheme program to evaluate
-    Returns:
-        AtomSpace: atomspace result
-    Raises:
-        RuntimeError: if result of Scheme program is not AtomSpace or
-            in case of evaluation error
-    """
-    cdef cValuePtr ret
-    cdef string expr
-    expr = pys.encode('UTF-8')
-    ret = eval_scheme_as(expr)
-    return AtomSpace_factoid(handle_cast(ret))
