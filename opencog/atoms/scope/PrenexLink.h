@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/PrenexLink.h
+ * opencog/atoms/scope/PrenexLink.h
  *
  * Copyright (C) 2017 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PRENEX_LINK_H
 #define _OPENCOG_PRENEX_LINK_H
 
-#include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/scope/RewriteLink.h>
 
 namespace opencog
 {

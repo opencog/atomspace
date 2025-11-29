@@ -15,13 +15,10 @@ ADD_LIBRARY (atomcore
 	FunctionLink.cc
 	GrantLink.cc
 	NumberNode.cc
-	PrenexLink.cc
 	PresentLink.cc
 	Quotation.cc
 	RandomChoice.cc
 	Replacement.cc
-	RewriteLink.cc
-	ScopeLink.cc
 	StateLink.cc
 	TimeLink.cc
 	TypeChoice.cc
@@ -61,13 +58,10 @@ INSTALL (FILES
 	FunctionLink.h
 	GrantLink.h
 	NumberNode.h
-	PrenexLink.h
 	PresentLink.h
 	Quotation.h
 	RandomChoice.h
 	Replacement.h
-	RewriteLink.h
-	ScopeLink.h
 	StateLink.h
 	TimeLink.h
 	TypeChoice.h

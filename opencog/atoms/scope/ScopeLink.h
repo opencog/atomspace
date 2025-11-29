@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ScopeLink.h
+ * opencog/atoms/scope/ScopeLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved

@@ -26,7 +26,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include "ScopeLink.h"
+#include <opencog/atoms/scope/ScopeLink.h>
 
 namespace opencog {
 

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/RewriteLink.h
+ * opencog/atoms/scope/RewriteLink.h
  *
  * Copyright (C) 2017 Nil Geisweiller
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_REWRITE_LINK_H
 #define _OPENCOG_REWRITE_LINK_H
 
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/scope/ScopeLink.h>
 
 namespace opencog
 {

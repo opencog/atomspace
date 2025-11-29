@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PUT_LINK_H
 #define _OPENCOG_PUT_LINK_H
 
-#include <opencog/atoms/core/PrenexLink.h>
+#include <opencog/atoms/scope/PrenexLink.h>
 
 namespace opencog
 {

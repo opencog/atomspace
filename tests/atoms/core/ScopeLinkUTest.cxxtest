@@ -25,7 +25,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/scope/ScopeLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 
 #include <cxxtest/TestSuite.h>

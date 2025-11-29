@@ -36,7 +36,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/types.h>
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/scope/ScopeLink.h>
 
 namespace opencog {
 

@@ -24,7 +24,7 @@
 #define _OPENCOG_FILTER_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/scope/ScopeLink.h>
 #include <opencog/atoms/core/Quotation.h>
 #include "GlobMatch.h"
 
