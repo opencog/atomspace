@@ -97,12 +97,12 @@ static bool check_evaluatable(const Handle& bool_atom)
 		// This is used by PLN to avoid type-checking.
 		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
-		// Accept both EVALUATABLE_LINK and BOOLEAN_OUTPUT_LINK.
+		// Accept both EVALUATABLE_LINK and BOOLEAN_OUTPUT_SIG.
 		// CRISP_OUTPUT_LINK inherits from both, so crisp boolean
 		// operations can work with either evaluatable expressions
 		// or boolean value expressions (like BoolValueOfLink).
 		if (not h->is_type(EVALUATABLE_LINK) and
-		    not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
+		    not h->is_type(BOOLEAN_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -119,7 +119,7 @@ static bool check_bool_vect(const Handle& bool_atom)
 		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
-		if (not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
+		if (not h->is_type(BOOLEAN_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -182,7 +182,7 @@ static bool check_type_ctors(const Handle& bool_atom)
 static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
-	classserver().addValidator(BOOLEAN_INPUT_LINK, check_bool_vect);
+	classserver().addValidator(BOOLEAN_INPUT_SIG, check_bool_vect);
 	classserver().addValidator(NUMERIC_INPUT_SIG, check_numeric);
 	classserver().addValidator(TYPE_INPUT_SIG, check_type_ctors);
 }
