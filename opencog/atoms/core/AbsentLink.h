@@ -24,6 +24,7 @@
 #define _OPENCOG_ABSENT_LINK_H
 
 #include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog
 {
@@ -70,7 +71,7 @@ public:
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
-		return evaluate(as, silent);
+		return ValueCast(createBoolValue(bevaluate(as, silent)));
 	}
 
 	static Handle factory(const Handle&);
