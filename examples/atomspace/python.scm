@@ -19,7 +19,6 @@
 ; demonstrated below.
 (python-eval "
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace
 from opencog.atomspace import createFloatValue
 
 # Create atoms in the current (scheme) atomspace

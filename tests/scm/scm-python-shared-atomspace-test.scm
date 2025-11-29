@@ -17,7 +17,6 @@
 ; Define a python func returning a FloatValue
 (python-eval "
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace
 from opencog.atomspace import tvkey, createFloatValue
 
 # Twiddle some atoms in the atomspace
