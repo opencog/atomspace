@@ -36,7 +36,6 @@ std::string opencog::eval_scheme(AtomSpace* as, const std::string &s)
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 	SchemeEval* evaluator = SchemeEval::get_scheme_evaluator(as);
 	evaluator->clear_pending();
-	evaluator->set_atomspace(AtomSpaceCast(as));
 	std::string scheme_return_value = evaluator->eval(s);
 
 	// If there's an error, the scheme_return_value will contain
@@ -64,7 +63,6 @@ ValuePtr opencog::eval_scheme_v(AtomSpace* as, const std::string &s)
 
 	SchemeEval* evaluator = SchemeEval::get_scheme_evaluator(as);
 	evaluator->clear_pending();
-	evaluator->set_atomspace(AtomSpaceCast(as));
 	ValuePtr scheme_return_value = evaluator->eval_v(s);
 
 	if (evaluator->eval_error())
