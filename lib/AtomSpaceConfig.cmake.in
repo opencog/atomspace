@@ -57,6 +57,7 @@ set(ATOMSPACE_LIBRARIES
 	query-engine
 	execution
 	grounded
+	grant
 	smob
 	backing
 	atomspace
