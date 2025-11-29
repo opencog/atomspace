@@ -44,7 +44,6 @@ private:
 public:
 	PythonSCM();
 	std::string eval(const std::string&);
-	void apply_as(const std::string&, AtomSpace*);
 }; // class
 
 /** @}*/
@@ -89,7 +88,6 @@ void PythonSCM::init_in_module(void* data)
 void PythonSCM::init(void)
 {
 	define_scheme_primitive("python-eval", &PythonSCM::eval, this, "python");
-	define_scheme_primitive("python-call-with-as", &PythonSCM::apply_as, this, "python");
 }
 
 std::string PythonSCM::eval(const std::string& pystr)
@@ -97,12 +95,6 @@ std::string PythonSCM::eval(const std::string& pystr)
 	const AtomSpacePtr& asp = SchemeSmob::ss_get_env_as("python-eval");
 	PythonEval* pyev = PythonEval::get_python_evaluator(asp);
 	return pyev->eval(pystr);
-}
-
-void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
-{
-	PythonEval* pyev = PythonEval::get_python_evaluator(as);
-	pyev->apply_as(pystr, as);
 }
 
 void opencog_python_init(void)
