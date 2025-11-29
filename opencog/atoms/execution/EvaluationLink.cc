@@ -706,7 +706,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 	if (IS_MESSAGE_LINK == t) return is_message(evelnk);
 
 	// -------------------------
-	if (nameserver().isA(t, CRISP_OUTPUT_LINK) and
+	if (nameserver().isA(t, CRISP_OUTPUT_SIG) and
 	    evelnk->is_evaluatable())
 	{
 		return evelnk->bevaluate(scratch, silent);

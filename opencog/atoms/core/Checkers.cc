@@ -98,7 +98,7 @@ static bool check_evaluatable(const Handle& bool_atom)
 		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
 		// Accept both EVALUATABLE_LINK and BOOLEAN_OUTPUT_SIG.
-		// CRISP_OUTPUT_LINK inherits from both, so crisp boolean
+		// CRISP_OUTPUT_SIG inherits from both, so crisp boolean
 		// operations can work with either evaluatable expressions
 		// or boolean value expressions (like BoolValueOfLink).
 		if (not h->is_type(EVALUATABLE_LINK) and
@@ -181,7 +181,7 @@ static bool check_type_ctors(const Handle& bool_atom)
 /* This runs when the shared lib is loaded. */
 static __attribute__ ((constructor)) void init(void)
 {
-	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
+	classserver().addValidator(CRISP_INPUT_SIG, check_evaluatable);
 	classserver().addValidator(BOOLEAN_INPUT_SIG, check_bool_vect);
 	classserver().addValidator(NUMERIC_INPUT_SIG, check_numeric);
 	classserver().addValidator(TYPE_INPUT_SIG, check_type_ctors);

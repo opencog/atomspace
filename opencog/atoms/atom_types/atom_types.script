@@ -94,6 +94,18 @@ BOOLEAN_INPUT_SIG <- SIG
 // Boolean-output link. Generates BoolValues upon execution.
 BOOLEAN_OUTPUT_SIG <- SIG
 
+// Crisp (scalar-valued) boolean-input signature.  This signature asks
+// for type-checking on it's "inputs" (it's oset): they must present
+// a scalar true/false result. It would be nice to claim that this type
+// isn't needed, because "everything is a vector", but that is not
+// currently practical. A fundamental scalar true-false bit seems like
+// a fundamental type.
+CRISP_INPUT_SIG <- BOOLEAN_INPUT_SIG
+
+// Crisp binary true/false output. Declares that execution naturally
+// yields a singular true/false value (and not a vector of bools).
+CRISP_OUTPUT_SIG <- BOOLEAN_OUTPUT_SIG
+
 // Numeric-input signature.  This signature forces type-checking on
 // it's "inputs" (it's oset): they must be NumberNodes, or things that
 // provide either NumberNodes or FloatValues when executed.
@@ -254,17 +266,6 @@ EVALUATABLE_LINK <- LINK
 // http://lambda-the-ultimate.org/node/4093
 EXECUTABLE_LINK <- LINK
 
-// Crisp (scalar-valued) boolean-input link.  This link type forces
-// type-checking on it's "inputs" (it's outgoing set): they must be
-// EvaluatableLinks. XXX We're doing away with this; everything will
-// get vectorized. We're in an ugly transition period right now.
-CRISP_INPUT_LINK <- BOOLEAN_INPUT_SIG
-
-// Crisp binary true/false output. Link types that, when evaluated,
-// naturally yield a singular true/false value (and not a vector of
-// bools). This will eventually go away ...
-CRISP_OUTPUT_LINK <- EVALUATABLE_LINK,BOOLEAN_OUTPUT_SIG
-
 // Alpha-convertible links are those that may have multiple different
 // representations that are alpha-equivalent. This mixin helps checkers
 // know whether they have to explicitly check for alpha-equivalence
@@ -314,13 +315,13 @@ CONTEXT_LINK <- ORDERED_LINK
 // whatsoever to actually execute these link types. They're used in
 // an entirely declarative fashion. This should be cleaned up, someday.
 //
-TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
-FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
-AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
-OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
-NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK // ,CRISP_INPUT_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
+TRUE_LINK <- ORDERED_LINK,CRISP_OUTPUT_SIG
+FALSE_LINK <- ORDERED_LINK,CRISP_OUTPUT_SIG
+AND_LINK <- UNORDERED_LINK,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
+OR_LINK <- UNORDERED_LINK,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
+NOT_LINK <- UNORDERED_LINK,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,CRISP_OUTPUT_SIG // ,CRISP_INPUT_SIG
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
@@ -346,7 +347,7 @@ SEQUENTIAL_OR_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK,CRISP_INPUT_LINK
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
+CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -354,7 +355,7 @@ CHOICE_LINK <- ORDERED_LINK,CRISP_OUTPUT_LINK
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_LINK
+PRESENT_LINK <- SET_LINK,CRISP_OUTPUT_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -916,7 +917,7 @@ SIMILARITY_LINK <- UNORDERED_LINK
 // "virtual" because it is impossible to enumerate all greater-than
 // relations and store them in the AtomSpae as real objects; these
 // exist only "virtually".
-VIRTUAL_LINK <- CRISP_OUTPUT_LINK
+VIRTUAL_LINK <- CRISP_OUTPUT_SIG
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 
