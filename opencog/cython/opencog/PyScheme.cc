@@ -76,24 +76,3 @@ ValuePtr opencog::eval_scheme_v(AtomSpace* as, const std::string &s)
 	return "Error: Compiled without Guile support";
 #endif // HAVE_GUILE
 }
-
-// Convenience wrapper, for stand-alone usage.
-Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
-{
-#ifdef HAVE_GUILE
-	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
-
-	SchemeEval* evaluator = SchemeEval::get_scheme_evaluator(as);
-	evaluator->clear_pending();
-	evaluator->set_atomspace(AtomSpaceCast(as));
-	Handle scheme_return_value = evaluator->eval_h(s);
-
-	if (evaluator->eval_error())
-		throw RuntimeException(TRACE_INFO,
-		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
-
-	return scheme_return_value;
-#else // HAVE_GUILE
-	return Handle();
-#endif // HAVE_GUILE
-}
