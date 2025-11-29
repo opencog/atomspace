@@ -43,7 +43,49 @@ HANDLE_VEC_ARG <-  ARG
 STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
 
-// Static type-checking declarations.
+// --------------------------------------------------------------
+// Executable Atom type declarations. Almost all executable Atoms are
+// Links. The oset of the Link serves as "function arguments" for that
+// link. The result of execution is a Value of some kind, usually of
+// some specific kind.
+//
+// Atomese is fundamentally defined to be a way of writing down
+// executable abstract syntax trees (AST). This results in a lot of
+// confusion between syntax and semantics. Roughly speaking, the
+// "syntax" aspect responds to the question of "what kind of AST
+// is legal?". Static syntax checking can be done at the time that
+// the AST is constructed, at "ctor-time". The "semantic" aspect
+// responds to the question of "what inputs did this link actually
+// get at the time of execuation?" Most executable links perform
+// some amount of type-checking during exec-time, branching to
+// different code, depending on that type.
+//
+// Atomese, in its original form, was envisioned as having a fairly
+// "normal" type system, informed by conventional type-theoretic ides.
+// This vision has fallen on hard times, as the exec-time code really
+// doesn't have any particularly clear and unambiguous response to the
+// types flowing through the code.  There's no currently obvious way of
+// "fixing" this. One might imagine that it is possible to somehow
+// "orthogonalize" the code, so that only one unique type flows all the
+// way through, thus avoiding exec-time type-checking. This is neither
+// practical, nor even (theoretically) possible.
+//
+// On the practical side: "orthogonalizing" is difficult, without ending
+// with a lot of almost-identical code, "cut-n-pasted" to handle the
+// different types flowing through it. Maybe, with effort, this can be
+// done, but the ad hoc approach is comfortable. On the theortical side
+// it might not be possible: numeric functions can overflow; there
+// might be errors and exceptions. The error type or exception type is
+// distinctly different than the data type, yet it must flow back through
+// the same AST that handles the "normal" data processing flow. (Wait,
+// are we saying that there should be another AST, devoted to exception
+// handling? Maybe... but ... not today..)
+//
+// Thus, type handling in Atomese is ... ad hoc. We try to be clean,
+// and mostly fail. Below are a set of type declarations for the inputs
+// and outputs of executable links that were arrived at from practical
+// experience. They're good-enough, for now.
+//
 SIG <- TOP_TYPE
 
 // Type-input signature.  This signature type forces type-checking
@@ -52,6 +94,16 @@ TYPE_INPUT_SIG <- SIG
 
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_SIG <- SIG
+
+// Numeric-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be NumberNodes, or things
+// that can evaluate to NumberNodes: viz NumericOutputLinks, or
+// numeric values (derived from FloatValue).
+NUMERIC_INPUT_SIG <- SIG
+
+// Numeric-output link. Generates either NumberNodes or FloatValues
+// upon execution.
+NUMERIC_OUTPUT_SIG <- SIG
 
 // --------------------------------------------------------------
 // Values are collections of data that can be associated with Atoms.
@@ -213,16 +265,6 @@ CRISP_INPUT_LINK <- BOOLEAN_INPUT_LINK
 // naturally yield a singular true/false value (and not a vector of
 // bools). This will eventually go away ...
 CRISP_OUTPUT_LINK <- EVALUATABLE_LINK,BOOLEAN_OUTPUT_LINK
-
-// Numeric-input link.  This link type forces type-checking on it's
-// "inputs" (it's outgoing set): they must be NumberNodes, or things
-// that can evaluate to NumberNodes: viz NumericOutputLinks, or
-// numeric values (derived from FloatValue).
-NUMERIC_INPUT_LINK <- LINK
-
-// Numeric-output link. Generates either NumberNodes or FloatValues
-// upon execution.
-NUMERIC_OUTPUT_LINK <- LINK // EXECUTABLE_LINK
 
 // Alpha-convertible links are those that may have multiple different
 // representations that are alpha-equivalent. This mixin helps checkers
@@ -876,8 +918,8 @@ SIMILARITY_LINK <- UNORDERED_LINK
 // relations and store them in the AtomSpae as real objects; these
 // exist only "virtually".
 VIRTUAL_LINK <- CRISP_OUTPUT_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
-LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
+LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 
 // Test whether all outgoing Atoms are closed, that is, if the
 // they do not contain any free variables.
@@ -967,11 +1009,11 @@ BOOL_NOT_LINK <- BOOL_OP_LINK
 // --------------------
 // Arithmetic and number-valued functions
 
-NUMERIC_FUNCTION_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,NUMERIC_INPUT_LINK
+NUMERIC_FUNCTION_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG,NUMERIC_INPUT_SIG
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_INPUT_LINK,NUMERIC_OUTPUT_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_INPUT_SIG,NUMERIC_OUTPUT_SIG
 PLUS_LINK <- ARITHMETIC_LINK
 MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
@@ -991,7 +1033,7 @@ HEAVISIDE_LINK <- NUMERIC_FUNCTION_LINK
 
 // Converts vector of bools into vector of floats.
 // Replacing false, true by 0.0 and 1.0
-IMPULSE_LINK <- FUNCTION_LINK,BOOLEAN_INPUT_LINK,NUMERIC_OUTPUT_LINK
+IMPULSE_LINK <- FUNCTION_LINK,BOOLEAN_INPUT_LINK,NUMERIC_OUTPUT_SIG
 
 // Logarithm base2
 LOG2_LINK <- NUMERIC_FUNCTION_LINK
@@ -1015,18 +1057,18 @@ ACCUMULATE_LINK <- NUMERIC_FUNCTION_LINK
 // marked with a zero, keeping all location marked with a one, thus
 // creating a shorter vector. Works on vectors of Bools, Strings, Floats,
 // etc. Declare that, so the static typechecker passes.
-DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
+DECIMATE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG,BOOLEAN_OUTPUT_LINK
 
 // Same as above, but instead of specifying a mask, the input is a
 // vector holding the index offsets of the mask bits. I.e. the input is
 // a list of indexes of items to keep.
-ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK,BOOLEAN_OUTPUT_LINK
+ELEMENT_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG,BOOLEAN_OUTPUT_LINK
 
 // TODO: perhaps create shift-left, shift-right and truncate operators?
 // Someday, they will be needed; just not yet, I guess.
 
 // Return the current time.
-TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG
 
 // --------------------
 // Value getters. Grab the current Value attached to some Atom.
@@ -1042,8 +1084,8 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // but we lie about this to keep the static typechecker happy.
 VALUE_OF_LINK <- FUNCTION_LINK
 BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,BOOLEAN_OUTPUT_LINK
-FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
-STREAM_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_LINK
+FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
+STREAM_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
 
 // Return the AtomSpace that the wrapped Atom is in.
 ATOM_SPACE_OF_LINK <- VALUE_OF_LINK
@@ -1105,7 +1147,7 @@ INCREMENT_VALUE_ON_LINK <- INCREMENT_VALUE_LINK
 // work-around: It can be placed inside a Link, so beta-reduction works.
 // It holds a Value, which functions can obtain by calling execute().
 // It *cannot* be placed in the AtomSpace, so is not quite a "real" Atom.
-VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_LINK
+VALUE_SHIM_LINK <- EXECUTABLE_LINK,NUMERIC_OUTPUT_SIG
 
 // Call execute() in a loop, forever, until it returns VoidValue.
 // This is used to implement stream draining.
@@ -1170,10 +1212,10 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 //
 // We don't really know what it returns, but it might be a number.
 // The static type checker will complain, unless we all NumericOutput.
-COND_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+COND_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG
 
 // Sleep link pauses execution for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_INPUT_SIG
 
 // ====================================================================
 // Performance scripting links.

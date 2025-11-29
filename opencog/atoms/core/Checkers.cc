@@ -156,7 +156,7 @@ static bool check_numeric(const Handle& bool_atom)
 		if (QUOTE_LINK == t) continue;
 		if (UNQUOTE_LINK == t) continue;
 
-		if (not h->is_type(NUMERIC_OUTPUT_LINK)) return false;
+		if (not h->is_type(NUMERIC_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -183,6 +183,6 @@ static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
 	classserver().addValidator(BOOLEAN_INPUT_LINK, check_bool_vect);
-	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
+	classserver().addValidator(NUMERIC_INPUT_SIG, check_numeric);
 	classserver().addValidator(TYPE_INPUT_SIG, check_type_ctors);
 }

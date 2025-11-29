@@ -80,7 +80,7 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	exo = as->add_atom(exo);
 
 	ValuePtr fsp;
-	if (args->is_type(NUMERIC_OUTPUT_LINK))
+	if (args->is_type(NUMERIC_OUTPUT_SIG))
 		fsp = createFormulaStream(exo);
 	else
 		fsp = createFutureStream(exo);
