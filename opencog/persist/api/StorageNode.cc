@@ -89,7 +89,13 @@ HandleSeq StorageNode::getMessages() const
 			h->markIsMessage();
 		return m;
 	}();
-	return msgs;
+
+	// Copy list above into the local AtomSpace. If this is not done,
+	// then (cog-execute! (IsMessage (Predicate "*-open-*"))) will fail.
+	HandleSeq lms;
+	for (const Handle& m : msgs)
+		lms.emplace_back(_atom_space->add(m));
+	return lms;
 }
 
 bool StorageNode::usesMessage(const Handle& key) const
