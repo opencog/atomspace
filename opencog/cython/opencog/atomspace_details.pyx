@@ -282,9 +282,8 @@ cdef class AtomSpace(Atom):
         except RuntimeError as e:
             cpp_except_to_pyerr(e)
 
-cdef api object py_atom(const cHandle& h):
-    cdef cHandle hc = h  # copy to avoid const issues with reference cast
-    return create_python_value_from_c_value(<cValuePtr&>(hc, hc.get()))
+cdef api object py_atom(cHandle h):
+    return create_python_value_from_c_value(<cValuePtr&>(h, h.get()))
 
 # Older cythons (before 2024) get compiler errors with the noexcept
 # keyword. Newer cythons without it get nag notes about optimization.

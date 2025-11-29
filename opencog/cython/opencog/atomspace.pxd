@@ -166,7 +166,7 @@ cdef class AtomSpace(Atom):
 #
 # The py_value_ptr is used by the c++ PythonEval class to get a
 # straight-up c++ ValuePtr with all the right reference counts, etc.
-cdef object py_atom(const cHandle& h)
+cdef object py_atom(cHandle h)
 
 # Older cythons (before 2024) get compiler errors with the noexcept
 # keyword. Newer cythons without it get nag notes about optimization.
