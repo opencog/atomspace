@@ -16,6 +16,6 @@ cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
 
 cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog":
     cValuePtr get_context_atomspace() nogil
-    void push_context_atomspace(cValuePtr atomspace) nogil
+    void push_context_atomspace(cHandle atomspace) nogil
     cValuePtr pop_context_atomspace() nogil
     void c_clear_context "opencog::clear_context" () nogil

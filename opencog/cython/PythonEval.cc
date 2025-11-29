@@ -189,34 +189,6 @@ ValuePtr PythonEval::apply_v(AtomSpace* as,
     return vptr;
 }
 
-/**
- * Call the user defined function with the provide atomspace argument.
- * This is a cut-n-paste of PythonEval::call_user_function but with
- * assorted hacks to handle the different argument type.
- *
- * On error throws an exception.
- */
-void PythonEval::apply_as(const std::string& func,
-                          AtomSpace* as_argument)
-{
-    // What if the user is working in one AtomSpace, but is manipulating
-    // another? Then setting the context AtomSpace would be wrong.
-    // I'm confused; I don't know what to do here.
-    // ASGuard asg(as_argument);
-    GILGuard gil;
-
-    // Create the Python tuple for the function call with python
-    // atomspace.
-    PyObject* pyArguments = PyTuple_New(1);
-    PyObject* pyAtomSpace = atomspace_py_object(AtomSpaceCast(as_argument));
-
-    PyTuple_SetItem(pyArguments, 0, pyAtomSpace);
-
-    // Execute the user function.
-    PyObject* pyReturnValue = do_call_user_function(func, pyArguments);
-    Py_DECREF(pyReturnValue);
-}
-
 // ===================================================================
 // Private Execution helper functions
 

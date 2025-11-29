@@ -57,7 +57,6 @@ class PythonEval : public GenericEval
         void initialize_python_objects_and_imports(void);
 
         // Python utility functions
-        PyObject* atomspace_py_object(AtomSpacePtr);
         PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
@@ -128,12 +127,6 @@ class PythonEval : public GenericEval
         Handle apply(AtomSpace * as, const std::string& func,
                      Handle varargs)
         { return HandleCast(apply_v(as, func, varargs)); }
-
-        /**
-         * Calls the Python function passed in `func`, passing it
-         * the AtomSpace as an argument, returning void.
-         */
-        void apply_as(const std::string& func, AtomSpace*);
 };
 
 /**

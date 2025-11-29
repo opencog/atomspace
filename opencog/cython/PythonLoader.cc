@@ -93,12 +93,12 @@ void opencog::global_python_initialize()
     import_opencog__atomspace();
 
     // The import_opencog__atomspace() call above sets the
-    // py_atomspace() function pointer if the cython module load
+    // py_atom() function pointer if the cython module load
     // succeeded. But the function pointer will be NULL if the
     // opencog.atomspace cython module failed to load. Avert
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by this hard-to-debug error message.
-    if (nullptr == py_atomspace) {
+    if (nullptr == py_atom) {
         PyErr_Print();
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
@@ -164,31 +164,6 @@ void PythonEval::initialize_python_objects_and_imports(void)
 
     logger().debug("PythonEval::%s Finished initialising python evaluator.",
         __FUNCTION__);
-}
-
-PyObject* PythonEval::atomspace_py_object(AtomSpacePtr asp)
-{
-    // The py_atomspace function pointer will be NULL if the
-    // opencog.atomspace cython module failed to load. Avert
-    // a hard-to-debug crash on null-pointer-deref, and replace
-    // it by a slightly less hard-to-debug error message.
-    if (NULL == py_atomspace) {
-        logger().warn("PythonEval::%s Failed to load the"
-                      "opencog.atomspace module", __FUNCTION__);
-        return NULL;
-    }
-
-    PyObject * pyAtomSpace = py_atomspace(asp);
-
-    if (!pyAtomSpace) {
-        if (PyErr_Occurred())
-            PyErr_Print();
-
-        logger().warn("PythonEval::%s Failed to get atomspace "
-                      "wrapped with python object", __FUNCTION__);
-    }
-
-    return pyAtomSpace;
 }
 
 // ====================================================
