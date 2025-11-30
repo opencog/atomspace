@@ -416,7 +416,7 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// assumption is that the EvaluationLink is actually evaluatable,
 		// which seems reasonable.
 		_temp_aspace->clear();
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
+		bool crispy = grnd->bevaluate(_temp_aspace);
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
 		                      << crispy << std::endl;})
