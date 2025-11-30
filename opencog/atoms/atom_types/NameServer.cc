@@ -206,8 +206,10 @@ void NameServer::setParentRecursively(Type parent, Type type, Type& maxd)
     if (type <= parent)
         throw InvalidParamException(TRACE_INFO,
             "Improper type declararition; "
-            "parent (%d) must be smaller than child (%d).\n"
-            "(Partial orders must be strict!)\n", parent, type);
+            "parent (%d %s) must be smaller than child (%d %s).\n"
+            "(Partial orders must be strict!)\n",
+            parent, getTypeName(parent).c_str(),
+            type, getTypeName(type).c_str());
 
     bool incr = false;
     recursiveMap[parent][type] = true;

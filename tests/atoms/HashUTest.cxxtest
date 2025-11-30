@@ -70,8 +70,11 @@ public:
 	void test_times_plus_compute_hash();
 
 	// Test that unordered links have the same hash regardless of the
-	// order of their outgoing set
+	// order of their outgoing set. These do not have their own ctors,
+	// and so are more easily messed up by uncareful edits to
+	// atom_types.script.
 	void test_equallink();
+	void test_andor();
 };
 
 void HashUTest::test_scope_compute_hash_1()
@@ -169,10 +172,47 @@ HashUTest::test_equallink()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// This test fails, if someone monkeys with the atom_types.script
+	// file and gets it wrong.
 	Handle X = an(VARIABLE_NODE, "$X");
 	Handle Y = an(VARIABLE_NODE, "$Y");
 	Handle EqXY = al(EQUAL_LINK, X, Y);
 	Handle EqYX = al(EQUAL_LINK, Y, X);
 
 	TS_ASSERT_EQUALS(EqXY.value(), EqYX.value());
+
+	// ----------------------------
+	// Should be symmetric, as well.
+	Handle IdXY = al(IDENTICAL_LINK, X, Y);
+	Handle IdYX = al(IDENTICAL_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(IdXY.value(), IdYX.value());
+
+	// ----------------------------
+	Handle EqvXY = al(EQUIVALENCE_LINK, X, Y);
+	Handle EqvYX = al(EQUIVALENCE_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(EqvXY.value(), EqvYX.value());
+}
+
+void
+HashUTest::test_andor()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// This test fails, if someone monkeys with the atom_types.script
+	// file and gets it wrong.
+	Handle X = an(VARIABLE_NODE, "$X");
+	Handle Y = an(VARIABLE_NODE, "$Y");
+	Handle AndXY = al(AND_LINK, X, Y);
+	Handle AndYX = al(AND_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(AndXY.value(), AndYX.value());
+
+	// ----------------------------
+	// Should be symmetric, as well.
+	Handle OrXY = al(OR_LINK, X, Y);
+	Handle OrYX = al(OR_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(OrXY.value(), OrYX.value());
 }
