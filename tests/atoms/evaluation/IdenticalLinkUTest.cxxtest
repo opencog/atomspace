@@ -23,7 +23,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 
 using namespace opencog;
 
@@ -63,16 +62,16 @@ void IdenticalLinkUTest::test_identical()
 	Handle AAA = L(IDENTICAL_LINK, A, A, A);
 	Handle ABB = L(IDENTICAL_LINK, A, B, B);
 
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, AA, &_as);
+	bool result = AA->bevaluate(&_as);
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, AAA, &_as);
+	result = AAA->bevaluate(&_as);
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, AB, &_as);
+	result = AB->bevaluate(&_as);
 	TS_ASSERT(not result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, ABB, &_as);
+	result = ABB->bevaluate(&_as);
 	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);

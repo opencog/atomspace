@@ -23,7 +23,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 
 using namespace opencog;
 
@@ -63,11 +62,11 @@ void ExclusiveLinkUTest::test_exclusive()
 	Handle T = L(EXCLUSIVE_LINK, A, B, C, A);
 
 
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, S, &_as);
+	bool result = S->bevaluate(&_as);
 	printf("Got result=%s\n", result ? "true" : "false");
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, T, &_as);
+	result = T->bevaluate(&_as);
 	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);
