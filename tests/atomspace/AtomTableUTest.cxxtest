@@ -36,7 +36,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
-#include <opencog/util/mt19937ar.h>
 #include "../query/test-types.h"
 
 using namespace opencog;
