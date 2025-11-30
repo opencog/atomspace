@@ -289,6 +289,7 @@ EXECUTABLE_LINK <- LINK
 // Basic boolean algebra and set-theory-inspired links.
 
 // Base class for sets and for operations that return sets.
+// XXX FIXME, perhaps this is a SIG ???
 COLLECTION_LINK <- LINK
 
 // Plain old list AKA Cartesian product
@@ -301,10 +302,10 @@ SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 // See also the section of relation-links below (including equality,
 // etc.) Perhaps the definition of MemberLink and SubsetLink should
 // be moved to that section!?
-MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+MEMBER_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 
 // Indicates a subset relationship.
-SUBSET_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+SUBSET_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
@@ -360,7 +361,7 @@ SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG,CRISP_INPUT_
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- ORDERED_LINK,EVALUATABLE_LINK,CRISP_OUTPUT_SIG
+CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -368,7 +369,7 @@ CHOICE_LINK <- ORDERED_LINK,EVALUATABLE_LINK,CRISP_OUTPUT_SIG
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- SET_LINK,EVALUATABLE_LINK,CRISP_OUTPUT_SIG
+PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
