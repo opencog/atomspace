@@ -20,8 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cmath>
-
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/execution/Instantiator.h>
@@ -36,16 +34,36 @@
 #include "EvaluatableLink.h"
 #include "EvaluationLink.h"
 
+#include <algorithm>
+#include <cmath>
+
 using namespace opencog;
 
 EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
-	: Link(std::move(oset), t)
+	: Link(std::move(oset), t), _unordered(false)
 {
 	if (not nameserver().isA(t, EVALUATABLE_LINK))
 	{
 		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an EvaluatableLink, got %s", tname.c_str());
+	}
+
+	// A kind of a hack, to do what the UnorderedLink ctor does.
+	// We do this mostly because we're lazy about writing lots
+	// lots of c++ classes to handle each of the case statemens
+	// below. Even though doing that would be "technically more
+	// correct". But for now, this technical hack seems ... tolerable.
+	// I really don't want to be pedantic for this stuff. It seems
+	// OK to wing it, sometimes...
+	if (nameserver().isA(t, UNORDERED_LINK))
+	{
+		_unordered = true;
+		// Place into arbitrary, but deterministic order. We use
+		// content (hash) based less, to avoid variations due to
+		// address-space randomization.
+		std::sort(_outgoing.begin(), _outgoing.end(),
+			content_based_handle_less());
 	}
 }
 

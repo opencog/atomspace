@@ -37,6 +37,7 @@ namespace opencog
 ///
 class EvaluatableLink : public Link
 {
+	bool _unordered;
 public:
 	EvaluatableLink(const HandleSeq&&, Type=EVALUATABLE_LINK);
 
@@ -50,6 +51,8 @@ public:
 	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
 		return ValueCast(createBoolValue(bevaluate(as, silent)));
 	}
+
+	virtual bool is_unordered_link() const { return _unordered; }
 
 	static Handle factory(const Handle&);
 };
