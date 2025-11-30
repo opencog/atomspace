@@ -272,9 +272,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return evelnk->bevaluate(scratch, silent);
 
 	// -------------------------
-	// Handle EVALUATION_LINK first, before EVALUATABLE_LINK dispatch.
-	// This is needed because EvaluationLink::bevaluate() calls back
-	// into crisp_eval_scratch(), which would create infinite recursion.
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -300,6 +297,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
 
+	// -------------------------
 	// PutLinks implement beta-reduction. This is special-cased here,
 	// so that first, the beta-reduction is performed, and then the
 	// result is evaluated (with the crisp evaluator).
@@ -310,6 +308,7 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
 	}
 
+	// -------------------------
 	if (DEFINED_PREDICATE_NODE == t)
 	{
 		return EvaluationLink::crisp_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
