@@ -24,7 +24,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Force.h"
-#include "Instantiator.h"
 
 using namespace opencog;
 
@@ -64,13 +63,19 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 		return as->add_atom(HandleCast(vp));
 	}
 
-Instantiator inst(as);
 	Handle args(cargs);
 	HandleSeq new_oset;
 	bool changed = false;
 	for (const Handle& ho : cargs->getOutgoingSet())
 	{
-		ValuePtr vp(inst.execute(ho, silent));
+		if (not ho->is_executable())
+		{
+			new_oset.emplace_back(ho);
+			continue;
+		}
+
+		ValuePtr vp(ho->execute(as, silent));
+
 		// vp might be NULL if ho was a DeleteLink
 		if (nullptr == vp)
 		{
