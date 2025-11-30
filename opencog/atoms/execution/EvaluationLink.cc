@@ -268,10 +268,10 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 {
 	Type t = evelnk->get_type();
 
-	if (evelnk->is_evaluatable())
-		return evelnk->bevaluate(scratch, silent);
-
 	// -------------------------
+	// Handle EVALUATION_LINK first, before is_evaluatable() dispatch.
+	// EvaluationLink::bevaluate() calls back into crisp_eval_scratch(),
+	// so we must handle it here to avoid infinite recursion.
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -296,6 +296,9 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		// Extract the args, and run the evaluation with them.
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
+
+	if (evelnk->is_evaluatable())
+		return evelnk->bevaluate(scratch, silent);
 
 	// -------------------------
 	// PutLinks implement beta-reduction. This is special-cased here,
