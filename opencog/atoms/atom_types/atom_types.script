@@ -299,13 +299,17 @@ LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
 SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 
 // Set membership. Declaration: individual belongs to set.
-// See also the section of relation-links below (including equality,
-// etc.) Perhaps the definition of MemberLink and SubsetLink should
-// be moved to that section!?
-MEMBER_LINK <- EVALUATABLE_LINK,ORDERED_SIG
+// Historically, this has been understood to be a declarative statement
+// for fact, rather than an evaluatable link that would return T/F
+// upon evaluation. If it is made evaluatable, then an odd assortment
+// existing unit tests fail. This raises the old, unresovlved
+// meta-issue: what is the proper semantics of some of these old
+// link types with these very basic names? I still don't have a good
+// asnwr to this.
+MEMBER_LINK <- ORDERED_LINK // EVALUATABLE_LINK,ORDERED_SIG
 
 // Indicates a subset relationship.
-SUBSET_LINK <- EVALUATABLE_LINK,ORDERED_SIG
+SUBSET_LINK <- ORDERED_LINK // EVALUATABLE_LINK,ORDERED_SIG
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
