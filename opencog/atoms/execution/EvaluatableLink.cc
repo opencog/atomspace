@@ -32,7 +32,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "EvaluatableLink.h"
-#include "EvaluationLink.h"
 
 #include <algorithm>
 #include <cmath>
@@ -68,8 +67,6 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 }
 
 // ---------------------------------------------------------------
-// Helper functions moved from EvaluationLink.cc
-
 /// Extract a single floating-point double out of an atom, that,
 /// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
@@ -398,6 +395,25 @@ static bool is_tail_rec(const Handle& thish, const Handle& tail)
 	return false;
 }
 
+static bool do_tail_eval(AtomSpace* scratch, bool silent, const Handle& h)
+{
+	if (DEFINED_PREDICATE_NODE == h->get_type())
+	{
+		Handle defn(DefineLink::get_definition(h));
+		if (not defn->is_evaluatable())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting EvaluatableLink, got %s\n",
+				defn->to_string().c_str());
+		return defn->bevaluate(scratch, silent);
+	}
+
+	if (not h->is_evaluatable())
+		throw RuntimeException(TRACE_INFO,
+			"Expecting EvaluatableLink, got %s\n",
+			h->to_string().c_str());
+	return h->bevaluate(scratch, silent);
+}
+
 // ---------------------------------------------------------------
 
 /// EvaluatableLink::bevaluate() -- evaluate this link, returning
@@ -450,7 +466,11 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 	{
 		for (const Handle& h : _outgoing)
 		{
-			bool tv = EvaluationLink::crisp_eval_scratch(_atom_space, h, scratch, silent);
+			if (not h->is_evaluatable())
+				throw RuntimeException(TRACE_INFO,
+					"Expecting EvaluatableLink, got %s\n",
+					h->to_string().c_str());
+			bool tv = h->bevaluate(scratch, silent);
 			if (not tv) return false;
 		}
 		return true;
@@ -459,7 +479,11 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 	{
 		for (const Handle& h : _outgoing)
 		{
-			bool tv = EvaluationLink::crisp_eval_scratch(_atom_space, h, scratch, silent);
+			if (not h->is_evaluatable())
+				throw RuntimeException(TRACE_INFO,
+					"Expecting EvaluatableLink, got %s\n",
+					h->to_string().c_str());
+			bool tv = h->bevaluate(scratch, silent);
 			if (tv) return true;
 		}
 		return false;
@@ -478,7 +502,7 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = EvaluationLink::crisp_eval_scratch(_atom_space, _outgoing[i], scratch, silent);
+				bool tv = do_tail_eval(scratch, silent, _outgoing[i]);
 				if (not tv) return false;
 			}
 		} while (is_trec);
@@ -498,7 +522,7 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				bool tv = EvaluationLink::crisp_eval_scratch(_atom_space, _outgoing[i], scratch, silent);
+				bool tv = do_tail_eval(scratch, silent, _outgoing[i]);
 				if (tv) return true;
 			}
 		} while (is_trec);
