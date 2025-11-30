@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PRESENT_LINK_H
 #define _OPENCOG_PRESENT_LINK_H
 
-#include <opencog/atoms/core/UnorderedLink.h>
+#include <opencog/atoms/execution/EvaluatableLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog
@@ -57,7 +57,7 @@ namespace opencog
 /// https://en.wikipedia.org/wiki/Rule_of_inference
 /// https://en.wikipedia.org/wiki/Idempotency_of_entailment
 ///
-class PresentLink : public UnorderedLink
+class PresentLink : public EvaluatableLink
 {
 	void init(void);
 public:

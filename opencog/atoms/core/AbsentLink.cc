@@ -26,37 +26,8 @@
 
 using namespace opencog;
 
-void AbsentLink::init(void)
-{
-	// The UnorderedLink ctor will have already sorted the outgoing set
-	// for us into some order.  To find duplicates, we merely need to
-	// iterate over the outgoing set, comparing neighbors.
-
-	Arity sz = _outgoing.size();
-	if (0 == sz) return;
-
-	HandleSeq uniq;
-	uniq.push_back(_outgoing[0]);  // The first one is always good.
-
-	// Look for an remove duplicates.
-	Arity lst = 0;
-	Arity nxt = 1;
-	while (nxt < sz)
-	{
-		if (_outgoing[lst] != _outgoing[nxt])
-		{
-			uniq.push_back(_outgoing[nxt]);
-			lst = nxt;
-		}
-		nxt++;
-	}
-
-	// swap into place; faster than copy.
-	_outgoing.swap(uniq);
-}
-
 AbsentLink::AbsentLink(const HandleSeq&& oset, Type t)
-	: UnorderedLink(std::move(oset), t)
+	: PresentLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, ABSENT_LINK))
 	{
@@ -64,8 +35,6 @@ AbsentLink::AbsentLink(const HandleSeq&& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an AbsentLink, got %s", tname.c_str());
 	}
-
-	init();
 }
 
 /// Return true, if none of the outgoing set is present in the
