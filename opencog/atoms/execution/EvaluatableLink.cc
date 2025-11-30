@@ -440,8 +440,11 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 	// Crisp-binary-valued Boolean Logical connectives
 	if (NOT_LINK == t)
 	{
-		return not EvaluationLink::crisp_eval_scratch(_atom_space,
-		      _outgoing[0], scratch, silent);
+		if (not _outgoing[0]->is_evaluatable())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting EvaluatableLink, got %s\n",
+				_outgoing[0]->to_string().c_str());
+		return not _outgoing[0]->bevaluate(scratch, silent);
 	}
 	if (AND_LINK == t)
 	{
