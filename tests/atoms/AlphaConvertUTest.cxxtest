@@ -370,8 +370,8 @@ void AlphaConvertUTest::test_vardecl_free_scope()
 	Handle Y = NA(VARIABLE_NODE, "$Y");
 
 	// Create Scopes with no variable declaration and X and Y swapped.
-	Handle hsco1 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(AND_LINK, X, Y), Y));
-	Handle hsco2 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(AND_LINK, Y, X), X));
+	Handle hsco1 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(LIST_LINK, X, Y), Y));
+	Handle hsco2 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(LIST_LINK, Y, X), X));
 
 	ScopeLinkPtr sco1(ScopeLinkCast(hsco1));
 	TS_ASSERT(sco1 != nullptr);
