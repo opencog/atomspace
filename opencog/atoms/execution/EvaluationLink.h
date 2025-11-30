@@ -58,13 +58,6 @@ public:
 	                               AtomSpace* scratch,
 	                               bool silent=false);
 
-	static ValuePtr do_evaluate(AtomSpace* as,
-	                            const Handle& evelnk,
-	                            bool silent=false)
-	{
-		return ValueCast(createBoolValue(crisp_eval_scratch(as, evelnk, as, silent)));
-	}
-
 	static Handle factory(const Handle&);
 };
 
