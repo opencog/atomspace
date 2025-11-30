@@ -29,8 +29,7 @@ void opencog_exec_init(void);
 #include <cstddef>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/guile/SchemeModule.h>
 
 // ========================================================
@@ -38,12 +37,19 @@ void opencog_exec_init(void);
 using namespace opencog;
 
 /**
- * cog-execute! executes any/all Ececutable and Evaluatable Links
+ * cog-execute! executes any/all Executable Links
  */
 static ValuePtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
-	Instantiator inst(atomspace);
-	ValuePtr pap(inst.execute(h));
+	if (h->is_type(DEFINED_PREDICATE_NODE))
+	{
+		Handle defn(DefineLink::get_definition(h));
+		return defn->execute(atomspace);
+	}
+	if (not h->is_executable())
+		return h;
+
+	ValuePtr pap(h->execute(atomspace));
 	if (pap and pap->is_atom())
 		return atomspace->add_atom(HandleCast(pap));
 	return pap;
