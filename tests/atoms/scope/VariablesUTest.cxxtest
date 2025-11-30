@@ -454,7 +454,7 @@ void VariablesUTest::test_find_variables_unordered_3()
 
 	// Inferred vardecl should have Z come last because it occurs more
 	// often than X and Y.
-	Handle body = al(AND_LINK,
+	Handle body = al(SEQUENTIAL_AND_LINK,
 	                 al(OR_LINK, X, Y),
 	                 al(OR_LINK, Z, Z));
 	Variables vars;
@@ -584,8 +584,8 @@ void VariablesUTest::test_find_variables_mixed_3()
 	// Make sure the variable declarations of body1 and body2 are
 	// the reverses of each other, that is if one is [X, Y], then
 	// the other is [Y, X].
-	Handle body1 = al(INHERITANCE_LINK, al(AND_LINK, X, Y), Y);
-	Handle body2 = al(INHERITANCE_LINK, al(AND_LINK, Y, X), X);
+	Handle body1 = al(INHERITANCE_LINK, al(LIST_LINK, X, Y), Y);
+	Handle body2 = al(INHERITANCE_LINK, al(LIST_LINK, Y, X), X);
 
 	Variables vars1;
 	Variables vars2;
