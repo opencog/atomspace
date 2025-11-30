@@ -268,11 +268,8 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 {
 	Type t = evelnk->get_type();
 
-	if (nameserver().isA(t, EVALUATABLE_LINK) and
-	    evelnk->is_evaluatable())
-	{
+	if (evelnk->is_evaluatable())
 		return evelnk->bevaluate(scratch, silent);
-	}
 
 	// -------------------------
 	// Handle EVALUATION_LINK first, before EVALUATABLE_LINK dispatch.
