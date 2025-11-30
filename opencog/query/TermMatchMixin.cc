@@ -521,7 +521,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	_temp_aspace->clear();
 	try
 	{
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+		bool crispy = gvirt->bevaluate(_temp_aspace, true);
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
 		                      << crispy << std::endl;})
 		return crispy;
