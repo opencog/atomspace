@@ -31,7 +31,6 @@
 
 #include "ExecutionOutputLink.h"
 #include "GroundedProcedureNode.h"
-#include "Instantiator.h"
 
 using namespace opencog;
 
@@ -217,9 +216,7 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bo
 		// Do NOT put this in the scratch space! It might
 		// contain ValueShimLinks, which would be deadly.
 		Handle reduct = createLink(std::move(vrel), sn->get_type());
-
-		Instantiator inst(scratch);
-		return inst.execute(reduct);
+		return reduct->execute(scratch);
 	}
 
 	Type st = sn->get_type();
