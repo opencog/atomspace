@@ -590,6 +590,35 @@ ValuePtr PutLink::execute(AtomSpace* as, bool silent)
 	return h->execute(as, silent);
 }
 
+// Crazy backwards-compatibility wrapper for PutLink.
+// Normally, the result of executing PutLink is usually some Atom,
+// the result of beta-reduction. If that Atom was also executable,
+// then PutLink executes it, as a matter of "courtesy". This remains
+// true, even now. But if the result of execution of a BoolValue,
+// then cast it to a crisp true/false. This happens when the
+// (PutLink (DefinedPredicate ...) ...) combination is used, which
+// is tested in a few unit tests. This is a "crazy work-around"
+// because normally PutLink is not (cannot be) an EVALUATABLE_LINK;
+// but we "pretend" it is, by having ::is_evaluatable() return true.
+// I guess we can live with this, but it doesn't follow the strict
+// design rules used for everything else.
+bool PutLink::bevaluate(AtomSpace* as, bool silent)
+{
+	ValuePtr boo(execute(as, silent));
+	if (BOOL_VALUE != boo->get_type())
+		throw RuntimeException(TRACE_INFO,
+			"Abuse of old PutLink compatibility layer! %s beval to %s",
+			to_string().c_str(), boo->to_string().c_str());
+
+	BoolValuePtr bvp(BoolValueCast(boo));
+	if (0 == bvp->size())
+		throw RuntimeException(TRACE_INFO,
+			"Abuse of old PutLink compatibility layer! bad size for %s",
+			to_string().c_str());
+
+	return bvp->value()[0];
+}
+
 DEFINE_LINK_FACTORY(PutLink, PUT_LINK)
 
 /* ===================== END OF FILE ===================== */

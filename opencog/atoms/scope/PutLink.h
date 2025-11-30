@@ -93,6 +93,10 @@ public:
 	virtual bool is_executable() const { return true; }
 	virtual ValuePtr execute(AtomSpace*, bool silent=false);
 
+	// Crazy handling for historical PutLink reduction.
+	virtual bool is_evaluatable() const { return true; }
+	virtual bool bevaluate(AtomSpace*, bool silent=false);
+
 	static Handle factory(const Handle&);
 };
 
