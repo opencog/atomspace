@@ -46,6 +46,8 @@ public:
 	PremiseOfLink(const PremiseOfLink&) = delete;
 	PremiseOfLink& operator=(const PremiseOfLink&) = delete;
 
+	virtual bool is_executable(void) const { return true; }
+
 	// Return the n'th premise of the rule.
 	virtual ValuePtr execute(AtomSpace*, bool);
 

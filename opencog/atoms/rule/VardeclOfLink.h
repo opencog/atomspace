@@ -49,6 +49,7 @@ public:
 	VardeclOfLink(const VardeclOfLink&) = delete;
 	VardeclOfLink& operator=(const VardeclOfLink&) = delete;
 
+	virtual bool is_executable(void) const { return true; }
 	// Return the variable decls.
 	virtual ValuePtr execute(AtomSpace*, bool);
 

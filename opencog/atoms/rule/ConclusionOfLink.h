@@ -48,6 +48,8 @@ public:
 	ConclusionOfLink(const ConclusionOfLink&) = delete;
 	ConclusionOfLink& operator=(const ConclusionOfLink&) = delete;
 
+	virtual bool is_executable(void) const { return true; }
+
 	// Return the n'th conclusion of the rule.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
