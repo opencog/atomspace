@@ -3,6 +3,7 @@
 ADD_LIBRARY(query-engine
 	ContinuationMixin.cc
 	InitiateSearchMixin.cc
+	Instantiator.cc
 	NextSearchMixin.cc
 	PatternMatchEngine.cc
 	Recognizer.cc
@@ -36,6 +37,7 @@ INSTALL (FILES
 	ContinuationMixin.h
 	Implicator.h
 	InitiateSearchMixin.h
+	Instantiator.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	RewriteMixin.h
