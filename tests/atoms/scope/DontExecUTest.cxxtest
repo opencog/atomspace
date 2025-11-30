@@ -78,7 +78,7 @@ void DontExecUTest::setUp()
 void DontExecUTest::xtest_DontExecLink_simple()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval->eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/scope/dont-exec-simple.scm\")");
 
 	Handle band = eval->eval_h("bad-and");
 	Handle dand = eval->eval_h("dont-and");
@@ -104,7 +104,7 @@ void DontExecUTest::xtest_DontExecLink_simple()
 void DontExecUTest::test_DontExecLink_multi()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval->eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+	eval->eval("(load-from-path \"tests/atoms/scope/dont-exec-simple.scm\")");
 
 	Handle got = eval->eval_h("(cog-execute! put-eval)");
 	Handle want = eval->eval_h("eval-expected");
