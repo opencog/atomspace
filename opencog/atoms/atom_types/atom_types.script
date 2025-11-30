@@ -305,11 +305,11 @@ SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
 // existing unit tests fail. This raises the old, unresovlved
 // meta-issue: what is the proper semantics of some of these old
 // link types with these very basic names? I still don't have a good
-// asnwr to this.
-MEMBER_LINK <- ORDERED_LINK // EVALUATABLE_LINK,ORDERED_SIG
+// answer to this.
+MEMBER_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 
 // Indicates a subset relationship.
-SUBSET_LINK <- ORDERED_LINK // EVALUATABLE_LINK,ORDERED_SIG
+SUBSET_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
