@@ -23,7 +23,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 using namespace opencog;
 
@@ -72,8 +71,7 @@ void DeleteLinkUTest::test_free_delete()
 	TS_ASSERT_EQUALS(1, list->getIncomingSetSize());
 
 	// Test that execution creates the desired link...
-	Instantiator inst(&_as);
-	Handle prop = HandleCast(inst.execute(add));
+	Handle prop = _as.add_atom(HandleCast(add->execute(&_as)));
 
 	printf("Created link %s\n", prop->to_string().c_str());
 	TS_ASSERT_EQUALS(EDGE_LINK, prop->get_type());
@@ -100,7 +98,7 @@ void DeleteLinkUTest::test_free_delete()
 	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
 	TS_ASSERT_EQUALS(3, list->getIncomingSetSize());
 
-	Handle undef = HandleCast(inst.execute(del));
+	Handle undef = HandleCast(del->execute(&_as));
 	TS_ASSERT_EQUALS(undef, Handle::UNDEFINED);
 
 	// The incoming set of both should decrease by one.

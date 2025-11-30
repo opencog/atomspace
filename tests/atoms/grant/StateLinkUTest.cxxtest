@@ -24,7 +24,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/grant/StateLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 using namespace opencog;
@@ -187,8 +186,7 @@ void StateLinkUTest::test_getting()
 		L(MEET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
-	Instantiator inst(&_as);
-	ValuePtr vgotten = inst.execute(empty_get);
+	ValuePtr vgotten = empty_get->execute(&_as);
 	printf("Got %s\n", vgotten->to_string().c_str());
 
 	// MeetLink returns empty LinkValue for no results
@@ -210,7 +208,7 @@ void StateLinkUTest::test_getting()
 		L(MEET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
-	vgotten = inst.execute(get);
+	vgotten = get->execute(&_as);
 	printf("Got %s\n", vgotten->to_string().c_str());
 
 	// MeetLink returns LinkValue containing the apple
@@ -241,8 +239,7 @@ void StateLinkUTest::test_putting()
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$y")),
 			N(CONCEPT_NODE, "strawberry"));
 
-	Instantiator inst(&_as);
-	Handle putten = HandleCast(inst.execute(put));
+	Handle putten = _as.add_atom(HandleCast(put->execute(&_as)));
 	printf("Put %s\n", putten->to_string().c_str());
 
 	Handle strawberry = N(CONCEPT_NODE, "strawberry");
@@ -388,7 +385,6 @@ void StateLinkUTest::test_list()
 void StateLinkUTest::test_scope()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	Instantiator inst(&_as);
 
 	// Initial data
 	L(STATE_LINK, N(ANCHOR_NODE, "rule"),
@@ -405,7 +401,7 @@ void StateLinkUTest::test_scope()
 				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "ImplicationLink")),
 			L(STATE_LINK, N(ANCHOR_NODE, "rule"), N(VARIABLE_NODE, "$x")));
 
-	ValuePtr vgotten = inst.execute(free_get);
+	ValuePtr vgotten = free_get->execute(&_as);
 	printf("Free Got %s\n", vgotten->to_string().c_str());
 
 	ValuePtr empty_result = createLinkValue(HandleSeq());
@@ -429,7 +425,7 @@ void StateLinkUTest::test_scope()
 				N(VARIABLE_NODE, "$x"), N(TYPE_NODE, "RuleLink")),
 			L(STATE_LINK, N(ANCHOR_NODE, "rule"), N(VARIABLE_NODE, "$x")));
 
-	ValuePtr vsgotten = inst.execute(scoped_get);
+	ValuePtr vsgotten = scoped_get->execute(&_as);
 	printf("Scoped Got %s\n", vsgotten->to_string().c_str());
 
 	ValuePtr scope_result = createLinkValue(HandleSeq{scoped});
@@ -441,7 +437,7 @@ void StateLinkUTest::test_scope()
 	// -------------------------------------------
 	// Repeating the free-var get should still NOT find the above!
 
-	ValuePtr vregotten = inst.execute(free_get);
+	ValuePtr vregotten = free_get->execute(&_as);
 	printf("Re-Free Got %s\n", vregotten->to_string().c_str());
 
 	// The result of the meet should be correct (still empty).

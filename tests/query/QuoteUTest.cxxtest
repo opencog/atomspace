@@ -331,8 +331,8 @@ void QuoteUTest::test_crash(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test for bug #646. QuoteLink placed below GetLink should not
-// be discarded by Instantiator before beginning of pattern matching.
+// Test for bug #646. QuoteLink placed below MeetLink should not
+// be discarded before beginning of pattern matching.
 void QuoteUTest::test_exec_getlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
