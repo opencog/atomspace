@@ -26,7 +26,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/scope/PutLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -124,8 +123,7 @@ void PutLinkUTest::test_define()
 		N(DEFINED_SCHEMA_NODE, "foobar"),
 		N(CONCEPT_NODE, "bbb"));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle pat =
 	L(INHERITANCE_LINK,
@@ -157,8 +155,7 @@ void PutLinkUTest::test_define_glob()
 						N(PREDICATE_NODE, "R"),
 						N(PREDICATE_NODE, "K"))));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected =
 			L(SET_LINK,
@@ -196,8 +193,7 @@ void PutLinkUTest::test_define_mixed_1()
 						N(PREDICATE_NODE, "R"),
 						N(PREDICATE_NODE, "K"))));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected =
 			L(SET_LINK,
@@ -241,8 +237,7 @@ void PutLinkUTest::test_define_mixed_2()
 							N(PREDICATE_NODE, "Q")),
 						N(PREDICATE_NODE, "R"))));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected =
 			L(SET_LINK,
@@ -289,8 +284,7 @@ void PutLinkUTest::test_filtering()
 				bar = N(CONCEPT_NODE, "bar")));
 
 	// Test that execution filters as desired...
-	Instantiator inst(_asp.get());
-	Handle cncpts = HandleCast(inst.execute(filt));
+	Handle cncpts = _asp->add_atom(HandleCast(filt->execute(_asp.get())));
 
 	printf("Filtered %s\n", cncpts->to_string().c_str());
 	TS_ASSERT_EQUALS(SET_LINK, cncpts->get_type());
@@ -307,7 +301,6 @@ void PutLinkUTest::test_filtering()
 void PutLinkUTest::test_function()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	Instantiator inst(_asp.get());
 
 	// Test that 2+2 = 4
 	// (Put (Plus) (List (Number 2) (Number 2)))
@@ -316,7 +309,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle four = HandleCast(inst.execute(want_four));
+	Handle four = _asp->add_atom(HandleCast(want_four->execute(_asp.get())));
 	Handle expected_four = N(NUMBER_NODE, "4");
 
 	printf("Expecting %s\n", expected_four->to_string().c_str());
@@ -328,7 +321,7 @@ void PutLinkUTest::test_function()
 	Handle want_two =
 		L(PUT_LINK, L(PLUS_LINK), N(NUMBER_NODE, "2"));
 
-	Handle two = HandleCast(inst.execute(want_two));
+	Handle two = _asp->add_atom(HandleCast(want_two->execute(_asp.get())));
 	Handle expected_two = N(NUMBER_NODE, "2");
 
 	printf("Expecting %s\n", expected_two->to_string().c_str());
@@ -342,7 +335,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK, N(NUMBER_NODE, "9")),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle thirteen = HandleCast(inst.execute(want_thirteen));
+	Handle thirteen = _asp->add_atom(HandleCast(want_thirteen->execute(_asp.get())));
 	Handle expected_thirteen = N(NUMBER_NODE, "13");
 
 	printf("Expecting %s\n", expected_thirteen->to_string().c_str());
@@ -356,7 +349,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK, N(NUMBER_NODE, "3"), N(NUMBER_NODE, "5")),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle twelve = HandleCast(inst.execute(want_twelve));
+	Handle twelve = _asp->add_atom(HandleCast(want_twelve->execute(_asp.get())));
 	Handle expected_twelve = N(NUMBER_NODE, "12");
 
 	printf("Expecting %s\n", expected_twelve->to_string().c_str());
@@ -385,7 +378,7 @@ void PutLinkUTest::test_function()
 					             N(NUMBER_NODE, "4"),
 					             N(NUMBER_NODE, "4"))));
 
-	Handle set = HandleCast(inst.execute(want_set));
+	Handle set = _asp->add_atom(HandleCast(want_set->execute(_asp.get())));
 	Handle expected_set =
 		L(SET_LINK,
 			N(NUMBER_NODE, "1"),
@@ -416,8 +409,7 @@ void PutLinkUTest::test_free_var_renaming()
 				N(VARIABLE_NODE, "$a"),
 				N(VARIABLE_NODE, "$b")));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
@@ -452,8 +444,7 @@ void PutLinkUTest::test_lambda()
 				N(CONCEPT_NODE, "animal"),
 				N(CONCEPT_NODE, "coyote")));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
@@ -487,8 +478,7 @@ void PutLinkUTest::test_lambda_partial_substitution()
 			lam,
 			N(CONCEPT_NODE, "animal"));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	// (Inheritance (Concept "animal") (Variable "$y"))
 	Handle expected_putted =
@@ -557,8 +547,7 @@ void PutLinkUTest::test_eta()
 					N(CONCEPT_NODE, "foobar"),
 					N(VARIABLE_NODE, "$w"))));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -615,8 +604,7 @@ void PutLinkUTest::test_alpha()
 				N(CONCEPT_NODE, "foobar"),
 				N(VARIABLE_NODE, "$w")));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -658,8 +646,7 @@ void PutLinkUTest::test_compose()
 	Handle put =
 		L(PUT_LINK, gee, eff);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -719,8 +706,7 @@ void PutLinkUTest::test_inject_compose()
 
 	Handle put = L(PUT_LINK, gee, eff);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -776,8 +762,7 @@ void PutLinkUTest::test_simple_alpha()
 
 	Handle put = L(PUT_LINK, gee, eff);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -840,8 +825,7 @@ void PutLinkUTest::test_simple_replace()
 
 	Handle put = L(PUT_LINK, gee, eff);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(UNORDERED_LINK,
@@ -898,8 +882,7 @@ void PutLinkUTest::test_typed_compose()
 	Handle put =
 		L(PUT_LINK, gee, eff);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -933,7 +916,7 @@ void PutLinkUTest::test_typed_compose()
 	try
 	{
 		put = L(PUT_LINK, gahhh, eff);
-		HandleCast(inst.execute(put));
+		HandleCast(put->execute(_asp.get()));
 	}
 	catch(const StandardException& ex)
 	{
@@ -983,8 +966,7 @@ void PutLinkUTest::test_ident_compose()
 	Handle put =
 		L(PUT_LINK, gee, L(LIST_LINK, ident, eff));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -1066,8 +1048,7 @@ void PutLinkUTest::test_recursive_compose()
 		L(PUT_LINK, gee,
 			L(LIST_LINK, ident, L(PUT_LINK, eff, inject)));
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -1157,8 +1138,7 @@ void PutLinkUTest::test_eval_inheritance()
 		args = L(LIST_LINK, Self, Bob),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 	Handle expected = L(UNORDERED_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Expecting %s\n", expected->to_string().c_str());
@@ -1210,8 +1190,7 @@ void PutLinkUTest::test_eval_implication_1()
 		vardecl = L(TYPED_VARIABLE_LINK, X, CT),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), A);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 	Handle expected = L(RULE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->to_string().c_str());
@@ -1291,8 +1270,7 @@ void PutLinkUTest::test_eval_implication_2()
 		args = L(LIST_LINK, Self, Bob),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
-	Instantiator inst(_asp.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 	Handle expected = L(UNORDERED_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Executing %s\n", put->to_string().c_str());
@@ -1340,8 +1318,7 @@ void PutLinkUTest::test_ill_unquote()
 		          L(UNQUOTE_LINK, x),
 		          L(UNQUOTE_LINK, g)));
 
-	Instantiator inst(_asp.get());
-	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(put)));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(put->execute(_asp.get())));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1381,9 +1358,8 @@ void PutLinkUTest::test_nested_1()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle nested_put = _eval->eval_h("nested-put-1"),
-		result = HandleCast(inst.execute(nested_put)),
+		result = _asp->add_atom(HandleCast(nested_put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-1");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1441,8 +1417,7 @@ void PutLinkUTest::test_nested_2()
 	Handle nested = _eval->eval_h("nested-put-2");
 	Handle expected = _eval->eval_h("expected-2");
 
-	Instantiator inst(_asp.get());
-	Handle result = HandleCast(inst.execute(nested));
+	Handle result = _asp->add_atom(HandleCast(nested->execute(_asp.get())));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1477,10 +1452,9 @@ void PutLinkUTest::test_nested_3()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle nested_put = _eval->eval_h("nested-put-3");
 
-	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(nested_put->execute(_asp.get())));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1509,10 +1483,9 @@ void PutLinkUTest::test_nested_4()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle nested_put = _eval->eval_h("nested-put-4");
 
-	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(nested_put->execute(_asp.get())));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1567,9 +1540,8 @@ void PutLinkUTest::test_nested_5()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle simple_put = _eval->eval_h("simple-put-5");
-	Handle result = HandleCast(inst.execute(simple_put));
+	Handle result = _asp->add_atom(HandleCast(simple_put->execute(_asp.get())));
 	Handle expected = _eval->eval_h("expected-5");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1578,7 +1550,7 @@ void PutLinkUTest::test_nested_5()
 	TS_ASSERT_EQUALS(result, expected);
 
 	Handle nested_put = _eval->eval_h("nested-put-5");
-	result = HandleCast(inst.execute(nested_put));
+	result = _asp->add_atom(HandleCast(nested_put->execute(_asp.get())));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1626,12 +1598,11 @@ void PutLinkUTest::test_and_compose_1()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle top = _eval->eval_h("top"),
 		and_sha_abs = _eval->eval_h("and-shallow-abstraction"),
 		put_top_and = L(PUT_LINK, top,
 		                and_sha_abs),
-		result = HandleCast(inst.execute(put_top_and)),
+		result = _asp->add_atom(HandleCast(put_top_and->execute(_asp.get()))),
 		expected = and_sha_abs;
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1686,7 +1657,6 @@ void PutLinkUTest::test_and_compose_2()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle inh_sha_abs = _eval->eval_h("inheritance-shallow-abstraction"),
 		and_sha_abs = _eval->eval_h("and-shallow-abstraction"),
 		spe_var = N(VARIABLE_NODE, "$spe-0"),
@@ -1694,7 +1664,7 @@ void PutLinkUTest::test_and_compose_2()
 		sha_var_2 = N(VARIABLE_NODE, "$sha-arg-1"),
 		put_inh_and = L(PUT_LINK, inh_sha_abs,
 		                L(LIST_LINK, spe_var, and_sha_abs)),
-		result = HandleCast(inst.execute(put_inh_and)),
+		result = _asp->add_atom(HandleCast(put_inh_and->execute(_asp.get()))),
 		expected = L(LAMBDA_LINK,
 		             L(VARIABLE_LIST,
 		               spe_var,
@@ -1729,7 +1699,6 @@ void PutLinkUTest::test_quoted_put()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Instantiator inst(_asp.get());
 	Handle quoted_put = L(QUOTE_LINK,
 	                      L(PUT_LINK,
 	                        L(LAMBDA_LINK,
@@ -1768,9 +1737,8 @@ void PutLinkUTest::test_tricky_put_1()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-1"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-1");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1801,9 +1769,8 @@ void PutLinkUTest::test_tricky_put_2()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-2"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-2");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1835,9 +1802,8 @@ void PutLinkUTest::test_tricky_put_3()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-3");
-	Handle result = HandleCast(inst.execute(put));
+	Handle result = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 	Handle expected = _eval->eval_h("expected-3");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1876,9 +1842,8 @@ void PutLinkUTest::test_tricky_put_4()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-4");
-	Handle result = HandleCast(inst.execute(put));
+	Handle result = _asp->add_atom(HandleCast(put->execute(_asp.get())));
 	Handle expected = _eval->eval_h("expected-4");
 	Handle unexpected = _eval->eval_h("unexpected-4");
 
@@ -1925,9 +1890,8 @@ void PutLinkUTest::test_tricky_put_5()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-5"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-5");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1949,9 +1913,8 @@ void PutLinkUTest::test_tricky_put_6()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-6"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-6");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1973,9 +1936,8 @@ void PutLinkUTest::test_tricky_put_7()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-7"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-7");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -2020,9 +1982,8 @@ void PutLinkUTest::test_quoted_exec()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-quoted.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-quoted-exec"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("quoted-exec");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -2067,9 +2028,8 @@ void PutLinkUTest::test_quoted_eval()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-quoted.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-quoted-eval"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("quoted-eval");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -2128,9 +2088,8 @@ void PutLinkUTest::test_quoted_lambda()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-quoted-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-quoted-conjuction-lambda"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("put-quoted-conjuction-lambda-result");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -2180,9 +2139,8 @@ void PutLinkUTest::test_get()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-get.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-get"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-put-get");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -2232,9 +2190,8 @@ void PutLinkUTest::test_get_lambda()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-get-lambda.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle put = _eval->eval_h("put-get-lambda"),
-		result = HandleCast(inst.execute(put)),
+		result = _asp->add_atom(HandleCast(put->execute(_asp.get()))),
 		expected = _eval->eval_h("expected-put-get-lambda");
 
 	logger().debug() << "result = " << oc_to_string(result);
