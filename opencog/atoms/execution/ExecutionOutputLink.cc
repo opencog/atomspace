@@ -115,17 +115,6 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	if (res->is_executable())
 		vp = res->execute(scratch.tmp, silent);
 
-	// Need to handle constructions such as
-	// (ExecutionOutput
-	//    (Lambda
-	//        (VariableList (Variable "$A") (Variable "$B"))
-	//        (LessThan (Variable "$A") (Variable "$B")))
-	else if (res->is_type(EVALUATABLE_LINK))
-	{
-		Instantiator inst(scratch.tmp);
-		vp = inst.execute(res);
-	}
-
 	if (vp and vp->is_atom())
 		return as->add_atom(HandleCast(vp));
 
