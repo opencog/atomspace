@@ -534,6 +534,7 @@ public:
     virtual bool bevaluate(AtomSpace*, bool silent=false) {
         throw RuntimeException(TRACE_INFO, "Not evaluatable!");
     }
+    virtual bool bevaluate(void) { return bevaluate(_atom_space, false); }
 
     // Non-crisp evaluation is deprecated. Changed to return BoolValue.
     virtual ValuePtr evaluate(AtomSpace* as, bool silent=false) {
