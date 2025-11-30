@@ -26,7 +26,6 @@
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/scope/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/flow/ValueShimLink.h>
 
 #include "Instantiator.h"
@@ -511,9 +510,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
 	{
-		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
-		return EvaluationLink::do_evaluate(_as, expr, silent);
+		Handle defn(DefineLink::get_definition(expr));
+		return defn->execute(_as, silent);
 	}
 
 	if (PUT_LINK == t)
