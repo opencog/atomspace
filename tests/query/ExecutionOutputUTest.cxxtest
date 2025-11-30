@@ -305,9 +305,8 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 		N21 = an(NUMBER_NODE, "21"),
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
-	Instantiator inst(as.get());
 	Handle expected = an(NUMBER_NODE, "42");
-	Handle result = HandleCast(inst.execute(twice21));
+	Handle result = HandleCast(twice21->execute(as.get()));
 	result = as->add_atom(result);
 
 	TS_ASSERT_EQUALS(expected, result);
@@ -316,7 +315,7 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 
 	Handle N21_LST = al(LIST_LINK, N21);
 	Handle twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST);
-	Handle result_lst = HandleCast(inst.execute(twice21_lst));
+	Handle result_lst = HandleCast(twice21_lst->execute(as.get()));
 	result_lst = as->add_atom(result_lst);
 
 	TS_ASSERT_EQUALS(expected, result_lst);
@@ -345,9 +344,8 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 	Handle exec =
 		al(EXECUTION_OUTPUT_LINK, identity, AB);
 
-	Instantiator inst(as.get());
 	Handle expected = AB;
-	Handle result = HandleCast(inst.execute(exec));
+	Handle result = HandleCast(exec->execute(as.get()));
 
 	TS_ASSERT_EQUALS(expected, result);
 
