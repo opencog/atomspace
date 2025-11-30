@@ -146,8 +146,9 @@ void PutLinkUTest::test_define_glob()
 	Handle put =
 			L(PUT_LINK,
 				N(GLOB_NODE, "$g"),
-				L(AND_LINK,
-					N(GLOB_NODE, "$g")),
+				L(DONT_EXEC_LINK,
+					L(AND_LINK,
+						N(GLOB_NODE, "$g"))),
 				L(SET_LINK,
 					L(LIST_LINK,
 						N(PREDICATE_NODE, "P"),
@@ -224,9 +225,10 @@ void PutLinkUTest::test_define_mixed_2()
 				L(VARIABLE_LIST,
 					N(GLOB_NODE, "$g"),
 					N(VARIABLE_NODE, "$v")),
-				L(AND_LINK,
-					N(GLOB_NODE, "$g"),
-					N(VARIABLE_NODE, "$v")),
+				L(DONT_EXEC_LINK,
+					L(AND_LINK,
+						N(GLOB_NODE, "$g"),
+						N(VARIABLE_NODE, "$v"))),
 				L(SET_LINK,
 					L(LIST_LINK,
 						L(LIST_LINK,
@@ -826,7 +828,7 @@ void PutLinkUTest::test_simple_replace()
 	Handle gee =
 		L(LAMBDA_LINK,
 			L(VARIABLE_LIST, X, Y, Z, W),
-			L(AND_LINK,
+			L(UNORDERED_LINK,
 				L(INHERITANCE_LINK, X, Y),
 				L(INHERITANCE_LINK, Z, W)));
 
@@ -842,7 +844,7 @@ void PutLinkUTest::test_simple_replace()
 	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
-		L(AND_LINK,
+		L(UNORDERED_LINK,
 			L(INHERITANCE_LINK, A, B),
 			L(INHERITANCE_LINK, B, C));
 
@@ -1151,13 +1153,13 @@ void PutLinkUTest::test_eval_inheritance()
 		vardecl = L(VARIABLE_LIST,
 		            L(TYPED_VARIABLE_LINK, X, Concept),
 		            L(TYPED_VARIABLE_LINK, Y, Concept)),
-		body = L(AND_LINK, X_human, Y_human, X_Y_acquainted),
+		body = L(UNORDERED_LINK, X_human, Y_human, X_Y_acquainted),
 		args = L(LIST_LINK, Self, Bob),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
 	Instantiator inst(_asp.get());
 	Handle putted = HandleCast(inst.execute(put));
-	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
+	Handle expected = L(UNORDERED_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Expecting %s\n", expected->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
@@ -1285,13 +1287,13 @@ void PutLinkUTest::test_eval_implication_2()
 		vardecl = L(VARIABLE_LIST,
 		            L(TYPED_VARIABLE_LINK, X, Predicate),
 		            L(TYPED_VARIABLE_LINK, Y, Predicate)),
-		body = L(AND_LINK, X_human, Y_human, X_Y_acquainted),
+		body = L(UNORDERED_LINK, X_human, Y_human, X_Y_acquainted),
 		args = L(LIST_LINK, Self, Bob),
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
 	Instantiator inst(_asp.get());
 	Handle putted = HandleCast(inst.execute(put));
-	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
+	Handle expected = L(UNORDERED_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Executing %s\n", put->to_string().c_str());
 	printf("Expecting %s\n", expected->to_string().c_str());
