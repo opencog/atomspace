@@ -29,7 +29,7 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
@@ -39,7 +39,7 @@
                                     (VariableNode "$X")
                                     (VariableNode "$B")))))
 
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")
@@ -83,7 +83,7 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
@@ -93,7 +93,7 @@
                                     (VariableNode "$X")
                                     (VariableNode "$B")))))
 
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")

@@ -35,7 +35,7 @@
 ;;       (TypeNode "PredicateNode")
 ;;     )
 ;;   )
-;;   (MemberLink
+;;   (TagLink
 ;;     (ConceptNode "ChurchOfEngland")
 ;;     (ConceptNode "AnglicanChurch")
 ;;   )
@@ -48,7 +48,7 @@
 ;;   )
 ;; )
 
-(MemberLink
+(TagLink
   (ConceptNode "ChurchOfEngland")
   (ConceptNode "AnglicanChurch")
 )
@@ -64,7 +64,7 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "?C")
          (ConceptNode "AnglicanChurch")
       )
@@ -77,7 +77,7 @@
                (TypeNode "PredicateNode")
             )
          )
-         (MemberLink
+         (TagLink
             (VariableNode "?C")
             (ConceptNode "AnglicanChurch")
          )

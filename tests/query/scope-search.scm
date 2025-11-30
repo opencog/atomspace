@@ -14,7 +14,7 @@
 ;; Helper functions
 
 (define (content-1)
-   (MemberLink
+   (TagLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (ScopeLink
          (VariableNode "$X")
@@ -31,8 +31,8 @@
 
 
 (define (content-2)
-; MemberLink having the same Variable name as rule
-   (MemberLink
+; TagLink having the same Variable name as rule
+   (TagLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (ScopeLink
          (VariableNode "$X-M2E")
@@ -59,7 +59,7 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "$B")
          (ScopeLink
             (VariableNode "$X-M2E")
@@ -82,7 +82,7 @@
                   (VariableNode "$C")
                )
             )
-            (MemberLink
+            (TagLink
                (VariableNode "$B")
                (ScopeLink
                   (VariableNode "$X-M2E")
@@ -114,7 +114,7 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "$B")
          (ScopeLink
             (VariableNode "$X-M2E")
@@ -137,7 +137,7 @@
                   (VariableNode "$C")
                )
             )
-            (MemberLink
+            (TagLink
                (VariableNode "$B")
                (ScopeLink
                   (VariableNode "$some-bound-var")
