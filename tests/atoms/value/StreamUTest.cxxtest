@@ -8,8 +8,6 @@
 
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -445,12 +443,12 @@ void StreamUTest::test_chaining()
 	Handle flipkey = an(PREDICATE_NODE, "*-binary-flip-*");
 	atom->setValue(flipkey, coinflip);
 
-	Handle chainof = al(FLOAT_VALUE_OF_LINK, atom, flipkey);
+	Handle chainof = al(BOOL_VALUE_OF_LINK, atom, flipkey);
 
 	double sum = 0.0;
 	for (int i=0; i<LOOPCNT*LEN; i++)
 	{
-		bool result = EvaluationLink::crisp_eval_scratch(_asp.get(), chainof, _asp.get());
+		bool result = chainof->bevaluate(_asp.get());
 		if (result) sum += 1.0;
 	}
 
