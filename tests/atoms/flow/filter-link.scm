@@ -650,8 +650,8 @@
       (Edge
          (PredicateNode "foo")
          (List (Variable "$x") (Variable "$y")))
-      (Member (Variable "$x") (Concept "all things frob"))
-      (Member (Variable "$y") (Concept "orange-colored things"))))
+      (Tag (Variable "$x") (Concept "all things frob"))
+      (Tag (Variable "$y") (Concept "orange-colored things"))))
 
 (define frob-rule
    (Filter
@@ -670,10 +670,10 @@
 (define frob-expect
   (Set
     (List
-      (Member
+      (Tag
         (Concept "A")
         (Concept "all things frob"))
-      (Member
+      (Tag
         (Concept "B")
         (Concept "orange-colored things")))))
 
@@ -687,7 +687,7 @@
          ; (PredicateNode "foo")
          (Sign 'PredicateNode)
          (List (Sign 'Concept) (Variable "$x")))
-      (Member (Variable "$x") (Concept "extract things"))))
+      (Tag (Variable "$x") (Concept "extract things"))))
 
 (define sign-filter
    (Filter
@@ -705,10 +705,10 @@
 
 (define sign-expect
 (SetLink
-  (MemberLink
+  (Tag
     (ConceptNode "D")
     (ConceptNode "extract things"))
-  (MemberLink
+  (Tag
     (ConceptNode "B")
     (ConceptNode "extract things"))))
 
