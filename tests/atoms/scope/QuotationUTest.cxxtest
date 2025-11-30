@@ -23,7 +23,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/Instantiator.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -70,9 +69,10 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/put-and.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle and_sha_abs = _eval->eval_h("and-shallow-abstraction"),
-		result = HandleCast(inst.execute(and_sha_abs)),
+		result = and_sha_abs->is_executable()
+			? HandleCast(and_sha_abs->execute(_asp.get()))
+			: and_sha_abs,
 		expected = and_sha_abs;
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -107,9 +107,10 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(_asp.get());
 	Handle quoted_lambda = _eval->eval_h("quoted-lambda"),
-		result = HandleCast(inst.execute(quoted_lambda)),
+		result = quoted_lambda->is_executable()
+			? HandleCast(quoted_lambda->execute(_asp.get()))
+			: quoted_lambda,
 		expected = quoted_lambda;
 
 	logger().debug() << "result = " << oc_to_string(result);
