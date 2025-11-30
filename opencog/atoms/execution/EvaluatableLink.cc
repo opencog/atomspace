@@ -147,18 +147,12 @@ static ValuePtr exec_or_eval(AtomSpace* as,
                              AtomSpace* scratch,
                              bool silent)
 {
-	if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
+	// PutLinks lie to us. That's OK, for now...
+	// if (term->is_evaluatable())
+	if (term->is_type(EVALUATABLE_LINK))
 	{
-		try
-		{
-			if (EvaluationLink::crisp_eval_scratch(as, term, scratch, silent))
-				return ValueCast(createBoolValue(true));
-			return ValueCast(createBoolValue(false));
-		}
-		catch (const SilentException& ex)
-		{
-			return term;
-		}
+		bool crisp = term->bevaluate(scratch, silent);
+		return ValueCast(createBoolValue(crisp));
 	}
 
 	// Nothing to do, here.
