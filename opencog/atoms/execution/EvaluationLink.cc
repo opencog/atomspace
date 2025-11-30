@@ -24,16 +24,10 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
-#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/scope/PutLink.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/reduct/FoldLink.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/BoolValue.h>
-#include <opencog/atoms/value/LinkValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 
