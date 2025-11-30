@@ -133,7 +133,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 			Handle plk = _continuation->getOutgoingAtom(0);
 			AtomSpace* tas = TermMatchMixin::_temp_aspace;
 			tas->clear();
-			bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+			bool crispy = plk->bevaluate(tas);
 
 			DO_LOG({LAZY_LOG_FINE << "Finish continuing, cnt=" << cnt
 				<< " result=" << crispy; })
