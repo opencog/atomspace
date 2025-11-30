@@ -22,7 +22,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
@@ -171,8 +170,10 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 		return term->execute();
 	}
 
-	Instantiator inst(as);
-	ValuePtr vp(inst.execute(sterm, silent));
+	if (not sterm->is_executable())
+		return sterm;
+
+	ValuePtr vp(sterm->execute(as, silent));
 
 	// If the return value is a ContainerValue, we assume that this
 	// is the result of executing a MeetLink or QueryLink.
@@ -184,7 +185,8 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 		if (1 == hs.size())
 			vp = hs[0];
 	}
-	if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
+	// if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
+	if (vp->is_atom()) as->add_atom(HandleCast(vp));
 	return vp;
 }
 
