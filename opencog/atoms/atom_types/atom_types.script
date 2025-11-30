@@ -324,18 +324,26 @@ CONTEXT_LINK <- ORDERED_LINK
 // sequential execution until the first failure or the first success.
 // See also CondLink below, which implements traditional conditional.
 //
-// XXX FIXME These types are widely and frequently misused in the code
-// base: people have used them in places where there is no intent
-// whatsoever to actually execute these link types. They're used in
-// an entirely declarative fashion. This should be cleaned up, someday.
+// XXX FIXME AndLink is widely and frequently misused in the code
+// base: people have used it in places where there is no intent
+// whatsoever to actually execute it. It was originally conceived to
+// be purely declarative, and that is how it got used. Most of that
+// old code has now gone to the trash-bin, but a bit of bizareness
+// remains: PutLinkUTest explicitly wraps AndLink with DontExec,
+// which sounds great, right? But then, after reduction, a bare
+// AndLink materializes, and gets executed. This is a PutLink design
+// bug: it tries to execute it's arguments before beta-reducing, and
+// then it beta-reduces, and then tries to execute the result. There's
+// a lot of awkwardness from this double execution. So hack around
+// this by keeping AndLin non-executable...
 //
-TRUE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
-FALSE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
-AND_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
-OR_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
-NOT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
-SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG // ,CRISP_INPUT_SIG
-SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG,CRISP_INPUT_SIG
+TRUE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
+FALSE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
+AND_LINK <- UNORDERED_LINK, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG // EVALUATABLE_LINK
+OR_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
+NOT_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
+SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG // ,CRISP_INPUT_SIG
+SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
