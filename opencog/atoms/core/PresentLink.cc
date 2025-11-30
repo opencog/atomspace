@@ -38,7 +38,7 @@ void PresentLink::init(void)
 	HandleSeq uniq;
 	uniq.push_back(_outgoing[0]);  // The first one is always good.
 
-	// Look for an remove duplicates.
+	// Look for and remove duplicates.
 	Arity lst = 0;
 	Arity nxt = 1;
 	while (nxt < sz)
@@ -56,7 +56,7 @@ void PresentLink::init(void)
 }
 
 PresentLink::PresentLink(const HandleSeq&& oset, Type t)
-	: UnorderedLink(std::move(oset), t)
+	: EvaluatableLink(std::move(oset), t)
 {
 	if (not nameserver().isA(t, PRESENT_LINK))
 	{

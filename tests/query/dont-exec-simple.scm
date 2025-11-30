@@ -8,7 +8,7 @@
 
 ; Evaluating the below should just return the bad-and
 (define put-and
-	(Put (DontExec (AndLink (Variable "$x")(Variable "$y")))
+	(Put (DontExec (AndLink (Variable "$x") (Variable "$y")))
 		(ListLink (Concept "a") (Concept "b"))))
 
 ; A multi-argument put whose EvaluationLink should not evaluate

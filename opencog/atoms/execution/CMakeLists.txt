@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (execution
 	Force.cc
+	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
 	Instantiator.cc
@@ -26,6 +27,7 @@ INSTALL (TARGETS execution
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
+	EvaluatableLink.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
 	Force.h

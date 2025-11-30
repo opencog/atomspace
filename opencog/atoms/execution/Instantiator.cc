@@ -591,7 +591,7 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	if (expr->is_type(EVALUATION_LINK))
 		return expr->execute(_as, silent);
 	if (expr->is_type(EVALUATABLE_LINK))
-		return EvaluationLink::do_evaluate(exas, expr, silent);
+		return expr->execute(_as, silent);
 
 	if (expr->is_type(NODE) and expr->is_executable())
 		return expr->execute(_as, silent);
