@@ -22,7 +22,6 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -311,9 +310,8 @@ void FilterLinkUTest::xtest_local_quote_map(void)
 
     eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
 
-    Instantiator inst(as.get());
     Handle local_quote_map = eval->eval_h("local-quote-map"),
-        result = HandleCast(inst.execute(local_quote_map)),
+        result = HandleCast(local_quote_map->execute(as.get())),
         expected1 = eval->eval_h("local-quote-map-result-1"),
         expected2 = eval->eval_h("local-quote-map-result-2");
 
@@ -334,9 +332,8 @@ void FilterLinkUTest::xtest_quote_arg_map(void)
 
     eval->eval("(load-from-path \"tests/atoms/flow/filter-link.scm\")");
 
-    Instantiator inst(as.get());
     Handle quote_arg_map = eval->eval_h("quote-arg-map"),
-        result = HandleCast(inst.execute(quote_arg_map)),
+        result = HandleCast(quote_arg_map->execute(as.get())),
         expected = eval->eval_h("quote-arg-map-result");
 
     printf("result %s", result->to_string().c_str());
