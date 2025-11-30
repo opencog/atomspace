@@ -50,16 +50,21 @@ using namespace opencog;
 ///
 Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 {
-	Instantiator inst(as);
-
 	if (LIST_LINK != cargs->get_type())
 	{
-		Handle args(HandleCast(inst.execute(cargs, silent)));
-		if (nullptr != args and args != cargs)
-			args = as->add_atom(args);
-		return args;
+		if (not cargs->is_executable())
+			return cargs;
+
+		ValuePtr vp(cargs->execute(as, silent));
+		if (not vp->is_atom())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting Atom, got %s when executing %s",
+				vp->to_string().c_str(), cargs->to_string().c_str());
+
+		return as->add_atom(HandleCast(vp));
 	}
 
+Instantiator inst(as);
 	Handle args(cargs);
 	HandleSeq new_oset;
 	bool changed = false;
