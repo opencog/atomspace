@@ -23,7 +23,6 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/free/Replacement.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 
 #include "ContinuationMixin.h"
 
