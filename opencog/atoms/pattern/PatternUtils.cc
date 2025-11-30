@@ -47,6 +47,8 @@ bool can_evaluate(const Handle& clause)
 		   and not (PRESENT_LINK == ct)
 		   and not (ABSENT_LINK == ct)
 		   and not (CHOICE_LINK == ct)
+		   and not (MEMBER_LINK == ct)
+		   and not (SUBSET_LINK == ct)
 		   and (not (EVALUATION_LINK == ct)
 		      or 0 == clause->get_arity()
 		      or nameserver().isA(clause->getOutgoingAtom(0)->get_type(),
