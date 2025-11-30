@@ -23,7 +23,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/QueueValue.h>
@@ -469,8 +468,7 @@ void ExecutionOutputUTest::test_lambda(void)
 	eval->eval("(load-from-path \"tests/query/exec-lambda.scm\")");
 	Handle bl = eval->eval_h("bl");
 
-	Instantiator inst(as.get());
-	ValuePtr result = inst.execute(bl);
+	ValuePtr result = bl->execute(as.get());
 	Handle lamb = al(LAMBDA_LINK, {
 	                  an(VARIABLE_NODE, "$X"),
 	                  al(EDGE_LINK, {
@@ -494,8 +492,7 @@ void ExecutionOutputUTest::test_lambda_get(void)
 	eval->eval("(load-from-path \"tests/query/exec-lambda-get.scm\")");
 	Handle exo = eval->eval_h("exo");
 
-	Instantiator inst(as.get());
-	Handle result = HandleCast(inst.execute(exo));
+	Handle result = as->add_atom(HandleCast(exo->execute(as.get())));
 	Handle expect = al(SET_LINK, {an(NUMBER_NODE, "0.6")});
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -552,9 +549,7 @@ void ExecutionOutputUTest::test_variable_schema(void)
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
 	})});
-	Instantiator inst(as.get());
-
-	ValuePtr result = inst.execute(get_link);
+	ValuePtr result = get_link->execute(as.get());
 	TS_ASSERT_EQUALS(result, al(SET_LINK, {an(NUMBER_NODE, "42")}));
 }
 
@@ -581,9 +576,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
 	})});
-	Instantiator inst(as.get());
-
-	ValuePtr result = inst.execute(bind_link);
+	ValuePtr result = bind_link->execute(as.get());
 
 	TS_ASSERT_EQUALS(result, al(SET_LINK, {an(NUMBER_NODE, "42")}));
 }
