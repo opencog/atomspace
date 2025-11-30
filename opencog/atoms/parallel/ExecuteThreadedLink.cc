@@ -28,7 +28,6 @@
 #include <opencog/util/concurrent_queue.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ExecuteThreadedLink.h>
 #include <opencog/atoms/value/QueueValue.h>
 
@@ -119,13 +118,11 @@ static void thread_exec(AtomSpace* as, bool silent,
 	{
 		Handle h;
 		if (not todo->try_get(h)) return;
+		if (not h->is_executable()) return;
 
-		// This is (supposed to be) identical to what cog-execute!
-		// would do...
-		Instantiator inst(as);
 		try
 		{
-			ValuePtr pap(inst.execute(h));
+			ValuePtr pap(h->execute(as, silent));
 			if (pap and pap->is_atom())
 				pap = as->add_atom(HandleCast(pap));
 			qvp->add(std::move(pap));
