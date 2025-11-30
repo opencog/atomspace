@@ -21,10 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <algorithm>
-#include <opencog/util/mt19937ar.h>
-
 #include "UnorderedLink.h"
+#include <algorithm>
 
 using namespace opencog;
 
