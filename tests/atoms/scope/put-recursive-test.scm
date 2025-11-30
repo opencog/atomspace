@@ -14,9 +14,11 @@
 	(Lambda
 		(VariableList (Variable "this") (Variable "that"))
 		(SequentialOr
-			(Inheritance (Variable "this") (Variable "that"))
+			(Present
+				(Inheritance (Variable "this") (Variable "that")))
 			(SequentialAnd
-				(Inheritance (Variable "this") (Variable "middle"))
+				(Present
+					(Inheritance (Variable "this") (Variable "middle")))
 				(Put (DefinedSchema "is-a relation")
 					(List (Variable "middle") (Variable "that")))))))
 
