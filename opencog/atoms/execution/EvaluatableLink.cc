@@ -56,7 +56,7 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 	// correct". But for now, this technical hack seems ... tolerable.
 	// I really don't want to be pedantic for this stuff. It seems
 	// OK to wing it, sometimes...
-	if (nameserver().isA(t, UNORDERED_LINK))
+	if (nameserver().isA(t, UNORDERED_SIG))
 	{
 		_unordered = true;
 		// Place into arbitrary, but deterministic order. We use

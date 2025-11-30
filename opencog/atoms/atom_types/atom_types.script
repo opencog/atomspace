@@ -122,6 +122,13 @@ TYPE_INPUT_SIG <- SIG
 // Type-output link. Generates Types upon execution.
 TYPE_OUTPUT_SIG <- SIG
 
+// Some link types are explicitly ordered or unordered; for example,
+// SequentialAnd must be ordered; EqualLink is not ordered. This is
+// declared as a signature mixin type, so as to avoid going through
+// the UnorderedLink c++ ctor "by accident", in the nameserver factory.
+ORDERED_SIG <- SIG
+UNORDERED_SIG <- SIG
+
 // Alpha-convertible links are those that bind variables, and, per
 // conventional theory, the bound variable names have no significance
 // outside of the link. Typical examples are the lambda of lambda
@@ -234,8 +241,8 @@ CONCEPT_NODE <- NODE
 NUMBER_NODE <- NODE
 
 // Basic Links
-ORDERED_LINK <- LINK
-UNORDERED_LINK <- LINK
+ORDERED_LINK <- LINK,ORDERED_SIG
+UNORDERED_LINK <- LINK,UNORDERED_SIG
 
 // A PredicateNode is the primary subobject classifier of Atomese.
 // When a PredicateNode is evaluated in some setting, the result is
@@ -929,22 +936,22 @@ LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 
 // Test whether all outgoing Atoms are closed, that is, if the
 // they do not contain any free variables.
-IS_CLOSED_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+IS_CLOSED_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it is true only if both sides are the same Atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same Atom.
-IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
-EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+IDENTICAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
+EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // AlphaEqualLink tests to see if both sides are the same, up to an
 // alpha-renaming of any variables that they may have.
-ALPHA_EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+ALPHA_EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // ExclusiveLink tests to make sure all elements differ from
 // one-another. True only if they all differ...
-EXCLUSIVE_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+EXCLUSIVE_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
@@ -1347,7 +1354,8 @@ PYTHON_AST <- FOREIGN_AST
 // Some of these need to be moved to the URE.
 
 // This is a marker used to avoid type-checking in the static type
-// checker. See `atoms/core/Checkers.cc`
+// checker. See `atoms/core/Checkers.cc` XXX FIXME, should probably
+// be a SIG ...
 DIRECTLY_EVALUATABLE_LINK <- LINK
 
 // The ImplicationLink and the InheritanceLink ... these are really
@@ -1371,7 +1379,8 @@ INHERITANCE_LINK <- ORDERED_LINK, DIRECTLY_EVALUATABLE_LINK
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
 // A relation much stronger than Similarity, and not just EqualLink.
-// Used only in unit tests, at this time.
+// Used only in unit tests, at this time. So, basically, unimplemented.
+// EQUIVALENCE_LINK <- EVALUATABLE_LINK,UNORDERED_SIG
 EQUIVALENCE_LINK <- UNORDERED_LINK
 
 // Undocumented mystery link. Used in unit tests.

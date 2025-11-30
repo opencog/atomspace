@@ -772,8 +772,9 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 		// knee in the curve is at 4 or fewer UnorderedLinks in a clause.
 		// Note that UnorderedUTest has some very unusual patterns,
 		// exploring many tens of thousands of combinations, something
-		// that most ussers will surely almost never do :-)
-		if (4 < contains_atomtype_count(claw, UNORDERED_LINK)) continue;
+		// that most users will surely almost never do :-)
+		if (4 < (contains_atomtype_count(claw, UNORDERED_LINK) +
+		         contains_atomtype_count(claw, UNORDERED_SIG))) continue;
 
 		_pat.cacheable_clauses.insert(claw);
 	}
@@ -1194,7 +1195,8 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 	}
 
 	// If the term is unordered, all parents must know about it.
-	if (nameserver().isA(t, UNORDERED_LINK))
+	if (nameserver().isA(t, UNORDERED_LINK) or
+	    nameserver().isA(t, UNORDERED_SIG))
 	{
 		// If there's a GlobNode in here, make sure there's only one.
 		// Unordered links with globs hit the "sparse" pattern match.
