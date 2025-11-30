@@ -257,9 +257,21 @@ static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 		throw SyntaxException(TRACE_INFO,
 		     "AlphaEqualLink expects two arguments");
 
-	Instantiator inst(as);
-	Handle h0(HandleCast(inst.execute(oset[0], silent)));
-	Handle h1(HandleCast(inst.execute(oset[1], silent)));
+	Handle h0(oset[0]);
+	if (h0->is_executable())
+	{
+		ValuePtr vp(h0->execute(as, silent));
+		if (not vp->is_atom()) return false;
+		h0 = HandleCast(vp);
+	}
+
+	Handle h1(oset[1]);
+	if (h1->is_executable())
+	{
+		ValuePtr vp(h1->execute(as, silent));
+		if (not vp->is_atom()) return false;
+		h1 = HandleCast(vp);
+	}
 
 	// Are they strictly equal? Good!
 	if (h0 == h1)
