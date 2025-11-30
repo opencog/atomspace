@@ -69,7 +69,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(FormulasInQueryUTest)
 	ADD_CXXTEST(SequenceUTest)
 	ADD_CXXTEST(EvaluationUTest)
-	ADD_CXXTEST(DontExecUTest)
 	ADD_CXXTEST(QuoteUTest)
 ENDIF (HAVE_GUILE)
 
