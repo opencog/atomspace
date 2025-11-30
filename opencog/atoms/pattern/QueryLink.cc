@@ -170,10 +170,19 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
-		Instantiator inst(as);
 		cvp->open();
 		for (const Handle& himp: get_implicand())
-			cvp->add(std::move(inst.execute(himp, true)));
+		{
+			if (himp->is_executable())
+			{
+				ValuePtr vp(himp->execute(as, true));
+				if (vp->is_atom())
+					vp = as->add_atom(HandleCast(vp));
+				cvp->add(std::move(vp));
+			}
+			else
+				cvp->add(himp);
+		}
 		cvp->close();
 		return cvp;
 	}
