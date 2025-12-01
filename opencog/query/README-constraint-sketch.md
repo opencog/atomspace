@@ -259,4 +259,33 @@ very complex, and might not be easy to extend.
 The handling for AlwaysLink, and the handling for GroupByLink can be
 removed, by refactoring them into Streams.
 
+You might be misunderstanding the role of IdenticalLink, and of virtual
+links in general.  If these links are ignored, then the graph to be
+searched over might have multiple disjoint, disconnected pieces.
+Currently, each disjoint component is grounded independently. A
+complete set of groundings are created for each.  Then a cartesian
+product is taken. The virtual links are bridges that connect these
+disjoint solution sets; conflicting solutions are discarded. The
+EqualLink is a prototypical example of a virtual link: if disjoint
+component A has variable X in it, and disjoint component B has Y in it,
+and there is an (Equal X Y) then all elements in the cartesian product
+AxB where X!=Y are discarded. This is already handled in the current
+code. It is handled for arbitrary, opaque (Foobar X Y) expressions,
+even (Foobar X Y Z W) where  X Y Z W might be in the same component or
+diferent ones, bridging across allo of them. So the code already has a
+certain kind of conflict-driven constraint system built into it. And it
+works well, its in the unit tests. It even works with unordered links.
+However, the base design was that the disjoint components could be
+identified, and indepenedently grounded. Then afterwards, the conflicts
+are explored, and the Cartesian product is narrowed down.  You can look
+for the word "Cartesian" in the code. What you have proposed for the
+exclusive-choice constraint system is similar, in many respects, except
+that your proposal does not have to deal with constrins on disjoint
+pieces. I don't see any easy way of adapting the existing
+disjoint-component code to handle this new case ... but maybe ...?
+Anyway, IdenticalLink makes components that "look disjoint" be "not
+actually disjoint". Unfortunately, the EqualLink is not strong enough
+to do this, so the code talks only of IdenticalLink and treats
+EqualLink as a black box opaque constraint.
+
 --------
