@@ -44,7 +44,10 @@
 	(CollectionOf
 	(QueryLink
 		; There are eighty-one variables! 81 = 9x9 cells
-		(VariableList (variable-decls))
+		(VariableList
+			(map
+				(lambda (var) (TypedVariable var (Type 'Concept)))
+				(variable-decls)))
 		(AndLink
 			; For this puzzle, 24 of the variables are fixed immediately.
 			(EvaluationLink (PredicateNode "fix12") (VariableNode "$cell_12"))
