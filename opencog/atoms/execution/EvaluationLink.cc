@@ -224,74 +224,27 @@ bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
 }
 
-/// `crisp_eval_scratch()` -- evaluate any Atoms that can meaningfully
-/// result in a crisp-logic, binary true/false truth value.
-///
-/// This handles evaluation of all crisp Boolean-logic constructs including:
-/// - Logical constants (TrueLink, FalseLink)
-/// - Logical connectives (NotLink, AndLink, OrLink, SequentialAndLink, etc.)
-/// - Comparison operations (GreaterThanLink, EqualLink, IdenticalLink, etc.)
-/// - Predicates (EvaluationLink with GroundedPredicateNode, DefinedPredicateNode)
-/// - Special forms (PutLink)
-/// - Set operations (MemberLink, SubsetLink, ExclusiveLink)
-///
-/// All evaluation is done with crisp Boolean semantics - there are no
-/// fuzzy or probabilistic truth values involved. Results are always
-/// true or false.
-///
-/// The implementation here is one big case-statement. It works.
-/// In the long-run, it might be better to just have C++ classes for
-/// each distinct atom type, and have an `evaluate()` method on each.
-/// Whatever. Performance is probably about the same, and for just right
-/// now, this is straight-forward and it works.
-///
-/// This function takes TWO atomspace arguments!  The first is the
-/// "main" atomspace, the second is a "scratch" or "temporary"
-/// atomspace.  The scratch space is used to instantiate any arguments
-/// that need to be passed to evaluatable links (i.e. to predicates);
-/// the idea is that such temporaries don't add garbage to the main
-/// atomspace.  The first argument, though, the "main" space, is used
-/// to instantiate any executable atoms: specifically, any PutLinks
-/// that were wrapped up by TrueLink, FalseLink. This is needed to get
-/// SequentialAndLink to work correctly, when moving down the sequence.
-///
-bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
-                                        const Handle& evelnk,
-                                        AtomSpace* scratch,
-                                        bool silent)
+bool EvaluationLink::bevaluate(AtomSpace* scratch, bool silent)
 {
-	Type t = evelnk->get_type();
-
-	// -------------------------
-	// Handle EVALUATION_LINK first, before is_evaluatable() dispatch.
-	// EvaluationLink::bevaluate() calls back into crisp_eval_scratch(),
-	// so we must handle it here to avoid infinite recursion.
-	if (EVALUATION_LINK == t)
+	HandleSeq args;
+	if (LIST_LINK == _outgoing.at(1)->get_type())
 	{
-		const HandleSeq& sna(evelnk->getOutgoingSet());
-
-		HandleSeq args;
-		if (LIST_LINK == sna.at(1)->get_type())
-		{
-			if (2 != sna.size())
-				throw SyntaxException(TRACE_INFO,
-					"EvaluationLink: Incorrect number of arguments, "
-					"expecting 2, got %lu for:\n\t%s",
-					sna.size(), evelnk->to_string().c_str());
-			args = sna.at(1)->getOutgoingSet();
-		}
-		else
-		{
-			// Copy all but the first.
-			size_t sz = sna.size();
-			for (size_t i=1; i<sz; i++) args.push_back(sna[i]);
-		}
-
-		// Extract the args, and run the evaluation with them.
-		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
+		if (2 != _outgoing.size())
+			throw SyntaxException(TRACE_INFO,
+				"EvaluationLink: Incorrect number of arguments, "
+				"expecting 2, got %lu for:\n\t%s",
+				_outgoing.size(), to_string().c_str());
+		args = _outgoing.at(1)->getOutgoingSet();
+	}
+	else
+	{
+		// Copy all but the first.
+		size_t sz = _outgoing.size();
+		for (size_t i=1; i<sz; i++) args.push_back(_outgoing[i]);
 	}
 
-	return false; // make compiler stop complaining.
+	// Extract the args, and run the evaluation with them.
+	return crisp_eval_with_args(scratch, _outgoing.at(0), args, silent);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

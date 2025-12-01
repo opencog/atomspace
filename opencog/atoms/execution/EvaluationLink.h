@@ -38,11 +38,6 @@ class EvaluationLink : public FreeLink
 	                                const HandleSeq& cargs,
 	                                bool silent);
 
-	static bool crisp_eval_scratch(AtomSpace* main,
-	                               const Handle&,
-	                               AtomSpace* scratch,
-	                               bool silent=false);
-
 public:
 	EvaluationLink(const HandleSeq&&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
@@ -50,8 +45,8 @@ public:
 	EvaluationLink& operator=(const EvaluationLink&) = delete;
 
 	virtual bool is_executable() const { return true; }
-	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
-		return evaluate(as, silent);
+	virtual ValuePtr execute(AtomSpace* scratch, bool silent=false) {
+		return ValueCast(createBoolValue(bevaluate(scratch, silent)));
 	}
 
 	virtual bool is_evaluatable() const { return true; }
@@ -59,9 +54,7 @@ public:
 		return ValueCast(createBoolValue(bevaluate(scratch, silent)));
 	}
 
-	virtual bool bevaluate(AtomSpace* scratch, bool silent=false) {
-		return crisp_eval_scratch(_atom_space, get_handle(), scratch, silent);
-	}
+	virtual bool bevaluate(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);
 };
