@@ -61,6 +61,7 @@ class UniqueLink : public FreeLink
 protected:
 	void init(void);
 	virtual void setAtomSpace(AtomSpace *);
+	virtual ContentHash compute_hash() const;
 
 	static Handle get_unique_nt(const Handle&, Type, bool, const AtomSpace*);
 	static Handle get_unique(const Handle&, Type, bool, const AtomSpace*);
