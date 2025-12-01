@@ -170,16 +170,25 @@ Complex expressions that would require full SMT solving:
 These require specialized theory solvers (e.g., Z3, CVC5, Yices)
 which are beyond our current scope. We treat them as opaque.
 
-### Strategy for Opaque Constraints
+### Strategy for Opaque Constraints (Existing Behavior)
 
-For opaque constraints, the system should:
-1. Identify which variables they depend on
-2. Wait until all those variables are bound
-3. Evaluate and fail immediately if unsatisfied
-4. Do NOT attempt to reason about or propagate from them
+The current query engine already handles opaque constraints correctly:
+1. Identifies which variables they depend on
+2. Waits until all those variables are bound
+3. Evaluates and fails immediately if unsatisfied
 
-This is still an improvement over checking all EvaluatableLinks
-at the very end - we check as soon as possible.
+This is existing functionality, not part of this proposal. The current
+engine treats almost all EvaluatableLinks as opaque, with EqualLink
+being a special case that gets early handling in some situations.
+
+Note: IdenticalLink could potentially be handled at pattern compilation
+time, but currently is not. Single-variable constraints could be
+evaluated as soon as that one variable is bound - it's unclear if this
+optimization is currently implemented.
+
+**What's new in this proposal**: Extending early handling to include
+ExclusiveLink with full constraint propagation (removing values from
+other variables' domains), rather than just early evaluation.
 
 ### Constraint Detection During Pattern Analysis
 
