@@ -28,6 +28,22 @@ tries all permutations independently.
 
 Currently `PatternTerm` tracks `var → grounding`. Could extend to track `var → {possible groundings}`:
 
+Original proposal:
+```
+  // Conceptually:
+  class PatternTerm {
+      // existing...
+      Handle _grounding;
+
+      // new: domain of possible groundings
+      HandleSet _domain;
+
+      // which other PatternTerms share constraints with this one
+      std::set<PatternTerm*> _neighbors;
+  };
+```
+Renamed:
+
 ```cpp
 // Possible values for each unbound variable
 class VariableDomain {
