@@ -35,7 +35,6 @@ class EvaluationLink : public FreeLink
 {
 public:
 	EvaluationLink(const HandleSeq&&, Type=EVALUATION_LINK);
-	EvaluationLink(const Handle& schema, const Handle& args);
 	EvaluationLink(const EvaluationLink&) = delete;
 	EvaluationLink& operator=(const EvaluationLink&) = delete;
 

@@ -74,15 +74,6 @@ EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
 *********/
 }
 
-EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
-    : FreeLink({schema, args}, EVALUATION_LINK)
-{
-	if (LIST_LINK != args->get_type()) {
-		throw RuntimeException(TRACE_INFO,
-		    "EvaluationLink must have args in a ListLink!");
-	}
-}
-
 /// We get exceptions in two differet ways: (a) due to user error,
 /// in which case we need to report the error to the user, and
 /// (b) occasionally expected errors, which might occur during normal
@@ -98,6 +89,7 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 /// the NotEvaluatableException thrown here.  Basically, these
 /// know that they might be sending non-evaluatable atoms here, and
 /// don't want to garbage up the log files with bogus errors.
+/// (??? Don't know that this is true any more...)
 ///
 static void throwSyntaxException(bool silent, const char* message...)
 {
@@ -109,8 +101,7 @@ static void throwSyntaxException(bool silent, const char* message...)
 	va_end(args);
 }
 
-/// `crisp_eval_with_args()` -- evaluate a PredicateNode with arguments,
-/// returning a boolean result.
+/// Evaluate a PredicateNode with arguments, returning a boolean result.
 ///
 /// Expects "pn" to be any actively-evaluatable predicate type.
 ///     Currently, this includes the GroundedPredicateNode and
@@ -228,6 +219,7 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 
 	throwSyntaxException(silent,
 		"Not evaluatable: %s", to_string().c_str());
+	return false;
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
