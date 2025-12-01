@@ -187,11 +187,11 @@ unordered links.
 The next issue is that, at lest for the Sudoku puzzle, the search clasues
 are written so that there are no constants such as (Concept "foo") in them:
 the terms consist *entirely* of variables, and thus lack any effecitve way
-of discovering the domain at the outset. 
+of discovering the domain at the outset.
 
 For terminology, lets call something like `(Concept "foo")` a constant.
 The Sudoku puzzle defintion does have constants, e.g.
-`(Predicate "3x3 sudoku")` from which the domain can be immediately infered. 
+`(Predicate "3x3 sudoku")` from which the domain can be immediately infered.
 This works for the current example, but does not hold in general.
 
 The next problem I see in the design is the implicit assumption that
@@ -222,5 +222,15 @@ is a wikipedia article on this.) What you call "Tier 2" and "Tier 3" is
 called "Satisfiability Modulo Theories" in mathematics, and is generally
 used in VLSI design.
 
+The current query engine already does everything needed for "opaque
+constraints": it already identifies all variables in them, and it does
+run them, and fails immediately if not satisfied. That is, the current
+solver treats almost all EvaluatableLink constraints as being opaque.
+The only exception to this is that, in a few special cases, the
+EqualLink is handled early. The IdenticalLink could even be handled
+during pattern compilation time, but is not. If one of these opaque
+constraints has only one variable in it, it could be run as soon as
+that variable is grounded, before others are considered. I do not
+recall if this is done, or not.
 
 --------

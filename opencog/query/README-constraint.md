@@ -170,9 +170,9 @@ Complex expressions that would require full SMT solving:
 These require specialized theory solvers (e.g., Z3, CVC5, Yices)
 which are beyond our current scope. We treat them as opaque.
 
-### Strategy for Complex Constraints
+### Strategy for Opaque Constraints
 
-For Tier 3 constraints, the system should:
+For opaque constraints, the system should:
 1. Identify which variables they depend on
 2. Wait until all those variables are bound
 3. Evaluate and fail immediately if unsatisfied
@@ -370,3 +370,6 @@ std::stack<ConstraintState> _constraint_state_stack;
 - CSP Solving: Russell & Norvig, "Artificial Intelligence: A Modern Approach"
 - CDCL: Marques-Silva & Sakallah, "GRASP: A Search Algorithm for
   Propositional Satisfiability" (1999)
+- Theory of Equality: https://en.wikipedia.org/wiki/Theory_of_equality
+- SMT (Satisfiability Modulo Theories): https://en.wikipedia.org/wiki/Satisfiability_modulo_theories
+- SMT Solvers: Z3 (Microsoft), CVC5 (Stanford), Yices (SRI)
