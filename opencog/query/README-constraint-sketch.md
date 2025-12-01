@@ -194,4 +194,27 @@ The Sudoku puzzle defintion does have constants, e.g.
 `(Predicate "3x3 sudoku")` from which the domain can be immediately infered. 
 This works for the current example, but does not hold in general.
 
+The next problem I see in the design is the implicit assumption that
+there is an exclusive-choice (mutual exclusion of choices) in variable
+groundings.  This is certainly true for sudoku, but is not true in
+general.  There is an Atemese link type, called ExclusiveLink, it is
+an EvaluatableLink, that implements exclusive-choice. It could be added
+to the terms (as an "axiom"). Add:
+```
+  (ExclusiveLink
+     (Variable "$cell_21") (Variable "$cell_22") (Variable "$cell_23")...)
+```
+to the set of terms in the query. With the current query engine design,
+EvaluatableLinks are NOT checked for satisfaction until AFTER all
+variables are grounded.  For this new design, these could be checked
+much earlier. But only certain very limited cases: `EqualLink`,
+`IdenticalLink`, `ExclusiveLink`, and maybe `GreaterThanLink`...
+since these can be reasoned over. It is not clear to me how to reason
+over complex constraints, like
+```
+  (And
+		(GreaterThan (Variable "X") (Variable "Y"))
+		(LessThan (Variable "Y") (Plus (Variable "Z") (Number 42))))
+```
+
 --------
