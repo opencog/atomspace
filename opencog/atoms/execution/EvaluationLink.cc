@@ -226,7 +226,6 @@ bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
 
 bool EvaluationLink::bevaluate(AtomSpace* scratch, bool silent)
 {
-	HandleSeq args;
 	if (LIST_LINK == _outgoing.at(1)->get_type())
 	{
 		if (2 != _outgoing.size())
@@ -234,16 +233,12 @@ bool EvaluationLink::bevaluate(AtomSpace* scratch, bool silent)
 				"EvaluationLink: Incorrect number of arguments, "
 				"expecting 2, got %lu for:\n\t%s",
 				_outgoing.size(), to_string().c_str());
-		args = _outgoing.at(1)->getOutgoingSet();
-	}
-	else
-	{
-		// Copy all but the first.
-		size_t sz = _outgoing.size();
-		for (size_t i=1; i<sz; i++) args.push_back(_outgoing[i]);
+		return crisp_eval_with_args(scratch, _outgoing.at(0),
+			_outgoing.at(1)->getOutgoingSet(), silent);
 	}
 
 	// Extract the args, and run the evaluation with them.
+	HandleSeq args(_outgoing.begin()+1, _outgoing.end());
 	return crisp_eval_with_args(scratch, _outgoing.at(0), args, silent);
 }
 
