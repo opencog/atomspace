@@ -540,8 +540,8 @@
 ; Define the variables to be solved for.
 ; This is just a big list of all the cells.
 ;
-(define (variable-decls)
-	(begin
+(define (variable-decls link-type)
+	(cog-new-link link-type
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")
