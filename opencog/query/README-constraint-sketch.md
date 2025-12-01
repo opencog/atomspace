@@ -1,6 +1,6 @@
 # Constraint Propagation Brainstorming
 
-Written by Claude Code, LLM. 30 November 2025
+Written by Claude Code, LLM. 30 November 2025 Notes added by Linas.
 
 Initial brainstorming notes on integrating constraint solving techniques
 into the pattern matcher.
@@ -173,7 +173,7 @@ So early on, you write
   // new: domain of possible groundings
   HandleSet _domain;
 ```
-How do you propose finding this comain? For example, a variable can be
+How do you propose finding this domain? For example, a variable can be
 declared (TypedVariable (Variable "X") (Type 'Concept))` and so we know
 the domain must be limited to ConceptNodes. However, there might be
 millions of these, so recording all of them is not very practical. Now,
@@ -183,5 +183,10 @@ narrow the domain very quickly in this way. Now, for "regular" searches,
 this narrowing is not needed, as it is areadly done, in a defacto fashion,
 by the graph crawler.  So this idea of domains seems relevant ONLY for
 unordered links.
+
+The next issue is that, at lest for the Sudoku puzzle, the search clasues
+are written so that there are no constants such as (Concept "foo") in them:
+the terms consist *entirely* of variables, and thus lack any effecitve way
+of discovering the domain at the outset. 
 
 --------
