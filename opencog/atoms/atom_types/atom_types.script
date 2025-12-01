@@ -297,7 +297,7 @@ PREDICATE_NODE <- NODE
 // logic. Anything that needs probabilistic truth would not, should not
 // use this, as it will lead to ambiguities and clashes as to which
 // interpretation to use when.
-EVALUATABLE_LINK <- LINK
+EVALUATABLE_LINK <- LINK,CRISP_OUTPUT_SIG
 
 // ExecutableLink. Any link type which might be executed, resulting
 // in a Value, should inherit from this type.
@@ -355,13 +355,13 @@ CONTEXT_LINK <- ORDERED_LINK
 // a lot of awkwardness from this double execution. So hack around
 // this by keeping AndLin non-executable...
 //
-TRUE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
-FALSE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
-AND_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-OR_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-NOT_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG // ,CRISP_INPUT_SIG
-SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
+TRUE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
+FALSE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
+AND_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+OR_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+NOT_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK, ORDERED_SIG // ,CRISP_INPUT_SIG
+SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_INPUT_SIG
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
@@ -387,7 +387,7 @@ SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INP
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
+CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -395,7 +395,7 @@ CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG
+PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -968,9 +968,9 @@ SIMILARITY_LINK <- UNORDERED_LINK
 //
 // XXX FIXME Should probably be renamed to RELATION_LINK. Got called
 // "virtual" because it is impossible to enumerate all greater-than
-// relations and store them in the AtomSpae as real objects; these
+// relations and store them in the AtomSpace as real objects; these
 // exist only "virtually".
-VIRTUAL_LINK <- EVALUATABLE_LINK,CRISP_OUTPUT_SIG
+VIRTUAL_LINK <- EVALUATABLE_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 
