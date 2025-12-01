@@ -129,7 +129,11 @@ could be checked DURING search, enabling early failure and propagation.
 
 ### Link Types Suitable for Early Evaluation
 
-**Tier 1 - Can propagate constraints:**
+**Theory of Equality (can propagate constraints):**
+
+The "Theory of Equality" from mathematical logic covers reasoning
+about equality and disequality. These constraints can be fully
+propagated during search:
 
 - `ExclusiveLink($a, $b, $c, ...)`: When $a=x, remove x from
   domains of $b, $c, etc. This is the key enabler for Sudoku-style
@@ -143,7 +147,12 @@ could be checked DURING search, enabling early failure and propagation.
 - `NotLink(EqualLink($a, $b))`: When $a=x, remove x from domain
   of $b. Expresses "must be different".
 
-**Tier 2 - Can check but not propagate (requires value ordering):**
+**Satisfiability Modulo Theories (SMT) - limited support:**
+
+SMT extends SAT solving with theory solvers for specific domains
+(linear arithmetic, bitvectors, etc.). This is well-studied in
+formal verification, particularly VLSI and CPU design. Full SMT
+support is beyond our scope, but simple cases can be handled:
 
 - `GreaterThanLink($x, $y)`: When $x=5, domain of $y becomes
   {values < 5}. Requires knowing the ordering of domain values.
@@ -151,11 +160,15 @@ could be checked DURING search, enabling early failure and propagation.
 
 - `LessThanLink($x, $y)`: Symmetric to GreaterThan.
 
-**Tier 3 - Opaque (check after grounding only):**
+**Opaque constraints (check after grounding only):**
 
-- Complex expressions: `(And (GreaterThan X Y) (LessThan Y (Plus Z 42)))`
+Complex expressions that would require full SMT solving:
+- `(And (GreaterThan X Y) (LessThan Y (Plus Z 42)))`
 - GroundedPredicateNodes (arbitrary code)
 - Most other EvaluatableLinks
+
+These require specialized theory solvers (e.g., Z3, CVC5, Yices)
+which are beyond our current scope. We treat them as opaque.
 
 ### Strategy for Complex Constraints
 
