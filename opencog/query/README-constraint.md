@@ -34,6 +34,71 @@ CSP solvers avoid this explosion using:
 
 These techniques can prune the search space from 10^77 to thousands.
 
+## Domain Inference: Where Do Domains Come From?
+
+A critical question: how do we determine the domain (set of possible
+values) for each variable? This is not always straightforward.
+
+### Case 1: Domains from Ground SetLinks (Ideal Case)
+
+When matching a pattern SetLink against a ground SetLink in the
+AtomSpace, the domain is exactly the elements of the ground SetLink.
+
+Example: Pattern `{$a, $b, $c}` matching ground `{x, y, z}`
+- Initial domain of $a, $b, $c is {x, y, z}
+- When $a binds to x, remove x from domains of $b, $c
+- Domain comes "for free" from the ground term
+
+This is the ideal case for constraint propagation: domains are small
+(N elements for N-element SetLink) and immediately available.
+
+### Case 2: Domains from Anchoring Constants
+
+When a pattern contains constants (non-variable atoms), these anchor
+the search and implicitly define domains. For example, with predicate
+`(Predicate "row-constraint")`, the associated SetLinks define what
+ground SetLinks are candidates, and their elements define the domain.
+
+The existing graph-crawler search already uses constants to narrow
+the search space. Constraint propagation builds on this by further
+pruning within the UnorderedLink matching phase.
+
+### Case 3: Domains from Type Constraints (Problematic)
+
+A variable declared as `(TypedVariable (Variable "X") (Type 'Concept))`
+has a domain of all ConceptNodes. This could be millions of atoms -
+far too large to enumerate explicitly.
+
+**This case is NOT suitable for explicit domain tracking.** The
+existing graph-crawler approach handles this implicitly by following
+edges rather than enumerating. Constraint propagation should not
+attempt to materialize such large domains.
+
+### Case 4: Pure Variable Patterns (Degenerate)
+
+If a pattern SetLink contains only variables with no anchoring
+constants anywhere in the query, there may be no practical way to
+determine a finite domain. This is a degenerate case where constraint
+propagation offers no benefit.
+
+### Applicability Heuristic
+
+Constraint propagation is beneficial when:
+1. **Domains are small**: The ground SetLinks being matched have
+   few elements (tens, not millions)
+2. **Variables are shared**: Multiple SetLinks contain the same
+   variables, creating cross-constraints
+3. **Permutation explosion is the bottleneck**: The naive N!
+   enumeration dominates search time
+
+When domains would be large (millions of atoms), the overhead of
+tracking them exceeds any benefit. The system should detect this
+and fall back to the existing permutation enumeration.
+
+A practical threshold might be: only use constraint propagation
+when the ground SetLink has fewer than ~1000 elements, and multiple
+SetLinks in the pattern share variables.
+
 ## Proposed Architecture
 
 ### 1. Domain Tracking in PatternTerm
