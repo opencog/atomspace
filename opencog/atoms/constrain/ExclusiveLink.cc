@@ -40,7 +40,8 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 {
 	// The EvaluatableLink will have sorted the outgoing set for us.
 	// If there are two identical atoms in here, they will appear next
-	// to each other.
+	// to each other. Do NOT allow such links to be placed into the
+	// AtomSpace.
 	for (size_t i = 0; i < _outgoing.size()-1; i++)
 	{
 		if (*_outgoing[i] == *_outgoing[i+1])
@@ -48,6 +49,8 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 				"All members of an ExclusiveLink must differ. Got %s",
 				to_string().c_str());
 	}
+
+	// If we are here, then yes, all elements differ from one-another.
 	Link::setAtomSpace(as);
 }
 
@@ -87,7 +90,7 @@ bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 		// Should we throw? Show we ignore? Perhaps throw, for now,
 		// until we find out what the "typical user" is trying to do.
 		if (not vp->is_atom())
-			throw RuntimeExcetion(TRACE_INFO,
+			throw RuntimeException(TRACE_INFO,
 				"Expecting execution to return an Atom; got %s\n",
 				vp->to_string().c_str());
 
