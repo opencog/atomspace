@@ -148,26 +148,12 @@ bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
 {
 	Handle pn(_outgoing.at(0));
 	Type pntype = pn->get_type();
-	if (DEFINED_PREDICATE_NODE == pntype)
+
+	// Allow recursive definitions. This can be handy.
+	while (DEFINED_PREDICATE_NODE == pntype)
 	{
-		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->get_type();
-
-		// Allow recursive definitions. This can be handy.
-		while (DEFINED_PREDICATE_NODE == dtype)
-		{
-			defn = DefineLink::get_definition(defn);
-			dtype = defn->get_type();
-		}
-
-		// If its not a LambdaLink, then I don't know what to do...
-		if (LAMBDA_LINK != dtype)
-			throw SyntaxException(TRACE_INFO,
-				"Expecting definition to be a LambdaLink, got %s",
-				defn->to_string().c_str());
-
-		pntype = dtype;
-		pn = defn;
+		pn = DefineLink::get_definition(pn);
+		pntype = pn->get_type();
 	}
 
 	// Treat LambdaLink as if it were a PutLink -- perform
