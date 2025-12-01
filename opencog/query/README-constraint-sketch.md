@@ -189,4 +189,9 @@ are written so that there are no constants such as (Concept "foo") in them:
 the terms consist *entirely* of variables, and thus lack any effecitve way
 of discovering the domain at the outset. 
 
+For terminology, lets call something like `(Concept "foo")` a constant.
+The Sudoku puzzle defintion does have constants, e.g.
+`(Predicate "3x3 sudoku")` from which the domain can be immediately infered. 
+This works for the current example, but does not hold in general.
+
 --------
