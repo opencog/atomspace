@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/constrain/ExclusiveLink.h
  *
- * Copyright (C) 2024 BrainyBlaze Dynamics, LLC
+ * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,13 +32,13 @@ namespace opencog
  */
 
 /**
- * The ExclusiveLink represents a constraint that requires all of its
- * members to be grounded to distinct (non-equal) atoms. That is, no
- * two members of the ExclusiveLink may have the same grounding.
+ * The ExclusiveLink implements exclusive-choice. All Atoms in the
+ * oset MUST differ from one-another; if they do not, then this
+ * Link cannot be added to the AtomSpace.
  *
- * This is used during pattern matching to enforce exclusivity
- * constraints, particularly useful for problems like Sudoku where
- * each cell in a row, column, or box must have a distinct value.
+ * This Link is Evaluatable: if any Atoms in it's outgoing set are
+ * executable, and that execution returns an Atom, then all such
+ * results must be exclusively unique, else false is returned.
  */
 class ExclusiveLink : public EvaluatableLink
 {

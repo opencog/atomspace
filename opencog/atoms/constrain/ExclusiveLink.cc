@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/constrain/ExclusiveLink.cc
  *
- * Copyright (C) 2024 BrainyBlaze Dynamics, LLC
+ * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,7 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 
 /* ================================================================= */
 
-/// Check to make sure all atoms differ
+/// Execute the outgoing set, make sure all results differ.
 bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 {
 	HandleSeq exset;
