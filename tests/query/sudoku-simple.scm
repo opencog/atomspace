@@ -9,23 +9,23 @@
 
 ; Definition of a number.  Cells in the sudoku puzzle can only contain
 ; numbers.
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "one"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "two"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "three"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "four"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "five"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "six"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "seven"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "eight"))
-(EvaluationLink (PredicateNode "IsNumber") (ConceptNode "nine"))
+(Edge (Predicate "IsNumber") (Concept "one"))
+(Edge (Predicate "IsNumber") (Concept "two"))
+(Edge (Predicate "IsNumber") (Concept "three"))
+(Edge (Predicate "IsNumber") (Concept "four"))
+(Edge (Predicate "IsNumber") (Concept "five"))
+(Edge (Predicate "IsNumber") (Concept "six"))
+(Edge (Predicate "IsNumber") (Concept "seven"))
+(Edge (Predicate "IsNumber") (Concept "eight"))
+(Edge (Predicate "IsNumber") (Concept "nine"))
 
 ; -------------------------------------------------------------------
 ; The set of numbers for the 2x2 puzzle
-(EvaluationLink
-	(PredicateNode "2x2 sudoku")
+(Edge
+	(Predicate "2x2 sudoku")
 	(SetLink
-		(ConceptNode "one")
-		(ConceptNode "two")
+		(Concept "one")
+		(Concept "two")
 	)
 )
 
@@ -36,40 +36,40 @@
 ; the structure slightly easier to read and understand.
 ;
 (define (x2_row1)
-	(EvaluationLink
-		(PredicateNode "2x2 sudoku")
+	(Edge
+		(Predicate "2x2 sudoku")
 		(SetLink
-			(VariableNode "$cell_11")
-			(VariableNode "$cell_12")
+			(Variable "$cell_11")
+			(Variable "$cell_12")
 		)
 	)
 )
 (define (x2_row2)
-	(EvaluationLink
-		(PredicateNode "2x2 sudoku")
+	(Edge
+		(Predicate "2x2 sudoku")
 		(SetLink
-			(VariableNode "$cell_21")
-			(VariableNode "$cell_22")
+			(Variable "$cell_21")
+			(Variable "$cell_22")
 		)
 	)
 )
 
 ;; Next, column constraints
 (define (x2_col1)
-	(EvaluationLink
-		(PredicateNode "2x2 sudoku")
+	(Edge
+		(Predicate "2x2 sudoku")
 		(SetLink
-			(VariableNode "$cell_11")
-			(VariableNode "$cell_21")
+			(Variable "$cell_11")
+			(Variable "$cell_21")
 		)
 	)
 )
 (define (x2_col2)
-	(EvaluationLink
-		(PredicateNode "2x2 sudoku")
+	(Edge
+		(Predicate "2x2 sudoku")
 		(SetLink
-			(VariableNode "$cell_12")
-			(VariableNode "$cell_22")
+			(Variable "$cell_12")
+			(Variable "$cell_22")
 		)
 	)
 )
@@ -90,18 +90,18 @@
 ;
 (define (x2-variable-decls lnk)
 	(cog-new-link lnk
-		(VariableNode "$cell_11")
-		(VariableNode "$cell_12")
+		(Variable "$cell_11")
+		(Variable "$cell_12")
 
-		(VariableNode "$cell_21")
-		(VariableNode "$cell_22")
+		(Variable "$cell_21")
+		(Variable "$cell_22")
 	)
 )
 
 ; ------------------------------------------
 
 ; Certain fixed numbers appear in certain fixed cell locations.
-(EvaluationLink (PredicateNode "x2-fix11") (ConceptNode "one"))
+(Edge (Predicate "x2-fix11") (Concept "one"))
 ;
 ; This puzzle should have exactly one solution, since fixing the
 ; upper-left corner constrains everything else.
@@ -111,7 +111,7 @@
 		(x2-variable-decls 'VariableList)
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
-			(EvaluationLink (PredicateNode "x2-fix11") (VariableNode "$cell_11"))
+			(Edge (Predicate "x2-fix11") (Variable "$cell_11"))
 
 			; Aside from the above constraint, there are another
 			; 4 constraints.
@@ -148,12 +148,12 @@
 ; -------------------------------------------------------------------
 ; -------------------------------------------------------------------
 ; The set of numbers for the 3x3 puzzle
-(EvaluationLink
-	(PredicateNode "3x3 sudoku")
+(Edge
+	(Predicate "3x3 sudoku")
 	(SetLink
-		(ConceptNode "one")
-		(ConceptNode "two")
-		(ConceptNode "three")
+		(Concept "one")
+		(Concept "two")
+		(Concept "three")
 	)
 )
 
@@ -164,65 +164,65 @@
 ; the structure slightly easier to read and understand.
 ;
 (define (x3_row1)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_11")
-			(VariableNode "$cell_12")
-			(VariableNode "$cell_13")
+			(Variable "$cell_11")
+			(Variable "$cell_12")
+			(Variable "$cell_13")
 		)
 	)
 )
 (define (x3_row2)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_21")
-			(VariableNode "$cell_22")
-			(VariableNode "$cell_23")
+			(Variable "$cell_21")
+			(Variable "$cell_22")
+			(Variable "$cell_23")
 		)
 	)
 )
 
 (define (x3_row3)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_31")
-			(VariableNode "$cell_32")
-			(VariableNode "$cell_33")
+			(Variable "$cell_31")
+			(Variable "$cell_32")
+			(Variable "$cell_33")
 		)
 	)
 )
 
 ;; Next, column constraints
 (define (x3_col1)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_11")
-			(VariableNode "$cell_21")
-			(VariableNode "$cell_31")
+			(Variable "$cell_11")
+			(Variable "$cell_21")
+			(Variable "$cell_31")
 		)
 	)
 )
 (define (x3_col2)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_12")
-			(VariableNode "$cell_22")
-			(VariableNode "$cell_32")
+			(Variable "$cell_12")
+			(Variable "$cell_22")
+			(Variable "$cell_32")
 		)
 	)
 )
 (define (x3_col3)
-	(EvaluationLink
-		(PredicateNode "3x3 sudoku")
+	(Edge
+		(Predicate "3x3 sudoku")
 		(SetLink
-			(VariableNode "$cell_13")
-			(VariableNode "$cell_23")
-			(VariableNode "$cell_33")
+			(Variable "$cell_13")
+			(Variable "$cell_23")
+			(Variable "$cell_33")
 		)
 	)
 )
@@ -245,17 +245,17 @@
 ;
 (define (x3-variable-decls lnk)
 	(cog-new-link lnk
-		(VariableNode "$cell_11")
-		(VariableNode "$cell_12")
-		(VariableNode "$cell_13")
+		(Variable "$cell_11")
+		(Variable "$cell_12")
+		(Variable "$cell_13")
 
-		(VariableNode "$cell_21")
-		(VariableNode "$cell_22")
-		(VariableNode "$cell_23")
+		(Variable "$cell_21")
+		(Variable "$cell_22")
+		(Variable "$cell_23")
 
-		(VariableNode "$cell_31")
-		(VariableNode "$cell_32")
-		(VariableNode "$cell_33")
+		(Variable "$cell_31")
+		(Variable "$cell_32")
+		(Variable "$cell_33")
 	)
 )
 
@@ -270,7 +270,7 @@
 ;          get four grand total.  The upper-left 1 is fixed.
 
 ; Certain fixed numbers appear in certain fixed cell locations.
-(EvaluationLink (PredicateNode "x3-fix11") (ConceptNode "one"))
+(Edge (Predicate "x3-fix11") (Concept "one"))
 
 (define (x3-puzzle)
 	(CollectionOf
@@ -278,7 +278,7 @@
 		(x3-variable-decls 'VariableList)
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
-			(EvaluationLink (PredicateNode "x3-fix11") (VariableNode "$cell_11"))
+			(Edge (Predicate "x3-fix11") (Variable "$cell_11"))
 
 			; Aside from the above constraints, there are another
 			; 6 constraints.
