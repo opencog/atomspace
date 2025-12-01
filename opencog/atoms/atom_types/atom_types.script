@@ -150,6 +150,14 @@ TYPE_OUTPUT_SIG <- SIG
 ORDERED_SIG <- SIG
 UNORDERED_SIG <- SIG
 
+// Base class for links that are naturally meant to be interpreted
+// either as sets (unordered) or as lists (ordered cartesian products).
+// The goal is to distinguish "natural sets" from other random jumbles
+// of stuff: most things in Atomese are jumbles, structures of some
+// kind, and are not naturally "sets". (The same way that a C++ class
+// is neither a "set", nor a "list" of members or methods.)
+COLLECTION_SIG <- SIG
+
 // Alpha-convertible links are those that bind variables, and, per
 // conventional theory, the bound variable names have no significance
 // outside of the link. Typical examples are the lambda of lambda
@@ -161,6 +169,11 @@ UNORDERED_SIG <- SIG
 // a Link. Alpha-equivalent links are those that are exactly the same,
 // irrespective of the names given to the variables that they bind.
 ALPHA_CONVERTIBLE_SIG <- SIG
+
+// Constraints are link types that implement forced constraints on
+// thier contents, depending on whether they contain free variables
+// or not.
+CONSTRAINT_SIG <- SIG
 
 // ==============================================================
 // Values are collections of data that can be associated with Atoms.
@@ -293,15 +306,11 @@ EXECUTABLE_LINK <- LINK
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-// Base class for sets and for operations that return sets.
-// XXX FIXME, perhaps this is a SIG ???
-COLLECTION_LINK <- LINK
-
 // Plain old list AKA Cartesian product
-LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
+LIST_LINK <- ORDERED_LINK,COLLECTION_SIG
 
 // Unordered multi-set (Classical Set-Theory set)
-SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
+SET_LINK <- UNORDERED_LINK,COLLECTION_SIG
 
 // Set membership. Declaration: individual belongs to set.
 // Historically, this has been understood to be a declarative statement
@@ -757,12 +766,6 @@ DUAL_LINK <- SATISFYING_LINK
 //
 FREE_LINK <- ORDERED_LINK
 
-// ConstraintLinks are link types that implement forced constraints
-// on thier contents, depending on whether they contain free variables
-// or not. This is an abstract base class; the specifics of the
-// constraint are implemented elsewhere.
-CONSTRAINT_LINK <- FREE_LINK
-
 // This is an interesting one. It is a link that must never be grounded!
 // It must contain at least one VariableNode somewhere within it; that
 // is, it must be an "open sentence" and never a "closed sentence".
@@ -779,7 +782,7 @@ CONSTRAINT_LINK <- FREE_LINK
 // because that would cause all variables to be bound, i.e. to become
 // a closed sentence; thus it inherits from FreeLink.
 //
-DELETE_LINK <- CONSTRAINT_LINK
+DELETE_LINK <- FREE_LINK,CONSTRAINT_SIG
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first Atom of the Link.  Useful for defining state.  Additional
@@ -787,7 +790,7 @@ DELETE_LINK <- CONSTRAINT_LINK
 // contain free variables (see Wikipedia definition of "open term",
 // "closed term").  Kind of like DeleteLink, but allows one instead of
 // zero closed terms.
-UNIQUE_LINK <- CONSTRAINT_LINK
+UNIQUE_LINK <- FREE_LINK,CONSTRAINT_SIG
 
 // Inserting a StateLink into the AtomSpace causes the previous
 // state to be removed from the AtomSpace. Uniqueness applies only to
@@ -807,6 +810,16 @@ DEFINE_LINK <- UNIQUE_LINK
 // hidden by Frames. Applies only to closed terms; thus, GrantLinks with
 // variables in the defintion can be created for search patterns.
 GRANT_LINK <- UNIQUE_LINK
+
+// ==============================================================
+
+// IdenticalLink tests for syntactic equality.  It does NOT execute its
+// arguments; it is true only if everything in them are the same Atom.
+IDENTICAL_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// ExclusiveLink tests to make sure all elements differ from
+// one-another. True only if they all differ...
+EXCLUSIVE_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // ==============================================================
 // Basic Knowledge-Representation types.
@@ -965,20 +978,13 @@ LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 // they do not contain any free variables.
 IS_CLOSED_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
-// IdenticalLink tests for syntactic equality.  It does NOT execute its
-// arguments; it is true only if both sides are the same Atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same Atom.
-IDENTICAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // AlphaEqualLink tests to see if both sides are the same, up to an
 // alpha-renaming of any variables that they may have.
 ALPHA_EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// ExclusiveLink tests to make sure all elements differ from
-// one-another. True only if they all differ...
-EXCLUSIVE_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
@@ -1164,7 +1170,7 @@ IS_MESSAGE_LINK <- VIRTUAL_LINK
 // be some executable link that, when executed, returns a LinkValue
 // (or some derived type, e.g. a QueueValue) and now we want an
 // actual set.
-COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_LINK
+COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_SIG
 
 // Opposite of the ValueOfLink; attach a Value to an Atom.
 // Verb: "to set", and not noun "a set (collection)"
