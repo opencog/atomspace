@@ -38,6 +38,16 @@ ExclusiveLink::ExclusiveLink(const HandleSeq&& oset, Type t)
 
 void ExclusiveLink::setAtomSpace(AtomSpace* as)
 {
+	// The EvaluatableLink will have sorted the outgoing set for us.
+	// If there are two identical atoms in here, they will appear next
+	// to each other.
+	for (size_t i = 0; i < _outgoing.size()-1; i++)
+	{
+		if (*_outgoing[i] == *_outgoing[i+1])
+			throw RuntimeException(TRACE_INFO,
+				"All members of an ExclusiveLink must differ. Got %s",
+				to_string().c_str());
+	}
 	Link::setAtomSpace(as);
 }
 
@@ -82,6 +92,15 @@ bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 				vp->to_string().c_str());
 
 		exset.emplace_back(as->add_atom(HandleCast(vp)));
+	}
+
+	// Sort. If there are two atoms that are the same, they will
+	// be sorted so that they are next to each-other.
+	std::sort(exset.begin(), exset.end(), content_based_handle_less());
+
+	for (size_t i = 0; i < exset.size()-1; i++)
+	{
+		if (*exset[i] == *exset[i+1]) return false;
 	}
 
 	return true;
