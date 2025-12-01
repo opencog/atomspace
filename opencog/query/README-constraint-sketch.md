@@ -253,4 +253,10 @@ constraints; this could also be done, and would need to be handled
 in some modular way, so that it does not tangle up into the already
 existing, rather complex code. 
 
+Need preliminary refactoring. The code in PatternLink.cc is already
+very complex, and might not be easy to extend.
+
+The handling for AlwaysLink, and the handling for GroupByLink can be
+removed, by refactoring them into Streams.
+
 --------

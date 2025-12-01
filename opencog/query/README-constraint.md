@@ -190,16 +190,82 @@ optimization is currently implemented.
 ExclusiveLink with full constraint propagation (removing values from
 other variables' domains), rather than just early evaluation.
 
-### Constraint Detection During Pattern Analysis
+### Pattern Compilation vs Runtime
 
-During pattern initialization (before search begins), analyze
-the pattern to identify:
-1. Which variables appear in ExclusiveLinks together
-2. Which EvaluatableLinks can be checked early (Tier 1, 2)
-3. Which must wait for full grounding (Tier 3)
+Important distinction: "pattern compilation" refers to the analysis
+done in `PatternLink.cc` before search begins, not C++ compilation.
+This analysis extracts structure from the pattern to make search
+faster. Constraint handling can happen at two stages:
 
-Build a dependency graph: for each EvaluatableLink, record which
-variables it depends on. When the last variable is bound, evaluate.
+1. **Pattern compile time** (`PatternLink.cc`): Analyze pattern
+   structure, identify constraint links, build constraint graph.
+   IdenticalLink and some EqualLink cases could be fully resolved here.
+
+2. **Search time** (`PatternMatchEngine.cc`): Propagate constraints
+   as variables are bound, prune domains, detect conflicts early.
+
+### Modular Design: Theory Solvers
+
+The constraint handling should be modular to avoid tangling with
+the already-complex pattern matching code. Each "theory" gets its
+own module with a clean interface:
+
+```cpp
+// Abstract interface for theory solvers
+class TheorySolver {
+public:
+    // Called at pattern compile time
+    virtual void analyze(const Handle& pattern) = 0;
+
+    // Called when a variable is bound during search
+    // Returns false if conflict detected
+    virtual bool on_bind(const Handle& var, const Handle& value) = 0;
+
+    // State management for backtracking
+    virtual void push_state() = 0;
+    virtual void pop_state() = 0;
+};
+```
+
+**Proposed modules:**
+
+1. **EqualitySolver**: Handles EqualLink, IdenticalLink, NotLink(Equal).
+   The current ad hoc EqualLink handling could be refactored into this.
+   Starting point for establishing the modular pattern.
+
+2. **ExclusiveSolver**: Handles ExclusiveLink with full domain
+   propagation. The main focus of this proposal.
+
+3. **ArithmeticSolver** (future): Handles GreaterThan, LessThan with
+   NumberNodes. Essentially simple linear programming over integers.
+
+4. **ASPSolver** (future): Answer-Set Programming style constraints.
+   Different paradigm that may need different integration approach.
+
+### Implementation Strategy
+
+Rather than adding everything at once:
+
+1. **First**: Refactor existing EqualLink handling into a clean
+   EqualitySolver module. Make it more robust and aggressive.
+   This establishes the modular pattern without adding new features.
+
+2. **Second**: Add ExclusiveSolver using the same interface.
+   This is where the domain propagation happens.
+
+3. **Third**: Evaluate what other solvers would be useful based
+   on real-world query patterns.
+
+This approach keeps new code separate from the existing complex
+pattern matching logic, making it easier to debug and maintain.
+
+### Constraint Detection During Pattern Compilation
+
+During pattern compilation (`PatternLink.cc`), analyze the pattern to:
+1. Identify EvaluatableLinks by type (Equality, Exclusive, Arithmetic, etc.)
+2. Route each to the appropriate theory solver for analysis
+3. Build the constraint graph (which variables interact via which constraints)
+4. Identify constraints that can be fully resolved at compile time
 
 ## Proposed Architecture
 
