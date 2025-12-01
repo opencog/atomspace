@@ -36,7 +36,7 @@
 ; Actually, this constraint will not be needed, as the requirement that
 ; the columns, rows and boxes be a number set is sufficient.  So the
 ; below only adds complexity to the problem, slowing down solving.
-(define (cells_are_numbers)
+(define (cells-are-numbers)
 	(list
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_11"))
 		(EvaluationLink (PredicateNode "IsNumber") (VariableNode "$cell_12"))
@@ -506,7 +506,7 @@
 ;; The grand-total set of constraints.
 (define (sudoku-constraints)
 	(list
-		;; (cells_are_numbers) ; constraint isn't needed.
+		; (cells-are-numbers) ; constraint isn't needed.
 		(row1)
 		(row2)
 		(row3)
@@ -540,8 +540,8 @@
 ; Define the variables to be solved for.
 ; This is just a big list of all the cells.
 ;
-(define (variable-decls link-type)
-	(cog-new-link link-type
+(define (variable-decls)
+	(list
 		(VariableNode "$cell_11")
 		(VariableNode "$cell_12")
 		(VariableNode "$cell_13")

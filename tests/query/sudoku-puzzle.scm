@@ -44,7 +44,7 @@
 	(CollectionOf
 	(QueryLink
 		; There are eighty-one variables! 81 = 9x9 cells
-		(variable-decls 'VariableList)
+		(VariableList (variable-decls))
 		(AndLink
 			; For this puzzle, 24 of the variables are fixed immediately.
 			(EvaluationLink (PredicateNode "fix12") (VariableNode "$cell_12"))
@@ -88,7 +88,7 @@
 			(sudoku-constraints)
 		)
 		; The solution
-		(variable-decls 'ListLink)
+		(ListLink (variable-decls))
 	)
 	)
 )
