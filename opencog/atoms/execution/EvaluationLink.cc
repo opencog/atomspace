@@ -291,35 +291,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return crisp_eval_with_args(scratch, sna.at(0), args, silent);
 	}
 
-	if (evelnk->is_evaluatable())
-		return evelnk->bevaluate(scratch, silent);
-
-	// -------------------------
-	// PutLinks implement beta-reduction. This is special-cased here,
-	// so that first, the beta-reduction is performed, and then the
-	// result is evaluated (with the crisp evaluator).
-	if (PUT_LINK == t)
-	{
-		PutLinkPtr pl(PutLinkCast(evelnk));
-		ValuePtr vp(pl->execute(as));
-		if (BOOL_VALUE == vp->get_type())
-		{
-			BoolValuePtr bvp = BoolValueCast(vp);
-			std::vector<bool> bvals = bvp->value();
-			if (bvals.empty())
-				return false;
-			// Use first boolean value
-			return bvals[0];
-		}
-		Handle red = HandleCast(vp);
-		if (nullptr == red)
-			throwSyntaxException(silent,
-				"Expected Atom when evaluating %s, got %s",
-				evelnk->to_string().c_str(),
-				vp->to_string().c_str());
-		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
-	}
-
 	return false; // make compiler stop complaining.
 }
 
