@@ -210,21 +210,6 @@ static bool is_message(const Handle& h)
 	return false;
 }
 
-/// Check for syntactic equality. Specifically, when comparing
-/// atoms, the handles MUST be the same handle.
-static bool identical(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	size_t nelts = oset.size();
-	if (2 > nelts) return true;
-
-	for (size_t j=1; j<nelts; j++)
-	{
-		if (oset[0] != oset[j]) return false;
-	}
-	return true;
-}
-
 /// Check for semantic equality.
 static bool equal(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -508,7 +493,6 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 
 	// -------------------------
 	// Assorted relations
-	if (IDENTICAL_LINK == t) return identical(evelnk);
 	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);

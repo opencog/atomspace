@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (constrain
 	ExclusiveLink.cc
+	IdenticalLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -21,5 +22,6 @@ INSTALL (TARGETS constrain EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	ExclusiveLink.h
+	IdenticalLink.h
 	DESTINATION "include/opencog/atoms/constrain"
 )
