@@ -33,6 +33,16 @@ class AtomSpace;
  */
 class EvaluationLink : public FreeLink
 {
+	static bool crisp_eval_with_args(AtomSpace* as,
+	                                const Handle& pn,
+	                                const HandleSeq& cargs,
+	                                bool silent);
+
+	static bool crisp_eval_scratch(AtomSpace* main,
+	                               const Handle&,
+	                               AtomSpace* scratch,
+	                               bool silent=false);
+
 public:
 	EvaluationLink(const HandleSeq&&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
@@ -52,11 +62,6 @@ public:
 	virtual bool bevaluate(AtomSpace* scratch, bool silent=false) {
 		return crisp_eval_scratch(_atom_space, get_handle(), scratch, silent);
 	}
-
-	static bool crisp_eval_scratch(AtomSpace* main,
-	                               const Handle&,
-	                               AtomSpace* scratch,
-	                               bool silent=false);
 
 	static Handle factory(const Handle&);
 };

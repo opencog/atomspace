@@ -143,10 +143,10 @@ static void throwSyntaxException(bool silent, const char* message...)
 ///
 /// For DefinedPredicateNodes, the defintiion is looked up first.
 ///
-static bool crisp_eval_with_args(AtomSpace* as,
-                                const Handle& pn,
-                                const HandleSeq& cargs,
-                                bool silent)
+bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
+                                          const Handle& pn,
+                                          const HandleSeq& cargs,
+                                          bool silent)
 {
 	Type pntype = pn->get_type();
 	if (DEFINED_PREDICATE_NODE == pntype)
