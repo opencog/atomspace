@@ -288,4 +288,21 @@ actually disjoint". Unfortunately, the EqualLink is not strong enough
 to do this, so the code talks only of IdenticalLink and treats
 EqualLink as a black box opaque constraint.
 
+Please sketch out a detailed prototype proposal: what the data data
+structures would look like, what existing code (files, approximate line
+numbers, method names) that need to be modified.  Put this into a
+distinct README-constraint-prototype.md file. Then go ahead and try to
+implement it.  Don't forget that your design will probably split into
+an analsys stage, and a runtime stage. The analysis needs to happen in
+the opencog/atoms/pattern/* directory, where you will record if any of
+the PattenTerms are exclusive-choice terms, mark them (set a bit, I
+guess just like the others) and stuff them into some bucket. You will
+probably need to be careful to distinguish those exclusive-choice terms
+that operate only on a single component, from those that bridge across
+multiple disconnected components. The ones that bridge will have to be
+virtual, I guess, although, I guess, they can be partly used, anyway.
+So that is the analysis stage. Then, at runtime, *if* there are
+exclusive-choice clauses in the PatternLink, then you can do the
+conflict-driven stuff.
+
 --------
