@@ -3005,11 +3005,14 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 		return explore_term_branches(term, grnd, clause);
 
 	logmsg("Clause is identity:", clause);
+	perm_push();
+	_perm_state.clear();
 
 	if (not tree_compare(term, grnd, CALL_SOLN))
 	{
 		logmsg("iiii NO solution for term:", term);
 		logmsg("iiii NOT solved by:", grnd);
+		perm_pop();
 		return false;
 	}
 
@@ -3034,14 +3037,23 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 			break;
 		}
 	}
-	if (nullptr == gterm) return false;
+	if (nullptr == gterm)
+	{
+		perm_pop();
+		return false;
+	}
 
 	logmsg("Identity grounding to validate:", gterm);
 	for (const PatternTermPtr& side : clause->getOutgoingSet())
 	{
 		if (side->getHandle() == vterm) continue;
-		if (not tree_compare(side, gterm, CALL_SOLN)) return false;
+		if (not tree_compare(side, gterm, CALL_SOLN))
+		{
+			perm_pop();
+			return false;
+		}
 	}
+	perm_pop();
 
 	// IdenticalLinks are necessarily evaluatable, and thus are
 	// necessarily embedded in an evaluatable clause, which we can
