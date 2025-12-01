@@ -320,40 +320,6 @@ bool EvaluationLink::crisp_eval_scratch(AtomSpace* as,
 		return EvaluationLink::crisp_eval_scratch(as, red, scratch, silent);
 	}
 
-	// -------------------------
-	if (DEFINED_PREDICATE_NODE == t)
-	{
-		return EvaluationLink::crisp_eval_scratch(as, DefineLink::get_definition(evelnk), scratch, silent);
-	}
-
-	if (nameserver().isA(t, VALUE_OF_LINK))
-	{
-		ValuePtr pap(evelnk->execute(scratch));
-
-		// There might not be a Value at the given key.
-		if (nullptr == pap)
-			return false;
-
-		// If it's a BoolValue, extract the boolean directly
-		if (pap->is_type(BOOL_VALUE))
-		{
-			BoolValuePtr bvp = BoolValueCast(pap);
-			std::vector<bool> bvals = bvp->value();
-			if (bvals.empty())
-				return false;
-			// Use first boolean value
-			return bvals[0];
-		}
-
-		// If it's an atom, recursively evaluate.
-		if (pap->is_atom())
-			return EvaluationLink::crisp_eval_scratch(as, HandleCast(pap), scratch, silent);
-	}
-
-	throwSyntaxException(silent,
-		"Either incorrect or not implemented yet. Cannot evaluate %s",
-		evelnk->to_string().c_str());
-
 	return false; // make compiler stop complaining.
 }
 
