@@ -40,6 +40,7 @@ namespace opencog
  */
 class IdenticalLink : public EvaluatableLink
 {
+	bool is_identical(void) const;
 public:
 	IdenticalLink(const HandleSeq&&, Type=IDENTICAL_LINK);
 	IdenticalLink(const IdenticalLink&) = delete;

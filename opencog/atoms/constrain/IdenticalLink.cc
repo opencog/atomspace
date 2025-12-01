@@ -35,7 +35,7 @@ IdenticalLink::IdenticalLink(const HandleSeq&& oset, Type t)
 
 /* ================================================================= */
 
-void IdenticalLink::setAtomSpace(AtomSpace* as)
+bool IdenticalLink::is_identical(void) const
 {
 	// Count number of non-variables:
 	size_t nfix = 0;
@@ -44,10 +44,7 @@ void IdenticalLink::setAtomSpace(AtomSpace* as)
 
 	// We're OK, if there's just zero or one constants in here.
 	if (2 > _outgoing.size() - nfix)
-	{
-		Link::setAtomSpace(as);
-		return;
-	}
+		return true;
 
 	// Lets see if they're all the same ...
 	Handle id;
@@ -61,29 +58,31 @@ void IdenticalLink::setAtomSpace(AtomSpace* as)
 		}
 
 		if (*h != *id)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot place IdenticalLink with non-identical atoms in AtomSpace!  Got %s",
-				to_string().c_str());
+			return false;
 	}
+	return true;
+}
 
-	// Not reachable.
-	OC_ASSERT(false, "Internal error");
+/* ================================================================= */
+
+void IdenticalLink::setAtomSpace(AtomSpace* as)
+{
+	if (not is_identical())
+		throw RuntimeException(TRACE_INFO,
+			"Cannot place IdenticalLink with non-identical atoms in AtomSpace!  Got %s",
+			to_string().c_str());
+
+	Link::setAtomSpace(as);
 }
 
 /* ================================================================= */
 
 /// Check for syntactic equality. Specifically, when comparing
 /// atoms, the handles MUST be the same handle.
+/// This can only return false if this Link is not yet in any AtomSpace.
 bool IdenticalLink::bevaluate(AtomSpace* as, bool silent)
 {
-	size_t nelts = _outgoing.size();
-	if (2 > nelts) return true;
-
-	for (size_t j=1; j<nelts; j++)
-	{
-		if (_outgoing[0] != _outgoing[j]) return false;
-	}
-	return true;
+	return is_identical();
 }
 
 DEFINE_LINK_FACTORY(IdenticalLink, IDENTICAL_LINK);
