@@ -24,17 +24,11 @@
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
-#include <opencog/atoms/scope/PutLink.h>
-#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/execution/GroundedProcedureNode.h>
 #include <opencog/atoms/value/BoolValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "Force.h"
 #include "EvaluationLink.h"
-
-#include <cmath>
 
 using namespace opencog;
 
@@ -44,34 +38,6 @@ EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
 	if (not nameserver().isA(t, EVALUATION_LINK))
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink or an inherited type thereof");
-
-	// The "canonical" EvaluationLink structure is:
-	//    EvaluationLink
-	//        PredicateNode "foo"
-	//        ListLink
-	//           ...
-	//
-	// However, patterns can have variables for either the
-	// ListLink, or the PredicateNode, or both.
-	//
-	// ... except reality is worse: many examples include
-	// badly-formed EvaluationLinks, on-purpose.  So, before
-	// we can do any sort of strict checking here, we would
-	// need fix all those wiki pages, examples, etc.
-	// As of this writing (March 2017), there are seven unit
-	// tests that create EvaluationLinks whose size() is not 2:
-	//    PutLinkUTest GetLinkUTest BuggySelfGroundUTest
-	//    StackMoreUTest ConstantClausesUTest PersistUTest
-	//    MultiPersistUTest
-	//
-/********
-	if (2 != oset.size())
-	   // or (LIST_LINK != oset[1]->get_type()))
-	{
-		throw RuntimeException(TRACE_INFO,
-		    "EvaluationLink must have predicate and args!");
-	}
-*********/
 }
 
 /// We get exceptions in two differet ways: (a) due to user error,
@@ -101,38 +67,29 @@ static void throwSyntaxException(bool silent, const char* message...)
 	va_end(args);
 }
 
-/// Evaluate a PredicateNode with arguments, returning a boolean result.
-///
-/// Expects "pn" to be any actively-evaluatable predicate type.
-///     Currently, this includes the GroundedPredicateNode and
-///     the DefinedPredicateNode.
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
-///
-/// The predicate as a whole is then evaluated and returns bool.
-///
-/// This is called after unwrapping EvaluationLinks of the form
+/// Evaluate a PredicateNode with arguments, returning boolean result.
+/// The canonical form is
 ///
 ///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
+///         SomePredicateNode "lang: func_name"
 ///         ListLink
 ///             SomeAtom
 ///             OtherAtom
 ///
-/// or
+/// or skipping the ListLink:
 ///
 ///     EvaluationLink
-///         GroundedPredicateNode "lang: func_name"
+///         SomePredicateNode "lang: func_name"
 ///         SomeAtom
 ///         OtherAtom
 ///
-/// (Skipping the ListLink...)
+/// Where SomePredicate can be GroundedPrdicate, DefinedPredicate,
+/// a LambdaLink, or some other Evaluatable Link.
 ///
-/// The `lang:` should be either `scm:` for scheme, `py:` for python,
-/// or `lib:` for c/c++ code.  This method will then invoke `func_name`
-/// on the provided ListLink of arguments.
-///
-/// For DefinedPredicateNodes, the defintiion is looked up first.
+/// Wheen SomePredicate is a GroundedPredicate, then the `lang:`
+/// should be either `scm:` for scheme, `py:` for python, or `lib:`
+/// for c/c++ code.  The `func_name` is then invoked on the provided
+/// arguments.
 ///
 bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 {
