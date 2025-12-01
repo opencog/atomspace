@@ -146,7 +146,7 @@ static void throwSyntaxException(bool silent, const char* message...)
 bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
                                const HandleSeq& cargs)
 {
-	const Handle& pn(_outgoing.at(0));
+	Handle pn(_outgoing.at(0));
 	Type pntype = pn->get_type();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
@@ -166,11 +166,8 @@ bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
 				"Expecting definition to be a LambdaLink, got %s",
 				defn->to_string().c_str());
 
-		// Treat LambdaLink as if it were a PutLink -- perform
-		// the beta-reduction, and evaluate the result.
-		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return reduct->bevaluate(as, silent);
+		pntype = dtype;
+		pn = defn;
 	}
 
 	// Treat LambdaLink as if it were a PutLink -- perform
