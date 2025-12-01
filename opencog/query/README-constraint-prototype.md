@@ -290,3 +290,68 @@ In the permutation enumeration, prefer variables with smallest domains:
 1. **Overhead**: Domain tracking adds overhead for simple patterns
 2. **Threshold**: Only enable when ExclusiveLinks present AND SetLinks have >3 elements
 3. **Memory**: State stack for backtracking - bounded by search depth
+
+---
+
+## KNOWN ISSUES WITH CURRENT IMPLEMENTATION (Dec 2024)
+
+The current implementation has been verified to compile and pass all 75 query tests,
+but does NOT provide the expected speedup for 9x9 Sudoku. The following issues need
+to be fixed:
+
+### Issue 1: Re-initialization in unorder_compare()
+
+**Problem**: `init_exclusive_constraints()` is called inside `unorder_compare()`,
+which means the constraint domain gets reset for each UnorderedLink/SetLink clause.
+For a 9x9 Sudoku with 27 clauses (9 rows + 9 columns + 9 boxes), all propagation
+work is thrown away every time a new clause is entered.
+
+**Fix**: Initialize the constraint domain ONCE at the pattern level (in `set_pattern()`
+or when pattern matching begins), not inside `unorder_compare()`.
+
+### Issue 2: Wrong Domain Source
+
+**Problem**: Domains are initialized from the current UnorderedLink's ground set
+(`osg` in `unorder_compare()`). This is wrong - the domains should come from the
+problem setup. For Sudoku, that's {1,2,3,4,5,6,7,8,9} shared across all 81 variables.
+
+**Fix**: Domains should be initialized from the ExclusiveLink's ground values or
+from the pattern's global variable type constraints, not from individual clause
+ground sets.
+
+### Issue 3: Intra-clause Only (No Inter-clause Propagation)
+
+**Problem**: The current implementation only propagates within a single UnorderedLink's
+permutation search. The real power should come from INTER-clause propagation:
+- When $X1 is bound to 1 in row 1, that should immediately eliminate 1 from all
+  variables in $X1's column and box
+- This requires constraints to persist across clause matching
+
+**Fix**: Constraints must span clause boundaries. When `variable_compare()` binds
+a variable, propagation should affect domains of ALL variables that share an
+ExclusiveLink with it, regardless of which clause they appear in.
+
+### Issue 4: Clause-level vs Pattern-level Scope
+
+**Problem**: The constraint state is reset for each clause. It should persist
+throughout the entire pattern matching process.
+
+**Fix**:
+1. Initialize constraint domain in `set_pattern()` or `explore_neighborhood()`
+2. Build the full constraint graph from ALL ExclusiveLinks in the pattern
+3. Use `solution_push()`/`solution_pop()` ONLY for backtracking, not for clause transitions
+4. Let propagation persist as variables are bound across multiple clauses
+
+### Required Code Changes
+
+1. **Move initialization**: From `unorder_compare()` to `set_pattern()` or
+   `explore_neighborhood()` entry point
+
+2. **Domain initialization**: Get domains from ExclusiveLink ground sets or
+   variable type constraints, not from individual clause ground sets
+
+3. **Persistent propagation**: Ensure `variable_compare()` propagation affects
+   the global constraint state, not a per-clause state
+
+4. **State management**: Only push/pop constraint state on backtracking (in
+   `solution_push()`/`solution_pop()`), not on clause transitions
