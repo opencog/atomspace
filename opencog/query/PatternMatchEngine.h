@@ -31,6 +31,7 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/pattern/Pattern.h>
+#include <opencog/query/ConstraintDomain.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
@@ -177,6 +178,14 @@ private:
 	bool setup_rotors(const PatternTermPtr&, const Handle&);
 	bool have_more_rotors(const PatternTermPtr&);
 	bool record_sparse(const PatternTermPtr&, const Handle&);
+
+	// --------------------------------------------
+	// Constraint propagation for ExclusiveLink
+	// Used to prune permutation search in unordered links.
+	ConstraintDomain _constraint_domain;
+	bool _use_constraint_domain;
+	void init_exclusive_constraints(const PatternTermSeq&, const HandleSet&);
+	bool propagate_exclusive(const Handle& var, const Handle& value);
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.

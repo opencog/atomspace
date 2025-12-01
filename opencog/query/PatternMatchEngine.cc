@@ -168,6 +168,17 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 		logmsg("Found grounding of variable:");
 		logmsg("$$ variable:", hp);
 		logmsg("$$ ground term:", hg);
+
+		// Propagate ExclusiveLink constraints. If this binding causes
+		// another variable's domain to become empty, we have a conflict.
+		if (not propagate_exclusive(hp, hg))
+		{
+			DO_LOG({LAZY_LOG_FINE << "Constraint conflict: "
+			        << hp->to_short_string() << " = "
+			        << hg->to_short_string();})
+			return false;
+		}
+
 		var_grounding[hp] = hg;
 	}
 	return true;
@@ -507,6 +518,15 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	// unless there are globs in the pattern
 	if (osg.size() != arity)
 		return _pmc.fuzzy_match(hp, hg);
+
+	// Initialize constraint domains for ExclusiveLink propagation.
+	// Each variable in this unordered link can potentially be bound
+	// to any value in the ground set.
+	if (_use_constraint_domain)
+	{
+		HandleSet ground_set(osg.begin(), osg.end());
+		init_exclusive_constraints(osp, ground_set);
+	}
 
 	// Either we're going to take a step; or we aren't.
 	// If we're not taking a step, then there are unexplored
@@ -2733,18 +2753,30 @@ void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
 	_clause_solutn_stack.push(clause_grounding);
+
+	// Save constraint propagation state for backtracking
+	if (_use_constraint_domain)
+		_constraint_domain.push_state();
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(_clause_solutn_stack, clause_grounding);
+
+	// Restore constraint propagation state
+	if (_use_constraint_domain)
+		_constraint_domain.pop_state();
 }
 
 void PatternMatchEngine::solution_drop(void)
 {
 	var_solutn_stack.pop();
 	_clause_solutn_stack.pop();
+
+	// Discard saved constraint state without restoring
+	if (_use_constraint_domain)
+		_constraint_domain.pop_discard();
 }
 
 /* ======================================================== */
@@ -3304,6 +3336,9 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_odo.clear();
 	_perm_podo.clear();
 	_perm_odo_state.clear();
+
+	// constraint propagation state
+	_use_constraint_domain = false;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
@@ -3311,6 +3346,72 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 {
 	_variables = &v;
 	_pat = &p;
+
+	// Enable constraint propagation if there are ExclusiveLink constraints
+	_use_constraint_domain = not p.exclusives.empty();
+}
+
+/* ======================================================== */
+/**
+ * Initialize constraint domain for ExclusiveLink constraints.
+ *
+ * This sets up the constraint propagation system for pruning
+ * permutation search. Variables that appear together in an
+ * ExclusiveLink must have distinct groundings.
+ *
+ * @param pattern_vars Variables in the current UnorderedLink pattern
+ * @param ground_set Set of possible groundings (from the ground term)
+ */
+void PatternMatchEngine::init_exclusive_constraints(
+	const PatternTermSeq& pattern_terms,
+	const HandleSet& ground_set)
+{
+	_constraint_domain.clear();
+
+	// Initialize domain for each variable in the pattern
+	for (const PatternTermPtr& ptm : pattern_terms)
+	{
+		const Handle& h = ptm->getHandle();
+		if (_variables->varset_contains(h))
+		{
+			_constraint_domain.init_domain(h, ground_set);
+		}
+	}
+
+	// Add ExclusiveLink constraints
+	for (const PatternTermPtr& excl : _pat->exclusives)
+	{
+		HandleSeq vars_in_excl;
+		const Handle& exh = excl->getHandle();
+		for (const Handle& elt : exh->getOutgoingSet())
+		{
+			if (_variables->varset_contains(elt))
+				vars_in_excl.push_back(elt);
+		}
+		if (vars_in_excl.size() > 1)
+			_constraint_domain.add_constraint(vars_in_excl);
+	}
+}
+
+/**
+ * Propagate constraint when a variable is bound.
+ *
+ * When a variable is bound to a value, this removes that value
+ * from the domains of all variables that share an ExclusiveLink
+ * constraint with it.
+ *
+ * @param var The variable being bound
+ * @param value The value it's being bound to
+ * @return false if propagation detects a conflict (empty domain)
+ */
+bool PatternMatchEngine::propagate_exclusive(
+	const Handle& var,
+	const Handle& value)
+{
+	if (not _use_constraint_domain) return true;
+	if (not _constraint_domain.has_domain(var)) return true;
+
+	return _constraint_domain.bind(var, value);
 }
 
 /* ======================================================== */

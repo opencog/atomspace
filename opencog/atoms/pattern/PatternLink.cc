@@ -1260,6 +1260,8 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 				}
 				else if (IDENTICAL_LINK == t)
 					ptm->markIdentical();
+				else if (EXCLUSIVE_LINK == t)
+					ptm->markExclusive();
 			}
 		}
 	}
