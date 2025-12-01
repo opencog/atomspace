@@ -164,3 +164,24 @@ bool smart_set_compare(const HandleSeq& pattern_vars,
 5. **Measure speedup** on test cases
 
 The really interesting question: could this generalize to make *all* pattern matching faster, not just combinatorially explosive problems?
+
+-----------------------------------------------------------
+
+Linas notes:
+So early on, you write
+```
+  // new: domain of possible groundings
+  HandleSet _domain;
+```
+How do you propose finding this comain? For example, a variable can be
+declared (TypedVariable (Variable "X") (Type 'Concept))` and so we know
+the domain must be limited to ConceptNodes. However, there might be
+millions of these, so recording all of them is not very practical. Now,
+some search clauses might be of the form
+`(List (Variable "X") (Concept "foo"))` and so *maybe* it is possible to
+narrow the domain very quickly in this way. Now, for "regular" searches,
+this narrowing is not needed, as it is areadly done, in a defacto fashion,
+by the graph crawler.  So this idea of domains seems relevant ONLY for
+unordered links.
+
+--------
