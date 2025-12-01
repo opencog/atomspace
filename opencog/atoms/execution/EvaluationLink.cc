@@ -143,8 +143,7 @@ static void throwSyntaxException(bool silent, const char* message...)
 ///
 /// For DefinedPredicateNodes, the defintiion is looked up first.
 ///
-bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
-                               const HandleSeq& cargs)
+bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 {
 	Handle pn(_outgoing.at(0));
 	Type pntype = pn->get_type();
@@ -156,21 +155,30 @@ bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
 		pntype = pn->get_type();
 	}
 
-	// Treat LambdaLink as if it were a PutLink -- perform
-	// the beta-reduction, and evaluate the result.
-	if (LAMBDA_LINK == pntype)
+	// Sanity check.
+	if (LIST_LINK == _outgoing.at(1)->get_type() and
+		(2 != _outgoing.size()))
 	{
-		LambdaLinkPtr lam(LambdaLinkCast(pn));
-		Handle reduct(lam->beta_reduce(cargs));
-		return reduct->bevaluate(as, silent);
+		throw SyntaxException(TRACE_INFO,
+			"EvaluationLink: Incorrect number of arguments, "
+			"expecting 2, got %lu for:\n\t%s",
+			_outgoing.size(), to_string().c_str());
 	}
 
 	// Throw a silent exception; this is called in some try..catch blocks.
 	if (GROUNDED_PREDICATE_NODE == pntype)
 	{
 		GroundedProcedureNodePtr gpn = GroundedProcedureNodeCast(pn);
-		Handle args(createLink(std::move(cargs), LIST_LINK));
-		ValuePtr result = gpn->execute_args(as, args, silent);
+
+		ValuePtr result;
+		if (LIST_LINK == _outgoing.at(1)->get_type())
+			result = gpn->execute_args(as, _outgoing.at(1), silent);
+		else
+		{
+			HandleSeq args(_outgoing.begin()+1, _outgoing.end());
+			Handle argl(createLink(std::move(args), LIST_LINK));
+			result = gpn->execute_args(as, argl, silent);
+		}
 
 		// Check if result is a BoolValue and return the bool directly
 		if (result->is_type(BOOL_VALUE))
@@ -190,6 +198,24 @@ bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
 			result->to_string().c_str());
 	}
 
+	HandleSeq cargs;
+	if (LIST_LINK == _outgoing.at(1)->get_type())
+		cargs = _outgoing.at(1)->getOutgoingSet();
+	else
+	{
+		cargs.reserve(_outgoing.size() - 1);
+		cargs.assign(_outgoing.begin()+1, _outgoing.end());
+	}
+
+	// Treat LambdaLink as if it were a PutLink -- perform
+	// the beta-reduction, and evaluate the result.
+	if (LAMBDA_LINK == pntype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(pn));
+		Handle reduct(lam->beta_reduce(cargs));
+		return reduct->bevaluate(as, silent);
+	}
+
 	// If it's evaluatable, assume it has some free variables.
 	// Use the LambdaLink to find those variables (via FreeLink)
 	// and then reduce it.
@@ -204,23 +230,6 @@ bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
 		throw NotEvaluatableException();
 	throw SyntaxException(TRACE_INFO,
 			"This predicate is not evaluatable: %s", pn->to_string().c_str());
-}
-
-bool EvaluationLink::bevaluate(AtomSpace* scratch, bool silent)
-{
-	if (LIST_LINK == _outgoing.at(1)->get_type())
-	{
-		if (2 != _outgoing.size())
-			throw SyntaxException(TRACE_INFO,
-				"EvaluationLink: Incorrect number of arguments, "
-				"expecting 2, got %lu for:\n\t%s",
-				_outgoing.size(), to_string().c_str());
-		return eval_args(scratch, silent, _outgoing.at(1)->getOutgoingSet());
-	}
-
-	// Extract the args, and run the evaluation with them.
-	HandleSeq args(_outgoing.begin()+1, _outgoing.end());
-	return eval_args(scratch, silent, args);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

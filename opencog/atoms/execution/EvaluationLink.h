@@ -33,7 +33,6 @@ class AtomSpace;
  */
 class EvaluationLink : public FreeLink
 {
-	bool eval_args(AtomSpace*, bool, const HandleSeq&);
 public:
 	EvaluationLink(const HandleSeq&&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
