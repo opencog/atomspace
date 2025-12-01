@@ -171,7 +171,7 @@ bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
 		// the beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+		return reduct->bevaluate(as, silent);
 	}
 
 	// Treat LambdaLink as if it were a PutLink -- perform
