@@ -3,7 +3,6 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (execution
-	Force.cc
 	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
@@ -29,7 +28,6 @@ INSTALL (FILES
 	EvaluatableLink.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
-	Force.h
 	GroundedProcedureNode.h
 	DESTINATION "include/opencog/atoms/execution"
 )
