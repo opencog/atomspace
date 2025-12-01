@@ -77,7 +77,7 @@ Handle StateLink::get_link(const AtomSpace* as)
 }
 
 // Over-ride what UniqueLink is doing, set it back to default.
-// We handle uniqueness slithgly later, at the install() step.
+// We handle uniqueness slightly later, at the install() step.
 void StateLink::setAtomSpace(AtomSpace* as)
 {
 	Link::setAtomSpace(as);
