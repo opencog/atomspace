@@ -180,7 +180,7 @@ bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
 		Handle reduct(lam->beta_reduce(cargs));
-		return EvaluationLink::crisp_eval_scratch(as, reduct, as, silent);
+		return reduct->bevaluate(as, silent);
 	}
 
 	// Throw a silent exception; this is called in some try..catch blocks.
