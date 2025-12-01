@@ -37,9 +37,37 @@ IdenticalLink::IdenticalLink(const HandleSeq&& oset, Type t)
 
 void IdenticalLink::setAtomSpace(AtomSpace* as)
 {
-	// Count number of not-variables:
+	// Count number of non-variables:
+	size_t nfix = 0;
+	for (const Handle& h: _outgoing)
+		if (not h->is_type(VARIABLE_NODE)) nfix ++;
 
-	Link::setAtomSpace(as);
+	// We're OK, if there's just zero or one constants in here.
+	if (2 > _outgoing.size() - nfix)
+	{
+		Link::setAtomSpace(as);
+		return;
+	}
+
+	// Lets see if they're all the same ...
+	Handle id;
+	for (const Handle& h: _outgoing)
+	{
+		if (h->is_type(VARIABLE_NODE)) continue;
+		if (nullptr == id)
+		{
+			id = h;
+			continue;
+		}
+
+		if (*h != *id)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot place IdenticalLink with non-identical atoms in AtomSpace!  Got %s",
+				to_string().c_str());
+	}
+
+	// Not reachable.
+	OC_ASSERT(false, "Internal error");
 }
 
 /* ================================================================= */
