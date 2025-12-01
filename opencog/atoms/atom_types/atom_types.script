@@ -296,8 +296,20 @@ PREDICATE_NODE <- NODE
 // interpretation, e.g. primitives inspired by conventional predicate
 // logic. Anything that needs probabilistic truth would not, should not
 // use this, as it will lead to ambiguities and clashes as to which
-// interpretation to use when.
-EVALUATABLE_LINK <- LINK,CRISP_OUTPUT_SIG
+// interpretation to use when. These are, by defintion, "crisp".
+EVALUATABLE_LINK <- LINK, CRISP_OUTPUT_SIG
+
+// The VirtualLink designation is needed by the pattern matcher,
+// in order to be able to find and treat terms that encode relations.
+//
+// In mathematics nomenclature, VirtualLinks are "relations": they are
+// terms that evaluate to crisp true/false values.
+//
+// XXX FIXME Should probably be renamed to RELATION_LINK. Got called
+// "virtual" because it is impossible to enumerate all greater-than
+// relations and store them in the AtomSpace as real objects; these
+// exist only "virtually".
+VIRTUAL_LINK <- EVALUATABLE_LINK
 
 // ExecutableLink. Any link type which might be executed, resulting
 // in a Value, should inherit from this type.
@@ -815,11 +827,11 @@ GRANT_LINK <- UNIQUE_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it is true only if everything in them are the same Atom.
-IDENTICAL_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+IDENTICAL_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // ExclusiveLink tests to make sure all elements differ from
 // one-another. True only if they all differ...
-EXCLUSIVE_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+EXCLUSIVE_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // ==============================================================
 // Basic Knowledge-Representation types.
@@ -939,38 +951,17 @@ ANCHOR_NODE <- NODE
 //
 // Relations always have an associated subobject classifier. For naive
 // set theory, this is the indicator function, having values of
-// true/false, indicating set membership. For Atomese, the subject
-// classifier is explicitly always a TRUTH_VALUE.
+// true/false, indicating set membership. For Atomese, the subobject
+// classifier is always explicitly a VALUE.
+//
+// Most of the stuff lised below will be conventional crisp-boolean
+// true/false classifiers.
 
 // A generic catch-all equality-relation link. No particular semantics
 // is assigned to this, other than that it relates things that
 // are "similar" in some way.
 SIMILARITY_LINK <- UNORDERED_LINK
 
-// A VirtualLink is equivalent to an EvaluationLink, with a
-// GroundedPredicateNode in it, except that the GPN is "built in".
-// So, for example, GreaterThanLink is equivalent to an EvaluationLink
-// with a GroundedPredicateNode "c++:greater_than". The built-in
-// evaluation links have better performance, since they don't need
-// to make a call to external scheme or python code to get evaluated.
-//
-// The VirtualLink designation is needed by the pattern matcher,
-// in order to be able to find and treat these terms correctly.
-//
-// VirtualLinks only need to be used for those GPN's that take 2 or
-// more arguments. If they take only one, then there is no reason
-// for them to be declared as virtual (at least, as far as the pattern
-// matcher is concerned, which, right now, is the only user of this
-// link type.)
-//
-// In mathematics nomenclature, VirtualLinks are "relations": they are
-// terms that evaluate to crisp true/false values.
-//
-// XXX FIXME Should probably be renamed to RELATION_LINK. Got called
-// "virtual" because it is impossible to enumerate all greater-than
-// relations and store them in the AtomSpace as real objects; these
-// exist only "virtually".
-VIRTUAL_LINK <- EVALUATABLE_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 
