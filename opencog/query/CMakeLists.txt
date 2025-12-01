@@ -1,7 +1,6 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
-	ConstraintDomain.cc
 	ContinuationMixin.cc
 	InitiateSearchMixin.cc
 	Instantiator.cc
@@ -35,7 +34,6 @@ INSTALL (TARGETS query-engine
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	ConstraintDomain.h
 	ContinuationMixin.h
 	Implicator.h
 	InitiateSearchMixin.h
