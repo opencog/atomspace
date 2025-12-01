@@ -210,23 +210,6 @@ static bool is_message(const Handle& h)
 	return false;
 }
 
-/// Check for semantic equality.
-static bool equal(AtomSpace* as, const Handle& h, bool silent)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	size_t nelts = oset.size();
-	if (2 > nelts) return true;
-
-	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
-
-	for (size_t j=1; j<nelts; j++)
-	{
-		ValuePtr v1(exec_or_eval(as, oset[j], as, silent));
-		if (v0 != v1 and *v0 != *v1) return false;
-	}
-	return true;
-}
-
 /// Check for alpha equivalence.
 static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -493,7 +476,6 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 
 	// -------------------------
 	// Assorted relations
-	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
 	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);

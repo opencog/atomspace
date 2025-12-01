@@ -3,6 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (constrain
+	EqualLink.cc
 	ExclusiveLink.cc
 	IdenticalLink.cc
 )
@@ -21,6 +22,7 @@ INSTALL (TARGETS constrain EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	EqualLink.h
 	ExclusiveLink.h
 	IdenticalLink.h
 	DESTINATION "include/opencog/atoms/constrain"
