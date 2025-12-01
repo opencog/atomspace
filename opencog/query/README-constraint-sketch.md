@@ -217,4 +217,10 @@ over complex constraints, like
 		(LessThan (Variable "Y") (Plus (Variable "Z") (Number 42))))
 ```
 
+FYI, What you call "Tier 1" is known as "The theory of Equality" (There
+is a wikipedia article on this.) What you call "Tier 2" and "Tier 3" is
+called "Satisfiability Modulo Theories" in mathematics, and is generally
+used in VLSI design.
+
+
 --------
