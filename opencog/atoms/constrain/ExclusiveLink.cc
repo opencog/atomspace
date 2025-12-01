@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "ExclusiveLink.h"
 
 using namespace opencog;
@@ -42,9 +43,47 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 
 /* ================================================================= */
 
+/// Check to make sure all atoms differ
 bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 {
-	// For now, just return true
+	HandleSeq exset;
+	exset.reserve(_outgoing.size());
+
+	for (const Handle& h: _outgoing)
+	{
+		if (not h->is_executable())
+		{
+			exset.push_back(h);
+			continue;
+		}
+		ValuePtr vp(h->execute(as, silent));
+
+#if NOT_NEEDED_YET
+		// Uhh ... !!??
+
+		// If the return value is a ContainerValue, we assume that this
+		// is the result of executing a MeetLink or QueryLink.
+		// In this case, unwrap it, to get the "actual value".
+		// This feels slightly hacky, but will do for just right now.
+		if (vp->is_type(CONTAINER_VALUE))
+		{
+			HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+			if (1 == hs.size())
+				vp = hs[0];
+		}
+#endif
+
+		// XXX Not clear what the deal here is. We expect an Atom.
+		// Should we throw? Show we ignore? Perhaps throw, for now,
+		// until we find out what the "typical user" is trying to do.
+		if (not vp->is_atom())
+			throw RuntimeExcetion(TRACE_INFO,
+				"Expecting execution to return an Atom; got %s\n",
+				vp->to_string().c_str());
+
+		exset.emplace_back(as->add_atom(HandleCast(vp)));
+	}
+
 	return true;
 }
 

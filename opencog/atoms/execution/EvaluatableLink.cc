@@ -339,31 +339,6 @@ static bool subset(AtomSpace* as, const Handle& h, bool silent)
 	return true;
 }
 
-/// Check to make sure all atoms differ
-static bool exclusive(AtomSpace* as, const Handle& h, bool silent)
-{
-	HandleSeq oset(h->getOutgoingSet());
-	ValueSeq vset;
-
-	size_t olen = oset.size();
-	while (true)
-	{
-		if (2 > olen) return true;
-
-		Handle last(oset.back());
-		oset.pop_back();
-		olen --;
-
-		ValuePtr v0(exec_or_eval(as, last, as, silent));
-		for (size_t j=0; j< olen; j++)
-		{
-			if (vset.size() <= j)
-				vset.push_back(exec_or_eval(as, oset[j], as, silent));
-			if (v0 == vset[j] or *v0 == *vset[j]) return false;
-		}
-	}
-}
-
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
 static bool is_evaluatable_sat(const Handle& satl)
 {
@@ -541,7 +516,6 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
-	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
 	if (IS_KEY_LINK == t) return is_key(evelnk);
 	if (IS_MESSAGE_LINK == t) return is_message(evelnk);
 
