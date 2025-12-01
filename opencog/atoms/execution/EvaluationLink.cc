@@ -143,11 +143,10 @@ static void throwSyntaxException(bool silent, const char* message...)
 ///
 /// For DefinedPredicateNodes, the defintiion is looked up first.
 ///
-bool EvaluationLink::crisp_eval_with_args(AtomSpace* as,
-                                          const Handle& pn,
-                                          const HandleSeq& cargs,
-                                          bool silent)
+bool EvaluationLink::eval_args(AtomSpace* as, bool silent,
+                               const HandleSeq& cargs)
 {
+	const Handle& pn(_outgoing.at(0));
 	Type pntype = pn->get_type();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
@@ -233,13 +232,12 @@ bool EvaluationLink::bevaluate(AtomSpace* scratch, bool silent)
 				"EvaluationLink: Incorrect number of arguments, "
 				"expecting 2, got %lu for:\n\t%s",
 				_outgoing.size(), to_string().c_str());
-		return crisp_eval_with_args(scratch, _outgoing.at(0),
-			_outgoing.at(1)->getOutgoingSet(), silent);
+		return eval_args(scratch, silent, _outgoing.at(1)->getOutgoingSet());
 	}
 
 	// Extract the args, and run the evaluation with them.
 	HandleSeq args(_outgoing.begin()+1, _outgoing.end());
-	return crisp_eval_with_args(scratch, _outgoing.at(0), args, silent);
+	return eval_args(scratch, silent, args);
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

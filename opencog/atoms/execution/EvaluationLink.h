@@ -33,11 +33,7 @@ class AtomSpace;
  */
 class EvaluationLink : public FreeLink
 {
-	static bool crisp_eval_with_args(AtomSpace* as,
-	                                const Handle& pn,
-	                                const HandleSeq& cargs,
-	                                bool silent);
-
+	bool eval_args(AtomSpace*, bool, const HandleSeq&);
 public:
 	EvaluationLink(const HandleSeq&&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
