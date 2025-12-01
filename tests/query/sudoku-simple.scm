@@ -74,10 +74,25 @@
 	)
 )
 
+; The contents of the cells must be numbers!
+; This constraint will not be needed, as the requirement that
+; the columns, rows and boxes be a number set is sufficient.  So the
+; below only adds complexity to the problem, slowing down solving.
+(define (cells-are-numbers-2x2)
+	(list
+		(Edge (Predicate "IsNumber") (Variable "$cell_11"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_12"))
+
+		(Edge (Predicate "IsNumber") (Variable "$cell_21"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_22"))
+	)
+)
+
 ;; The grand-total set of constraints.
 (define (x2-sudoku-constraints)
 	(list
-		;; (cells_are_numbers) ; constraint isn't needed.
+		; constraint isn't needed. But we use it anyway, "for fun"
+		(cells-are-numbers-2x2) ; useless constraint.
 		(x2_row1)
 		(x2_row2)
 		(x2_col1)
@@ -88,8 +103,8 @@
 ; Define the variables to be solved for.
 ; This is just a big list of all the cells.
 ;
-(define (x2-variable-decls lnk)
-	(cog-new-link lnk
+(define (x2-variable-decls)
+	(list
 		(Variable "$cell_11")
 		(Variable "$cell_12")
 
@@ -108,7 +123,7 @@
 (define (x2-puzzle)
 	(CollectionOf
 	(QueryLink
-		(x2-variable-decls 'VariableList)
+		(VariableList (x2-variable-decls))
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
 			(Edge (Predicate "x2-fix11") (Variable "$cell_11"))
@@ -118,7 +133,7 @@
 			(x2-sudoku-constraints)
 		)
 		; The solution
-		(x2-variable-decls 'ListLink)
+		(ListLink (x2-variable-decls))
 	)
 	)
 )
@@ -133,13 +148,13 @@
 (define (x2-any)
 	(CollectionOf
 	(QueryLink
-		(x2-variable-decls 'VariableList)
+		(VariableList (x2-variable-decls))
 		(AndLink
 			; There are 4 constraints. One is actually redundant...
 			(x2-sudoku-constraints)
 		)
 		; The solution
-		(x2-variable-decls 'ListLink)
+		(ListLink (x2-variable-decls))
 	)
 	)
 )
@@ -227,10 +242,29 @@
 	)
 )
 
+; The contents of the cells must be numbers!
+; Actually, this constraint will not be needed, as the requirement that
+; the columns, rows and boxes be a number set is sufficient.  So the
+; below only adds complexity to the problem, slowing down solving.
+(define (cells-are-numbers-3x3)
+	(list
+		(Edge (Predicate "IsNumber") (Variable "$cell_11"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_12"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_13"))
+
+		(Edge (Predicate "IsNumber") (Variable "$cell_21"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_22"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_23"))
+
+		(Edge (Predicate "IsNumber") (Variable "$cell_31"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_32"))
+		(Edge (Predicate "IsNumber") (Variable "$cell_33"))
+	))
+
 ;; The grand-total set of constraints.
 (define (x3-sudoku-constraints)
 	(list
-		;; (cells_are_numbers) ; constraint isn't needed.
+		(cells-are-numbers-3x3) ; constraint isn't needed.
 		(x3_row1)
 		(x3_row2)
 		(x3_row3)
@@ -243,8 +277,8 @@
 ; Define the variables to be solved for.
 ; This is just a big list of all the cells.
 ;
-(define (x3-variable-decls lnk)
-	(cog-new-link lnk
+(define (x3-variable-decls)
+	(list
 		(Variable "$cell_11")
 		(Variable "$cell_12")
 		(Variable "$cell_13")
@@ -275,7 +309,7 @@
 (define (x3-puzzle)
 	(CollectionOf
 	(QueryLink
-		(x3-variable-decls 'VariableList)
+		(VariableList (x3-variable-decls))
 		(AndLink
 			; For this puzzle, 1 of the variables is fixed immediately.
 			(Edge (Predicate "x3-fix11") (Variable "$cell_11"))
@@ -285,7 +319,7 @@
 			(x3-sudoku-constraints)
 		)
 		; The solution
-		(x3-variable-decls 'ListLink)
+		(ListLink (x3-variable-decls))
 	)
 	)
 )

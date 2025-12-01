@@ -36,7 +36,7 @@
 ; Actually, this constraint will not be needed, as the requirement that
 ; the columns, rows and boxes be a number set is sufficient.  So the
 ; below only adds complexity to the problem, slowing down solving.
-(define (cells-are-numbers)
+(define (cells-are-numbers-9x9)
 	(list
 		(Edge (Predicate "IsNumber") (Variable "$cell_11"))
 		(Edge (Predicate "IsNumber") (Variable "$cell_12"))
@@ -506,7 +506,7 @@
 ;; The grand-total set of constraints.
 (define (sudoku-constraints)
 	(list
-		; (cells-are-numbers) ; constraint isn't needed.
+		; (cells-are-numbers-9x9) ; constraint isn't needed.
 		(row1)
 		(row2)
 		(row3)
