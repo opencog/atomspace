@@ -618,70 +618,6 @@ LOCAL_QUOTE_LINK <- DONT_EXEC_LINK
 // Could be used in PatternLink too.
 REPLACEMENT_LINK <- ORDERED_LINK
 
-// A FreeLink is any kind of link that might have free variables in it.
-// The FreeLink exists for one purpose: to make visible/explicit all of
-// free variables in the link. The primary user is the pattern matcher.
-// That is, envision the FreeLink as being at the top of a tree, and
-// somewhere in that tree, there might be VariableNodes.  The C++ class
-// for this link records the names of those variables, in order of
-// traversal.  The goal here is to simply know these variables, so that,
-// at the time of evaluation or execution, they are easily located.
-//
-// The variables are necessarily free: they do NOT have type
-// declarations or restrictions associated with them.  This is in sharp
-// contrast to ScopeLink, which binds variables by scoping them, and
-// then forcing type restrictions to them.
-//
-// FreeLinks may be open or closed; they are closed terms if they
-// have no free variables in them.
-//
-FREE_LINK <- ORDERED_LINK
-
-// This is an interesting one. It is a link that must never be grounded!
-// It must contain at least one VariableNode somewhere within it; that
-// is, it must be an "open sentence" and never a "closed sentence".
-// (as it would be called, using the terminology of predicate logic;
-// See Wikipedia for a formal definition).
-//
-// Attempting to insert a DeleteLink holding a fully grounded term
-// (holding a closed sentence) will instead cause the the term to be
-// deleted from the AtomSpace, thus the name.  This is meant to be used
-// with the pattern matcher, so that if it discovers a grounding, the
-// grounded term is deleted.
-//
-// Implementation Note: The DeleteLink cannot inherit from FunctionLink
-// because that would cause all variables to be bound, i.e. to become
-// a closed sentence; thus it inherits from FreeLink.
-//
-DELETE_LINK <- FREE_LINK
-
-// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
-// fixed first Atom of the Link.  Useful for defining state.  Additional
-// "open" links may exist; "open" links are defined as links that
-// contain free variables (see Wikipedia definition of "open term",
-// "closed term").  Kind of like DeleteLink, but allows one instead of
-// zero closed terms.
-UNIQUE_LINK <- FREE_LINK
-
-// Inserting a StateLink into the AtomSpace causes the previous
-// state to be removed from the AtomSpace. Uniqueness applies only to
-// closed terms; thus, StateLinks with variables in the defintion can
-// be created for search patterns.
-STATE_LINK <- UNIQUE_LINK
-
-// Uniquely naming things, tagging things. Attempting to insert a
-// second definition into the AtomSpace will throw an exception.
-// Restricted to DefinedProcedure, DefinedSchema, etc.
-DEFINE_LINK <- UNIQUE_LINK
-
-// Unqiue, exclusive relationships. Attempting to insert a second relation
-// into the AtomSpace will silently fail, and the original relation is
-// returned. No error is thrown. Allows first-come-first-serve atomic
-// mutex relationships to be placed in the AtomSpace. These cannot be
-// hidden by Frames. Applies only to closed terms; thus, GrantLinks with
-// variables in the defintion can be created for search patterns.
-GRANT_LINK <- UNIQUE_LINK
-
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
@@ -793,6 +729,79 @@ QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
 // of the pattern and the grounding are reversed: given a grounding, the
 // collection of patterns that are grounded by it can be searched-for.
 DUAL_LINK <- SATISFYING_LINK
+
+// ==============================================================
+// Freedoms and constraints.
+
+// A FreeLink is any kind of link that might have free variables in it.
+// The FreeLink exists for one purpose: to make visible/explicit all of
+// free variables in the link. The primary user is the pattern matcher.
+// That is, envision the FreeLink as being at the top of a tree, and
+// somewhere in that tree, there might be VariableNodes.  The C++ class
+// for this link records the names of those variables, in order of
+// traversal.  The goal here is to simply know these variables, so that,
+// at the time of evaluation or execution, they are easily located.
+//
+// The variables are necessarily free: they do NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to ScopeLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+//
+FREE_LINK <- ORDERED_LINK
+
+// ConstraintLinks are link types that implement forced constraints
+// on thier contents, depending on whether they contain free variables
+// or not. This is an abstract base class; the specifics of the
+// constraint are implemented elsewhere.
+CONSTRAINT_LINK <- FREE_LINK
+
+// This is an interesting one. It is a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, using the terminology of predicate logic;
+// See Wikipedia for a formal definition).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+// Implementation Note: The DeleteLink cannot inherit from FunctionLink
+// because that would cause all variables to be bound, i.e. to become
+// a closed sentence; thus it inherits from FreeLink.
+//
+DELETE_LINK <- CONSTRAINT_LINK
+
+// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
+// fixed first Atom of the Link.  Useful for defining state.  Additional
+// "open" links may exist; "open" links are defined as links that
+// contain free variables (see Wikipedia definition of "open term",
+// "closed term").  Kind of like DeleteLink, but allows one instead of
+// zero closed terms.
+UNIQUE_LINK <- CONSTRAINT_LINK
+
+// Inserting a StateLink into the AtomSpace causes the previous
+// state to be removed from the AtomSpace. Uniqueness applies only to
+// closed terms; thus, StateLinks with variables in the defintion can
+// be created for search patterns.
+STATE_LINK <- UNIQUE_LINK
+
+// Uniquely naming things, tagging things. Attempting to insert a
+// second definition into the AtomSpace will throw an exception.
+// Restricted to DefinedProcedure, DefinedSchema, etc.
+DEFINE_LINK <- UNIQUE_LINK
+
+// Unqiue, exclusive relationships. Attempting to insert a second relation
+// into the AtomSpace will silently fail, and the original relation is
+// returned. No error is thrown. Allows first-come-first-serve atomic
+// mutex relationships to be placed in the AtomSpace. These cannot be
+// hidden by Frames. Applies only to closed terms; thus, GrantLinks with
+// variables in the defintion can be created for search patterns.
+GRANT_LINK <- UNIQUE_LINK
 
 // ==============================================================
 // Basic Knowledge-Representation types.
