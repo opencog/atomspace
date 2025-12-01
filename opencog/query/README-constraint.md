@@ -99,6 +99,86 @@ A practical threshold might be: only use constraint propagation
 when the ground SetLink has fewer than ~1000 elements, and multiple
 SetLinks in the pattern share variables.
 
+## Explicit Constraints and Early Evaluation
+
+### The Mutual Exclusion Assumption
+
+The initial design implicitly assumes that variables in the same
+SetLink must take distinct values. This is true for Sudoku (each
+row/column/box has 9 different values) but is NOT true in general.
+A SetLink `{$a, $b, $c}` matching `{x, y, z}` does not inherently
+require $a, $b, $c to be distinct - they could all bind to x.
+
+### Explicit Constraint Links
+
+To enable constraint propagation, mutual exclusion and other
+constraints should be explicitly declared using EvaluatableLinks:
+
+```scheme
+; Declare that these variables must have distinct values
+(ExclusiveLink
+    (Variable "$cell_21")
+    (Variable "$cell_22")
+    (Variable "$cell_23")
+    ...)
+```
+
+Currently, EvaluatableLinks are checked AFTER all variables are
+grounded. For constraint propagation, certain simple EvaluatableLinks
+could be checked DURING search, enabling early failure and propagation.
+
+### Link Types Suitable for Early Evaluation
+
+**Tier 1 - Can propagate constraints:**
+
+- `ExclusiveLink($a, $b, $c, ...)`: When $a=x, remove x from
+  domains of $b, $c, etc. This is the key enabler for Sudoku-style
+  constraint propagation.
+
+- `IdenticalLink($a, $b)`: When $a=x, set domain of $b to {x}.
+  Unifies the variables.
+
+- `EqualLink($a, $b)`: Similar to IdenticalLink for propagation.
+
+- `NotLink(EqualLink($a, $b))`: When $a=x, remove x from domain
+  of $b. Expresses "must be different".
+
+**Tier 2 - Can check but not propagate (requires value ordering):**
+
+- `GreaterThanLink($x, $y)`: When $x=5, domain of $y becomes
+  {values < 5}. Requires knowing the ordering of domain values.
+  Works for NumberNodes; unclear for arbitrary atoms.
+
+- `LessThanLink($x, $y)`: Symmetric to GreaterThan.
+
+**Tier 3 - Opaque (check after grounding only):**
+
+- Complex expressions: `(And (GreaterThan X Y) (LessThan Y (Plus Z 42)))`
+- GroundedPredicateNodes (arbitrary code)
+- Most other EvaluatableLinks
+
+### Strategy for Complex Constraints
+
+For Tier 3 constraints, the system should:
+1. Identify which variables they depend on
+2. Wait until all those variables are bound
+3. Evaluate and fail immediately if unsatisfied
+4. Do NOT attempt to reason about or propagate from them
+
+This is still an improvement over checking all EvaluatableLinks
+at the very end - we check as soon as possible.
+
+### Constraint Detection During Pattern Analysis
+
+During pattern initialization (before search begins), analyze
+the pattern to identify:
+1. Which variables appear in ExclusiveLinks together
+2. Which EvaluatableLinks can be checked early (Tier 1, 2)
+3. Which must wait for full grounding (Tier 3)
+
+Build a dependency graph: for each EvaluatableLink, record which
+variables it depends on. When the last variable is bound, evaluate.
+
 ## Proposed Architecture
 
 ### 1. Domain Tracking in PatternTerm
