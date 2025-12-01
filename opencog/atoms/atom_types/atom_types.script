@@ -44,10 +44,31 @@ STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
 
 // ==============================================================
-// Executable Atom type declarations. Almost all executable Atoms are
-// Links. The oset of the Link serves as "function arguments" for that
-// link. The result of execution is a Value of some kind, usually of
-// some specific kind.
+// Type-safety links.  These are used to enforce type safety at
+// Atom creation time.  This is done in the ClassServer, with the
+// ClassServer::addValidator() method and the factory which runs the
+// validators. viz. std::vector<Validator*> _validator; in that class.
+//
+// This mechanism is adequate to deal with simple user errors, but
+// isn't very strong. Issues include:
+//
+// *) By doing type-checking at Atom-creation time, this is a kind-of
+//    static type-checking, and thus suffers from the typical issues
+//    of static type-checking.
+// *) Polymorphic outputs are broken.  For example, ValueOfLink
+//    can return both numbers, and not-numbers...
+// *) It fails to handle "deep types", as there should be some form
+//    of ArrowLink associated with each Atom atype.
+// *) It fails to handle connector polarities beyond just "input"
+//    and "output". That is, there are more ways of connecting things
+//    than merely saying "outputs are things that can be plugged into
+//    inputs, and their types must match."
+//
+// So... deficient in many ways, but basically, it works for now, and it
+// handles most of the basic cases in a fairly straightforward fashion.
+//
+// ---------
+// Meta-commentary/philosophy.
 //
 // Atomese is fundamentally defined to be a way of writing down
 // executable abstract syntax trees (AST). This results in a lot of
@@ -250,39 +271,23 @@ UNORDERED_LINK <- LINK,UNORDERED_SIG
 PREDICATE_NODE <- NODE
 
 // ===========================================================
-// Type-safety links.  These are used to enforce type safety at
-// Atom creation time.  This is done in the ClassServer, with the
-// ClassServer::addValidator() method and the factory which runs the
-// validators. viz. std::vector<Validator*> _validator; in that class.
-//
-// This mechanism is adequate to deal with simple user errors, but
-// isn't very strong. Issues include:
-//
-// *) By doing type-checking at Atom-creation time, this is a kind-of
-//    static type-checking, and thus suffers from the typical issues
-//    of static type-checking.
-// *) Polymorphic outputs are broken.  For example, ValueOfLink
-//    can return both numbers, and not-numbers...
-// *) It fails to handle "deep types", as there should be some form
-//    of ArrowLink associated with each Atom atype.
-// *) It fails to handle connector polarities beyond just "input"
-//    and "output". That is, there are more ways of connecting things
-//    than merely saying "outputs are things that can be plugged into
-//    inputs, and their types must match."
-//
-// So... deficient in many ways, but basically, it works for now, and it
-// handles most of the basic cases in a fairly straightforward fashion.
+// Executable Atom type declarations. Almost all executable Atoms are
+// Links. The oset of the Link serves as "function arguments" for that
+// link. The result of execution is a Value of some kind, usually of
+// some specific kind.
+// XXX TODO ... perhaps these two should be SIGs?
 
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a TruthValue, should inherit from this type.
-// XXX this is going away.
+// in a crisp boolean true/false value should inherit from this type.
+// This is typically used for constructs that have a natural true/false
+// interpretation, e.g. primitives inspired by conventional predicate
+// logic. Anything that needs probabilistic truth would not, should not
+// use this, as it will lead to ambiguities and clashes as to which
+// interpretation to use when.
 EVALUATABLE_LINK <- LINK
 
 // ExecutableLink. Any link type which might be executed, resulting
-// in a Value, should inherit from this type. These are all $vau link
-// types (John N. Shutt, "The Kernel Programming Language")
-// https://web.cs.wpi.edu/~jshutt/kernel.html
-// http://lambda-the-ultimate.org/node/4093
+// in a Value, should inherit from this type.
 EXECUTABLE_LINK <- LINK
 
 // ===========================================================
