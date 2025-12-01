@@ -233,4 +233,24 @@ constraints has only one variable in it, it could be run as soon as
 that variable is grounded, before others are considered. I do not
 recall if this is done, or not.
 
+Some clarification. "pattern-compile-time" is not the same as "compile
+time".  The patterns are analyzed by the code in PatternLink.cc: this
+analysis is called "pattern compilation", and is intended to make the
+actual search run faster. The IdenticalLink, and some cases of EqualLink
+could be handled there.
+
+This also suggests the need for a modular design approach: a module for
+"theory of equality" and a module for "exclusive choice", and perhaps
+others: a "linear programming" module that handles GreaterThan constraints.
+The current code does try to handle EqualLinks in a smart way, but the
+design is ad hoc. So perhaps a good starting point is to get more
+aggressive, more robust with the handling of EqualLinks, and use this to
+create the outlines of a more general module that could propagate
+exclusive-choice constraints.
+
+We also have not talked about Answer-Set Programming (ASP) type
+constraints; this could also be done, and would need to be handled
+in some modular way, so that it does not tangle up into the already
+existing, rather complex code. 
+
 --------
