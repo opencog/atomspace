@@ -226,10 +226,8 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 		return reduct->bevaluate(as, silent);
 	}
 
-	if (silent)
-		throw NotEvaluatableException();
-	throw SyntaxException(TRACE_INFO,
-			"This predicate is not evaluatable: %s", pn->to_string().c_str());
+	throwSyntaxException(silent,
+		"Not evaluatable: %s", to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
