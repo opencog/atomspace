@@ -36,6 +36,47 @@ AlphaEqualLink::AlphaEqualLink(const HandleSeq&& oset, Type t)
 
 /* ================================================================= */
 
+void AlphaEqualLink::setAtomSpace(AtomSpace* as)
+{
+	Handle hid;
+	Variables vid;
+	for (Handle h : _outgoing)
+	{
+		if (h->is_executable())
+			continue;
+
+		if (nullptr == hid)
+		{
+			hid = h;
+			vid.find_variables(h);
+			continue;
+		}
+
+		// Are they strictly equal? Good!
+		if (hid == h) continue;
+
+		// Not strictly equal. Are they alpha convertible?
+		Variables v;
+		v.find_variables(h);
+
+		// If the variables are not alpha-convertable,
+		// then there is no possibility of equality.
+		if (not v.is_equal(vid))
+			throw SyntaxException(TRACE_INFO,
+				"Cannot place AlphaEqualLink with non-alpha-convertible elements in the AtomSpace! Got %s",
+				to_string().c_str());
+
+		// Actually alpha-convert, and compare.
+		Handle ha = v.substitute_nocheck(h, vid.varseq, false);
+		if (not (*hid == *ha))
+			throw SyntaxException(TRACE_INFO,
+				"Cannot place AlphaEqualLink with non-alpha-convertible elements in the AtomSpace! Got %s",
+				to_string().c_str());
+	}
+
+	Link::setAtomSpace(as);
+}
+
 /// Check for alpha equivalence.
 /// Two atoms are alpha-equivalent if they are structurally identical
 /// after variable renaming (alpha-conversion).
