@@ -3436,20 +3436,20 @@ void PatternMatchEngine::init_constraint_domains(void)
 
 				for (Arity i = 0; i < clause_arity; i++)
 				{
-					Handle child = clause_h->getOutgoingAtom(i);
+					const Handle& child = clause_h->getOutgoingAtom(i);
 					if (child == var)
 					{
 						var_pos = i;
+						if (key_pos != (Arity)-1) break;
+						continue;
 					}
-					else if (child->get_type() != VARIABLE_NODE and
-					         child->get_type() != GLOB_NODE and
-					         not _variables->varset_contains(child))
+
+					Type ct = child->get_type();
+					if (ct != VARIABLE_NODE and ct != GLOB_NODE)
 					{
-						if (not search_key)
-						{
-							search_key = child;
-							key_pos = i;
-						}
+						search_key = child;
+						key_pos = i;
+						if (var_pos != (Arity)-1) break;
 					}
 				}
 
@@ -3457,27 +3457,22 @@ void PatternMatchEngine::init_constraint_domains(void)
 
 				// Use the search key's incoming set to find matching atoms
 				Type clause_type = clause_h->get_type();
-				IncomingSet key_incoming = search_key->getIncomingSet();
+				IncomingSet key_incoming = search_key->getIncomingSetByType(clause_type);
 				for (const Handle& candidate : key_incoming)
 				{
-					if (candidate->get_type() != clause_type) continue;
 					if (candidate->get_arity() != clause_arity) continue;
 					if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
 
 					// Extract what the variable would be bound to
-					Handle binding = candidate->getOutgoingAtom(var_pos);
-					if (binding->get_type() != VARIABLE_NODE and
-					    binding->get_type() != GLOB_NODE)
-					{
+					const Handle& binding = candidate->getOutgoingAtom(var_pos);
+					Type bt = binding->get_type();
+					if (bt != VARIABLE_NODE and bt != GLOB_NODE)
 						var_domain.insert(binding);
-					}
 				}
 			}
 
 			if (not var_domain.empty())
-			{
 				_constraint_domain.init_domain(var, var_domain);
-			}
 		}
 	}
 
