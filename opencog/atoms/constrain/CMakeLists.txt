@@ -9,6 +9,7 @@ ADD_LIBRARY (constrain
 	EqualLink.cc
 	ExclusiveLink.cc
 	IdenticalLink.cc
+	IsClosedLink.cc
 	PresentLink.cc
 )
 
@@ -32,6 +33,7 @@ INSTALL (FILES
 	EqualLink.h
 	ExclusiveLink.h
 	IdenticalLink.h
+	IsClosedLink.h
 	PresentLink.h
 	DESTINATION "include/opencog/atoms/constrain"
 )

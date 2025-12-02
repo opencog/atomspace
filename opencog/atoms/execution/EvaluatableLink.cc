@@ -130,14 +130,6 @@ static bool lesser(AtomSpace* as, const Handle& h, bool silent)
 	return (v0 < v1);
 }
 
-/// Perform a IsClosed check
-static bool is_outgoing_closed(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	return std::all_of(oset.begin(), oset.end(),
-	                   [](const Handle& o) { return is_closed(o); });
-}
-
 static ValuePtr exec_or_eval(AtomSpace* as,
                              const Handle& term,
                              AtomSpace* scratch,
@@ -435,7 +427,6 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 	// Assorted relations
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);
-	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
 	if (IS_KEY_LINK == t) return is_key(evelnk);
