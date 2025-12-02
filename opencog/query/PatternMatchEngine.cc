@@ -3408,7 +3408,7 @@ void PatternMatchEngine::init_constraint_domains(void)
 	_constraint_domain_initialized = true;
 
 	// For each variable in an ExclusiveLink, determine its domain by looking
-	// at OTHER clauses in the pattern that constrain it.
+	// at OTHER terms in the pattern that constrain it.
 	for (const PatternTermPtr& excl : _pat->exclusives)
 	{
 		const Handle& excl_h = excl->getHandle();
@@ -3417,26 +3417,26 @@ void PatternMatchEngine::init_constraint_domains(void)
 			if (not _variables->varset_contains(var)) continue;
 			if (_constraint_domain.has_domain(var)) continue;
 
-			// Find clauses that contain this variable (via connectivity_map)
+			// Find terms that contain this variable (via connectivity_map)
 			HandleSet var_domain;
 			auto range = _pat->connectivity_map.equal_range(var);
 			for (auto it = range.first; it != range.second; ++it)
 			{
-				const PatternTermPtr& clause_term = it->second;
-				const Handle& clause_h = clause_term->getHandle();
+				const PatternTermPtr& term = it->second;
+				const Handle& term_h = term->getHandle();
 
-				// Skip ExclusiveLinks - we want OTHER clauses
-				if (clause_h->get_type() == EXCLUSIVE_LINK) continue;
+				// Skip ExclusiveLinks - we want OTHER terms
+				if (term_h->get_type() == EXCLUSIVE_LINK) continue;
 
-				// Find a ground atom (constant) in this clause to use as search key
+				// Find a ground atom (constant) in this term to use as search key
 				Handle search_key;
 				Arity key_pos = (Arity)-1;
 				Arity var_pos = (Arity)-1;
-				Arity clause_arity = clause_h->get_arity();
+				Arity term_arity = term_h->get_arity();
 
-				for (Arity i = 0; i < clause_arity; i++)
+				for (Arity i = 0; i < term_arity; i++)
 				{
-					const Handle& child = clause_h->getOutgoingAtom(i);
+					const Handle& child = term_h->getOutgoingAtom(i);
 					if (child == var)
 					{
 						var_pos = i;
@@ -3456,11 +3456,11 @@ void PatternMatchEngine::init_constraint_domains(void)
 				if (not search_key or var_pos == (Arity)-1) continue;
 
 				// Use the search key's incoming set to find matching atoms
-				Type clause_type = clause_h->get_type();
-				IncomingSet key_incoming = search_key->getIncomingSetByType(clause_type);
+				Type term_type = term_h->get_type();
+				IncomingSet key_incoming = search_key->getIncomingSetByType(term_type);
 				for (const Handle& candidate : key_incoming)
 				{
-					if (candidate->get_arity() != clause_arity) continue;
+					if (candidate->get_arity() != term_arity) continue;
 					if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
 
 					// Extract what the variable would be bound to
