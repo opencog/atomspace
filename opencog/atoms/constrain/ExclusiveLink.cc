@@ -42,8 +42,14 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 	// If there are two identical atoms in here, they will appear next
 	// to each other. Do NOT allow such links to be placed into the
 	// AtomSpace.
+	//
+	// One exception to this rule is an executable link -- it might
+	// appear twice, but, when executed, return different results
+	// each time it is run.
 	for (size_t i = 0; i < _outgoing.size()-1; i++)
 	{
+		if (_outgoing[i]->is_executable()) continue;
+
 		if (*_outgoing[i] == *_outgoing[i+1])
 			throw RuntimeException(TRACE_INFO,
 				"All members of an ExclusiveLink must differ. Got %s",
