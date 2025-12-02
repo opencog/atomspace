@@ -174,7 +174,7 @@ void QueryUTest::test_exclusive(void)
 	TS_ASSERT_EQUALS(LinkValueCast(v)->value().size(), 1);
 	printf("Got: %s\n", v->to_string().c_str());
 
-	ValuePtr ev = eval->eval_v("(QueueValue (Concept \"green\"))");
+	ValuePtr ev = eval->eval_v("(UnisetValue (Concept \"green\"))");
 	printf("Expected: %s\n", ev->to_string().c_str());
 
 	LinkValuePtr lv(LinkValueCast(v));
