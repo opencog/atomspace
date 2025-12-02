@@ -40,11 +40,13 @@ namespace opencog
  */
 class IsClosedLink : public EvaluatableLink
 {
+protected:
+	virtual void setAtomSpace(AtomSpace*);
+
 public:
 	IsClosedLink(const HandleSeq&&, Type=IS_CLOSED_LINK);
 	IsClosedLink(const IsClosedLink&) = delete;
 	IsClosedLink& operator=(const IsClosedLink&) = delete;
-	virtual ~IsClosedLink() {}
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 
