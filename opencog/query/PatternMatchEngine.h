@@ -186,7 +186,7 @@ private:
 	// Used to prune permutation search in unordered links.
 	ConstraintDomain _constraint_domain;
 	bool _use_constraint_domain;
-	bool _constraint_domain_initialized;
+	void init_constraint_domains(void);
 	bool propagate_exclusive(const Handle& var, const Handle& value);
 
 	// --------------------------------------------
@@ -329,7 +329,6 @@ private:
 public:
 	PatternMatchEngine(PatternMatchCallback&);
 	void set_pattern(const Variables&, const Pattern&);
-	void init_constraint_domains(void);
 
 	// Examine the locally connected neighborhood for possible
 	// matches.

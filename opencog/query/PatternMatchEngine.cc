@@ -3379,9 +3379,7 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 {
 	_variables = &v;
 	_pat = &p;
-
-	// Initialize constraint propagation.
-	_constraint_domain_initialized = false;
+	init_constraint_domains();
 }
 
 /* ======================================================== */
@@ -3400,11 +3398,9 @@ void PatternMatchEngine::set_pattern(const Variables& v,
  */
 void PatternMatchEngine::init_constraint_domains(void)
 {
-	if (_constraint_domain_initialized) return;
-	_constraint_domain_initialized = true;
 	_use_constraint_domain = false;
-
 	if (_pat->exclusives.empty()) return;
+
 	_constraint_domain.clear();
 
 	// For each variable in an ExclusiveLink, determine its domain by looking
