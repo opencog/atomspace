@@ -115,6 +115,11 @@ struct Pattern
 	/// Used at runtime for quick lookup during constraint propagation.
 	std::map<Handle, PatternTermSeq> var_exclusives;
 
+	/// For each ExclusiveLink, the list of variables it contains.
+	/// Variables in the same group must have distinct groundings.
+	/// Computed once during pattern analysis.
+	HandleSeqSeq exclusive_var_groups;
+
 	/// Evaluatable terms are those that need to be evaluated to
 	/// find out if they hold true. For example, GreaterThanLink,
 	/// and anything with a GroundedPredicateNode (GPN) in them.

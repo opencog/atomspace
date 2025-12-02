@@ -3522,19 +3522,12 @@ void PatternMatchEngine::init_constraint_domains(void)
 		return;
 	}
 
-	// Add constraints from pattern ExclusiveLinks
-	// Variables in the same ExclusiveLink must have distinct values
-	for (const PatternTermPtr& excl : _pat->exclusives)
+	// Add constraints from pattern ExclusiveLinks.
+	// Variables in the same ExclusiveLink must have distinct values.
+	// The variable groups were precomputed during pattern analysis.
+	for (const HandleSeq& vars_in_excl : _pat->exclusive_var_groups)
 	{
-		HandleSeq vars_in_excl;
-		const Handle& h = excl->getHandle();
-		for (const Handle& elt : h->getOutgoingSet())
-		{
-			if (_variables->varset_contains(elt))
-				vars_in_excl.push_back(elt);
-		}
-		if (vars_in_excl.size() > 1)
-			_constraint_domain.add_constraint(vars_in_excl);
+		_constraint_domain.add_constraint(vars_in_excl);
 	}
 
 	DO_LOG({LAZY_LOG_FINE << "Initialized constraint domain:\n"

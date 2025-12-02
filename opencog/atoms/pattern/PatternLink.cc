@@ -197,6 +197,21 @@ void PatternLink::categorize_exclusives(void)
 		collect_exclusives_recursive(ptm);
 	for (const PatternTermPtr& ptm : _pat.grouping)
 		collect_exclusives_recursive(ptm);
+
+	// Precompute the list of variables in each ExclusiveLink.
+	// This is used by constraint propagation.
+	for (const PatternTermPtr& excl : _pat.exclusives)
+	{
+		HandleSeq vars_in_excl;
+		const Handle& h = excl->getHandle();
+		for (const Handle& elt : h->getOutgoingSet())
+		{
+			if (_variables.varset_contains(elt))
+				vars_in_excl.push_back(elt);
+		}
+		if (vars_in_excl.size() > 1)
+			_pat.exclusive_var_groups.push_back(vars_in_excl);
+	}
 }
 
 
