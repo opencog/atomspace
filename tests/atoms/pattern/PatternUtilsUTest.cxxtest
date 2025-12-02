@@ -115,7 +115,7 @@ void PatternUtilsUTest::test_is_constant_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle IdAB = al(IDENTICAL_LINK, A, B);
+	Handle IdAB = createLink(IDENTICAL_LINK, A, B);
 
 	TS_ASSERT(not is_constant({}, IdAB));
 }
