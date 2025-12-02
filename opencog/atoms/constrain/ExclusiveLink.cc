@@ -26,6 +26,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "ExclusiveLink.h"
 
+#include <algorithm>
+
 using namespace opencog;
 
 ExclusiveLink::ExclusiveLink(const HandleSeq&& oset, Type t)
