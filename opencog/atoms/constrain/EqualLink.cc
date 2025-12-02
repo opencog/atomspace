@@ -57,7 +57,7 @@ void EqualLink::setAtomSpace(AtomSpace* as)
 		}
 
 		if (*h != *id)
-			throw RuntimeException(TRACE_INFO,
+			throw SyntaxException(TRACE_INFO,
 				"Cannot placeEqualLink with non-equal elements in the AtomSpace!  Got %s",
 				to_string().c_str());
 	}

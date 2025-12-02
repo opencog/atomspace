@@ -52,7 +52,7 @@ void ExclusiveLink::setAtomSpace(AtomSpace* as)
 		if (_outgoing[i]->is_executable()) continue;
 
 		if (*_outgoing[i] == *_outgoing[i+1])
-			throw RuntimeException(TRACE_INFO,
+			throw SyntaxException(TRACE_INFO,
 				"All members of an ExclusiveLink must differ. Got %s",
 				to_string().c_str());
 	}

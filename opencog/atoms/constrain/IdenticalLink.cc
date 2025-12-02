@@ -69,7 +69,7 @@ bool IdenticalLink::is_identical(void) const
 void IdenticalLink::setAtomSpace(AtomSpace* as)
 {
 	if (not is_identical())
-		throw RuntimeException(TRACE_INFO,
+		throw SyntaxException(TRACE_INFO,
 			"Cannot place IdenticalLink with non-identical atoms in AtomSpace!  Got %s",
 			to_string().c_str());
 
