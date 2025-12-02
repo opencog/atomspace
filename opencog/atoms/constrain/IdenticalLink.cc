@@ -43,7 +43,7 @@ bool IdenticalLink::is_identical(void) const
 		if (not h->is_type(VARIABLE_NODE)) nfix ++;
 
 	// We're OK, if there's just zero or one constants in here.
-	if (2 > _outgoing.size() - nfix)
+	if (2 > nfix)
 		return true;
 
 	// Lets see if they're all the same ...
