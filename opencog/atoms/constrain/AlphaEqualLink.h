@@ -42,6 +42,9 @@ namespace opencog
  */
 class AlphaEqualLink : public EvaluatableLink
 {
+protected:
+	virtual void setAtomSpace(AtomSpace*);
+
 public:
 	AlphaEqualLink(const HandleSeq&&, Type=ALPHA_EQUAL_LINK);
 	AlphaEqualLink(const AlphaEqualLink&) = delete;
