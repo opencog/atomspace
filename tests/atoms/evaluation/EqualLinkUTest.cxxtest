@@ -65,11 +65,16 @@ void EqualLinkUTest::test_equality()
 
 	// These can be added to AtomSpace (identical or has executable)
 	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
-	Handle ident_asa = L(IDENTICAL_LINK, thing_a, semantic_a);
-	Handle ident_asb = L(IDENTICAL_LINK, thing_a, semantic_b);
 
-	// These must use createLink (non-identical, non-executable)
+	// Cannot be added
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, thing_b));
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, semantic_a));
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, semantic_b));
+
+	// Create some naked IdenticalLinks
 	Handle ident_ab = createLink(IDENTICAL_LINK, thing_a, thing_b);
+	Handle ident_asa = createLink(IDENTICAL_LINK, thing_a, semantic_a);
+	Handle ident_asb = createLink(IDENTICAL_LINK, thing_a, semantic_b);
 
 	// -------
 	// These can be added to AtomSpace (equal or has executable)
