@@ -130,14 +130,6 @@ static bool lesser(AtomSpace* as, const Handle& h, bool silent)
 	return (v0 < v1);
 }
 
-/// Perform a IsClosed check
-static bool is_outgoing_closed(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	return std::all_of(oset.begin(), oset.end(),
-	                   [](const Handle& o) { return is_closed(o); });
-}
-
 static ValuePtr exec_or_eval(AtomSpace* as,
                              const Handle& term,
                              AtomSpace* scratch,
@@ -210,81 +202,6 @@ static bool is_message(const Handle& h)
 	return false;
 }
 
-/// Check for syntactic equality. Specifically, when comparing
-/// atoms, the handles MUST be the same handle.
-static bool identical(const Handle& h)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	size_t nelts = oset.size();
-	if (2 > nelts) return true;
-
-	for (size_t j=1; j<nelts; j++)
-	{
-		if (oset[0] != oset[j]) return false;
-	}
-	return true;
-}
-
-/// Check for semantic equality.
-static bool equal(AtomSpace* as, const Handle& h, bool silent)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	size_t nelts = oset.size();
-	if (2 > nelts) return true;
-
-	ValuePtr v0(exec_or_eval(as, oset[0], as, silent));
-
-	for (size_t j=1; j<nelts; j++)
-	{
-		ValuePtr v1(exec_or_eval(as, oset[j], as, silent));
-		if (v0 != v1 and *v0 != *v1) return false;
-	}
-	return true;
-}
-
-/// Check for alpha equivalence.
-static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "AlphaEqualLink expects two arguments");
-
-	Handle h0(oset[0]);
-	if (h0->is_executable())
-	{
-		ValuePtr vp(h0->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h0 = HandleCast(vp);
-	}
-
-	Handle h1(oset[1]);
-	if (h1->is_executable())
-	{
-		ValuePtr vp(h1->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h1 = HandleCast(vp);
-	}
-
-	// Are they strictly equal? Good!
-	if (h0 == h1)
-		return true;
-
-	// Not strictly equal. Are they alpha convertible?
-	Variables v0, v1;
-	v0.find_variables(h0);
-	v1.find_variables(h1);
-
-	// If the variables are not alpha-convertable, then
-	// there is no possibility of equality.
-	if (not v0.is_equal(v1))
-		return false;
-
-	// Actually alpha-convert, and compare.
-	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
-	return (*h0 == *h1a);
-}
-
 /// Check for set membership
 static bool member(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -337,31 +254,6 @@ static bool subset(AtomSpace* as, const Handle& h, bool silent)
 	}
 
 	return true;
-}
-
-/// Check to make sure all atoms differ
-static bool exclusive(AtomSpace* as, const Handle& h, bool silent)
-{
-	HandleSeq oset(h->getOutgoingSet());
-	ValueSeq vset;
-
-	size_t olen = oset.size();
-	while (true)
-	{
-		if (2 > olen) return true;
-
-		Handle last(oset.back());
-		oset.pop_back();
-		olen --;
-
-		ValuePtr v0(exec_or_eval(as, last, as, silent));
-		for (size_t j=0; j< olen; j++)
-		{
-			if (vset.size() <= j)
-				vset.push_back(exec_or_eval(as, oset[j], as, silent));
-			if (v0 == vset[j] or *v0 == *vset[j]) return false;
-		}
-	}
 }
 
 /** Return true if the SatisfactionLink can be "trivially" evaluated. */
@@ -533,15 +425,10 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 
 	// -------------------------
 	// Assorted relations
-	if (IDENTICAL_LINK == t) return identical(evelnk);
-	if (EQUAL_LINK == t) return equal(scratch, evelnk, silent);
-	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);
-	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
 	if (MEMBER_LINK == t) return member(scratch, evelnk, silent);
 	if (SUBSET_LINK == t) return subset(scratch, evelnk, silent);
-	if (EXCLUSIVE_LINK == t) return exclusive(scratch, evelnk, silent);
 	if (IS_KEY_LINK == t) return is_key(evelnk);
 	if (IS_MESSAGE_LINK == t) return is_message(evelnk);
 

@@ -44,10 +44,31 @@ STRING_VEC_ARG <-  ARG
 VALUE_VEC_ARG <-  ARG
 
 // ==============================================================
-// Executable Atom type declarations. Almost all executable Atoms are
-// Links. The oset of the Link serves as "function arguments" for that
-// link. The result of execution is a Value of some kind, usually of
-// some specific kind.
+// Type-safety links.  These are used to enforce type safety at
+// Atom creation time.  This is done in the ClassServer, with the
+// ClassServer::addValidator() method and the factory which runs the
+// validators. viz. std::vector<Validator*> _validator; in that class.
+//
+// This mechanism is adequate to deal with simple user errors, but
+// isn't very strong. Issues include:
+//
+// *) By doing type-checking at Atom-creation time, this is a kind-of
+//    static type-checking, and thus suffers from the typical issues
+//    of static type-checking.
+// *) Polymorphic outputs are broken.  For example, ValueOfLink
+//    can return both numbers, and not-numbers...
+// *) It fails to handle "deep types", as there should be some form
+//    of ArrowLink associated with each Atom atype.
+// *) It fails to handle connector polarities beyond just "input"
+//    and "output". That is, there are more ways of connecting things
+//    than merely saying "outputs are things that can be plugged into
+//    inputs, and their types must match."
+//
+// So... deficient in many ways, but basically, it works for now, and it
+// handles most of the basic cases in a fairly straightforward fashion.
+//
+// ---------
+// Meta-commentary/philosophy.
 //
 // Atomese is fundamentally defined to be a way of writing down
 // executable abstract syntax trees (AST). This results in a lot of
@@ -129,6 +150,14 @@ TYPE_OUTPUT_SIG <- SIG
 ORDERED_SIG <- SIG
 UNORDERED_SIG <- SIG
 
+// Base class for links that are naturally meant to be interpreted
+// either as sets (unordered) or as lists (ordered cartesian products).
+// The goal is to distinguish "natural sets" from other random jumbles
+// of stuff: most things in Atomese are jumbles, structures of some
+// kind, and are not naturally "sets". (The same way that a C++ class
+// is neither a "set", nor a "list" of members or methods.)
+COLLECTION_SIG <- SIG
+
 // Alpha-convertible links are those that bind variables, and, per
 // conventional theory, the bound variable names have no significance
 // outside of the link. Typical examples are the lambda of lambda
@@ -140,6 +169,11 @@ UNORDERED_SIG <- SIG
 // a Link. Alpha-equivalent links are those that are exactly the same,
 // irrespective of the names given to the variables that they bind.
 ALPHA_CONVERTIBLE_SIG <- SIG
+
+// Constraints are link types that implement forced constraints on
+// thier contents, depending on whether they contain free variables
+// or not.
+CONSTRAINT_SIG <- SIG
 
 // ==============================================================
 // Values are collections of data that can be associated with Atoms.
@@ -250,53 +284,45 @@ UNORDERED_LINK <- LINK,UNORDERED_SIG
 PREDICATE_NODE <- NODE
 
 // ===========================================================
-// Type-safety links.  These are used to enforce type safety at
-// Atom creation time.  This is done in the ClassServer, with the
-// ClassServer::addValidator() method and the factory which runs the
-// validators. viz. std::vector<Validator*> _validator; in that class.
-//
-// This mechanism is adequate to deal with simple user errors, but
-// isn't very strong. Issues include:
-//
-// *) By doing type-checking at Atom-creation time, this is a kind-of
-//    static type-checking, and thus suffers from the typical issues
-//    of static type-checking.
-// *) Polymorphic outputs are broken.  For example, ValueOfLink
-//    can return both numbers, and not-numbers...
-// *) It fails to handle "deep types", as there should be some form
-//    of ArrowLink associated with each Atom atype.
-// *) It fails to handle connector polarities beyond just "input"
-//    and "output". That is, there are more ways of connecting things
-//    than merely saying "outputs are things that can be plugged into
-//    inputs, and their types must match."
-//
-// So... deficient in many ways, but basically, it works for now, and it
-// handles most of the basic cases in a fairly straightforward fashion.
+// Executable Atom type declarations. Almost all executable Atoms are
+// Links. The oset of the Link serves as "function arguments" for that
+// link. The result of execution is a Value of some kind, usually of
+// some specific kind.
+// XXX TODO ... perhaps these two should be SIGs?
 
 // Evaluatable link. Any link type which might be evaluated, resulting
-// in a TruthValue, should inherit from this type.
-// XXX this is going away.
-EVALUATABLE_LINK <- LINK
+// in a crisp boolean true/false value should inherit from this type.
+// This is typically used for constructs that have a natural true/false
+// interpretation, e.g. primitives inspired by conventional predicate
+// logic. Anything that needs probabilistic truth would not, should not
+// use this, as it will lead to ambiguities and clashes as to which
+// interpretation to use when. These are, by defintion, "crisp".
+EVALUATABLE_LINK <- LINK, CRISP_OUTPUT_SIG
+
+// The VirtualLink designation is needed by the pattern matcher,
+// in order to be able to find and treat terms that encode relations.
+//
+// In mathematics nomenclature, VirtualLinks are "relations": they are
+// terms that evaluate to crisp true/false values.
+//
+// XXX FIXME Should probably be renamed to RELATION_LINK. Got called
+// "virtual" because it is impossible to enumerate all greater-than
+// relations and store them in the AtomSpace as real objects; these
+// exist only "virtually".
+VIRTUAL_LINK <- EVALUATABLE_LINK
 
 // ExecutableLink. Any link type which might be executed, resulting
-// in a Value, should inherit from this type. These are all $vau link
-// types (John N. Shutt, "The Kernel Programming Language")
-// https://web.cs.wpi.edu/~jshutt/kernel.html
-// http://lambda-the-ultimate.org/node/4093
+// in a Value, should inherit from this type.
 EXECUTABLE_LINK <- LINK
 
 // ===========================================================
 // Basic boolean algebra and set-theory-inspired links.
 
-// Base class for sets and for operations that return sets.
-// XXX FIXME, perhaps this is a SIG ???
-COLLECTION_LINK <- LINK
-
 // Plain old list AKA Cartesian product
-LIST_LINK <- ORDERED_LINK,COLLECTION_LINK
+LIST_LINK <- ORDERED_LINK,COLLECTION_SIG
 
 // Unordered multi-set (Classical Set-Theory set)
-SET_LINK <- UNORDERED_LINK,COLLECTION_LINK
+SET_LINK <- UNORDERED_LINK,COLLECTION_SIG
 
 // Set membership. Declaration: individual belongs to set.
 // Historically, this has been understood to be a declarative statement
@@ -341,13 +367,13 @@ CONTEXT_LINK <- ORDERED_LINK
 // a lot of awkwardness from this double execution. So hack around
 // this by keeping AndLin non-executable...
 //
-TRUE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
-FALSE_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG
-AND_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-OR_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-NOT_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
-SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG // ,CRISP_INPUT_SIG
-SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INPUT_SIG
+TRUE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
+FALSE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
+AND_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+OR_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+NOT_LINK <- EVALUATABLE_LINK, UNORDERED_SIG, CRISP_INPUT_SIG
+SEQUENTIAL_AND_LINK <- EVALUATABLE_LINK, ORDERED_SIG // ,CRISP_INPUT_SIG
+SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_INPUT_SIG
 
 // ====================================================================
 // Pattern-engine links. These have a special meaning for the pattern
@@ -373,7 +399,7 @@ SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_OUTPUT_SIG, CRISP_INP
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
+CHOICE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -381,7 +407,7 @@ CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG,CRISP_OUTPUT_SIG
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG,CRISP_OUTPUT_SIG
+PRESENT_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -618,70 +644,6 @@ LOCAL_QUOTE_LINK <- DONT_EXEC_LINK
 // Could be used in PatternLink too.
 REPLACEMENT_LINK <- ORDERED_LINK
 
-// A FreeLink is any kind of link that might have free variables in it.
-// The FreeLink exists for one purpose: to make visible/explicit all of
-// free variables in the link. The primary user is the pattern matcher.
-// That is, envision the FreeLink as being at the top of a tree, and
-// somewhere in that tree, there might be VariableNodes.  The C++ class
-// for this link records the names of those variables, in order of
-// traversal.  The goal here is to simply know these variables, so that,
-// at the time of evaluation or execution, they are easily located.
-//
-// The variables are necessarily free: they do NOT have type
-// declarations or restrictions associated with them.  This is in sharp
-// contrast to ScopeLink, which binds variables by scoping them, and
-// then forcing type restrictions to them.
-//
-// FreeLinks may be open or closed; they are closed terms if they
-// have no free variables in them.
-//
-FREE_LINK <- ORDERED_LINK
-
-// This is an interesting one. It is a link that must never be grounded!
-// It must contain at least one VariableNode somewhere within it; that
-// is, it must be an "open sentence" and never a "closed sentence".
-// (as it would be called, using the terminology of predicate logic;
-// See Wikipedia for a formal definition).
-//
-// Attempting to insert a DeleteLink holding a fully grounded term
-// (holding a closed sentence) will instead cause the the term to be
-// deleted from the AtomSpace, thus the name.  This is meant to be used
-// with the pattern matcher, so that if it discovers a grounding, the
-// grounded term is deleted.
-//
-// Implementation Note: The DeleteLink cannot inherit from FunctionLink
-// because that would cause all variables to be bound, i.e. to become
-// a closed sentence; thus it inherits from FreeLink.
-//
-DELETE_LINK <- FREE_LINK
-
-// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
-// fixed first Atom of the Link.  Useful for defining state.  Additional
-// "open" links may exist; "open" links are defined as links that
-// contain free variables (see Wikipedia definition of "open term",
-// "closed term").  Kind of like DeleteLink, but allows one instead of
-// zero closed terms.
-UNIQUE_LINK <- FREE_LINK
-
-// Inserting a StateLink into the AtomSpace causes the previous
-// state to be removed from the AtomSpace. Uniqueness applies only to
-// closed terms; thus, StateLinks with variables in the defintion can
-// be created for search patterns.
-STATE_LINK <- UNIQUE_LINK
-
-// Uniquely naming things, tagging things. Attempting to insert a
-// second definition into the AtomSpace will throw an exception.
-// Restricted to DefinedProcedure, DefinedSchema, etc.
-DEFINE_LINK <- UNIQUE_LINK
-
-// Unqiue, exclusive relationships. Attempting to insert a second relation
-// into the AtomSpace will silently fail, and the original relation is
-// returned. No error is thrown. Allows first-come-first-serve atomic
-// mutex relationships to be placed in the AtomSpace. These cannot be
-// hidden by Frames. Applies only to closed terms; thus, GrantLinks with
-// variables in the defintion can be created for search patterns.
-GRANT_LINK <- UNIQUE_LINK
-
 // The ScopeLink is used to identify an open term, i.e. a link
 // containing VariableNodes within it, and binding those variables.
 // In the process, it can also force type restrictions on them.
@@ -793,6 +755,99 @@ QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
 // of the pattern and the grounding are reversed: given a grounding, the
 // collection of patterns that are grounded by it can be searched-for.
 DUAL_LINK <- SATISFYING_LINK
+
+// ==============================================================
+// Freedoms and constraints.
+
+// A FreeLink is any kind of link that might have free variables in it.
+// The FreeLink exists for one purpose: to make visible/explicit all of
+// free variables in the link. The primary user is the pattern matcher.
+// That is, envision the FreeLink as being at the top of a tree, and
+// somewhere in that tree, there might be VariableNodes.  The C++ class
+// for this link records the names of those variables, in order of
+// traversal.  The goal here is to simply know these variables, so that,
+// at the time of evaluation or execution, they are easily located.
+//
+// The variables are necessarily free: they do NOT have type
+// declarations or restrictions associated with them.  This is in sharp
+// contrast to ScopeLink, which binds variables by scoping them, and
+// then forcing type restrictions to them.
+//
+// FreeLinks may be open or closed; they are closed terms if they
+// have no free variables in them.
+//
+FREE_LINK <- ORDERED_LINK
+
+// This is an interesting one. It is a link that must never be grounded!
+// It must contain at least one VariableNode somewhere within it; that
+// is, it must be an "open sentence" and never a "closed sentence".
+// (as it would be called, using the terminology of predicate logic;
+// See Wikipedia for a formal definition).
+//
+// Attempting to insert a DeleteLink holding a fully grounded term
+// (holding a closed sentence) will instead cause the the term to be
+// deleted from the AtomSpace, thus the name.  This is meant to be used
+// with the pattern matcher, so that if it discovers a grounding, the
+// grounded term is deleted.
+//
+// Implementation Note: This used to inherit from FreeLink, but there
+// seems to be no point to that. Its simpler and easier to determine
+// whether it is open or closed on the fly.
+//
+DELETE_LINK <- LINK, CONSTRAINT_SIG
+
+// Only one "closed" UniqueLink may exist (in the AtomSpace), for a
+// fixed first Atom of the Link.  Useful for defining state.  Additional
+// "open" links may exist; "open" links are defined as links that
+// contain free variables (see Wikipedia definition of "open term",
+// "closed term").  Kind of like DeleteLink, but allows one instead of
+// zero closed terms.
+//
+// XXX FIXME - Historically, this was designed to inherit from FreeLink,
+// but it is not clear that this extra baggage is actually needed.
+//
+UNIQUE_LINK <- FREE_LINK,CONSTRAINT_SIG
+
+// Inserting a StateLink into the AtomSpace causes the previous
+// state to be removed from the AtomSpace. Uniqueness applies only to
+// closed terms; thus, StateLinks with variables in the defintion can
+// be created for search patterns.
+STATE_LINK <- UNIQUE_LINK
+
+// Uniquely naming things, tagging things. Attempting to insert a
+// second definition into the AtomSpace will throw an exception.
+// Restricted to DefinedProcedure, DefinedSchema, etc.
+DEFINE_LINK <- UNIQUE_LINK
+
+// Unqiue, exclusive relationships. Attempting to insert a second relation
+// into the AtomSpace will silently fail, and the original relation is
+// returned. No error is thrown. Allows first-come-first-serve atomic
+// mutex relationships to be placed in the AtomSpace. These cannot be
+// hidden by Frames. Applies only to closed terms; thus, GrantLinks with
+// variables in the defintion can be created for search patterns.
+GRANT_LINK <- UNIQUE_LINK
+
+// ==============================================================
+
+// IdenticalLink tests for syntactic equality.  It does NOT execute its
+// arguments; it is true only if everything in them are the same Atom.
+IDENTICAL_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// EqualLink tests for semantic equality: the contents are equal, if,
+// after execution, they all evaluate to the same Atom.
+EQUAL_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// AlphaEqualLink tests to see if all contained Atoms are the same, up to an
+// alpha-renaming of any variables that they may have.
+ALPHA_EQUAL_LINK <- VIRTUAL_LINK,CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// ExclusiveLink tests to make sure all contained Atoms differ from
+// one-another. True only if they all differ...
+EXCLUSIVE_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// Test whether all outgoing Atoms are closed, that is, if the
+// they do not contain any free variables.
+IS_CLOSED_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // ==============================================================
 // Basic Knowledge-Representation types.
@@ -912,59 +967,19 @@ ANCHOR_NODE <- NODE
 //
 // Relations always have an associated subobject classifier. For naive
 // set theory, this is the indicator function, having values of
-// true/false, indicating set membership. For Atomese, the subject
-// classifier is explicitly always a TRUTH_VALUE.
+// true/false, indicating set membership. For Atomese, the subobject
+// classifier is always explicitly a VALUE.
+//
+// Most of the stuff lised below will be conventional crisp-boolean
+// true/false classifiers.
 
 // A generic catch-all equality-relation link. No particular semantics
 // is assigned to this, other than that it relates things that
 // are "similar" in some way.
 SIMILARITY_LINK <- UNORDERED_LINK
 
-// A VirtualLink is equivalent to an EvaluationLink, with a
-// GroundedPredicateNode in it, except that the GPN is "built in".
-// So, for example, GreaterThanLink is equivalent to an EvaluationLink
-// with a GroundedPredicateNode "c++:greater_than". The built-in
-// evaluation links have better performance, since they don't need
-// to make a call to external scheme or python code to get evaluated.
-//
-// The VirtualLink designation is needed by the pattern matcher,
-// in order to be able to find and treat these terms correctly.
-//
-// VirtualLinks only need to be used for those GPN's that take 2 or
-// more arguments. If they take only one, then there is no reason
-// for them to be declared as virtual (at least, as far as the pattern
-// matcher is concerned, which, right now, is the only user of this
-// link type.)
-//
-// In mathematics nomenclature, VirtualLinks are "relations": they are
-// terms that evaluate to crisp true/false values.
-//
-// XXX FIXME Should probably be renamed to RELATION_LINK. Got called
-// "virtual" because it is impossible to enumerate all greater-than
-// relations and store them in the AtomSpae as real objects; these
-// exist only "virtually".
-VIRTUAL_LINK <- EVALUATABLE_LINK,CRISP_OUTPUT_SIG
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
-
-// Test whether all outgoing Atoms are closed, that is, if the
-// they do not contain any free variables.
-IS_CLOSED_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// IdenticalLink tests for syntactic equality.  It does NOT execute its
-// arguments; it is true only if both sides are the same Atom.
-// EqualLink tests for semantic equality: the two sides are equal, if,
-// after execution, they evaluate to the same Atom.
-IDENTICAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// AlphaEqualLink tests to see if both sides are the same, up to an
-// alpha-renaming of any variables that they may have.
-ALPHA_EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// ExclusiveLink tests to make sure all elements differ from
-// one-another. True only if they all differ...
-EXCLUSIVE_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.
@@ -1150,7 +1165,7 @@ IS_MESSAGE_LINK <- VIRTUAL_LINK
 // be some executable link that, when executed, returns a LinkValue
 // (or some derived type, e.g. a QueueValue) and now we want an
 // actual set.
-COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_LINK
+COLLECTION_OF_LINK <- FUNCTION_LINK,COLLECTION_SIG
 
 // Opposite of the ValueOfLink; attach a Value to an Atom.
 // Verb: "to set", and not noun "a set (collection)"

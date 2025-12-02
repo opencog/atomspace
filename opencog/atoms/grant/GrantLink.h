@@ -47,7 +47,6 @@ class GrantLink : public UniqueLink
 {
 protected:
 	void init(void);
-	virtual ContentHash compute_hash() const;
 	virtual void setAtomSpace(AtomSpace*);
 
 public:

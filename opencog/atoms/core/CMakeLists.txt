@@ -3,13 +3,10 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
-	AbsentLink.cc
 	Checkers.cc
 	CondLink.cc
-	DeleteLink.cc
 	FunctionLink.cc
 	NumberNode.cc
-	PresentLink.cc
 	RandomChoice.cc
 	TimeLink.cc
 	UnorderedLink.cc
@@ -29,12 +26,9 @@ INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	AbsentLink.h
 	CondLink.h
-	DeleteLink.h
 	FunctionLink.h
 	NumberNode.h
-	PresentLink.h
 	RandomChoice.h
 	TimeLink.h
 	UnorderedLink.h

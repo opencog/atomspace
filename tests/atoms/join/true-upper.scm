@@ -12,15 +12,15 @@
 
 (define min-join
 	(MinimalJoin
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))
 
 (define max-join
 	(MaximalJoin
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))
 
 (define upper-set
 	(UpperSet
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))

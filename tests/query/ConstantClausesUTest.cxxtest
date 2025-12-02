@@ -67,12 +67,10 @@ public:
 	void test_evaluatable_3();
 	void test_constant_evaluatable_1();
 	void test_constant_evaluatable_2();
-	void test_constant_evaluatable_3();
 	void test_constant_pattern();
 	void test_mixed_clauses_1();
 	void test_mixed_clauses_2();
 	void test_mixed_clauses_3();
-	void test_constant_present();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -205,24 +203,6 @@ void ConstantClausesUTest::test_constant_evaluatable_2()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-/*
- * Simple Concept as constant clause with a complex evaluatable
- * constant clause that not is true (so the rewrite term should not be
- * triggered).
- */
-void ConstantClausesUTest::test_constant_evaluatable_3()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	Handle bl = al(COLLECTION_OF_LINK, al(QUERY_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B)),
-		result = HandleCast(bl->execute(as.get())),
-		expected = al(SET_LINK);
-	printf("Querylink: %s\n", bl->to_string().c_str());
-	printf("   Found : %s\n", result->to_string().c_str());
-	printf("Expected : %s\n", expected->to_string().c_str());
-	TS_ASSERT_EQUALS(result, expected);
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
 /**
  * Constant clauses in a child atomspace would be expected not to be
  * accessible from the parent atomspace, so the rewrite term would not
@@ -318,21 +298,6 @@ void ConstantClausesUTest::test_mixed_clauses_3()
 	logger().debug() << "more_expected = " << oc_to_string(more_expected);
 
 	TS_ASSERT_EQUALS(results, more_expected);
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void ConstantClausesUTest::test_constant_present()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval->eval("(load-from-path \"constant-present.scm\")");
-
-	Handle results = eval->eval_h("(cog-execute! query)");
-	Handle expected = eval->eval_h("expected");
-
-	logger().debug() << " results = " << oc_to_string(results);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(results, expected);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

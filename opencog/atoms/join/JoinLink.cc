@@ -97,6 +97,9 @@ void JoinLink::validate(void)
 		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
 		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
 
+		// Constant terms (nodes) are allowed
+		if (clause->is_node()) continue;
+
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?) Got %s",
 			clause->to_string().c_str());
 	}
@@ -122,8 +125,8 @@ void JoinLink::setup_meet(void)
 		if (nameserver().isA(t, TYPE_OUTPUT_SIG)) continue;
 
 		// If variable declarations are missing, then
-		// we insist on the first link being a PresentLink
-		if (i == 0 and not (PRESENT_LINK == t)) continue;
+		// we insist on the first link being a PresentLink or a Node
+		if (i == 0 and not (PRESENT_LINK == t) and not clause->is_node()) continue;
 
 		// The top-var clauses cannot be passed to the meet.
 		if (_top_var and is_free_in_tree(clause, _top_var)) continue;
@@ -139,13 +142,7 @@ void JoinLink::setup_meet(void)
 			continue;
 		}
 
-		// If we are here, there are no variables. Its a constant
-		if (PRESENT_LINK != t)
-			throw SyntaxException(TRACE_INFO,
-				"Constant terms should be wrapped in a PresentLink, got %s",
-				clause->to_short_string().c_str());
-
-		_const_terms.insert(clause->getOutgoingAtom(0));
+		_const_terms.insert(clause);
 	}
 
 	_vsize = _variables.varseq.size();

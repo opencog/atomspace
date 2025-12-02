@@ -5,7 +5,7 @@
 (Inheritance (Concept "mouse") (Concept "mammal"))
 
 (define get-mouse
-	(MeetLink (Variable "x")
+	(MeetLink (TypedVariable (Variable "x") (Type 'ConceptNode))
 		(And
 			(Present (Inheritance (Variable "x") (Concept "animal")))
 

@@ -78,40 +78,6 @@ bool GrantLink::operator==(const Atom& other) const
 	return true;
 }
 
-/// We hash only the first Atom in the OutgoingSet; it is the one
-/// that determines uniqueness. The second Atom does not matter.
-/// But this is done only for closed Atoms; there is no uniqueness
-/// constraint on open grants (containing variables). This allows
-/// GrantLinks to appear in query terms.
-ContentHash GrantLink::compute_hash() const
-{
-	if (not is_closed())
-		return Link::compute_hash();
-
-   // The nameserver().getTypeHash() returns hash of the type name
-	// string, and is thus independent of all other type declarations.
-	// 1<<44 - 377 is prime
-	ContentHash hsh = ((1ULL<<44) - 377) * nameserver().getTypeHash(get_type());
-
-	const Handle& h(_outgoing[0]);
-
-	hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
-
-	// Bit-mixing copied from murmur64. Yes, this is needed.
-	hsh ^= hsh >> 33;
-	hsh *= 0xff51afd7ed558ccdL;
-	hsh ^= hsh >> 33;
-	hsh *= 0xc4ceb9fe1a85ec53L;
-	hsh ^= hsh >> 33;
-
-	// Links will always have the MSB set.
-	ContentHash mask = ((ContentHash) 1ULL) << (8*sizeof(ContentHash) - 1);
-	hsh |= mask;
-
-	if (Handle::INVALID_HASH == hsh) hsh -= 1;
-	return hsh;
-}
-
 /// Overload the UniqueLink::setAtomSpace() method, and just do the
 /// ordinary thing. Uniqueness is done via hashing.
 void GrantLink::setAtomSpace(AtomSpace* as)

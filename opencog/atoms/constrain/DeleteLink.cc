@@ -21,23 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "DeleteLink.h"
 
 using namespace opencog;
 
-void DeleteLink::init(void)
-{
-	FreeLink::init();
-}
-
 void DeleteLink::setAtomSpace(AtomSpace * as)
 {
 	// The handleset must contain a variable in it, somewhere.
 	// If it doesn't, then the entire handleset is to be deleted
 	// (removed from the atomspace).
-	if (0 < _vars.varseq.size())
+	if (not is_closed(get_handle()))
 	{
 		Atom::setAtomSpace(as);
 		return;
@@ -54,7 +50,7 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 	// Self-delete only when fully-grounded. Do nothing, if there
 	// are variables. The goal is to allow DeleteLinks to be used in
 	// query patterns (where they will have ... variables in them!)
-	if (0 < _vars.varseq.size())
+	if (not is_closed(get_handle()))
 		return nullptr;
 
 	// In general, neither this link, nor it's outgoing set will be in
@@ -67,12 +63,8 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 		throw InvalidParamException(TRACE_INFO,
 			"DeleteLink::execute() expects AtomSpace");
 
-	const HandleSeq& oset = _outgoing;
-	for (const Handle& h : oset)
+	for (const Handle& h : _outgoing)
 	{
-		Type t = h->get_type();
-		if (VARIABLE_NODE == t or GLOB_NODE == t) continue; // wtf!?
-
 		AtomSpace* oas = h->getAtomSpace();
 		if (nullptr == oas) oas = as;
 		oas->extract_atom(h, true);
@@ -81,9 +73,8 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 }
 
 DeleteLink::DeleteLink(const HandleSeq&& oset, Type type)
-	: FreeLink(std::move(oset), type)
+	: Link(std::move(oset), type)
 {
-	init();
 }
 
 DEFINE_LINK_FACTORY(DeleteLink, DELETE_LINK)

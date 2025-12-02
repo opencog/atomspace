@@ -57,10 +57,9 @@ void IdenticalLinkUTest::test_identical()
 	Handle A = N(CONCEPT_NODE, "A");
 	Handle B = N(CONCEPT_NODE, "B");
 
-	Handle AA = L(IDENTICAL_LINK, A, A);
-	Handle AB = L(IDENTICAL_LINK, A, B);
-	Handle AAA = L(IDENTICAL_LINK, A, A, A);
-	Handle ABB = L(IDENTICAL_LINK, A, B, B);
+	// Test bevaluate() on naked links
+	Handle AA = createLink(IDENTICAL_LINK, A, A);
+	Handle AAA = createLink(IDENTICAL_LINK, A, A, A);
 
 	bool result = AA->bevaluate(&_as);
 	TS_ASSERT(result);
@@ -68,11 +67,29 @@ void IdenticalLinkUTest::test_identical()
 	result = AAA->bevaluate(&_as);
 	TS_ASSERT(result);
 
+	// Adding identical atoms to AtomSpace should succeed
+	AA = L(IDENTICAL_LINK, A, A);
+	TS_ASSERT(AA != nullptr);
+	AAA = L(IDENTICAL_LINK, A, A, A);
+	TS_ASSERT(AAA != nullptr);
+
+	// Test bevaluate() on naked links with non-identical atoms
+	Handle AB = createLink(IDENTICAL_LINK, A, B);
+	Handle ABB = createLink(IDENTICAL_LINK, A, B, B);
+
 	result = AB->bevaluate(&_as);
 	TS_ASSERT(not result);
 
 	result = ABB->bevaluate(&_as);
 	TS_ASSERT(not result);
+
+	// Adding non-identical atoms to AtomSpace should throw
+	bool caught = false;
+	try { L(IDENTICAL_LINK, A, B); }
+	catch (const RuntimeException& ex) { caught = true; }
+	TS_ASSERT(caught);
+
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, A, B, B));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

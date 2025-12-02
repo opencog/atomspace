@@ -45,20 +45,6 @@
           )
         )
       )
-      (PresentLink
-        (EvaluationLink
-          (PredicateNode "P")
-          (LambdaLink
-            (ImplicationLink
-              (InheritanceLink
-                (VariableNode "$X")
-                (VariableNode "$Y")
-              )
-              (VariableNode "$Z")
-            )
-          )
-        )
-      )
     )
     (Concept "OK")
   ))
