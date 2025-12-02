@@ -330,7 +330,7 @@ private:
 public:
 	PatternMatchEngine(PatternMatchCallback&);
 	void set_pattern(const Variables&, const Pattern&);
-	void init_constraint_domains(AtomSpace*);
+	void init_constraint_domains(void);
 
 	// Examine the locally connected neighborhood for possible
 	// matches.

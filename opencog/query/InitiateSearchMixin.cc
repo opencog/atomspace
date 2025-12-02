@@ -585,7 +585,7 @@ bool InitiateSearchMixin::legacy_search(PatternMatchCallback& pmc)
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
-		pme.init_constraint_domains(_as);
+		pme.init_constraint_domains();
 		return pme.explore_constant_evaluatables(_pattern->pmandatory);
 	}
 
@@ -1152,7 +1152,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
-		pme.init_constraint_domains(_as);
+		pme.init_constraint_domains();
 
 		while (0 < _issued_stack.size()) _issued_stack.pop();
 		_issued.clear();
@@ -1199,7 +1199,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		{
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
-			pme.init_constraint_domains(_as);
+			pme.init_constraint_domains();
 
 			if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 		});
@@ -1230,7 +1230,7 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
-		pme.init_constraint_domains(_as);
+		pme.init_constraint_domains();
 
 		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner

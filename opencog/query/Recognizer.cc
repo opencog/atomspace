@@ -58,7 +58,7 @@ bool Recognizer::do_search(PatternMatchCallback& pmc, const Handle& top)
 
 	PatternMatchEngine pme(pmc);
 	pme.set_pattern(*_variables, *_pattern);
-	pme.init_constraint_domains(_as);
+	pme.init_constraint_domains();
 
 	// IncomingSet iset = get_incoming_set(top);
 	IncomingSet iset = top->getIncomingSet(_as);

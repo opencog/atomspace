@@ -3390,15 +3390,16 @@ void PatternMatchEngine::set_pattern(const Variables& v,
  * Initialize constraint domains for all variables in ExclusiveLinks.
  *
  * This is called ONCE at the start of pattern matching (not per-clause).
- * It finds ground ExclusiveLinks in the AtomSpace to determine the
- * domain (set of possible values) for each variable.
+ * It determines the domain (set of possible values) for each variable
+ * by looking at OTHER clauses in the pattern that constrain those variables.
  *
  * For example, in Sudoku:
- * - Pattern has: (ExclusiveLink $cell_11 $cell_12 ...)
- * - AtomSpace has: (ExclusiveLink (Concept "one") (Concept "two") ... (Concept "nine"))
- * - The domain for all variables is {one, two, ..., nine}
+ * - Pattern has: (Edge (Predicate "IsNumber") $cell_11) and (ExclusiveLink $cell_11 ...)
+ * - AtomSpace has: (Edge (Predicate "IsNumber") (Concept "one")), etc.
+ * - By finding what $cell_11 could be bound to via the IsNumber clause,
+ *   we determine the domain is {one, two, ..., nine}
  */
-void PatternMatchEngine::init_constraint_domains(AtomSpace* as)
+void PatternMatchEngine::init_constraint_domains(void)
 {
 	if (not _use_constraint_domain) return;
 	if (_constraint_domain_initialized) return;
@@ -3406,53 +3407,101 @@ void PatternMatchEngine::init_constraint_domains(AtomSpace* as)
 	_constraint_domain.clear();
 	_constraint_domain_initialized = true;
 
-	// Find ground ExclusiveLinks (those containing only constants, no variables)
-	// to determine the domain for variables.
-	HandleSet domain;
-	HandleSeq all_exclusives;
-	as->get_handles_by_type(all_exclusives, EXCLUSIVE_LINK);
-
-	for (const Handle& excl : all_exclusives)
+	// For each variable in an ExclusiveLink, determine its domain by looking
+	// at OTHER clauses in the pattern that constrain it.
+	for (const PatternTermPtr& excl : _pat->exclusives)
 	{
-		// Check if this ExclusiveLink contains only constants (no variables)
-		bool is_ground = true;
-		for (const Handle& elt : excl->getOutgoingSet())
+		const Handle& excl_h = excl->getHandle();
+		for (const Handle& var : excl_h->getOutgoingSet())
 		{
-			if (_variables->varset_contains(elt) or
-			    elt->get_type() == VARIABLE_NODE or
-			    elt->get_type() == GLOB_NODE)
+			if (not _variables->varset_contains(var)) continue;
+			if (_constraint_domain.has_domain(var)) continue;
+
+			// Find clauses that contain this variable (via connectivity_map)
+			HandleSet var_domain;
+			auto range = _pat->connectivity_map.equal_range(var);
+			for (auto it = range.first; it != range.second; ++it)
 			{
-				is_ground = false;
-				break;
+				const PatternTermPtr& clause_term = it->second;
+				const Handle& clause_h = clause_term->getHandle();
+
+				// Skip ExclusiveLinks - we want OTHER clauses
+				if (clause_h->get_type() == EXCLUSIVE_LINK) continue;
+
+				// Find a ground atom (constant) in this clause to use as search key
+				Handle search_key;
+				Arity key_pos = (Arity)-1;
+				Arity var_pos = (Arity)-1;
+				Arity clause_arity = clause_h->get_arity();
+
+				for (Arity i = 0; i < clause_arity; i++)
+				{
+					Handle child = clause_h->getOutgoingAtom(i);
+					if (child == var)
+					{
+						var_pos = i;
+					}
+					else if (child->get_type() != VARIABLE_NODE and
+					         child->get_type() != GLOB_NODE and
+					         not _variables->varset_contains(child))
+					{
+						if (not search_key)
+						{
+							search_key = child;
+							key_pos = i;
+						}
+					}
+				}
+
+				if (not search_key or var_pos == (Arity)-1) continue;
+
+				// Use the search key's incoming set to find matching atoms
+				Type clause_type = clause_h->get_type();
+				IncomingSet key_incoming = search_key->getIncomingSet();
+				for (const Handle& candidate : key_incoming)
+				{
+					if (candidate->get_type() != clause_type) continue;
+					if (candidate->get_arity() != clause_arity) continue;
+					if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
+
+					// Extract what the variable would be bound to
+					Handle binding = candidate->getOutgoingAtom(var_pos);
+					if (binding->get_type() != VARIABLE_NODE and
+					    binding->get_type() != GLOB_NODE)
+					{
+						var_domain.insert(binding);
+					}
+				}
+			}
+
+			if (not var_domain.empty())
+			{
+				_constraint_domain.init_domain(var, var_domain);
 			}
 		}
-
-		if (is_ground)
-		{
-			// This is a ground ExclusiveLink - its elements form the domain
-			for (const Handle& elt : excl->getOutgoingSet())
-				domain.insert(elt);
-		}
 	}
 
-	// If no ground ExclusiveLinks found, we can't do constraint propagation
-	if (domain.empty())
-	{
-		_use_constraint_domain = false;
-		return;
-	}
-
-	// Initialize domain for each variable that appears in pattern ExclusiveLinks
+	// If no domain found for any variable, disable constraint propagation
+	bool have_any_domain = false;
 	for (const PatternTermPtr& excl : _pat->exclusives)
 	{
 		const Handle& h = excl->getHandle();
 		for (const Handle& elt : h->getOutgoingSet())
 		{
-			if (_variables->varset_contains(elt))
+			if (_variables->varset_contains(elt) and
+			    _constraint_domain.has_domain(elt))
 			{
-				_constraint_domain.init_domain(elt, domain);
+				have_any_domain = true;
+				break;
 			}
 		}
+		if (have_any_domain) break;
+	}
+
+	if (not have_any_domain)
+	{
+		_use_constraint_domain = false;
+		return;
 	}
 
 	// Add constraints from pattern ExclusiveLinks
