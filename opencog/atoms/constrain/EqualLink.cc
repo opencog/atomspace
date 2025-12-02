@@ -83,6 +83,8 @@ bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 
 			if (*h != *id)
 				return false;
+
+			continue;
 		}
 
 		ValuePtr vp(h->execute(as, silent));
