@@ -40,14 +40,15 @@ namespace opencog
  */
 class IdenticalLink : public EvaluatableLink
 {
+protected:
 	bool is_identical(void) const;
+	virtual void setAtomSpace(AtomSpace*);
+
 public:
 	IdenticalLink(const HandleSeq&&, Type=IDENTICAL_LINK);
 	IdenticalLink(const IdenticalLink&) = delete;
 	IdenticalLink& operator=(const IdenticalLink&) = delete;
-	virtual ~IdenticalLink() {}
 
-	virtual void setAtomSpace(AtomSpace*);
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);

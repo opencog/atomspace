@@ -49,7 +49,6 @@ public:
 	AlphaEqualLink(const HandleSeq&&, Type=ALPHA_EQUAL_LINK);
 	AlphaEqualLink(const AlphaEqualLink&) = delete;
 	AlphaEqualLink& operator=(const AlphaEqualLink&) = delete;
-	virtual ~AlphaEqualLink() {}
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 

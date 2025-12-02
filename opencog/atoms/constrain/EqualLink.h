@@ -45,7 +45,6 @@ public:
 	EqualLink(const HandleSeq&&, Type=EQUAL_LINK);
 	EqualLink(const EqualLink&) = delete;
 	EqualLink& operator=(const EqualLink&) = delete;
-	virtual ~EqualLink() {}
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 

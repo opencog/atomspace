@@ -42,13 +42,14 @@ namespace opencog
  */
 class ExclusiveLink : public EvaluatableLink
 {
+protected:
+	virtual void setAtomSpace(AtomSpace*);
+
 public:
 	ExclusiveLink(const HandleSeq&&, Type=EXCLUSIVE_LINK);
 	ExclusiveLink(const ExclusiveLink&) = delete;
 	ExclusiveLink& operator=(const ExclusiveLink&) = delete;
-	virtual ~ExclusiveLink() {}
 
-	virtual void setAtomSpace(AtomSpace*);
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);

@@ -40,7 +40,7 @@ void AlphaEqualLink::setAtomSpace(AtomSpace* as)
 {
 	Handle hid;
 	Variables vid;
-	for (Handle h : _outgoing)
+	for (const Handle& h : _outgoing)
 	{
 		if (h->is_executable())
 			continue;
