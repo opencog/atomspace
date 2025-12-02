@@ -78,6 +78,22 @@ PresentLink::PresentLink(const HandleSeq&& oset, Type t)
 /// for absence would always fail!
 void PresentLink::setAtomSpace(AtomSpace* as)
 {
+	// Special-case ALWAYS_LINK and GROUP_LINK
+	// This hack is here only until these two are eleminated
+	// and replaced by strems (much like SortedStream but
+	// grouping instead. We have this here to pass unit tests
+	// until that time.)
+	if (is_type(ALWAYS_LINK))
+	{
+		if (is_closed(get_handle()))
+			throw SyntaxException(TRACE_INFO,
+				"Cannot add a closed %s to the AtomSpace!  Got %s",
+				nameserver().getTypeName(get_type()).c_str(),
+				to_string().c_str());
+		Link::setAtomSpace(as);
+		return;
+	}
+
 	for (const Handle& h : _outgoing)
 	{
 		if (is_closed(h))
