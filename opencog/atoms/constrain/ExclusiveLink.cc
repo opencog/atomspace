@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "ExclusiveLink.h"
 
@@ -77,9 +78,6 @@ bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 		}
 		ValuePtr vp(h->execute(as, silent));
 
-#if NOT_NEEDED_YET
-		// Uhh ... !!??
-
 		// If the return value is a ContainerValue, we assume that this
 		// is the result of executing a MeetLink or QueryLink.
 		// In this case, unwrap it, to get the "actual value".
@@ -89,8 +87,11 @@ bool ExclusiveLink::bevaluate(AtomSpace* as, bool silent)
 			HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
 			if (1 == hs.size())
 				vp = hs[0];
+			else
+				throw RuntimeException(TRACE_INFO,
+					"Expecting only one result, got %s",
+					vp->to_string().c_str());
 		}
-#endif
 
 		// XXX Not clear what the deal here is. We expect an Atom.
 		// Should we throw? Show we ignore? Perhaps throw, for now,

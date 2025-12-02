@@ -95,6 +95,22 @@ bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 		}
 
 		ValuePtr vp(h->execute(as, silent));
+
+		// If the return value is a ContainerValue, we assume that this
+		// is the result of executing a MeetLink or QueryLink.
+		// In this case, unwrap it, to get the "actual value".
+		// This feels slightly hacky, but will do for just right now.
+		if (vp->is_type(CONTAINER_VALUE))
+		{
+			HandleSeq hs(LinkValueCast(vp)->to_handle_seq());
+			if (1 == hs.size())
+				vp = hs[0];
+			else
+				throw RuntimeException(TRACE_INFO,
+					"Expecting only one result: got %s",
+					vp->to_string().c_str());
+		}
+
 		if (vp->is_atom())
 			vp = as->add_atom(HandleCast(vp));
 
