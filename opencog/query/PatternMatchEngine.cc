@@ -3426,50 +3426,38 @@ void PatternMatchEngine::init_constraint_domains(void)
 				const Handle& term_h = term->getHandle();
 
 				// Skip ExclusiveLinks - we want OTHER terms
-				if (term_h->get_type() == EXCLUSIVE_LINK) continue;
+				Type term_type = term_h->get_type();
+				if (term_type == EXCLUSIVE_LINK) continue;
 
-				// Find a ground atom (constant) in this term to use as search key
-				Handle search_key;
-				Arity key_pos = (Arity)-1;
-				Arity var_pos = (Arity)-1;
-				Arity term_arity = term_h->get_arity();
-
-				for (Arity i = 0; i < term_arity; i++)
+				// Find a constant subterm in this term to use as a pivot.
+				Handle const_term;
+				for (const Handle& child: term_h->getOutgoingSet())
 				{
-					const Handle& child = term_h->getOutgoingAtom(i);
-					if (child == var)
-					{
-						var_pos = i;
-						if (key_pos != (Arity)-1) break;
-						continue;
-					}
-
 					Type ct = child->get_type();
 					if (ct != VARIABLE_NODE and ct != GLOB_NODE)
 					{
-						search_key = child;
-						key_pos = i;
-						if (var_pos != (Arity)-1) break;
+						const_term = child;
+						break;
 					}
 				}
+				if (not const_term) continue;
 
-				if (not search_key or var_pos == (Arity)-1) continue;
-
-				// Use the search key's incoming set to find matching atoms
-				Type term_type = term_h->get_type();
-				IncomingSet key_incoming = search_key->getIncomingSetByType(term_type);
+				// Use the const subterm's incoming set to find Atoms
+				// that are plausibly in the var_domain.
+				IncomingSet incoming = const_term->getIncomingSetByType(term_type);
+				Arity term_arity = term_h->get_arity();
 
 				if (nameserver().isA(term_type, UNORDERED_LINK))
 				{
-					// For unordered links, search_key can be anywhere.
-					// Any element (except search_key) could be a binding.
-					for (const Handle& candidate : key_incoming)
+					// For unordered links, const_term can be anywhere.
+					// Any element (except const_term) could be a binding.
+					for (const Handle& candidate : incoming)
 					{
 						if (candidate->get_arity() != term_arity) continue;
 
 						for (const Handle& elt : candidate->getOutgoingSet())
 						{
-							if (elt == search_key) continue;
+							if (elt == const_term) continue;
 							Type bt = elt->get_type();
 							if (bt != VARIABLE_NODE and bt != GLOB_NODE)
 								var_domain.insert(elt);
@@ -3478,12 +3466,25 @@ void PatternMatchEngine::init_constraint_domains(void)
 				}
 				else
 				{
-					// For ordered links, search_key must be at the same position.
+					// For ordered links, the location of the var is fixed,
+					// and so only the Atom at the same fixed location will
+					// be in the domain.
+					Arity const_pos = (Arity)-1;
+					Arity var_pos = (Arity)-1;
+					for (Arity i = 0; i < term_arity; i++)
+					{
+						const Handle& child = term_h->getOutgoingAtom(i);
+						if (child == var) var_pos = i;
+						else if (child == const_term) const_pos = i;
+						if (var_pos != (Arity)-1 and const_pos != (Arity)-1) break;
+					}
+					if (var_pos == (Arity)-1) continue;
+
 					// Extract binding from the same position as var.
-					for (const Handle& candidate : key_incoming)
+					for (const Handle& candidate : incoming)
 					{
 						if (candidate->get_arity() != term_arity) continue;
-						if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
+						if (candidate->getOutgoingAtom(const_pos) != const_term) continue;
 
 						const Handle& binding = candidate->getOutgoingAtom(var_pos);
 						Type bt = binding->get_type();
