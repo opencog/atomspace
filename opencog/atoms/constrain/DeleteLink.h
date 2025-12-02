@@ -24,7 +24,6 @@
 #define _OPENCOG_DELETE_LINK_H
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/free/FreeLink.h>
 
 namespace opencog
 {
@@ -41,10 +40,9 @@ namespace opencog
 /// DeleteLinks with free variables are allowed, as these are needed
 /// for pattern queries and rewriting.
 ///
-class DeleteLink : public FreeLink
+class DeleteLink : public Link
 {
 protected:
-	void init(void);
 	void setAtomSpace(AtomSpace *);
 public:
 	DeleteLink(const HandleSeq&&, Type=DELETE_LINK);
