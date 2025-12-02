@@ -43,6 +43,17 @@ EqualLink::EqualLink(const HandleSeq&& oset, Type t)
 /// contain exectuable Links (which will be executed at runtime,
 /// in bevaluate()), or those that contain free variables (because
 /// equality is not knowable, until those variables are grounded.)
+///
+/// This explicitly prevents the insertion of
+///    (Equals (Number 2) (Number 3))
+/// into the AtomSpace, but still allows
+///    (Equals (Number 2) (Plus (Number 2) (Number 5)))
+/// Now, we could check this at insertion time, because the Plus
+/// has no variables, and is thus immediately evaluatable. But this
+/// example is too simple: there's too many ways to voilate assorted
+/// assumptions about what may or may not be executable at the time
+/// that we go to insert. Thus, allow potential nonsense to be inserted.
+/// I don't see a better way, just right now.
 void EqualLink::setAtomSpace(AtomSpace* as)
 {
 	Handle id;
