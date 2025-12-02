@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /**
- * The IdenticalLink implements syntactic equality: all Atoms in the 
+ * The IdenticalLink implements syntactic equality: all Atoms in the
  * outgoing set that are  closed (contain no free variables) must be
  * identically the same Atom.
  *
