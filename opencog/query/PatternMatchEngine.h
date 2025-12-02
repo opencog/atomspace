@@ -187,7 +187,6 @@ private:
 	ConstraintDomain _constraint_domain;
 	bool _use_constraint_domain;
 	bool _constraint_domain_initialized;
-	void init_exclusive_constraints(const PatternTermSeq&, const HandleSet&);
 	bool propagate_exclusive(const Handle& var, const Handle& value);
 
 	// --------------------------------------------

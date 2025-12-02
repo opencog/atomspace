@@ -3518,48 +3518,6 @@ void PatternMatchEngine::init_constraint_domains(void)
 	        << _constraint_domain.to_string();});
 }
 
-/* ======================================================== */
-/**
- * Initialize constraint domain for ExclusiveLink constraints.
- *
- * This sets up the constraint propagation system for pruning
- * permutation search. Variables that appear together in an
- * ExclusiveLink must have distinct groundings.
- *
- * @param pattern_vars Variables in the current UnorderedLink pattern
- * @param ground_set Set of possible groundings (from the ground term)
- */
-void PatternMatchEngine::init_exclusive_constraints(
-	const PatternTermSeq& pattern_terms,
-	const HandleSet& ground_set)
-{
-	_constraint_domain.clear();
-
-	// Initialize domain for each variable in the pattern
-	for (const PatternTermPtr& ptm : pattern_terms)
-	{
-		const Handle& h = ptm->getHandle();
-		if (_variables->varset_contains(h))
-		{
-			_constraint_domain.init_domain(h, ground_set);
-		}
-	}
-
-	// Add ExclusiveLink constraints
-	for (const PatternTermPtr& excl : _pat->exclusives)
-	{
-		HandleSeq vars_in_excl;
-		const Handle& exh = excl->getHandle();
-		for (const Handle& elt : exh->getOutgoingSet())
-		{
-			if (_variables->varset_contains(elt))
-				vars_in_excl.push_back(elt);
-		}
-		if (vars_in_excl.size() > 1)
-			_constraint_domain.add_constraint(vars_in_excl);
-	}
-}
-
 /**
  * Propagate constraint when a variable is bound.
  *
