@@ -3500,23 +3500,7 @@ void PatternMatchEngine::init_constraint_domains(void)
 	}
 
 	// If no domain found for any variable, disable constraint propagation
-	bool have_any_domain = false;
-	for (const PatternTermPtr& excl : _pat->exclusives)
-	{
-		const Handle& h = excl->getHandle();
-		for (const Handle& elt : h->getOutgoingSet())
-		{
-			if (_variables->varset_contains(elt) and
-			    _constraint_domain.has_domain(elt))
-			{
-				have_any_domain = true;
-				break;
-			}
-		}
-		if (have_any_domain) break;
-	}
-
-	if (not have_any_domain)
+	if (_constraint_domain.empty())
 	{
 		_use_constraint_domain = false;
 		return;
@@ -3526,9 +3510,7 @@ void PatternMatchEngine::init_constraint_domains(void)
 	// Variables in the same ExclusiveLink must have distinct values.
 	// The variable groups were precomputed during pattern analysis.
 	for (const HandleSeq& vars_in_excl : _pat->exclusive_var_groups)
-	{
 		_constraint_domain.add_constraint(vars_in_excl);
-	}
 
 	DO_LOG({LAZY_LOG_FINE << "Initialized constraint domain:\n"
 	        << _constraint_domain.to_string();});

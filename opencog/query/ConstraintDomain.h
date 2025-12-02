@@ -75,6 +75,11 @@ public:
 	bool has_domain(const Handle& var) const;
 
 	/**
+	 * Check if any domains have been registered.
+	 */
+	bool empty() const { return _domains.empty(); }
+
+	/**
 	 * Check if variable is bound (domain has exactly one value).
 	 */
 	bool is_bound(const Handle& var) const;
