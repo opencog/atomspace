@@ -30,8 +30,21 @@ void ConstraintDomain::init_domain(const Handle& var, const HandleSet& possible_
 void ConstraintDomain::clear()
 {
 	_domains.clear();
+	_initial_domains.clear();
 	_bound_vars.clear();
 	_neighbors.clear();
+	while (!_state_stack.empty()) _state_stack.pop();
+}
+
+void ConstraintDomain::save_initial()
+{
+	_initial_domains = _domains;
+}
+
+void ConstraintDomain::reset()
+{
+	_domains = _initial_domains;
+	_bound_vars.clear();
 	while (!_state_stack.empty()) _state_stack.pop();
 }
 

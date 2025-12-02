@@ -59,6 +59,16 @@ public:
 	 */
 	void clear();
 
+	/**
+	 * Save current state as initial state (call after setup).
+	 */
+	void save_initial();
+
+	/**
+	 * Reset to initial state (for starting new search).
+	 */
+	void reset();
+
 	// -------------------------------------------------------
 	// Domain queries
 	// -------------------------------------------------------
@@ -177,6 +187,9 @@ public:
 private:
 	// Current domains: variable -> set of possible values
 	DomainMap _domains;
+
+	// Initial domains (saved after setup, for reset)
+	DomainMap _initial_domains;
 
 	// Variables known to be bound (domain size == 1 and propagated)
 	HandleSet _bound_vars;

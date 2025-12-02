@@ -3323,6 +3323,10 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// GlobNode state
 	_glob_state.clear();
+
+	// Reset constraint domains for ExclusiveLinks to initial state.
+	if (_use_constraint_domain)
+		_constraint_domain.reset();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)
@@ -3508,6 +3512,9 @@ void PatternMatchEngine::init_constraint_domains(void)
 	// The variable groups were precomputed during pattern analysis.
 	for (const HandleSeq& vars_in_excl : _pat->exclusive_var_groups)
 		_constraint_domain.add_constraint(vars_in_excl);
+
+	// Save initial state so it can be reset for each new search.
+	_constraint_domain.save_initial();
 
 	DO_LOG({LAZY_LOG_FINE << "Initialized constraint domain:\n"
 	        << _constraint_domain.to_string();});
