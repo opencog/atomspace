@@ -49,6 +49,10 @@ SatisfactionLink::SatisfactionLink(const HandleSeq&& hseq, Type t)
 bool SatisfactionLink::bevaluate(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot run queries outside of an AtomSpace!");
+
 	Satisfier sater(as);
 	sater.satisfy(PatternLinkCast(get_handle()));
 

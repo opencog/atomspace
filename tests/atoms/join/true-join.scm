@@ -42,24 +42,24 @@
 
 (define min-const-ab
 	(MinimalJoin
-		(Present (Concept "A"))
-		(Present (Concept "B"))))
+		(Concept "A")
+		(Concept "B")))
 
 (define max-const-ab
 	(MaximalJoin
-		(Present (Concept "A"))
-		(Present (Concept "B"))))
+		(Concept "A")
+		(Concept "B")))
 
 (define min-const-ap
 	(MinimalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(Present (Concept "B"))))
+		(Concept "B")))
 
 ; (cog-execute! min-const-ap)
 
 (define max-const-ap
 	(MaximalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(Present (Concept "B"))))
+		(Concept "B")))
 
 ; (cog-execute! max-const-ap)

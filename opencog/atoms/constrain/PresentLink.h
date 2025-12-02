@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/PresentLink.h
+ * opencog/atoms/constrain/PresentLink.h
  *
  * Copyright (C) 2017 Linas Vepstas
  * All Rights Reserved
@@ -60,6 +60,9 @@ namespace opencog
 class PresentLink : public EvaluatableLink
 {
 	void init(void);
+protected:
+	virtual void setAtomSpace(AtomSpace *);
+
 public:
 	PresentLink(const HandleSeq&&, Type=PRESENT_LINK);
 

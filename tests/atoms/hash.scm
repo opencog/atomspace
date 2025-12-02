@@ -46,7 +46,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -101,25 +101,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -283,7 +265,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -318,24 +300,6 @@
         (VariableNode "$Q-1d91711a")
       )
     )
-    (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
     (EquivalenceLink
       (VariableNode "$B-a083600")
       (VariableNode "$B-79625a3")
@@ -360,7 +324,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )
@@ -602,7 +566,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -657,25 +621,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -729,7 +675,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -764,24 +710,6 @@
         (VariableNode "$Q-1d91711a")
       )
     )
-    (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
     (EquivalenceLink
       (VariableNode "$B-a083600")
       (VariableNode "$B-79625a3")
@@ -806,7 +734,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )

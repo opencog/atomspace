@@ -370,11 +370,11 @@ void UnorderedUTest::test_quote(void)
 
 	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
 
-	// Result should be a SetLink w/ one solutions
+	// Result should be a SetLink w/ one solution
 	Handle result = eval->eval_h("(cog-execute! (CollectionOf query))");
 
 	logger().debug("embedded result is %s\n", result->to_string().c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

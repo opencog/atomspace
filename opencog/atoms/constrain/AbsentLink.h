@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/AbsentLink.h
+ * opencog/atoms/constrain/AbsentLink.h
  *
  * Copyright (C) 2017,2021 Linas Vepstas
  * All Rights Reserved
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_ABSENT_LINK_H
 #define _OPENCOG_ABSENT_LINK_H
 
-#include <opencog/atoms/core/PresentLink.h>
+#include <opencog/atoms/constrain/PresentLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog

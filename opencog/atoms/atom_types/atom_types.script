@@ -399,7 +399,7 @@ SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_INPUT_SIG
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG
+CHOICE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -407,7 +407,7 @@ CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG
+PRESENT_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",
@@ -790,11 +790,11 @@ FREE_LINK <- ORDERED_LINK
 // with the pattern matcher, so that if it discovers a grounding, the
 // grounded term is deleted.
 //
-// Implementation Note: The DeleteLink cannot inherit from FunctionLink
-// because that would cause all variables to be bound, i.e. to become
-// a closed sentence; thus it inherits from FreeLink.
+// Implementation Note: This used to inherit from FreeLink, but there
+// seems to be no point to that. Its simpler and easier to determine
+// whether it is open or closed on the fly.
 //
-DELETE_LINK <- FREE_LINK,CONSTRAINT_SIG
+DELETE_LINK <- LINK, CONSTRAINT_SIG
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first Atom of the Link.  Useful for defining state.  Additional
@@ -802,6 +802,10 @@ DELETE_LINK <- FREE_LINK,CONSTRAINT_SIG
 // contain free variables (see Wikipedia definition of "open term",
 // "closed term").  Kind of like DeleteLink, but allows one instead of
 // zero closed terms.
+//
+// XXX FIXME - Historically, this was designed to inherit from FreeLink,
+// but it is not clear that this extra baggage is actually needed.
+//
 UNIQUE_LINK <- FREE_LINK,CONSTRAINT_SIG
 
 // Inserting a StateLink into the AtomSpace causes the previous
@@ -829,9 +833,21 @@ GRANT_LINK <- UNIQUE_LINK
 // arguments; it is true only if everything in them are the same Atom.
 IDENTICAL_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
-// ExclusiveLink tests to make sure all elements differ from
+// EqualLink tests for semantic equality: the contents are equal, if,
+// after execution, they all evaluate to the same Atom.
+EQUAL_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// AlphaEqualLink tests to see if all contained Atoms are the same, up to an
+// alpha-renaming of any variables that they may have.
+ALPHA_EQUAL_LINK <- VIRTUAL_LINK,CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// ExclusiveLink tests to make sure all contained Atoms differ from
 // one-another. True only if they all differ...
 EXCLUSIVE_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
+
+// Test whether all outgoing Atoms are closed, that is, if the
+// they do not contain any free variables.
+IS_CLOSED_LINK <- VIRTUAL_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // ==============================================================
 // Basic Knowledge-Representation types.
@@ -964,18 +980,6 @@ SIMILARITY_LINK <- UNORDERED_LINK
 
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
 LESS_THAN_LINK <- VIRTUAL_LINK,NUMERIC_INPUT_SIG
-
-// Test whether all outgoing Atoms are closed, that is, if the
-// they do not contain any free variables.
-IS_CLOSED_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// EqualLink tests for semantic equality: the two sides are equal, if,
-// after execution, they evaluate to the same Atom.
-EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
-
-// AlphaEqualLink tests to see if both sides are the same, up to an
-// alpha-renaming of any variables that they may have.
-ALPHA_EQUAL_LINK <- VIRTUAL_LINK,UNORDERED_SIG
 
 // If the pattern has a grounding (any grounding at all), then
 // return true, else return false. This is a crisp binary true/false.

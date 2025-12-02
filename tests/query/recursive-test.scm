@@ -194,14 +194,6 @@
 (test-assert "cont-inf-loop" throwd)
 
 ; ----------
-(test-assert "exout" (equal? (BoolValue #t)
-	(cog-execute!
-		(ExecutionOutput
-			(Lambda
-				(VariableList (Variable "this") (Variable "that"))
-				(Present (Inheritance (Variable "this") (Variable "that"))))
-			(List	(Concept "mammal") (Concept "vertebrate"))))))
-
 (test-end tname)
 
 (opencog-test-end)

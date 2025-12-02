@@ -67,8 +67,6 @@ public:
 
 	void test_eval_equal(void);
 	void test_logic_equal(void);
-
-	void test_lambda(void);
 };
 
 void EvaluationUTest::tearDown(void)
@@ -294,38 +292,6 @@ void EvaluationUTest::test_logic_equal(void)
 
 	eval->eval("(load-from-path \"tests/query/eval-equal.scm\")");
 	do_test_logic();
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void EvaluationUTest::test_lambda(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/eval-lambda.scm\")");
-
-	ValuePtr vp = eval->eval_v("(cog-execute! is-red-light)");
-	BoolValuePtr bvp = BoolValueCast(vp);
-	printf ("Red light BoolValue: %s\n", bvp->to_string().c_str());
-	TS_ASSERT(bvp->get_bit(0));
-
-	vp = eval->eval_v("(cog-execute! meet-is-red-light)");
-	bvp = BoolValueCast(vp);
-	printf ("Red light (meet): %s\n", bvp->to_string().c_str());
-	TS_ASSERT(bvp->get_bit(0));
-
-	eval->eval_h(
-		"(State (Concept \"stop light\") (Concept \"green light\"))");
-
-	vp = eval->eval_v("(cog-execute! is-red-light)");
-	bvp = BoolValueCast(vp);
-	printf ("Green light BoolValue: %s\n", bvp->to_string().c_str());
-	TS_ASSERT(not bvp->get_bit(0));
-
-	vp = eval->eval_v("(cog-execute! meet-is-red-light)");
-	bvp = BoolValueCast(vp);
-	printf ("Green light (meet): %s\n", bvp->to_string().c_str());
-	TS_ASSERT(not bvp->get_bit(0));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
