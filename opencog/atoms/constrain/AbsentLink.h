@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/PresentLink.h
+ * opencog/atoms/constrain/AbsentLink.h
  *
- * Copyright (C) 2017 Linas Vepstas
+ * Copyright (C) 2017,2021 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PRESENT_LINK_H
-#define _OPENCOG_PRESENT_LINK_H
+#ifndef _OPENCOG_ABSENT_LINK_H
+#define _OPENCOG_ABSENT_LINK_H
 
-#include <opencog/atoms/execution/EvaluatableLink.h>
+#include <opencog/atoms/constrain/PresentLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 namespace opencog
@@ -32,57 +32,48 @@ namespace opencog
  *  @{
  */
 
-/// The PresentLink specifies a set that contains no duplicated elements.
-/// That is, all elements of the PresentLik are pair-wise distinct.
+/// The AbsentLink specifies a set that contains no duplicated elements.
+/// That is, all elements of the AbsentLik are pair-wise distinct.
 /// The constructor removes duplicates.
 ///
 /// For example,
 ///
-///     PresentLink
+///     AbsentLink
 ///         SomeAtom
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// is exactly the same as
 ///
-///     PresentLink
+///     AbsentLink
 ///         SomeAtom
 ///         OtherAtom
 ///
 /// and the copies of the duplicated `SomeAtom` is removed during atom
 /// construction.
 ///
-/// Conceptually, the ctor for PresentLink applies a rule of inference,
+/// Conceptually, the ctor for AbsentLink applies a rule of inference,
 /// called the "Rule of contraction (or idempotency of entailment)"
 /// https://en.wikipedia.org/wiki/Rule_of_inference
 /// https://en.wikipedia.org/wiki/Idempotency_of_entailment
 ///
-class PresentLink : public EvaluatableLink
+class AbsentLink : public PresentLink
 {
-	void init(void);
-protected:
-	virtual void setAtomSpace(AtomSpace *);
 public:
-	PresentLink(const HandleSeq&&, Type=PRESENT_LINK);
+	AbsentLink(const HandleSeq&&, Type=ABSENT_LINK);
 
-	PresentLink(const PresentLink &) = delete;
-	PresentLink& operator=(const PresentLink &) = delete;
-
-	virtual bool is_evaluatable() const { return true; }
-	virtual bool is_executable() const { return true; }
+	AbsentLink(const AbsentLink &) = delete;
+	AbsentLink& operator=(const AbsentLink &) = delete;
 
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
-	virtual ValuePtr execute(AtomSpace* as, bool silent=false) {
-		return ValueCast(createBoolValue(bevaluate(as, silent)));
-	}
 
 	static Handle factory(const Handle&);
 };
 
-LINK_PTR_DECL(PresentLink)
-#define createPresentLink CREATE_DECL(PresentLink)
+LINK_PTR_DECL(AbsentLink)
+#define createAbsentLink CREATE_DECL(AbsentLink)
 
 /** @}*/
 }
 
-#endif // _OPENCOG_PRESENT_LINK_H
+#endif // _OPENCOG_ABSENT_LINK_H

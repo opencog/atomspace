@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/DeleteLink.h
+ * opencog/atoms/constrain/DeleteLink.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
