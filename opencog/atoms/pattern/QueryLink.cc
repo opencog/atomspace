@@ -106,6 +106,9 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
 ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot run queries outside of an AtomSpace!");
 
 	/*
 	 * The `do_conn_check` flag stands for "do connectivity check"; if the

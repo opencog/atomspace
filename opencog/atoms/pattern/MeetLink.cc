@@ -50,6 +50,9 @@ MeetLink::MeetLink(const HandleSeq&& hseq, Type t)
 ContainerValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot run queries outside of an AtomSpace!");
 
 	// Where shall we place results? Why, right here!
 	ValuePtr vp(getValue(get_handle()));
