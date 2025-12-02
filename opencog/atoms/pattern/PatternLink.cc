@@ -1312,14 +1312,9 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 	// If the parent isn't evaluatable, it makes no sense to
 	// mark the child evaluatable. The problem here is that
 	// users insert stray AndLinks into random places.
-	// Note: ExclusiveLinks are NOT treated as evaluatable - they are
-	// constraint-only clauses that connect patterns but should be
-	// traversable during clause selection. This allows variables
-	// in different Edge clauses to be connected through ExclusiveLinks.
 	const PatternTermPtr& parent = ptm->getParent();
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
-	    and not ptm->isQuoted() and can_evaluate(h)
-	    and EXCLUSIVE_LINK != t)
+	    and not ptm->isQuoted() and can_evaluate(h))
 	{
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
@@ -1356,17 +1351,10 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 				}
 				else if (IDENTICAL_LINK == t)
 					ptm->markIdentical();
+				else if (EXCLUSIVE_LINK == t)
+					ptm->markExclusive();
 			}
 		}
-	}
-
-	// ExclusiveLinks get marked separately since they're not evaluatable.
-	// This must be done after the recursion check above to ensure proper
-	// parent handling.
-	if (EXCLUSIVE_LINK == t and not ptm->isQuoted())
-	{
-		if (parent->getHandle() == nullptr or not parent->isVirtual())
-			ptm->markExclusive();
 	}
 
 	// Recurse down to the tips. ... after the evaluatable markup above.

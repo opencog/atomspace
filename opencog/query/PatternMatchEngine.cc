@@ -1623,10 +1623,21 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
 
-	// Handle ExclusiveLinks: when we've reached the ExclusiveLink clause,
-	// accept it - the constraint propagation handles distinctness.
+	// Handle constraint-only ExclusiveLinks (those in _pat->exclusives):
+	// auto-accept them - constraint propagation handles distinctness.
+	// Filter ExclusiveLinks (with constants) need to be evaluated.
 	if (parent->isExclusive() and clause == parent)
-		return clause_accept(clause, hg);
+	{
+		// Check if this is a constraint-only ExclusiveLink
+		bool is_constraint_excl = false;
+		for (const PatternTermPtr& excl : _pat->exclusives)
+		{
+			if (excl == clause) { is_constraint_excl = true; break; }
+		}
+		if (is_constraint_excl)
+			return clause_accept(clause, hg);
+		// Otherwise, evaluate it below
+	}
 
 	// Check if its molecular chemistry.
 	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
@@ -2421,14 +2432,25 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
 
-	// Handle exclusive terms before evaluatables. ExclusiveLinks are
-	// matched against ground ExclusiveLinks, not evaluated.
+	// Handle constraint-only ExclusiveLinks (those in _pat->exclusives).
+	// These use constraint propagation and don't need evaluation.
+	// Filter ExclusiveLinks (with constants) fall through to be evaluated.
 	if (parent->isExclusive())
-		return explore_up_branches(ptm, hg, clause);
+	{
+		bool is_constraint_excl = false;
+		for (const PatternTermPtr& excl : _pat->exclusives)
+		{
+			if (excl == clause) { is_constraint_excl = true; break; }
+		}
+		if (is_constraint_excl)
+			return explore_up_branches(ptm, hg, clause);
+		// Otherwise, fall through to evaluatable handling
+	}
 
 	if (parent->hasAnyEvaluatable())
 	{
-		OC_ASSERT(false, "Hit some dead code!");
+		// This handles filter ExclusiveLinks (with constants) that need
+		// to be evaluated as true/false constraints.
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",

@@ -148,16 +148,18 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	}
 
 	// Make sure all clauses have been grounded.
-	// Skip ExclusiveLinks - they're constraint-only clauses that don't
-	// need to be matched. Their constraints are enforced via propagate_exclusive().
+	// Skip constraint-only ExclusiveLinks (those with 2+ variables) -
+	// their constraints are enforced via propagate_exclusive().
+	// ExclusiveLinks with constants still need to be issued and evaluated.
 	for (const PatternTermPtr& root : _pattern->pmandatory)
 	{
-		// Skip bare ExclusiveLinks - they're constraint-only clauses
-		// that don't need to be issued. They provide connectivity but
-		// are not matched against the AtomSpace.
-		bool is_excl_type = (root->getHandle() != nullptr and
-		                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
-		if (is_excl_type)
+		// Skip ExclusiveLinks that are in the exclusives list (constraint-only)
+		bool is_constraint_excl = false;
+		for (const PatternTermPtr& excl : _pattern->exclusives)
+		{
+			if (excl == root) { is_constraint_excl = true; break; }
+		}
+		if (is_constraint_excl)
 			continue;
 
 		if (_issued.end() == _issued.find(root))
@@ -341,13 +343,18 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 			bool has_eval = root->hasAnyEvaluatable();
 			bool is_absent = root->isAbsent();
 
-			// Check if this is a bare ExclusiveLink clause
-			bool is_excl_type = (root->getHandle() and
-			                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
+			// Check if this is a constraint-only ExclusiveLink (in _pattern->exclusives)
+			// These have 2+ variables and are used for constraint propagation.
+			// ExclusiveLinks with constants should still be issued and evaluated.
+			bool is_constraint_excl = false;
+			for (const PatternTermPtr& excl : _pattern->exclusives)
+			{
+				if (excl == root) { is_constraint_excl = true; break; }
+			}
 
-			// Skip ExclusiveLinks as clauses to explore - they're constraints.
+			// Skip constraint-only ExclusiveLinks as clauses to explore.
 			// But use them as connectivity bridges by finding all their variables.
-			if (is_excl_type)
+			if (is_constraint_excl)
 			{
 				// Find all ungrounded variables in this ExclusiveLink
 				const auto& clause_vars = _pattern->clause_variables.find(root);
@@ -393,10 +400,13 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 				bool has_eval = root->hasAnyEvaluatable();
 				bool is_absent = root->isAbsent();
 
-				// Skip ExclusiveLinks
-				bool is_excl_type = (root->getHandle() and
-				                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
-				if (is_excl_type) continue;
+				// Skip constraint-only ExclusiveLinks (in _pattern->exclusives)
+				bool is_constraint_excl = false;
+				for (const PatternTermPtr& excl : _pattern->exclusives)
+				{
+					if (excl == root) { is_constraint_excl = true; break; }
+				}
+				if (is_constraint_excl) continue;
 
 				bool ok = !already_issued and
 				          (search_eval or !has_eval) and (search_absents or !is_absent);
