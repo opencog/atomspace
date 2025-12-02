@@ -139,13 +139,7 @@ void JoinLink::setup_meet(void)
 			continue;
 		}
 
-		// If we are here, there are no variables. Its a constant
-		if (PRESENT_LINK != t)
-			throw SyntaxException(TRACE_INFO,
-				"Constant terms should be wrapped in a PresentLink, got %s",
-				clause->to_short_string().c_str());
-
-		_const_terms.insert(clause->getOutgoingAtom(0));
+		_const_terms.insert(clause);
 	}
 
 	_vsize = _variables.varseq.size();
