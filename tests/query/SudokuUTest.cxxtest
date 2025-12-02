@@ -192,6 +192,29 @@ void SudokuPuzzle::test_9x9_inkala(void)
 	eval->eval("(load-from-path \"tests/query/sudoku-rules.scm\")");
 	eval->eval("(load-from-path \"tests/query/sudoku-9x9-inkala.scm\")");
 
+	// Load some additional gorp just to make things confusing.
+	eval->eval("(load-from-path \"tests/query/sudoku-9x9-2944-hard.scm\")");
+	eval->eval("(load-from-path \"tests/query/sudoku-simple.scm\")");
+
+#if 0
+	// Load junk from completely unrelated unit tests.
+	// Basically, jam random junk into atomspace to confuse the system
+	eval->eval("(load-from-path \"tests/query/unordered-exhaust.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-more.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-couplayer.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-couple.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-distinct.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-equal.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-equpr.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-indistinct.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odo-layer.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-odometer.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered.scm\")");
+#endif
+
 	// Create an implication link that will be tested.
 	Handle puzzle = eval->eval_h("(puzzle-9x9-inkala)");
 
