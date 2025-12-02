@@ -38,20 +38,6 @@ IsClosedLink::IsClosedLink(const HandleSeq&& oset, Type t)
 
 /* ================================================================= */
 
-void IsClosedLink::setAtomSpace(AtomSpace* as)
-{
-	for (const Handle& h : _outgoing)
-	{
-		if (h->is_executable()) continue;
-		if (not is_closed(h))
-			throw SyntaxException(TRACE_INFO,
-				"Cannot place non-closed Atoms into AtomSpace: Got %s",
-				to_string().c_str());
-	}
-
-	Link::setAtomSpace(as);
-}
-
 /// Return true if all of the outgoing atoms are closed
 /// (contain no free variables).
 bool IsClosedLink::bevaluate(AtomSpace* as, bool silent)
