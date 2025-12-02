@@ -3458,16 +3458,38 @@ void PatternMatchEngine::init_constraint_domains(void)
 				// Use the search key's incoming set to find matching atoms
 				Type term_type = term_h->get_type();
 				IncomingSet key_incoming = search_key->getIncomingSetByType(term_type);
-				for (const Handle& candidate : key_incoming)
-				{
-					if (candidate->get_arity() != term_arity) continue;
-					if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
 
-					// Extract what the variable would be bound to
-					const Handle& binding = candidate->getOutgoingAtom(var_pos);
-					Type bt = binding->get_type();
-					if (bt != VARIABLE_NODE and bt != GLOB_NODE)
-						var_domain.insert(binding);
+				if (nameserver().isA(term_type, UNORDERED_LINK))
+				{
+					// For unordered links, search_key can be anywhere.
+					// Any element (except search_key) could be a binding.
+					for (const Handle& candidate : key_incoming)
+					{
+						if (candidate->get_arity() != term_arity) continue;
+
+						for (const Handle& elt : candidate->getOutgoingSet())
+						{
+							if (elt == search_key) continue;
+							Type bt = elt->get_type();
+							if (bt != VARIABLE_NODE and bt != GLOB_NODE)
+								var_domain.insert(elt);
+						}
+					}
+				}
+				else
+				{
+					// For ordered links, search_key must be at the same position.
+					// Extract binding from the same position as var.
+					for (const Handle& candidate : key_incoming)
+					{
+						if (candidate->get_arity() != term_arity) continue;
+						if (candidate->getOutgoingAtom(key_pos) != search_key) continue;
+
+						const Handle& binding = candidate->getOutgoingAtom(var_pos);
+						Type bt = binding->get_type();
+						if (bt != VARIABLE_NODE and bt != GLOB_NODE)
+							var_domain.insert(binding);
+					}
 				}
 			}
 
