@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "IdenticalLink.h"
 
@@ -40,7 +41,7 @@ bool IdenticalLink::is_identical(void) const
 	// Count number of non-variables:
 	size_t nfix = 0;
 	for (const Handle& h: _outgoing)
-		if (not h->is_type(VARIABLE_NODE)) nfix ++;
+		if (is_closed(h)) nfix ++;
 
 	// We're OK, if there's just zero or one constants in here.
 	if (2 > nfix)
@@ -50,7 +51,7 @@ bool IdenticalLink::is_identical(void) const
 	Handle id;
 	for (const Handle& h: _outgoing)
 	{
-		if (h->is_type(VARIABLE_NODE)) continue;
+		if (not is_closed(h)) continue;
 		if (nullptr == id)
 		{
 			id = h;

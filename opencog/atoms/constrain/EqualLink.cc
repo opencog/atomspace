@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -38,12 +39,16 @@ EqualLink::EqualLink(const HandleSeq&& oset, Type t)
 
 /* ================================================================= */
 
+/// The only EqualLinks allowed into the AtomSpace are those that
+/// contain exectuable Links (which will be executed at runtime,
+/// in bevaluate()), or those that contain free variables (because
+/// equality is not knowable, until those variables are grounded.)
 void EqualLink::setAtomSpace(AtomSpace* as)
 {
 	Handle id;
 	for (const Handle& h: _outgoing)
 	{
-		if (h->is_type(VARIABLE_NODE)) continue;
+		if (not is_closed(h)) continue;
 		if (h->is_executable()) continue;
 		if (nullptr == id)
 		{
@@ -63,7 +68,8 @@ void EqualLink::setAtomSpace(AtomSpace* as)
 /* ================================================================= */
 
 /// Check for semantic equality. -- Are things equal, after execution?
-/// The "equal things" mgith all be Values.
+/// The "equal things" might be Values, as this is commonly used on
+/// arithmetic expressions.
 bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 {
 	size_t nelts = _outgoing.size();

@@ -33,8 +33,8 @@ namespace opencog
 
 /**
  * The IdenticalLink implements syntactic equality: all Atoms in the 
- * outgoing set that are not Variables must be indentically the same
- * Atom.
+ * outgoing set that are  closed (contain no free variables) must be
+ * identically the same Atom.
  *
  * This is used during pattern matching to enforce identity constraints.
  */
