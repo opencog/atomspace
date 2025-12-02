@@ -39,13 +39,14 @@ namespace opencog
  */
 class EqualLink : public EvaluatableLink
 {
+protected:
+	virtual void setAtomSpace(AtomSpace*);
 public:
 	EqualLink(const HandleSeq&&, Type=EQUAL_LINK);
 	EqualLink(const EqualLink&) = delete;
 	EqualLink& operator=(const EqualLink&) = delete;
 	virtual ~EqualLink() {}
 
-	virtual void setAtomSpace(AtomSpace*);
 	virtual bool bevaluate(AtomSpace*, bool silent=false);
 
 	static Handle factory(const Handle&);
