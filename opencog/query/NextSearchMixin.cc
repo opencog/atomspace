@@ -148,11 +148,23 @@ void InitiateSearchMixin::next_connections(const GroundingMap& var_grounding)
 	}
 
 	// Make sure all clauses have been grounded.
+	// Skip ExclusiveLinks - they're constraint-only clauses that don't
+	// need to be matched. Their constraints are enforced via propagate_exclusive().
 	for (const PatternTermPtr& root : _pattern->pmandatory)
 	{
+		// Skip bare ExclusiveLinks - they're constraint-only clauses
+		// that don't need to be issued. They provide connectivity but
+		// are not matched against the AtomSpace.
+		bool is_excl_type = (root->getHandle() != nullptr and
+		                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
+		if (is_excl_type)
+			continue;
+
 		if (_issued.end() == _issued.find(root))
+		{
 			throw RuntimeException(TRACE_INFO,
 				"BUG! Still have ungrounded clauses!!");
+		}
 	}
 }
 
@@ -310,6 +322,10 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 	// with smallest size of its incoming set. If there are many such
 	// atoms we choose one from clauses with minimal number of ungrounded
 	// yet variables.
+
+	// Track variables reachable through ExclusiveLinks for second pass
+	HandleSet reachable_via_exclusive;
+
 	for (const auto& tckvar : thick_vars)
 	{
 		std::size_t pursue_thickness = tckvar.first;
@@ -321,9 +337,34 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
 			const PatternTermPtr& root = it->second;
-			if ((_issued.end() == _issued.find(root))
-			     and (search_eval or not root->hasAnyEvaluatable())
-			     and (search_absents or not root->isAbsent()))
+			bool already_issued = (_issued.end() != _issued.find(root));
+			bool has_eval = root->hasAnyEvaluatable();
+			bool is_absent = root->isAbsent();
+
+			// Check if this is a bare ExclusiveLink clause
+			bool is_excl_type = (root->getHandle() and
+			                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
+
+			// Skip ExclusiveLinks as clauses to explore - they're constraints.
+			// But use them as connectivity bridges by finding all their variables.
+			if (is_excl_type)
+			{
+				// Find all ungrounded variables in this ExclusiveLink
+				const auto& clause_vars = _pattern->clause_variables.find(root);
+				if (clause_vars != _pattern->clause_variables.end())
+				{
+					for (const Handle& var : clause_vars->second)
+					{
+						if (ungrounded_vars.find(var) != ungrounded_vars.end())
+							reachable_via_exclusive.insert(var);
+					}
+				}
+				continue;
+			}
+
+			bool ok = !already_issued and
+			          (search_eval or !has_eval) and (search_absents or !is_absent);
+			if (ok)
 			{
 				unsigned int root_thickness = thickness(root, ungrounded_vars);
 				if (root_thickness < thinnest_clause)
@@ -333,6 +374,52 @@ bool InitiateSearchMixin::get_next_thinnest_clause(const GroundingMap& var_groun
 					unsolved_clause = root;
 					joint = pursue;
 					unsolved = true;
+				}
+			}
+		}
+	}
+
+	// Second pass: look for non-ExclusiveLink clauses connected to
+	// variables reachable through ExclusiveLinks
+	if (not unsolved and reachable_via_exclusive.size() > 0)
+	{
+		for (const Handle& reachable : reachable_via_exclusive)
+		{
+			const auto& root_list = _pattern->connectivity_map.equal_range(reachable);
+			for (auto it = root_list.first; it != root_list.second; it++)
+			{
+				const PatternTermPtr& root = it->second;
+				bool already_issued = (_issued.end() != _issued.find(root));
+				bool has_eval = root->hasAnyEvaluatable();
+				bool is_absent = root->isAbsent();
+
+				// Skip ExclusiveLinks
+				bool is_excl_type = (root->getHandle() and
+				                     root->getHandle()->get_type() == EXCLUSIVE_LINK);
+				if (is_excl_type) continue;
+
+				bool ok = !already_issued and
+				          (search_eval or !has_eval) and (search_absents or !is_absent);
+				if (ok)
+				{
+					// For second-pass clauses, we need to find a CONSTANT
+					// in the clause since the reachable variable is ungrounded.
+					// Find a constant using find_starter.
+					size_t depth = 0, width = 0;
+					PatternTermPtr start_term;
+					Handle starter = find_starter(root, depth, start_term, width);
+					if (starter)
+					{
+						unsigned int root_thickness = thickness(root, ungrounded_vars);
+						if (root_thickness < thinnest_clause)
+						{
+							thinnest_clause = root_thickness;
+							thinnest_joint = width; // Use incoming set size
+							unsolved_clause = root;
+							joint = starter;  // Use the CONSTANT as joint
+							unsolved = true;
+						}
+					}
 				}
 			}
 		}

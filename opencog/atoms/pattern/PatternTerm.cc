@@ -280,7 +280,10 @@ void PatternTerm::markExclusive()
 	if (isQuoted()) return;
 
 	_is_exclusive = true;
-	_has_any_evaluatable = true;  // ExclusiveLink is evaluatable
+	// Note: Unlike VirtualLinks, ExclusiveLinks are NOT marked as
+	// evaluatable. They should be matched against ground ExclusiveLinks
+	// in the AtomSpace, with constraint propagation handling the
+	// distinctness requirement during search.
 }
 
 // ==============================================================

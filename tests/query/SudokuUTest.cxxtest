@@ -175,7 +175,7 @@ void SudokuPuzzle::test_9x9_puzzle(void)
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
-#if NOT_TODAY
+#if 1 // Yes, TODAY
 	logger().debug("puzzle is:\n%s\n", oc_to_string(puzzle).c_str());
 	logger().flush();
 

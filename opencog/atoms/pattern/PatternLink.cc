@@ -63,9 +63,15 @@ void PatternLink::common_init(void)
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in their literal form.
+	// Also include ExclusiveLinks for connectivity analysis - even though
+	// they're evaluatable (virtual), they connect variables and should
+	// not cause the pattern to be split into multiple components.
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
 		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
+			_fixed.push_back(ptm);
+		else if (ptm->getHandle() != nullptr and
+		         ptm->getHandle()->get_type() == EXCLUSIVE_LINK)
 			_fixed.push_back(ptm);
 	}
 
@@ -111,6 +117,86 @@ void PatternLink::common_init(void)
 	locate_cacheable(_pat.absents);
 	locate_cacheable(_pat.always);
 	locate_cacheable(_pat.grouping);
+
+	// Collect and categorize ExclusiveLink constraints for
+	// constraint propagation during pattern matching.
+	categorize_exclusives();
+}
+
+/// Recursively walk the PatternTerm tree to find ExclusiveLinks.
+void PatternLink::collect_exclusives_recursive(const PatternTermPtr& ptm)
+{
+	const Handle& h = ptm->getHandle();
+
+	// Check for ExclusiveLink by type since isExclusive() is only set
+	// for top-level evaluatable ExclusiveLinks, not nested ones.
+	bool is_exclusive = (h != nullptr and h->get_type() == EXCLUSIVE_LINK);
+
+	// If this term is an ExclusiveLink, collect it
+	if (is_exclusive)
+	{
+		// Extract the variables from this ExclusiveLink
+		HandleSet vars_in_excl;
+		for (const Handle& elt : h->getOutgoingSet())
+		{
+			if (_variables.varset_contains(elt))
+				vars_in_excl.insert(elt);
+		}
+
+		// Only process if there are at least 2 variables
+		// (otherwise there's no constraint to propagate)
+		if (vars_in_excl.size() >= 2)
+		{
+			// Check which components these variables belong to
+			std::set<size_t> components_touched;
+			for (const Handle& var : vars_in_excl)
+			{
+				for (size_t i = 0; i < _num_comps; i++)
+				{
+					if (_component_vars[i].count(var))
+						components_touched.insert(i);
+				}
+			}
+
+			if (components_touched.size() == 1)
+			{
+				// Single component - can use for constraint propagation
+				_pat.exclusives.push_back(ptm);
+			}
+			else
+			{
+				// Bridges components - must treat as virtual
+				_pat.exclusive_virtuals.push_back(ptm);
+			}
+
+			// Build var_exclusives map for runtime lookup
+			for (const Handle& var : vars_in_excl)
+				_pat.var_exclusives[var].push_back(ptm);
+		}
+	}
+
+	// Recurse into children
+	for (const PatternTermPtr& child : ptm->getOutgoingSet())
+		collect_exclusives_recursive(child);
+}
+
+/// Categorize ExclusiveLink terms for constraint propagation.
+/// This identifies which ExclusiveLinks operate within a single
+/// connected component (usable for constraint propagation) vs
+/// those that bridge components (must be virtual).
+void PatternLink::categorize_exclusives(void)
+{
+	// Walk through all mandatory clauses looking for ExclusiveLinks
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
+		collect_exclusives_recursive(ptm);
+
+	// Also check absents, always, grouping
+	for (const PatternTermPtr& ptm : _pat.absents)
+		collect_exclusives_recursive(ptm);
+	for (const PatternTermPtr& ptm : _pat.always)
+		collect_exclusives_recursive(ptm);
+	for (const PatternTermPtr& ptm : _pat.grouping)
+		collect_exclusives_recursive(ptm);
 }
 
 
@@ -863,6 +949,11 @@ bool PatternLink::is_virtual(const Handle& clause)
 	// So we treat them as an unusual but not really virtual link.
 	if (IDENTICAL_LINK == clause->get_type()) return false;
 
+	// ExclusiveLinks can bridge over all their members.
+	// They should be matched against ground ExclusiveLinks in the
+	// AtomSpace, not evaluated as virtual clauses.
+	if (EXCLUSIVE_LINK == clause->get_type()) return false;
+
 	size_t nsub = 0;
 	size_t nsolv = 0;
 	size_t nvar = 0;
@@ -1221,9 +1312,14 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 	// If the parent isn't evaluatable, it makes no sense to
 	// mark the child evaluatable. The problem here is that
 	// users insert stray AndLinks into random places.
+	// Note: ExclusiveLinks are NOT treated as evaluatable - they are
+	// constraint-only clauses that connect patterns but should be
+	// traversable during clause selection. This allows variables
+	// in different Edge clauses to be connected through ExclusiveLinks.
 	const PatternTermPtr& parent = ptm->getParent();
 	if ((parent->getHandle() == nullptr or parent->hasEvaluatable())
-	    and not ptm->isQuoted() and can_evaluate(h))
+	    and not ptm->isQuoted() and can_evaluate(h)
+	    and EXCLUSIVE_LINK != t)
 	{
 		// If its an AndLink, make sure that all of the children are
 		// evaluatable. The problem is .. users insert AndLinks into
@@ -1260,10 +1356,17 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 				}
 				else if (IDENTICAL_LINK == t)
 					ptm->markIdentical();
-				else if (EXCLUSIVE_LINK == t)
-					ptm->markExclusive();
 			}
 		}
+	}
+
+	// ExclusiveLinks get marked separately since they're not evaluatable.
+	// This must be done after the recursion check above to ensure proper
+	// parent handling.
+	if (EXCLUSIVE_LINK == t and not ptm->isQuoted())
+	{
+		if (parent->getHandle() == nullptr or not parent->isVirtual())
+			ptm->markExclusive();
 	}
 
 	// Recurse down to the tips. ... after the evaluatable markup above.
