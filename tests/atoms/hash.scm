@@ -102,24 +102,6 @@
     )
     (NotLink
       (EqualLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -316,24 +298,6 @@
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-1d91711a")
-      )
-    )
-    (NotLink
-      (EqualLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
       )
     )
     (EquivalenceLink
@@ -658,24 +622,6 @@
     )
     (NotLink
       (EqualLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -762,24 +708,6 @@
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-1d91711a")
-      )
-    )
-    (NotLink
-      (EqualLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
       )
     )
     (EquivalenceLink
