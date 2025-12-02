@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (constrain
 	AbsentLink.cc
+	AlphaEqualLink.cc
 	DeleteLink.cc
 	EqualLink.cc
 	ExclusiveLink.cc
@@ -26,6 +27,7 @@ INSTALL (TARGETS constrain EXPORT AtomSpaceTargets
 
 INSTALL (FILES
 	AbsentLink.h
+	AlphaEqualLink.h
 	DeleteLink.h
 	EqualLink.h
 	ExclusiveLink.h

@@ -210,49 +210,6 @@ static bool is_message(const Handle& h)
 	return false;
 }
 
-/// Check for alpha equivalence.
-static bool alpha_equal(AtomSpace* as, const Handle& h, bool silent)
-{
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (2 != oset.size())
-		throw SyntaxException(TRACE_INFO,
-		     "AlphaEqualLink expects two arguments");
-
-	Handle h0(oset[0]);
-	if (h0->is_executable())
-	{
-		ValuePtr vp(h0->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h0 = HandleCast(vp);
-	}
-
-	Handle h1(oset[1]);
-	if (h1->is_executable())
-	{
-		ValuePtr vp(h1->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h1 = HandleCast(vp);
-	}
-
-	// Are they strictly equal? Good!
-	if (h0 == h1)
-		return true;
-
-	// Not strictly equal. Are they alpha convertible?
-	Variables v0, v1;
-	v0.find_variables(h0);
-	v1.find_variables(h1);
-
-	// If the variables are not alpha-convertable, then
-	// there is no possibility of equality.
-	if (not v0.is_equal(v1))
-		return false;
-
-	// Actually alpha-convert, and compare.
-	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
-	return (*h0 == *h1a);
-}
-
 /// Check for set membership
 static bool member(AtomSpace* as, const Handle& h, bool silent)
 {
@@ -476,7 +433,6 @@ bool EvaluatableLink::bevaluate(AtomSpace* scratch, bool silent)
 
 	// -------------------------
 	// Assorted relations
-	if (ALPHA_EQUAL_LINK == t) return alpha_equal(scratch, evelnk, silent);
 	if (GREATER_THAN_LINK == t) return greater(scratch, evelnk, silent);
 	if (LESS_THAN_LINK == t) return lesser(scratch, evelnk, silent);
 	if (IS_CLOSED_LINK == t) return is_outgoing_closed(evelnk);
