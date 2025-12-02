@@ -790,11 +790,11 @@ FREE_LINK <- ORDERED_LINK
 // with the pattern matcher, so that if it discovers a grounding, the
 // grounded term is deleted.
 //
-// Implementation Note: The DeleteLink cannot inherit from FunctionLink
-// because that would cause all variables to be bound, i.e. to become
-// a closed sentence; thus it inherits from FreeLink.
+// Implementation Note: This used to inherit from FreeLink, but there
+// seems to be no point to that. Its simpler and easier to determine
+// whether it is open or closed on the fly.
 //
-DELETE_LINK <- FREE_LINK,CONSTRAINT_SIG
+DELETE_LINK <- LINK, CONSTRAINT_SIG
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first Atom of the Link.  Useful for defining state.  Additional
@@ -802,6 +802,10 @@ DELETE_LINK <- FREE_LINK,CONSTRAINT_SIG
 // contain free variables (see Wikipedia definition of "open term",
 // "closed term").  Kind of like DeleteLink, but allows one instead of
 // zero closed terms.
+//
+// XXX FIXME - Historically, this was designed to inherit from FreeLink,
+// but it is not clear that this extra baggage is actually needed.
+//
 UNIQUE_LINK <- FREE_LINK,CONSTRAINT_SIG
 
 // Inserting a StateLink into the AtomSpace causes the previous
