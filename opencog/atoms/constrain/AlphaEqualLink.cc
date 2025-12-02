@@ -41,43 +41,44 @@ AlphaEqualLink::AlphaEqualLink(const HandleSeq&& oset, Type t)
 /// after variable renaming (alpha-conversion).
 bool AlphaEqualLink::bevaluate(AtomSpace* as, bool silent)
 {
-	if (2 != _outgoing.size())
-		throw SyntaxException(TRACE_INFO,
-		     "AlphaEqualLink expects two arguments");
+	// The whack case,
+	if (1 == _outgoing.size()) return true;
 
-	Handle h0(_outgoing[0]);
-	if (h0->is_executable())
+	Handle hid;
+	Variables vid;
+	for (Handle h : _outgoing)
 	{
-		ValuePtr vp(h0->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h0 = HandleCast(vp);
+		if (h->is_executable())
+		{
+			ValuePtr vp(h->execute(as, silent));
+			if (not vp->is_atom()) return false;
+			h = HandleCast(vp);
+		}
+		if (nullptr == hid)
+		{
+			hid = h;
+			vid.find_variables(h);
+			continue;
+		}
+
+		// Are they strictly equal? Good!
+		if (hid == h) continue;
+
+		// Not strictly equal. Are they alpha convertible?
+		Variables v;
+		v.find_variables(h);
+
+		// If the variables are not alpha-convertable,
+		// then there is no possibility of equality.
+		if (not v.is_equal(vid))
+			return false;
+
+		// Actually alpha-convert, and compare.
+		Handle ha = v.substitute_nocheck(h, vid.varseq, silent);
+		if (not (*hid == *ha))
+			return false;
 	}
-
-	Handle h1(_outgoing[1]);
-	if (h1->is_executable())
-	{
-		ValuePtr vp(h1->execute(as, silent));
-		if (not vp->is_atom()) return false;
-		h1 = HandleCast(vp);
-	}
-
-	// Are they strictly equal? Good!
-	if (h0 == h1)
-		return true;
-
-	// Not strictly equal. Are they alpha convertible?
-	Variables v0, v1;
-	v0.find_variables(h0);
-	v1.find_variables(h1);
-
-	// If the variables are not alpha-convertable, then
-	// there is no possibility of equality.
-	if (not v0.is_equal(v1))
-		return false;
-
-	// Actually alpha-convert, and compare.
-	Handle h1a = v1.substitute_nocheck(h1, v0.varseq, silent);
-	return (*h0 == *h1a);
+	return true;
 }
 
 DEFINE_LINK_FACTORY(AlphaEqualLink, ALPHA_EQUAL_LINK);
