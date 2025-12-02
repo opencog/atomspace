@@ -46,7 +46,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -101,7 +101,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (LambdaLink
           (TypedVariableLink
@@ -119,7 +119,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -283,7 +283,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -319,7 +319,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (LambdaLink
           (TypedVariableLink
@@ -360,7 +360,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )
@@ -602,7 +602,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -657,7 +657,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (LambdaLink
           (TypedVariableLink
@@ -675,7 +675,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -729,7 +729,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -765,7 +765,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (LambdaLink
           (TypedVariableLink
@@ -806,7 +806,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )
