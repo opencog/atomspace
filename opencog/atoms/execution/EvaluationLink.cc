@@ -161,7 +161,14 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(pn));
 		Handle reduct(lam->beta_reduce(cargs));
-		reduct = as->add_atom(reduct);
+		try
+		{
+			reduct = as->add_atom(reduct);
+		}
+		catch (const SyntaxException&)
+		{
+			return false;
+		}
 		return reduct->bevaluate(as, silent);
 	}
 
@@ -172,7 +179,14 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 	{
 		LambdaLinkPtr lam(createLambdaLink(HandleSeq({pn})));
 		Handle reduct(lam->beta_reduce(cargs));
-		reduct = as->add_atom(reduct);
+		try
+		{
+			reduct = as->add_atom(reduct);
+		}
+		catch (const SyntaxException&)
+		{
+			return false;
+		}
 		return reduct->bevaluate(as, silent);
 	}
 

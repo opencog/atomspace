@@ -399,7 +399,7 @@ SEQUENTIAL_OR_LINK <- EVALUATABLE_LINK, ORDERED_SIG, CRISP_INPUT_SIG
 // crisp-true/false if any of the items on the menu are present.
 // Compare to RandomChoiceLink below, which randomly selects one
 // entry.
-CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG
+CHOICE_LINK <- EVALUATABLE_LINK, ORDERED_SIG
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
@@ -407,7 +407,7 @@ CHOICE_LINK <- EVALUATABLE_LINK,ORDERED_SIG
 // the same Atom is present more than once, or what order it was in, it
 // is an unordered link, and duplicates are eliminated.
 //
-PRESENT_LINK <- EVALUATABLE_LINK,UNORDERED_SIG
+PRESENT_LINK <- EVALUATABLE_LINK, CONSTRAINT_SIG, COLLECTION_SIG, UNORDERED_SIG
 
 // The 'intuitionist logic' version of NOT_LINK is ABSENT_LINK.
 // In 'intuitionist logic', the opposite of "true" is not "false",

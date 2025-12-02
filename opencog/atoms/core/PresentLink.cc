@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "PresentLink.h"
 
@@ -67,6 +68,29 @@ PresentLink::PresentLink(const HandleSeq&& oset, Type t)
 
 	init();
 }
+
+/* ================================================================= */
+
+/// The only way that a PresentLink or AbsentLink can be added an
+/// AtomSpace is if they contain free variables. Adding constant terms
+/// is flawed: If the constant wasn't there previously, it would get
+/// added, and the test for presence would always succeed! And a test
+/// for absence would always fail!
+void PresentLink::setAtomSpace(AtomSpace* as)
+{
+	for (const Handle& h : _outgoing)
+	{
+		if (is_closed(h))
+			throw SyntaxException(TRACE_INFO,
+				"Cannot add a closed %s to the AtomSpace!  Got %s",
+				nameserver().getTypeName(get_type()).c_str(),
+				to_string().c_str());
+	}
+
+	Link::setAtomSpace(as);
+}
+
+/* ================================================================= */
 
 /// Return true, if all of the outgoing set is present in the
 /// indicated AtomSpace. It only makes sense to call this if

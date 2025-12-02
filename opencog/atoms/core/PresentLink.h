@@ -60,6 +60,8 @@ namespace opencog
 class PresentLink : public EvaluatableLink
 {
 	void init(void);
+protected:
+	virtual void setAtomSpace(AtomSpace *);
 public:
 	PresentLink(const HandleSeq&&, Type=PRESENT_LINK);
 
