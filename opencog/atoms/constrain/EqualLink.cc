@@ -40,17 +40,67 @@ EqualLink::EqualLink(const HandleSeq&& oset, Type t)
 
 void EqualLink::setAtomSpace(AtomSpace* as)
 {
+	Handle id;
+	for (const Handle& h: _outgoing)
+	{
+		if (h->is_type(VARIABLE_NODE)) continue;
+		if (h->is_executable()) continue;
+		if (nullptr == id)
+		{
+			id = h;
+			continue;
+		}
+
+		if (*h != *id)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot placeEqualLink with non-equal elements in the AtomSpace!  Got %s",
+				to_string().c_str());
+	}
+
 	Link::setAtomSpace(as);
 }
 
 /* ================================================================= */
 
-/// Check for semantic equality.
+/// Check for semantic equality. -- Are things equal, after execution?
 bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 {
 	size_t nelts = _outgoing.size();
 	if (2 > nelts) return true;
 
+	Handle id;
+	for (const Handle& h: _outgoing)
+	{
+		if (h->is_type(VARIABLE_NODE)) continue;
+
+		if (not h->is_executable())
+		{
+			if (nullptr == id)
+			{
+				id = h;
+				continue;
+			}
+
+			if (*h != *id)
+				return false;
+		}
+
+		ValuePtr vp(h->execute(as, silent));
+		if (not vp->is_atom())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting an Atom, got %s\n", vp->to_string().c_str());
+
+		Handle nh(as->add_atom(HandleCast(vp)));
+
+		if (nullptr == id)
+		{
+			id = nh;
+			continue;
+		}
+
+		if (*nh != *id)
+			return false;
+	}
 	return true;
 }
 
