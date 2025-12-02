@@ -40,7 +40,7 @@
 (Edge (Predicate "fix95") (Concept "three"))
 (Edge (Predicate "fix98") (Concept "eight"))
 
-(define (puzzle)
+(define (puzzle-9x9-2944-hard)
 	(CollectionOf
 	(QueryLink
 		; There are eighty-one variables! 81 = 9x9 cells

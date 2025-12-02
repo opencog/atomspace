@@ -161,10 +161,10 @@ void SudokuPuzzle::test_9x9_puzzle(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/sudoku-rules.scm\")");
-	eval->eval("(load-from-path \"tests/query/sudoku-puzzle.scm\")");
+	eval->eval("(load-from-path \"tests/query/sudoku-9x9-2944-hard.scm\")");
 
 	// Create an implication link that will be tested.
-	Handle puzzle = eval->eval_h("(puzzle)");
+	Handle puzzle = eval->eval_h("(puzzle-9x9-2944-hard)");
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle);
