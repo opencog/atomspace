@@ -58,16 +58,25 @@ void ExclusiveLinkUTest::test_exclusive()
 	Handle B = N(CONCEPT_NODE, "B");
 	Handle C = N(CONCEPT_NODE, "C");
 	Handle D = N(CONCEPT_NODE, "D");
-	Handle S = L(EXCLUSIVE_LINK, A, B, C, D);
-	Handle T = L(EXCLUSIVE_LINK, A, B, C, A);
 
-
+	// bevaluate() on an naked link with all distinct atoms
+	Handle S = createLink(EXCLUSIVE_LINK, A, B, C, D);
 	bool result = S->bevaluate(&_as);
 	printf("Got result=%s\n", result ? "true" : "false");
 	TS_ASSERT(result);
 
-	result = T->bevaluate(&_as);
+	// bevaluate() on naked link with duplicates should return false
+	Handle E = createLink(EXCLUSIVE_LINK, A, B, C, A);
+	result = E->bevaluate(&_as);
+	printf("Got duplicate result=%s\n", result ? "true" : "false");
 	TS_ASSERT(not result);
+
+	// Adding to AtomSpace should succeed for distinct atoms
+	S = L(EXCLUSIVE_LINK, A, B, C, D);
+	TS_ASSERT(S != nullptr);
+
+	// Cannot add illegal ExclusiveLink.
+	TS_ASSERT_THROWS_ANYTHING(L(EXCLUSIVE_LINK, A, B, C, A));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

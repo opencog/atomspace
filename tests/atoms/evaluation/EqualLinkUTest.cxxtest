@@ -63,18 +63,22 @@ void EqualLinkUTest::test_equality()
 	Handle semantic_b =
 		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_b);
 
+	// These can be added to AtomSpace (identical or has executable)
 	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
 	Handle ident_asa = L(IDENTICAL_LINK, thing_a, semantic_a);
-
-	Handle ident_ab = L(IDENTICAL_LINK, thing_a, thing_b);
 	Handle ident_asb = L(IDENTICAL_LINK, thing_a, semantic_b);
 
+	// These must use createLink (non-identical, non-executable)
+	Handle ident_ab = createLink(IDENTICAL_LINK, thing_a, thing_b);
+
 	// -------
+	// These can be added to AtomSpace (equal or has executable)
 	Handle equal_aa = L(EQUAL_LINK, thing_a, thing_a);
 	Handle equal_asa = L(EQUAL_LINK, thing_a, semantic_a);
-
-	Handle equal_ab = L(EQUAL_LINK, thing_a, thing_b);
 	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
+
+	// These must use createLink (non-equal, non-executable)
+	Handle equal_ab = createLink(EQUAL_LINK, thing_a, thing_b);
 
 	// -------
 	bool result = ident_aa->bevaluate(&_as);
@@ -101,6 +105,11 @@ void EqualLinkUTest::test_equality()
 
 	result = equal_asb->bevaluate(&_as);
 	TS_ASSERT(!result); // false
+
+	// Adding non-identical/non-equal atoms should throw
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, thing_b));
+
+	TS_ASSERT_THROWS_ANYTHING(L(EQUAL_LINK, thing_a, thing_b));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -156,11 +165,13 @@ void EqualLinkUTest::test_nway()
 	Handle thing_a = N(CONCEPT_NODE, "thing A");
 	Handle thing_b = N(CONCEPT_NODE, "thing B");
 
+	// These can be added to AtomSpace (all equal)
 	Handle equal_aaa = L(EQUAL_LINK, thing_a, thing_a, thing_a);
-	Handle equal_aba = L(EQUAL_LINK, thing_a, thing_b, thing_a);
-
 	Handle equal_aaaa = L(EQUAL_LINK, thing_a, thing_a, thing_a, thing_a);
-	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
+
+	// These must use createLink (non-equal atoms)
+	Handle equal_aba = createLink(EQUAL_LINK, thing_a, thing_b, thing_a);
+	Handle equal_abaa = createLink(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
 
 	// -------
 	bool result = equal_aaa->bevaluate(&_as);
@@ -174,6 +185,9 @@ void EqualLinkUTest::test_nway()
 
 	result = equal_abaa->bevaluate(&_as);
 	TS_ASSERT(!result); // false
+
+	// Adding non-equal atoms should throw
+	TS_ASSERT_THROWS_ANYTHING(L(EQUAL_LINK, thing_a, thing_b, thing_a););
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
