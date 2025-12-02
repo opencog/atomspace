@@ -63,12 +63,13 @@ void EqualLink::setAtomSpace(AtomSpace* as)
 /* ================================================================= */
 
 /// Check for semantic equality. -- Are things equal, after execution?
+/// The "equal things" mgith all be Values.
 bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 {
 	size_t nelts = _outgoing.size();
 	if (2 > nelts) return true;
 
-	Handle id;
+	ValuePtr id;
 	for (const Handle& h: _outgoing)
 	{
 		if (h->is_type(VARIABLE_NODE)) continue;
@@ -81,26 +82,23 @@ bool EqualLink::bevaluate(AtomSpace* as, bool silent)
 				continue;
 			}
 
-			if (*h != *id)
+			if (*(ValueCast(h)) != *id)
 				return false;
 
 			continue;
 		}
 
 		ValuePtr vp(h->execute(as, silent));
-		if (not vp->is_atom())
-			throw RuntimeException(TRACE_INFO,
-				"Expecting an Atom, got %s\n", vp->to_string().c_str());
-
-		Handle nh(as->add_atom(HandleCast(vp)));
+		if (vp->is_atom())
+			vp = as->add_atom(HandleCast(vp));
 
 		if (nullptr == id)
 		{
-			id = nh;
+			id = vp;
 			continue;
 		}
 
-		if (*nh != *id)
+		if (*vp != *id)
 			return false;
 	}
 	return true;
