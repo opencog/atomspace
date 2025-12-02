@@ -3380,8 +3380,7 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 	_variables = &v;
 	_pat = &p;
 
-	// Enable constraint propagation if there are ExclusiveLink constraints
-	_use_constraint_domain = not p.exclusives.empty();
+	// Initialize constraint propagation.
 	_constraint_domain_initialized = false;
 }
 
@@ -3401,11 +3400,12 @@ void PatternMatchEngine::set_pattern(const Variables& v,
  */
 void PatternMatchEngine::init_constraint_domains(void)
 {
-	if (not _use_constraint_domain) return;
 	if (_constraint_domain_initialized) return;
-
-	_constraint_domain.clear();
 	_constraint_domain_initialized = true;
+	_use_constraint_domain = false;
+
+	if (_pat->exclusives.empty()) return;
+	_constraint_domain.clear();
 
 	// For each variable in an ExclusiveLink, determine its domain by looking
 	// at OTHER terms in the pattern that constrain it.
@@ -3499,12 +3499,13 @@ void PatternMatchEngine::init_constraint_domains(void)
 		}
 	}
 
-	// If no domain found for any variable, disable constraint propagation
+	// If no domain found for any variable, then we bail.
+	// It might be possible to discover domains in the middle
+	// of the search, but we don't do that here.
 	if (_constraint_domain.empty())
-	{
-		_use_constraint_domain = false;
 		return;
-	}
+
+	_use_constraint_domain = true;
 
 	// Add constraints from pattern ExclusiveLinks.
 	// Variables in the same ExclusiveLink must have distinct values.
