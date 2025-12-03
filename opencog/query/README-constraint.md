@@ -463,10 +463,26 @@ Cartesian product of component solutions).
 - Required for miracle Sudoku (79 ungrounded variables)
 - See `README-constraint-units.md` for details
 
-### Future (Phase 4)
-- MRV (Minimum Remaining Values) variable ordering heuristic
+### Future (Phase 4+)
+
+**Variable Ordering:**
+- MRV (Minimum Remaining Values) heuristic - bind most constrained variable first
+
+**Early Constraint Evaluation:**
+- Single-variable constraints: evaluate as soon as that one variable is grounded
+  (unclear if currently implemented - needs investigation)
+- IdenticalLink: could be resolved at pattern-compile time (in PatternLink.cc)
+  but currently is not
+
+**Modular Theory Solver Architecture:**
+- Refactor into clean modules: EqualitySolver, ExclusiveSolver, ArithmeticSolver
+- Current EqualLink handling is ad hoc; could be made more robust
+- ArithmeticSolver for GreaterThan/LessThan with NumberNodes
+- ASP (Answer-Set Programming) style constraints - different integration approach
+
+**Advanced Techniques:**
 - Conflict-driven clause learning (CDCL)
-- Additional theory solvers (arithmetic, etc.)
+- Watched literals for efficient propagation
 
 ## Risks and Mitigations
 
