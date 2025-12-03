@@ -325,7 +325,20 @@ public:
 };
 ```
 
-### 3. Integration with unorder_compare
+### 3. Integration with unorder_compare (Arc Consistency)
+
+The core insight is applying **arc consistency** (AC-3 algorithm) during
+unordered matching. Instead of trying all N! permutations blindly:
+
+1. For each position, check domain intersection
+2. When binding position i to value v:
+   - Remove v from domains of all other positions in the same ExclusiveLink
+   - If any domain becomes empty → fail immediately (early pruning)
+   - If any domain has exactly 1 element → bind it (unit propagation)
+3. Only recurse on positions with choices remaining
+
+This transforms exponential permutation enumeration into polynomial
+constraint propagation for many practical cases.
 
 Modify `PatternMatchEngine::unorder_compare` to use constraint
 propagation instead of blind permutation enumeration:
@@ -395,6 +408,42 @@ struct ConstraintState {
 
 std::stack<ConstraintState> _constraint_state_stack;
 ```
+
+## Design Challenges
+
+Several fundamental challenges shaped the implementation:
+
+### Structural Matching vs. Constraint Semantics
+The pattern matcher performs structural matching - it matches pattern terms
+against ground atoms in the AtomSpace. It doesn't inherently reason about
+constraint semantics. The ExclusiveLink expresses mutual exclusion
+constraints that were previously only checked after all variables were
+grounded. The constraint propagation enhancement hooks into ExclusiveLink
+to enable early pruning during search.
+
+### Domain Discovery
+Where do variable domains come from? For `(TypedVariable (Variable "X") (Type 'Concept))`,
+the domain is all ConceptNodes - potentially millions. Explicit enumeration is
+impractical. The solution: domains are discovered at search time from other
+terms in the pattern via the `connectivity_map`, not declared upfront.
+
+### GroundedPredicates
+Arbitrary code can run during matching. Constraints cannot propagate through
+opaque predicates - they must be evaluated after all their variables are
+grounded. This is why the thickness check ensures evaluatable clauses aren't
+selected until fully grounded.
+
+### Generality vs. Efficiency
+The pattern matcher handles arbitrary patterns. Specialized constraint solvers
+know the structure. The design adds constraint propagation as an optimization
+layer that activates only when ExclusiveLinks are present, falling back to
+standard permutation enumeration otherwise.
+
+### Cross-Component Constraints
+ExclusiveLinks may bridge variables in different connected components of the
+pattern graph. Single-component constraints can use direct propagation;
+cross-component constraints must be handled as virtual links (filtering the
+Cartesian product of component solutions).
 
 ## Implementation Status
 
