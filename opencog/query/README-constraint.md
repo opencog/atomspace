@@ -2,11 +2,16 @@
 
 Written by Claude Code, LLM, 30 Nov 2025, edited by Linas.
 
-Below follows a proposed enhancement to the pattern matcher to
-incorporate constraint propagation techniques from CSP (Constraint
+This document describes the constraint propagation enhancement to the
+pattern matcher, incorporating techniques from CSP (Constraint
 Satisfaction Problem) solvers. The goal is to reduce the search
 space for patterns involving UnorderedLinks (usually SetLinks)
 containing shared variables.
+
+**Current Status (Dec 2025):** ExclusiveLink constraint propagation is
+implemented and working. Five of six SudokuUTest tests pass. The remaining
+test (miracle Sudoku) requires unit propagation, documented separately in
+`README-constraint-units.md`.
 
 ## The Problem
 
@@ -267,7 +272,7 @@ During pattern compilation (`PatternLink.cc`), analyze the pattern to:
 3. Build the constraint graph (which variables interact via which constraints)
 4. Identify constraints that can be fully resolved at compile time
 
-## Proposed Architecture
+## Implemented Architecture
 
 ### 1. Domain Tracking in PatternTerm
 
@@ -391,29 +396,28 @@ struct ConstraintState {
 std::stack<ConstraintState> _constraint_state_stack;
 ```
 
-## Implementation Plan
+## Implementation Status
 
-### Phase 1: Domain Infrastructure
-- Add VariableDomain class
-- Add ConstraintNetwork class
-- Integrate with existing PatternTerm infrastructure
-- Unit tests for domain operations
+### Completed (Phase 1-2)
+- ✅ `ConstraintDomain` class with domain tracking (`ConstraintDomain.h/cc`)
+- ✅ Constraint network tracking which variables share ExclusiveLinks
+- ✅ Basic propagation: when variable binds, eliminate value from neighbors
+- ✅ State push/pop for backtracking support
+- ✅ Integration into PatternMatchEngine via `propagate_exclusive()`
+- ✅ Evaluatable clause handling: thickness check prevents selecting
+    evaluatable clauses until all variables grounded
+- ✅ 5 of 6 SudokuUTest tests passing
 
-### Phase 2: Basic Propagation
-- Implement arc consistency (AC-3 algorithm)
-- Integrate into unorder_compare
-- Maintain existing behavior as fallback
-- Benchmark on test cases
+### Needed (Phase 3): Unit Propagation
+- When domain has only 1 value, automatically bind that variable
+- `ConstraintDomain::find_unit()` exists but not yet integrated
+- Required for miracle Sudoku (79 ungrounded variables)
+- See `README-constraint-units.md` for details
 
-### Phase 3: Variable Ordering
-- Implement MRV (Minimum Remaining Values) heuristic
-- Optionally implement LCV (Least Constraining Value)
-- Compare performance with default ordering
-
-### Phase 4: Advanced Techniques (Future)
+### Future (Phase 4)
+- MRV (Minimum Remaining Values) variable ordering heuristic
 - Conflict-driven clause learning (CDCL)
-- Watched literals for efficient propagation
-- Constraint-specific propagators
+- Additional theory solvers (arithmetic, etc.)
 
 ## Risks and Mitigations
 
@@ -432,12 +436,13 @@ std::stack<ConstraintState> _constraint_state_stack;
    Mitigation: Treat GroundedPredicates as constraints that must be
    checked but cannot propagate.
 
-## Files Likely to Be Modified
+## Files Modified
 
-- `PatternMatchEngine.cc` - Core matching logic
-- `PatternMatchEngine.h` - New data structures
-- `PatternTerm.cc/h` - Domain tracking (possibly)
-- `clause_connect.cc` - Enhanced ordering (later phase)
+- `PatternMatchEngine.cc` - Core matching, `propagate_exclusive()` method
+- `PatternMatchEngine.h` - `_constraint_domain` member, `_use_constraint_domain` flag
+- `ConstraintDomain.cc/h` - New class for domain tracking
+- `NextSearchMixin.cc` - Evaluatable clause thickness check
+- `InitiateSearchMixin.cc` - `init_constraint_domains()` initialization
 
 ## References
 
