@@ -3417,8 +3417,11 @@ void PatternMatchEngine::init_constraint_domains(void)
 			if (not _variables->varset_contains(var)) continue;
 			if (_constraint_domain.has_domain(var)) continue;
 
-			// Find terms that contain this variable (via connectivity_map)
+			// Find terms that contain this variable (via connectivity_map).
+			// The domain is the INTERSECTION of possible values across
+			// all terms. A variable must satisfy ALL its constraints.
 			HandleSet var_domain;
+			bool first_term = true;
 			auto range = _pat->connectivity_map.equal_range(var);
 			for (auto it = range.first; it != range.second; ++it)
 			{
@@ -3443,9 +3446,10 @@ void PatternMatchEngine::init_constraint_domains(void)
 				if (not const_term) continue;
 
 				// Use the const subterm's incoming set to find Atoms
-				// that are plausibly in the var_domain.
+				// that are plausibly in the domain for this term.
 				IncomingSet incoming = const_term->getIncomingSetByType(term_type);
 				Arity term_arity = term_h->get_arity();
+				HandleSet term_domain;
 
 				if (nameserver().isA(term_type, UNORDERED_LINK))
 				{
@@ -3460,7 +3464,7 @@ void PatternMatchEngine::init_constraint_domains(void)
 							if (elt == const_term) continue;
 							Type bt = elt->get_type();
 							if (bt != VARIABLE_NODE and bt != GLOB_NODE)
-								var_domain.insert(elt);
+								term_domain.insert(elt);
 						}
 					}
 				}
@@ -3489,8 +3493,31 @@ void PatternMatchEngine::init_constraint_domains(void)
 						const Handle& binding = candidate->getOutgoingAtom(var_pos);
 						Type bt = binding->get_type();
 						if (bt != VARIABLE_NODE and bt != GLOB_NODE)
-							var_domain.insert(binding);
+							term_domain.insert(binding);
 					}
+				}
+
+				// Intersect term_domain with var_domain.
+				// For first term, just copy; for subsequent terms, intersect.
+				if (term_domain.empty()) continue;
+
+				if (first_term)
+				{
+					var_domain = term_domain;
+					first_term = false;
+				}
+				else
+				{
+					// Keep only values that appear in both sets.
+					for (auto vit = var_domain.begin(); vit != var_domain.end(); )
+					{
+						if (term_domain.find(*vit) == term_domain.end())
+							vit = var_domain.erase(vit);
+						else
+							++vit;
+					}
+					// If intersection is empty, no valid groundings exist.
+					if (var_domain.empty()) break;
 				}
 			}
 
