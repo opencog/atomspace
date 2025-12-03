@@ -20,7 +20,7 @@
 
 ; The set of numbers that can be chosen from. Every row, column
 ; and three-by-three box must hold this set.
-(SetLink
+(ExclusiveLink
 	(Concept "one")
 	(Concept "two")
 	(Concept "three")
@@ -140,7 +140,7 @@
 ;
 ; First, nine row constraints
 (define (row1)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_11")
 		(Variable "$cell_12")
 		(Variable "$cell_13")
@@ -153,7 +153,7 @@
 	)
 )
 (define (row2)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_21")
 		(Variable "$cell_22")
 		(Variable "$cell_23")
@@ -166,7 +166,7 @@
 	)
 )
 (define (row3)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_31")
 		(Variable "$cell_32")
 		(Variable "$cell_33")
@@ -179,7 +179,7 @@
 	)
 )
 (define (row4)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_41")
 		(Variable "$cell_42")
 		(Variable "$cell_43")
@@ -192,7 +192,7 @@
 	)
 )
 (define (row5)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_51")
 		(Variable "$cell_52")
 		(Variable "$cell_53")
@@ -205,7 +205,7 @@
 	)
 )
 (define (row6)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_61")
 		(Variable "$cell_62")
 		(Variable "$cell_63")
@@ -218,7 +218,7 @@
 	)
 )
 (define (row7)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_71")
 		(Variable "$cell_72")
 		(Variable "$cell_73")
@@ -231,7 +231,7 @@
 	)
 )
 (define (row8)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_81")
 		(Variable "$cell_82")
 		(Variable "$cell_83")
@@ -244,7 +244,7 @@
 	)
 )
 (define (row9)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_91")
 		(Variable "$cell_92")
 		(Variable "$cell_93")
@@ -259,7 +259,7 @@
 
 ;; Next, nine column constraints
 (define (col1)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_11")
 		(Variable "$cell_21")
 		(Variable "$cell_31")
@@ -272,7 +272,7 @@
 	)
 )
 (define (col2)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_12")
 		(Variable "$cell_22")
 		(Variable "$cell_32")
@@ -285,7 +285,7 @@
 	)
 )
 (define (col3)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_13")
 		(Variable "$cell_23")
 		(Variable "$cell_33")
@@ -298,7 +298,7 @@
 	)
 )
 (define (col4)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_14")
 		(Variable "$cell_24")
 		(Variable "$cell_34")
@@ -311,7 +311,7 @@
 	)
 )
 (define (col5)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_15")
 		(Variable "$cell_25")
 		(Variable "$cell_35")
@@ -324,7 +324,7 @@
 	)
 )
 (define (col6)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_16")
 		(Variable "$cell_26")
 		(Variable "$cell_36")
@@ -337,7 +337,7 @@
 	)
 )
 (define (col7)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_17")
 		(Variable "$cell_27")
 		(Variable "$cell_37")
@@ -350,7 +350,7 @@
 	)
 )
 (define (col8)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_18")
 		(Variable "$cell_28")
 		(Variable "$cell_38")
@@ -363,7 +363,7 @@
 	)
 )
 (define (col9)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_19")
 		(Variable "$cell_29")
 		(Variable "$cell_39")
@@ -378,7 +378,7 @@
 
 ;; And finally, 9 box constraints
 (define (box11)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_11")
 		(Variable "$cell_12")
 		(Variable "$cell_13")
@@ -392,7 +392,7 @@
 )
 
 (define (box14)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_14")
 		(Variable "$cell_15")
 		(Variable "$cell_16")
@@ -406,7 +406,7 @@
 )
 
 (define (box17)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_17")
 		(Variable "$cell_18")
 		(Variable "$cell_19")
@@ -420,7 +420,7 @@
 )
 
 (define (box41)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_41")
 		(Variable "$cell_42")
 		(Variable "$cell_43")
@@ -434,7 +434,7 @@
 )
 
 (define (box44)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_44")
 		(Variable "$cell_45")
 		(Variable "$cell_46")
@@ -448,7 +448,7 @@
 )
 
 (define (box47)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_47")
 		(Variable "$cell_48")
 		(Variable "$cell_49")
@@ -462,7 +462,7 @@
 )
 
 (define (box71)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_71")
 		(Variable "$cell_72")
 		(Variable "$cell_73")
@@ -476,7 +476,7 @@
 )
 
 (define (box74)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_74")
 		(Variable "$cell_75")
 		(Variable "$cell_76")
@@ -490,7 +490,7 @@
 )
 
 (define (box77)
-	(SetLink
+	(ExclusiveLink
 		(Variable "$cell_77")
 		(Variable "$cell_78")
 		(Variable "$cell_79")

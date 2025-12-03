@@ -1197,7 +1197,6 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 		{
 			PatternMatchEngine pme(pmc);
 			pme.set_pattern(*_variables, *_pattern);
-
 			if (pme.explore_neighborhood(_starter_term, h, _root)) nfnd++;
 		});
 
@@ -1227,7 +1226,6 @@ bool InitiateSearchMixin::search_loop(PatternMatchCallback& pmc,
 	{
 		PatternMatchEngine pme(pmc);
 		pme.set_pattern(*_variables, *_pattern);
-
 		Handle h(_search_set[j]);
 		DO_LOG({LAZY_LOG_FINE << dbg_banner
 		             << "\n       Loop candidate ("

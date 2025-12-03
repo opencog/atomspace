@@ -32,6 +32,7 @@ PatternTerm::PatternTerm(void)
 	  _has_evaluatable(false),
 	  _is_virtual(false),
 	  _is_identical(false),
+	  _is_exclusive(false),
 	  _has_any_unordered_link(false),
 	  _has_unordered_below(false),
 	  _is_literal(false),
@@ -60,6 +61,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_evaluatable(false),
 	  _is_virtual(false),
 	  _is_identical(false),
+	  _is_exclusive(false),
 	  _has_any_unordered_link(false),
 	  _has_unordered_below(false),
 	  _is_literal(false),
@@ -270,6 +272,14 @@ void PatternTerm::markIdentical()
 	if (isQuoted()) return;
 
 	_is_identical = true;
+}
+
+void PatternTerm::markExclusive()
+{
+	// If quoted, it cannot be evaluated.
+	if (isQuoted()) return;
+
+	_is_exclusive = true;
 }
 
 // ==============================================================

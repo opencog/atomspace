@@ -102,6 +102,24 @@ struct Pattern
 	long group_min_size;
 	long group_max_size;
 
+	/// ExclusiveLink terms that operate within a single component.
+	/// Variables in an ExclusiveLink must have distinct groundings.
+	/// These can use constraint propagation during permutation search.
+	PatternTermSeq exclusives;
+
+	/// ExclusiveLink terms that bridge multiple components.
+	/// These must be treated as virtual links (filter Cartesian product).
+	PatternTermSeq exclusive_virtuals;
+
+	/// Map from variable to ExclusiveLinks it participates in.
+	/// Used at runtime for quick lookup during constraint propagation.
+	std::map<Handle, PatternTermSeq> var_exclusives;
+
+	/// For each ExclusiveLink, the list of variables it contains.
+	/// Variables in the same group must have distinct groundings.
+	/// Computed once during pattern analysis.
+	HandleSeqSeq exclusive_var_groups;
+
 	/// Evaluatable terms are those that need to be evaluated to
 	/// find out if they hold true. For example, GreaterThanLink,
 	/// and anything with a GroundedPredicateNode (GPN) in them.

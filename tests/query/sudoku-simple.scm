@@ -23,7 +23,7 @@
 ; The set of numbers for the 2x2 puzzle
 (Edge
 	(Predicate "2x2 sudoku")
-	(SetLink
+	(ExclusiveLink
 		(Concept "one")
 		(Concept "two")
 	)
@@ -38,7 +38,7 @@
 (define (x2_row1)
 	(Edge
 		(Predicate "2x2 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_11")
 			(Variable "$cell_12")
 		)
@@ -47,7 +47,7 @@
 (define (x2_row2)
 	(Edge
 		(Predicate "2x2 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_21")
 			(Variable "$cell_22")
 		)
@@ -58,7 +58,7 @@
 (define (x2_col1)
 	(Edge
 		(Predicate "2x2 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_11")
 			(Variable "$cell_21")
 		)
@@ -67,7 +67,7 @@
 (define (x2_col2)
 	(Edge
 		(Predicate "2x2 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_12")
 			(Variable "$cell_22")
 		)
@@ -165,7 +165,7 @@
 ; The set of numbers for the 3x3 puzzle
 (Edge
 	(Predicate "3x3 sudoku")
-	(SetLink
+	(ExclusiveLink
 		(Concept "one")
 		(Concept "two")
 		(Concept "three")
@@ -181,7 +181,7 @@
 (define (x3_row1)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_11")
 			(Variable "$cell_12")
 			(Variable "$cell_13")
@@ -191,7 +191,7 @@
 (define (x3_row2)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_21")
 			(Variable "$cell_22")
 			(Variable "$cell_23")
@@ -202,7 +202,7 @@
 (define (x3_row3)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_31")
 			(Variable "$cell_32")
 			(Variable "$cell_33")
@@ -214,7 +214,7 @@
 (define (x3_col1)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_11")
 			(Variable "$cell_21")
 			(Variable "$cell_31")
@@ -224,7 +224,7 @@
 (define (x3_col2)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_12")
 			(Variable "$cell_22")
 			(Variable "$cell_32")
@@ -234,7 +234,7 @@
 (define (x3_col3)
 	(Edge
 		(Predicate "3x3 sudoku")
-		(SetLink
+		(ExclusiveLink
 			(Variable "$cell_13")
 			(Variable "$cell_23")
 			(Variable "$cell_33")

@@ -130,6 +130,11 @@ protected:
 	// IdenticalLink). This can be used as a transitive assignment.
 	bool _is_identical;
 
+	// This term is an ExclusiveLink. Variables in an ExclusiveLink
+	// must all have distinct groundings. Used for constraint propagation
+	// during UnorderedLink permutation enumeration.
+	bool _is_exclusive;
+
 	// True if this tree node is unordered, or if any pattern
 	// subtree rooted in this tree node contains an unordered link.
 	// Trees without any unordered links can be searched in a
@@ -255,6 +260,9 @@ public:
 
 	void markIdentical();
 	bool isIdentical() const noexcept { return _is_identical; }
+
+	void markExclusive();
+	bool isExclusive() const noexcept { return _is_exclusive; }
 
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }

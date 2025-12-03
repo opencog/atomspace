@@ -149,6 +149,8 @@ protected:
 	void init(void);
 	void init_bottom(void);
 	void common_init(void);
+	void categorize_exclusives(void);
+	void collect_exclusives_recursive(const PatternTermPtr&);
 	void disjointed_init(void);
 	void setup_components(void);
 
