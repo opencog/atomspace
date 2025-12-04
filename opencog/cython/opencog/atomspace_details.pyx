@@ -6,6 +6,7 @@ from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.type_ctors cimport cPythonException, get_context_atomspace
 import cython
+import warnings
 
 # from atomspace cimport *
 
@@ -348,10 +349,12 @@ cdef api cValuePtr py_value_ptr(object py_value) with gil:
     return (<Value>py_value).shared_ptr
 
 def create_child_atomspace(object atomspace):
-    cdef cAtomSpace* parent_asp = <cAtomSpace*>(<AtomSpace>atomspace).shared_ptr.get()
-    cdef cHandle asp = createAtomSpace(parent_asp)
-    cdef AtomSpace result = AtomSpace_factoid(asp)
-    result.parent_atomspace = atomspace
-    return result
+    """Deprecated: Use AtomSpace(parent) instead."""
+    warnings.warn(
+        "create_child_atomspace() is deprecated, use AtomSpace(parent) instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return AtomSpace(atomspace)
 
 # ====================== end of file ============================
