@@ -26,8 +26,8 @@
 #include <opencog/util/platform.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/value/VoidValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 
 using namespace opencog;
 
@@ -43,6 +43,7 @@ static void thread_eval(AtomSpace* as,
 	set_thread_name("atoms:parallel");
 	if (not evelnk->is_executable()) return;
 
+	set_frame(AtomSpaceCast(as));
 	try
 	{
 		ValuePtr pap(evelnk->execute(as, silent));

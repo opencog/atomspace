@@ -30,8 +30,8 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/parallel/ExecuteThreadedLink.h>
 #include <opencog/atoms/value/QueueValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 
 using namespace opencog;
 
@@ -114,6 +114,7 @@ static void thread_exec(AtomSpace* as, bool silent,
                         std::exception_ptr* returned_ex)
 {
 	set_thread_name("atoms:execlink");
+	set_frame(AtomSpaceCast(as));
 	while (true)
 	{
 		Handle h;

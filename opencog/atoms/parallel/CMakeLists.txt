@@ -15,6 +15,7 @@ ADD_LIBRARY (parallel
 ADD_DEPENDENCIES(parallel opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(parallel
+	framestack
 	atomcore
 	atombase
 )

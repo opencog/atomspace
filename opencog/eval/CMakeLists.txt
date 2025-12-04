@@ -9,10 +9,6 @@ ADD_LIBRARY(framestack
 # Avoid building this lib until AFTER the types have been built.
 ADD_DEPENDENCIES(framestack opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(framestack
-	atomspace
-)
-
 INSTALL(TARGETS framestack
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
