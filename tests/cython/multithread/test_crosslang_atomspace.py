@@ -18,7 +18,7 @@ from opencog.atomspace import AtomSpace
 from opencog.type_constructors import (
     ConceptNode, PredicateNode, ListLink, NumberNode,
     ExecutionOutputLink, GroundedSchemaNode, Evaluation,
-    GroundedPredicate
+    GroundedPredicate, StringValue, FloatValue
 )
 from opencog.type_ctors import (
     set_thread_atomspace, push_thread_atomspace, get_thread_atomspace
@@ -480,6 +480,255 @@ class Test_1c_CrossLangWithAtomspaceSwitch(ThreadTestCase):
 
         self.assertIsNotNone(result)
         print(f"Python→Scheme: Scheme sees atomspace: {result.name}")
+
+
+class Test_CrossLangAtomSharing(ThreadTestCase):
+    """
+    Test that atoms are truly shared between Python and Scheme.
+
+    These tests verify that:
+    1. An atom created in one language is the same atom in the other
+    2. Values set on an atom in one language are readable in the other
+    3. Modifications in one language are visible in the other
+    """
+
+    def test_scheme_creates_atom_python_reads_value(self):
+        """
+        Scheme creates an atom and sets a value, Python reads it back.
+
+        This verifies the atomspace is truly shared.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        # Scheme creates atom and sets a StringValue on it
+        scheme_eval(atomspace, '''
+            (cog-set-value!
+                (Concept "shared-atom-1")
+                (Predicate "test-key-1")
+                (StringValue "hello from scheme"))
+        ''')
+
+        # Python reads the same atom and value
+        atom = ConceptNode("shared-atom-1")
+        key = PredicateNode("test-key-1")
+        value = atom.get_value(key)
+
+        self.assertIsNotNone(value, "Python should see the value set by Scheme")
+        self.assertEqual(value.to_list(), ["hello from scheme"])
+
+    def test_python_creates_atom_scheme_reads_value(self):
+        """
+        Python creates an atom and sets a value, Scheme reads it back.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        # Python creates atom and sets a StringValue on it
+        atom = ConceptNode("shared-atom-2")
+        key = PredicateNode("test-key-2")
+        atomspace.set_value(atom, key, StringValue("hello from python"))
+
+        # Scheme reads the same atom and value
+        result = scheme_eval(atomspace, '''
+            (define val (cog-value (Concept "shared-atom-2") (Predicate "test-key-2")))
+            (if val
+                (cog-value-ref val 0)
+                "NOT FOUND")
+        ''')
+
+        self.assertIn("hello from python", result)
+
+    def test_scheme_creates_floatvalue_python_reads(self):
+        """
+        Scheme creates a FloatValue, Python reads it and verifies values match.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        # Scheme sets a FloatValue with specific numbers
+        scheme_eval(atomspace, '''
+            (cog-set-value!
+                (Concept "float-atom")
+                (Predicate "float-key")
+                (FloatValue 1.5 2.5 3.5))
+        ''')
+
+        # Python reads and verifies
+        atom = ConceptNode("float-atom")
+        key = PredicateNode("float-key")
+        value = atom.get_value(key)
+
+        self.assertIsNotNone(value)
+        float_list = value.to_list()
+        self.assertEqual(len(float_list), 3)
+        self.assertAlmostEqual(float_list[0], 1.5)
+        self.assertAlmostEqual(float_list[1], 2.5)
+        self.assertAlmostEqual(float_list[2], 3.5)
+
+    def test_python_creates_floatvalue_scheme_reads(self):
+        """
+        Python creates a FloatValue, Scheme reads it and verifies values match.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        # Python sets a FloatValue
+        atom = ConceptNode("py-float-atom")
+        key = PredicateNode("py-float-key")
+        atomspace.set_value(atom, key, FloatValue([10.1, 20.2, 30.3]))
+
+        # Scheme reads and verifies each element
+        result = scheme_eval(atomspace, '''
+            (define fv (cog-value (Concept "py-float-atom") (Predicate "py-float-key")))
+            (format #f "~a ~a ~a"
+                (cog-value-ref fv 0)
+                (cog-value-ref fv 1)
+                (cog-value-ref fv 2))
+        ''')
+
+        # Parse the result - should be "10.1 20.2 30.3" approximately
+        self.assertIn("10.1", result)
+        self.assertIn("20.2", result)
+        self.assertIn("30.3", result)
+
+    def test_atom_identity_across_languages(self):
+        """
+        Verify that the same atom handle is used in both languages.
+
+        Create atom in Python, modify in Scheme, verify in Python.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        # Python creates an atom
+        atom = ConceptNode("identity-test-atom")
+        key1 = PredicateNode("key-from-python")
+        atomspace.set_value(atom, key1, StringValue("python-value"))
+
+        # Scheme adds another value to the SAME atom
+        scheme_eval(atomspace, '''
+            (cog-set-value!
+                (Concept "identity-test-atom")
+                (Predicate "key-from-scheme")
+                (StringValue "scheme-value"))
+        ''')
+
+        # Python verifies both values are on the same atom
+        key2 = PredicateNode("key-from-scheme")
+
+        val1 = atom.get_value(key1)
+        val2 = atom.get_value(key2)
+
+        self.assertIsNotNone(val1, "Python's own value should still be there")
+        self.assertIsNotNone(val2, "Scheme's value should be visible to Python")
+
+        self.assertEqual(val1.to_list(), ["python-value"])
+        self.assertEqual(val2.to_list(), ["scheme-value"])
+
+    def test_bidirectional_value_modification(self):
+        """
+        Values can be overwritten by either language.
+
+        Python sets value, Scheme overwrites, Python reads new value.
+        """
+        atomspace = AtomSpace()
+        push_thread_atomspace(atomspace)
+
+        atom = ConceptNode("overwrite-test")
+        key = PredicateNode("overwrite-key")
+
+        # Python sets initial value
+        atomspace.set_value(atom, key, StringValue("original"))
+
+        # Verify Python sees it
+        val = atom.get_value(key)
+        self.assertEqual(val.to_list(), ["original"])
+
+        # Scheme overwrites
+        scheme_eval(atomspace, '''
+            (cog-set-value!
+                (Concept "overwrite-test")
+                (Predicate "overwrite-key")
+                (StringValue "modified by scheme"))
+        ''')
+
+        # Python reads the new value
+        val = atom.get_value(key)
+        self.assertEqual(val.to_list(), ["modified by scheme"])
+
+    def test_threaded_crosslang_atom_sharing(self):
+        """
+        Multiple threads share atoms across languages.
+
+        Each thread:
+        1. Creates a unique atom in Python
+        2. Sets a value in Python
+        3. Has Scheme read and modify it
+        4. Python verifies Scheme's modification
+        """
+        num_threads = 10
+        validator = ThreadSafetyValidator()
+
+        # Shared atomspace for all threads
+        shared_atomspace = AtomSpace()
+        push_thread_atomspace(shared_atomspace)
+
+        def worker(thread_id):
+            """Worker that tests cross-language atom sharing."""
+            try:
+                push_thread_atomspace(shared_atomspace)
+
+                # Unique atom names for this thread
+                atom_name = f"thread-{thread_id}-atom"
+                key_name = f"thread-{thread_id}-key"
+
+                # Python creates atom and sets value
+                atom = ConceptNode(atom_name)
+                key = PredicateNode(key_name)
+                shared_atomspace.set_value(
+                    atom, key, StringValue(f"py-{thread_id}")
+                )
+
+                # Scheme reads and modifies
+                scheme_eval(shared_atomspace, f'''
+                    (cog-set-value!
+                        (Concept "{atom_name}")
+                        (Predicate "{key_name}")
+                        (StringValue "scm-modified-{thread_id}"))
+                ''')
+
+                # Python verifies Scheme's modification
+                val = atom.get_value(key)
+                if val is None:
+                    validator.record_error(thread_id, "Value is None after Scheme modification")
+                    return "failed"
+
+                expected = f"scm-modified-{thread_id}"
+                actual = val.to_list()[0]
+                if actual != expected:
+                    validator.record_error(
+                        thread_id,
+                        f"Expected '{expected}', got '{actual}'"
+                    )
+                    return "failed"
+
+                return "success"
+
+            except Exception as e:
+                validator.record_error(thread_id, str(e))
+                return "failed"
+
+        results = self.run_threads(
+            worker,
+            num_threads,
+            use_barrier=True,
+            timeout=30.0
+        )
+
+        validator.assert_no_errors(self)
+        success_count = sum(1 for r in results.values() if r == "success")
+        self.assertEqual(success_count, num_threads)
 
 
 if __name__ == '__main__':
