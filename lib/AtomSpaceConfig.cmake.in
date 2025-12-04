@@ -56,6 +56,7 @@ set(ATOMSPACE_LIBRARIES
 	pattern
 	query-engine
 	execution
+	framestack
 	grounded
 	grant
 	signature
@@ -68,7 +69,6 @@ set(ATOMSPACE_LIBRARIES
 IF (HAVE_CYTHON)
 	set(ATOMSPACE_PythonEval_LIBRARY PythonEval)
 	SET(ATOMSPACE_LIBRARIES
-	    executioncontext
 	    ${ATOMSPACE_LIBRARIES}
 	    ${ATOMSPACE_PythonEval_LIBRARY}
 	)
