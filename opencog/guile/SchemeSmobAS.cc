@@ -279,9 +279,11 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
  */
 void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 {
-	set_frame(nas);
+	// nas will be nullptr during thread-exit and calling
+	// set_frame() will cause TLS heartache and heap corruption.
+	if (nullptr == nas) return;
 
-	// Also set the fluid for thread inheritance
+	set_frame(nas);
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
 }
 
