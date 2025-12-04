@@ -300,7 +300,7 @@ const AtomSpacePtr& SchemeSmob::get_current_as(void)
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	const AtomSpacePtr& fluid_asp = ss_to_atomspace(ref);
 	set_frame(fluid_asp);
-	return fluid_asp;
+	return get_frame();
 }
 
 const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
