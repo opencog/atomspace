@@ -68,9 +68,10 @@ def scm_test_create_marker():
 (cog-pop-atomspace)
 
 ; Verify the atom is gone from the base atomspace
+; Note: cog-node returns '() (empty list) when atom not found, not #f
 (define marker-after-pop (cog-node 'ConceptNode "py-marker-from-scheme-push"))
 (test-assert "Atom is gone after pop"
-    (eq? #f marker-after-pop))
+    (null? marker-after-pop))
 
 ; -----------------------------------------------------------------------------
 ; Test: Scheme pushes, Scheme creates atom, Python sees and modifies it
@@ -127,7 +128,7 @@ def scm_test_read_and_modify():
 
 (define scm-marker-after-pop (cog-node 'ConceptNode "scm-marker-for-py"))
 (test-assert "Scheme marker is gone after pop"
-    (eq? #f scm-marker-after-pop))
+    (null? scm-marker-after-pop))
 
 (test-end tname)
 
