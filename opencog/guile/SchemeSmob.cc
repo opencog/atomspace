@@ -310,6 +310,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
+	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
