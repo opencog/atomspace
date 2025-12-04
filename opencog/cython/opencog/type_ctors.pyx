@@ -61,9 +61,8 @@ def add_node(Type t, atom_name):
 def set_thread_atomspace(AtomSpace atomspace):
     """
     Set the default atomspace for the current thread.
-    Clears the context stack and pushes the atomspace onto it.
+    Pushes the atomspace onto the context stack.
     """
-    c_clear_context()
     if atomspace is not None:
         push_context_atomspace(handle_cast(atomspace.shared_ptr))
 
