@@ -1,7 +1,6 @@
 import unittest
 import threading
 
-from opencog.atomspace import create_child_atomspace
 from opencog.type_constructors import *
 from opencog.type_ctors import push_thread_atomspace, get_thread_atomspace
 
@@ -45,7 +44,7 @@ class DoExecuteTest(unittest.TestCase):
 
     def test_add_atom_from_grounded_schema_node(self):
         parent_as = get_thread_atomspace()
-        test_as = create_child_atomspace(parent_as)
+        test_as = AtomSpace(parent_as)
         test_as.execute(
                 ExecutionOutputLink(
                     GroundedSchemaNode("py:add_new_link"),

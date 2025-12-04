@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import opencog.atomspace
 from opencog.atomspace import Atom, tvkey
-from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
+from opencog.atomspace import types, is_a, get_type, get_type_name
 
 from opencog.type_constructors import *
 from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
@@ -236,7 +236,7 @@ class AtomTest(TestCase):
         Test that parent atomspace will not be deleted before child
         """
         a = opencog.atomspace.AtomSpace()
-        b = opencog.atomspace.create_child_atomspace(a)
+        b = opencog.atomspace.AtomSpace(a)
         del a
 
     def test_creation(self):
@@ -296,7 +296,7 @@ class AtomTest(TestCase):
 
     def test_create_child_atomspace(self):
         test = ConceptNode("test")
-        b = create_child_atomspace(self.space)
+        b = AtomSpace(self.space)
         test2 = b.add_node(types.ConceptNode, 'test2')
         self.assertTrue(test in b.get_atoms_by_type(types.ConceptNode))
         self.assertTrue(test2 in b.get_atoms_by_type(types.ConceptNode))
