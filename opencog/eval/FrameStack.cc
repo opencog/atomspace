@@ -16,49 +16,6 @@
 
 namespace opencog {
 
-thread_local std::deque<AtomSpacePtr> frame_stack = std::deque<AtomSpacePtr>();
-
-const AtomSpacePtr& get_frame(void)
-{
-	static AtomSpacePtr nullasp;
-	if (frame_stack.empty())
-		return nullasp;
-	return frame_stack.back();
-}
-
-void push_frame(const AtomSpacePtr& asp)
-{
-	frame_stack.push_back(asp);
-}
-
-void push_frame(const ValuePtr& vasp)
-{
-	frame_stack.push_back(AtomSpaceCast(vasp));
-}
-
-AtomSpacePtr pop_frame(void)
-{
-	AtomSpacePtr result = get_frame();
-	frame_stack.pop_back();
-	return result;
-}
-
-void set_frame(const AtomSpacePtr& asp)
-{
-	if (frame_stack.empty())
-		frame_stack.push_back(asp);
-	else
-		frame_stack.back() = asp;
-}
-
-void set_frame(const ValuePtr& vasp)
-{
-	set_frame(AtomSpaceCast(vasp));
-}
-
-void clear_frame_stack(void)
-{
-	frame_stack.clear();
-}
+thread_local std::deque<AtomSpacePtr> frame_stack;
 
 }
