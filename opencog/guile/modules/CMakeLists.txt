@@ -18,7 +18,7 @@ ADD_GUILE_MODULE (FILES
 ADD_LIBRARY (logger LoggerSCM.cc)
 
 TARGET_LINK_LIBRARIES(logger
-	smob
+	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 ADD_GUILE_EXTENSION(SCM_CONFIG logger "opencog-ext-path-logger")

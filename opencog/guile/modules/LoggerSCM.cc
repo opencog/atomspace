@@ -1,7 +1,7 @@
 /*
  * LoggerSCM.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2024 OpenCog Foundation
  *
  * Author: Nil Geisweiller
  *
@@ -29,7 +29,8 @@ using namespace opencog;
 namespace opencog {
 
 /**
- * Expose the Logger singleton to Scheme
+ * Expose the Logger singleton to Scheme.
+ * All functions operate on the global logger() singleton.
  */
 
 class LoggerSCM : public ModuleWrap
@@ -37,172 +38,144 @@ class LoggerSCM : public ModuleWrap
 protected:
 	virtual void init();
 
-	Logger* do_default_logger();
-	Logger* do_new_logger();
-	std::string do_logger_set_level(Logger*, const std::string& level);
-	std::string do_logger_get_level(const Logger*);
-	std::string do_logger_set_filename(Logger*, const std::string& filename);
-	std::string do_logger_get_filename(const Logger*);
-	std::string do_logger_set_component(Logger*, const std::string& component);
-	std::string do_logger_get_component(const Logger*);
-	bool do_logger_set_stdout(Logger*, bool);
-	bool do_logger_set_sync(Logger*, bool);
-	bool do_logger_set_timestamp(Logger*, bool);
-	bool do_logger_is_error_enabled(Logger*);
-	bool do_logger_is_warn_enabled(Logger*);
-	bool do_logger_is_info_enabled(Logger*);
-	bool do_logger_is_debug_enabled(Logger*);
-	bool do_logger_is_fine_enabled(Logger*);
-	void do_logger_error(Logger*, const std::string& msg);
-	void do_logger_warn(Logger*, const std::string& msg);
-	void do_logger_info(Logger*, const std::string& msg);
-	void do_logger_debug(Logger*, const std::string& msg);
-	void do_logger_fine(Logger*, const std::string& msg);
-	void do_flush(Logger*);
-
-	bool is_logger(SCM);
+	std::string do_logger_set_level(const std::string& level);
+	std::string do_logger_get_level();
+	std::string do_logger_set_filename(const std::string& filename);
+	std::string do_logger_get_filename();
+	std::string do_logger_set_component(const std::string& component);
+	std::string do_logger_get_component();
+	bool do_logger_set_stdout(bool);
+	bool do_logger_set_sync(bool);
+	bool do_logger_set_timestamp(bool);
+	bool do_logger_is_error_enabled();
+	bool do_logger_is_warn_enabled();
+	bool do_logger_is_info_enabled();
+	bool do_logger_is_debug_enabled();
+	bool do_logger_is_fine_enabled();
+	void do_logger_error(const std::string& msg);
+	void do_logger_warn(const std::string& msg);
+	void do_logger_info(const std::string& msg);
+	void do_logger_debug(const std::string& msg);
+	void do_logger_fine(const std::string& msg);
+	void do_flush();
 
 public:
 	LoggerSCM();
 };
 
-/// Get the default logger.
-Logger* LoggerSCM::do_default_logger()
-{
-	return &logger();
-}
-
-/// Create a new logger.
-Logger* LoggerSCM::do_new_logger()
-{
-	return SchemeSmob::new_logger();
-}
-
 /// Set level, return previous level.
-std::string LoggerSCM::do_logger_set_level(Logger* lg, const std::string& level)
+std::string LoggerSCM::do_logger_set_level(const std::string& level)
 {
-	std::string prev_level;
-	prev_level = Logger::get_level_string(lg->get_level());
-	lg->set_level(Logger::get_level_from_string(level));
-	return prev_level;
+	std::string prev = Logger::get_level_string(logger().get_level());
+	logger().set_level(Logger::get_level_from_string(level));
+	return prev;
 }
 
-std::string LoggerSCM::do_logger_get_level(const Logger* lg)
+std::string LoggerSCM::do_logger_get_level()
 {
-	return Logger::get_level_string(lg->get_level());
+	return Logger::get_level_string(logger().get_level());
 }
 
 /// Set logfile, return previous file.
-std::string LoggerSCM::do_logger_set_filename(Logger* lg, const std::string& filename)
+std::string LoggerSCM::do_logger_set_filename(const std::string& filename)
 {
-	std::string old_file;
-	old_file = lg->get_filename();
-	lg->set_filename(filename);
-	return old_file;
+	std::string old = logger().get_filename();
+	logger().set_filename(filename);
+	return old;
 }
 
-std::string LoggerSCM::do_logger_get_filename(const Logger* lg)
+std::string LoggerSCM::do_logger_get_filename()
 {
-	return lg->get_filename();
+	return logger().get_filename();
 }
 
 /// Set component, return previous component.
-std::string LoggerSCM::do_logger_set_component(Logger* lg, const std::string& component)
+std::string LoggerSCM::do_logger_set_component(const std::string& component)
 {
-	std::string old_component;
-	old_component = lg->get_component();
-	lg->set_component(component);
-	return old_component;
+	std::string old = logger().get_component();
+	logger().set_component(component);
+	return old;
 }
 
-std::string LoggerSCM::do_logger_get_component(const Logger* lg)
+std::string LoggerSCM::do_logger_get_component()
 {
-	return lg->get_component();
+	return logger().get_component();
 }
 
-bool LoggerSCM::do_logger_set_stdout(Logger* lg, bool enable)
+bool LoggerSCM::do_logger_set_stdout(bool enable)
 {
-	// bool previous_setting = lg->get_print_to_stdout_flag();
-	bool previous_setting = enable;
-	lg->set_print_to_stdout_flag(enable);
-	return previous_setting;
+	bool prev = enable;
+	logger().set_print_to_stdout_flag(enable);
+	return prev;
 }
 
-bool LoggerSCM::do_logger_set_sync(Logger* lg, bool enable)
+bool LoggerSCM::do_logger_set_sync(bool enable)
 {
-	// bool previous_setting = lg->get_sync_flag();
-	bool previous_setting = enable;
-	lg->set_sync_flag(enable);
-	return previous_setting;
+	bool prev = enable;
+	logger().set_sync_flag(enable);
+	return prev;
 }
 
-bool LoggerSCM::do_logger_set_timestamp(Logger* lg, bool enable)
+bool LoggerSCM::do_logger_set_timestamp(bool enable)
 {
-	// bool previous_setting = lg->get_timestamp_flag();
-	bool previous_setting = enable;
-	lg->set_timestamp_flag(enable);
-	return previous_setting;
+	bool prev = enable;
+	logger().set_timestamp_flag(enable);
+	return prev;
 }
 
-bool LoggerSCM::do_logger_is_error_enabled(Logger* lg)
+bool LoggerSCM::do_logger_is_error_enabled()
 {
-	return lg->is_error_enabled();
+	return logger().is_error_enabled();
 }
 
-bool LoggerSCM::do_logger_is_warn_enabled(Logger* lg)
+bool LoggerSCM::do_logger_is_warn_enabled()
 {
-	return lg->is_warn_enabled();
+	return logger().is_warn_enabled();
 }
 
-bool LoggerSCM::do_logger_is_info_enabled(Logger* lg)
+bool LoggerSCM::do_logger_is_info_enabled()
 {
-	return lg->is_info_enabled();
+	return logger().is_info_enabled();
 }
 
-bool LoggerSCM::do_logger_is_debug_enabled(Logger* lg)
+bool LoggerSCM::do_logger_is_debug_enabled()
 {
-	return lg->is_debug_enabled();
+	return logger().is_debug_enabled();
 }
 
-bool LoggerSCM::do_logger_is_fine_enabled(Logger* lg)
+bool LoggerSCM::do_logger_is_fine_enabled()
 {
-	return lg->is_fine_enabled();
+	return logger().is_fine_enabled();
 }
 
-void LoggerSCM::do_logger_error(Logger* lg, const std::string& msg)
+void LoggerSCM::do_logger_error(const std::string& msg)
 {
-	lg->error(msg);
+	logger().error(msg);
 }
 
-void LoggerSCM::do_logger_warn(Logger* lg, const std::string& msg)
+void LoggerSCM::do_logger_warn(const std::string& msg)
 {
-	lg->warn(msg);
+	logger().warn(msg);
 }
 
-void LoggerSCM::do_logger_info(Logger* lg, const std::string& msg)
+void LoggerSCM::do_logger_info(const std::string& msg)
 {
-	lg->info(msg);
+	logger().info(msg);
 }
 
-void LoggerSCM::do_logger_debug(Logger* lg, const std::string& msg)
+void LoggerSCM::do_logger_debug(const std::string& msg)
 {
-	lg->debug(msg);
+	logger().debug(msg);
 }
 
-void LoggerSCM::do_logger_fine(Logger* lg, const std::string& msg)
+void LoggerSCM::do_logger_fine(const std::string& msg)
 {
-	lg->fine(msg);
+	logger().fine(msg);
 }
 
-void LoggerSCM::do_flush(Logger* lg)
+void LoggerSCM::do_flush()
 {
-	lg->flush();
-}
-
-bool LoggerSCM::is_logger(SCM s)
-{
-	return SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s)
-		and SCM_SMOB_FLAGS(s) == SchemeSmob::COG_LOGGER;
+	logger().flush();
 }
 
 } /*end of namespace opencog*/
@@ -213,60 +186,52 @@ LoggerSCM::LoggerSCM() : ModuleWrap("opencog logger") {}
 /// Thus, all the definitions below happen in that module.
 void LoggerSCM::init(void)
 {
-	define_scheme_primitive("cog-default-logger",
-		&LoggerSCM::do_default_logger, this, "logger");
-	define_scheme_primitive("cog-new-logger",
-		&LoggerSCM::do_new_logger, this, "logger");
-
-	define_scheme_primitive("cog-logger-set-level-of-logger!",
+	define_scheme_primitive("cog-logger-set-level!",
 		&LoggerSCM::do_logger_set_level, this, "logger");
-	define_scheme_primitive("cog-logger-get-level-of-logger",
+	define_scheme_primitive("cog-logger-get-level",
 		&LoggerSCM::do_logger_get_level, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-filename-of-logger!",
+	define_scheme_primitive("cog-logger-set-filename!",
 		&LoggerSCM::do_logger_set_filename, this, "logger");
-	define_scheme_primitive("cog-logger-get-filename-of-logger",
+	define_scheme_primitive("cog-logger-get-filename",
 		&LoggerSCM::do_logger_get_filename, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-component-of-logger!",
+	define_scheme_primitive("cog-logger-set-component!",
 		&LoggerSCM::do_logger_set_component, this, "logger");
-	define_scheme_primitive("cog-logger-get-component-of-logger",
+	define_scheme_primitive("cog-logger-get-component",
 		&LoggerSCM::do_logger_get_component, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-stdout-of-logger!",
+	define_scheme_primitive("cog-logger-set-stdout!",
 		&LoggerSCM::do_logger_set_stdout, this, "logger");
-	define_scheme_primitive("cog-logger-set-sync-of-logger!",
+	define_scheme_primitive("cog-logger-set-sync!",
 		&LoggerSCM::do_logger_set_sync, this, "logger");
-	define_scheme_primitive("cog-logger-set-timestamp-of-logger!",
+	define_scheme_primitive("cog-logger-set-timestamp!",
 		&LoggerSCM::do_logger_set_timestamp, this, "logger");
 
-	define_scheme_primitive("cog-logger-error-enabled-of-logger?",
+	define_scheme_primitive("cog-logger-error-enabled?",
 		&LoggerSCM::do_logger_is_error_enabled, this, "logger");
-	define_scheme_primitive("cog-logger-warn-enabled-of-logger?",
+	define_scheme_primitive("cog-logger-warn-enabled?",
 		&LoggerSCM::do_logger_is_warn_enabled, this, "logger");
-	define_scheme_primitive("cog-logger-info-enabled-of-logger?",
+	define_scheme_primitive("cog-logger-info-enabled?",
 		&LoggerSCM::do_logger_is_info_enabled, this, "logger");
-	define_scheme_primitive("cog-logger-debug-enabled-of-logger?",
+	define_scheme_primitive("cog-logger-debug-enabled?",
 		&LoggerSCM::do_logger_is_debug_enabled, this, "logger");
-	define_scheme_primitive("cog-logger-fine-enabled-of-logger?",
+	define_scheme_primitive("cog-logger-fine-enabled?",
 		&LoggerSCM::do_logger_is_fine_enabled, this, "logger");
 
-	define_scheme_primitive("cog-logger-error-of-logger",
+	define_scheme_primitive("cog-logger-error-str",
 		&LoggerSCM::do_logger_error, this, "logger");
-	define_scheme_primitive("cog-logger-warn-of-logger",
+	define_scheme_primitive("cog-logger-warn-str",
 		&LoggerSCM::do_logger_warn, this, "logger");
-	define_scheme_primitive("cog-logger-info-of-logger",
+	define_scheme_primitive("cog-logger-info-str",
 		&LoggerSCM::do_logger_info, this, "logger");
-	define_scheme_primitive("cog-logger-debug-of-logger",
+	define_scheme_primitive("cog-logger-debug-str",
 		&LoggerSCM::do_logger_debug, this, "logger");
-	define_scheme_primitive("cog-logger-fine-of-logger",
+	define_scheme_primitive("cog-logger-fine-str",
 		&LoggerSCM::do_logger_fine, this, "logger");
 
-	define_scheme_primitive("cog-logger-flush-of-logger",
+	define_scheme_primitive("cog-logger-flush",
 		&LoggerSCM::do_flush, this, "logger");
-
-	define_scheme_primitive("cog-logger?",
-		&LoggerSCM::is_logger, this, "logger");
 }
 
 extern "C" {

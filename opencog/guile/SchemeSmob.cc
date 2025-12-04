@@ -145,16 +145,6 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
 
-		case COG_LOGGER:
-		{
-			Logger* al = (Logger *) SCM_SMOB_DATA(a);
-			Logger* bl = (Logger *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			/* Just a simple pointer comparison */
-			if (al == bl) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
 		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
