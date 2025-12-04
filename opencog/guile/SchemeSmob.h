@@ -229,6 +229,7 @@ private:
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(const AtomSpacePtr&);
+	static const AtomSpacePtr& get_current_as(void);
 
 	SchemeSmob();
 

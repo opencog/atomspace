@@ -264,6 +264,9 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 	// Set the new atomspace in the unified frame stack
 	set_frame(nas);
 
+	// Also set the fluid for thread inheritance
+	scm_fluid_set_x(atomspace_fluid, new_as);
+
 	return old_as;
 }
 
@@ -277,11 +280,32 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 {
 	set_frame(nas);
+
+	// Also set the fluid for thread inheritance
+	scm_fluid_set_x(atomspace_fluid, make_as(nas));
+}
+
+/**
+ * Get current atomspace from frame stack, falling back to the
+ * Guile fluid if the frame stack is empty. This provides thread
+ * inheritance semantics - new threads inherit via the fluid.
+ */
+const AtomSpacePtr& SchemeSmob::get_current_as(void)
+{
+	const AtomSpacePtr& asp = get_frame();
+	if (asp) return asp;
+
+	// Frame stack is empty - inherit from the Guile fluid
+	// (which propagates across thread creation)
+	SCM ref = scm_fluid_ref(atomspace_fluid);
+	const AtomSpacePtr& fluid_asp = ss_to_atomspace(ref);
+	set_frame(fluid_asp);
+	return fluid_asp;
 }
 
 const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
 {
-	return get_frame();
+	return get_current_as();
 }
 
 /* ============================================================== */
@@ -313,8 +337,8 @@ const AtomSpacePtr& SchemeSmob::get_as_from_list(SCM slist)
  */
 SCM SchemeSmob::ss_push_atomspace (void)
 {
-	// Get current atomspace from the unified frame stack
-	AtomSpacePtr base_as = get_frame();
+	// Get current atomspace (from frame stack or fluid)
+	AtomSpacePtr base_as = get_current_as();
 
 	// Create a new atomspace with the current as parent
 	AtomSpacePtr new_as;
@@ -326,6 +350,9 @@ SCM SchemeSmob::ss_push_atomspace (void)
 	// Push the new atomspace onto the unified frame stack
 	push_frame(new_as);
 
+	// Also set the fluid for thread inheritance
+	scm_fluid_set_x(atomspace_fluid, make_as(new_as));
+
 	// Return the previous (base) atomspace
 	return base_as ? make_as(base_as) : SCM_EOL;
 }
@@ -333,13 +360,12 @@ SCM SchemeSmob::ss_push_atomspace (void)
 /* ============================================================== */
 /**
  * Pop a temporary atomspace from the unified frame stack.
- * Clears the popped atomspace.
  * Return unspecified.
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
 	// Get current (top) atomspace before popping
-	AtomSpacePtr top_as = get_frame();
+	const AtomSpacePtr& top_as = get_frame();
 	if (nullptr == top_as)
 		scm_misc_error("cog-pop-atomspace",
 			"More pops than pushes!", SCM_EOL);
@@ -347,8 +373,9 @@ SCM SchemeSmob::ss_pop_atomspace (void)
 	// Pop from the unified frame stack
 	pop_frame();
 
-	// Clear the temp space contents (for debug, not strictly needed)
-	top_as->clear();
+	// Update the fluid to the new top of stack
+	const AtomSpacePtr& new_top = get_frame();
+	scm_fluid_set_x(atomspace_fluid, make_as(new_top));
 
 	return SCM_UNSPECIFIED;
 }
