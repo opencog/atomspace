@@ -30,7 +30,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/FrameStack.h>
 #include "PythonEval.h"
 #include "PyGILGuard.h"
 
@@ -107,7 +107,7 @@ void opencog::global_python_initialize()
         // This allows type constructors to work without requiring
         // explicit set_default_atomspace() calls.
         AtomSpacePtr default_atomspace = createAtomSpace();
-        push_context_atomspace(default_atomspace);
+        push_frame(default_atomspace);
         logger().info("[global_python_initialize] Created default atomspace");
     }
 
@@ -134,7 +134,7 @@ void opencog::global_python_finalize()
     // Clear the context stack to release any atomspace references
     // before Python finalization. This prevents the thread_local
     // deque destructor from trying to access Python during shutdown.
-    clear_context();
+    clear_frame_stack();
 
     // Cleanup Python.
     if (!initialized_outside_opencog)

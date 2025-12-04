@@ -61,32 +61,36 @@ def add_node(Type t, atom_name):
 def set_thread_atomspace(AtomSpace atomspace):
     """
     Set the default atomspace for the current thread.
-    Pushes the atomspace onto the context stack.
+    Sets (replaces top of) the frame stack.
     """
     if atomspace is not None:
-        push_context_atomspace(handle_cast(atomspace.shared_ptr))
+        set_frame(handle_cast(atomspace.shared_ptr))
 
 
 def push_thread_atomspace(AtomSpace new_atomspace = None):
     """
-    Set default atomspace for current thread
+    Push a new atomspace onto the frame stack for the current thread.
+    If no atomspace is provided, creates a child of the current atomspace.
     """
     if new_atomspace is None:
         parent_atomspace = get_thread_atomspace()
         if parent_atomspace is None:
             raise RuntimeError("Atomspace is not set!")
         new_atomspace = create_child_atomspace(parent_atomspace)
-    push_context_atomspace(handle_cast(new_atomspace.shared_ptr))
+    push_frame(handle_cast(new_atomspace.shared_ptr))
     return new_atomspace
 
 
 def get_thread_atomspace():
     """
-    Get the default atomspace for the current thread
+    Get the default atomspace for the current thread from the frame stack.
     """
-    cdef cValuePtr context = get_context_atomspace()
+    cdef cValuePtr context = get_frame()
     return AtomSpace_factoid(handle_cast(context))
 
 
 def pop_thread_atomspace():
-    return AtomSpace_factoid(handle_cast(pop_context_atomspace()))
+    """
+    Pop the top atomspace from the frame stack and return it.
+    """
+    return AtomSpace_factoid(handle_cast(pop_frame()))

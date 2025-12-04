@@ -22,15 +22,15 @@ include "atomspace_details.pyx"
 # doesn't already exist. This allows type constructors to work
 # without requiring explicit set_default_atomspace() calls.
 
-from opencog.type_ctors cimport get_context_atomspace, push_context_atomspace
+from opencog.type_ctors cimport get_frame, push_frame
 
 cdef void _init_default_atomspace():
     cdef cHandle default_as
     cdef cHandle new_as
 
-    default_as = handle_cast(get_context_atomspace())
+    default_as = handle_cast(get_frame())
     if default_as.get() == NULL:
         new_as = createAtomSpace(<cAtomSpace*> NULL)
-        push_context_atomspace(new_as)
+        push_frame(new_as)
 
 _init_default_atomspace()

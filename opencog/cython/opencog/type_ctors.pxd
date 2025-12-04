@@ -14,8 +14,9 @@ cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
     cHandle c_add_node "opencog::add_node" (Type t, const string s) nogil except +
     cHandle c_add_link "opencog::add_link" (Type t, const vector[cHandle]) nogil except +
 
-cdef extern from "opencog/cython/executioncontext/Context.h" namespace "opencog":
-    cValuePtr get_context_atomspace() nogil
-    void push_context_atomspace(cHandle atomspace) nogil
-    cValuePtr pop_context_atomspace() nogil
-    void c_clear_context "opencog::clear_context" () nogil
+cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
+    cValuePtr get_frame() nogil
+    void push_frame(cHandle atomspace) nogil
+    cValuePtr pop_frame() nogil
+    void set_frame(cHandle atomspace) nogil
+    void clear_frame_stack() nogil

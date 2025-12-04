@@ -13,7 +13,6 @@ SET(CMAKE_CXX_FLAGS
 	"${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wno-unused-function")
 
 ADD_SUBDIRECTORY (opencog)
-ADD_SUBDIRECTORY (executioncontext)
 
 INCLUDE_DIRECTORIES(
 	${Python3_INCLUDE_DIRS}
@@ -39,7 +38,7 @@ TARGET_LINK_LIBRARIES(PythonEval
 	atomflow
 	atombase
 	atomspace
-	executioncontext
+	framestack
 	${Python3_LIBRARIES}
 )
 

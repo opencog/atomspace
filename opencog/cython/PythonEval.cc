@@ -32,7 +32,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/FrameStack.h>
 #include <opencog/eval/EvaluatorPool.h>
 #include "PythonEval.h"
 #include "PyGILGuard.h"

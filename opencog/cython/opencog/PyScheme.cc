@@ -25,7 +25,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/FrameStack.h>
 
 using namespace opencog;
 

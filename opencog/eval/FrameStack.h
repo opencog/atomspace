@@ -14,30 +14,32 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <deque>
 
-#ifndef _OPENCOG_CONTEXT_H
-#define _OPENCOG_CONTEXT_H
+#ifndef _OPENCOG_FRAMESTACK_H
+#define _OPENCOG_FRAMESTACK_H
 
 namespace opencog
 {
 
-AtomSpacePtr get_context_atomspace(void);
-void push_context_atomspace(const AtomSpacePtr&);
-void push_context_atomspace(const ValuePtr&);
-AtomSpacePtr pop_context_atomspace(void);
-void clear_context(void);
+AtomSpacePtr get_frame(void);
+void push_frame(const AtomSpacePtr&);
+void push_frame(const ValuePtr&);
+AtomSpacePtr pop_frame(void);
+void set_frame(const AtomSpacePtr&);
+void set_frame(const ValuePtr&);
+void clear_frame_stack(void);
 
-// Simple RAII guard for the current python conext AtomSpace.
+// Simple RAII guard for the current AtomSpace frame.
 struct ASGuard
 {
 	ASGuard(AtomSpace* as)
-	{ push_context_atomspace(AtomSpaceCast(as)); }
+	{ push_frame(AtomSpaceCast(as)); }
 	ASGuard(const AtomSpacePtr& asp)
-	{ push_context_atomspace(asp); }
-	~ASGuard() { pop_context_atomspace(); }
+	{ push_frame(asp); }
+	~ASGuard() { pop_frame(); }
 	ASGuard(const ASGuard&) = delete;
 	ASGuard& operator=(const ASGuard&) = delete;
 };
 
 }
 
-#endif // _OPENCOG_CONTEXT_H
+#endif // _OPENCOG_FRAMESTACK_H

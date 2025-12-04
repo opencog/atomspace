@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
 from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
-from opencog.type_ctors cimport cPythonException, get_context_atomspace
+from opencog.type_ctors cimport cPythonException, get_frame
 import cython
 import warnings
 
@@ -146,7 +146,7 @@ cdef class AtomSpace(Atom):
             asp.set_name(name.encode('UTF-8'))
 
         # Insert into current atomspace if one exists
-        cdef cValuePtr ctx = get_context_atomspace()
+        cdef cValuePtr ctx = get_frame()
         cdef cAtomSpace* ctx_as
         if ctx.get() != NULL:
             ctx_as = <cAtomSpace*>ctx.get()

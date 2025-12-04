@@ -1,5 +1,5 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cython/executioncontext/Context.h>
+#include <opencog/eval/FrameStack.h>
 #include <opencog/util/exceptions.h>
 
 #include "TypeCtors.h"
@@ -8,7 +8,7 @@ using namespace opencog;
 
 Handle opencog::add_node(Type t, std::string name)
 {
-    AtomSpacePtr atomspace = get_context_atomspace();
+    AtomSpacePtr atomspace = get_frame();
     if (atomspace == nullptr)
         throw RuntimeException(TRACE_INFO, "current atomspace is not set");
 
@@ -17,7 +17,7 @@ Handle opencog::add_node(Type t, std::string name)
 
 Handle opencog::add_link(Type t, HandleSeq outgoing)
 {
-    AtomSpacePtr atomspace = get_context_atomspace();
+    AtomSpacePtr atomspace = get_frame();
     if (atomspace == nullptr)
         throw RuntimeException(TRACE_INFO, "current atomspace is not set");
 

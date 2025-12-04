@@ -76,7 +76,7 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	atomspace
-	executioncontext
+	framestack
 	${Python3_LIBRARIES}
 )
 
@@ -136,7 +136,7 @@ ADD_LIBRARY(type_ctors_cython
 TARGET_LINK_LIBRARIES(type_ctors_cython
 	PythonEval
 	atomspace
-	executioncontext
+	framestack
 	${Python3_LIBRARIES}
 )
 
