@@ -144,7 +144,6 @@ cog-value-type
 ; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
 
 (include-from-path "opencog/base/core-docs.scm")
-(include-from-path "opencog/base/atom-docs.scm")
 (include-from-path "opencog/base/utilities.scm")
 (include-from-path "opencog/base/atom-cache.scm")
 (include-from-path "opencog/base/types.scm")
