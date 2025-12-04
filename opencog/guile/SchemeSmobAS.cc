@@ -366,16 +366,21 @@ SCM SchemeSmob::ss_push_atomspace (void)
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
-	// Get current (top) atomspace before popping
 	const AtomSpacePtr& top_as = get_frame();
 	if (nullptr == top_as)
 		scm_misc_error("cog-pop-atomspace",
 			"More pops than pushes!", SCM_EOL);
 
-	// Pop from the unified frame stack
+	// Clear the top_as. This is needed to clear AtomSpace ptrs in
+	// the Atoms it contains. Those Atoms might be live and held
+	// in some LinkValue containing resullts, but the pointers
+	// in them must go go go.
+	top_as->clear();
+
 	pop_frame();
 
-	// Update the fluid to the new top of stack
+	// Update the fluid, too. I suspect this is not needed.
+	// but best keep things in sync to avoid crazy-making.
 	const AtomSpacePtr& new_top = get_frame();
 	scm_fluid_set_x(atomspace_fluid, make_as(new_top));
 
