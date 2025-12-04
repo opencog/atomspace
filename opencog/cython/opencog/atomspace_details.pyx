@@ -126,7 +126,15 @@ cdef class AtomSpace(Atom):
             else:
                 raise TypeError("First argument must be a string (name) or AtomSpace (parent)")
 
-        cdef cHandle new_as = createAtomSpace(<cAtomSpace*> NULL)
+        # Create the atomspace, passing parent to C++ if specified
+        cdef cHandle new_as
+        cdef cAtomSpace* parent_asp
+        if parent is not None:
+            parent_asp = <cAtomSpace*>(<AtomSpace>parent).shared_ptr.get()
+            new_as = createAtomSpace(parent_asp)
+        else:
+            new_as = createAtomSpace(<cAtomSpace*> NULL)
+
         self.shared_ptr = static_pointer_cast[cValue, cAtom](new_as)
         self.parent_atomspace = parent
 
