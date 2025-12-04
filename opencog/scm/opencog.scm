@@ -73,6 +73,8 @@ cog-number
 cog-outgoing-atom
 cog-outgoing-by-type
 cog-outgoing-set
+cog-pop-atomspace
+cog-push-atomspace
 cog-set-atomspace!
 cog-set-server-mode!
 cog-set-value!
