@@ -10,6 +10,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/oc_assert.h>
 
@@ -256,30 +257,31 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 	if (!nas)
 		return SCM_BOOL_F;
 
-	SCM old_as = scm_fluid_ref(atomspace_fluid);
+	// Get previous atomspace from the unified frame stack
+	AtomSpacePtr old_asp = get_frame();
+	SCM old_as = old_asp ? make_as(old_asp) : SCM_BOOL_F;
 
-	scm_fluid_set_x(atomspace_fluid, new_as);
+	// Set the new atomspace in the unified frame stack
+	set_frame(nas);
 
 	return old_as;
 }
 
 /* ============================================================== */
 /**
- * Set the atomspace into the top-level interaction environment
- * Since its held in a fluid, it can have a different value in each
+ * Set the atomspace into the unified frame stack.
+ * Since its thread-local, it can have a different value in each
  * thread, so that different threads can use different atomspaces,
  * all at the same time.
  */
 void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 {
-	scm_fluid_set_x(atomspace_fluid, make_as(nas));
+	set_frame(nas);
 }
 
-const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
+AtomSpacePtr SchemeSmob::ss_get_env_as(const char* subr)
 {
-	SCM ref = scm_fluid_ref(atomspace_fluid);
-	const AtomSpacePtr& asp = ss_to_atomspace(ref);
-	return asp;
+	return get_frame();
 }
 
 /* ============================================================== */
@@ -301,6 +303,54 @@ const AtomSpacePtr& SchemeSmob::get_as_from_list(SCM slist)
 
 	static AtomSpacePtr nullasp;
 	return nullasp;
+}
+
+/* ============================================================== */
+/**
+ * Push a new temporary atomspace onto the unified frame stack.
+ * Creates a new atomspace derived from the current one.
+ * Return the previous (base) atomspace.
+ */
+SCM SchemeSmob::ss_push_atomspace (void)
+{
+	// Get current atomspace from the unified frame stack
+	AtomSpacePtr base_as = get_frame();
+
+	// Create a new atomspace with the current as parent
+	AtomSpacePtr new_as;
+	if (base_as)
+		new_as = createAtomSpace(base_as);
+	else
+		new_as = createAtomSpace();
+
+	// Push the new atomspace onto the unified frame stack
+	push_frame(new_as);
+
+	// Return the previous (base) atomspace
+	return base_as ? make_as(base_as) : SCM_EOL;
+}
+
+/* ============================================================== */
+/**
+ * Pop a temporary atomspace from the unified frame stack.
+ * Clears the popped atomspace.
+ * Return unspecified.
+ */
+SCM SchemeSmob::ss_pop_atomspace (void)
+{
+	// Get current (top) atomspace before popping
+	AtomSpacePtr top_as = get_frame();
+	if (nullptr == top_as)
+		scm_misc_error("cog-pop-atomspace",
+			"More pops than pushes!", SCM_EOL);
+
+	// Pop from the unified frame stack
+	pop_frame();
+
+	// Clear the temp space contents (for debug, not strictly needed)
+	top_as->clear();
+
+	return SCM_UNSPECIFIED;
 }
 
 /* ===================== END OF FILE ============================ */

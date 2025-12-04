@@ -165,6 +165,8 @@ private:
 	static SCM ss_as_p(SCM);
 	static SCM ss_as(SCM);
 	static SCM ss_set_as(SCM);
+	static SCM ss_push_atomspace(void);
+	static SCM ss_pop_atomspace(void);
 	static SCM ss_as_env(SCM);
 	static SCM ss_as_clear(SCM);
 	static SCM ss_as_mark_readonly(SCM);
@@ -235,7 +237,7 @@ public:
 	static void init();
 
 	// This is used in the guile module wrappers for foreign calls.
-	static const AtomSpacePtr& ss_get_env_as(const char *);
+	static AtomSpacePtr ss_get_env_as(const char *);
 };
 
 // This assumes that sizeof(ValuePtr) == 16. If it ever changes

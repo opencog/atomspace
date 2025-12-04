@@ -1061,6 +1061,43 @@
        cog-atomspace -- Get the current AtomSpace in this thread.
 ")
 
+(set-procedure-property! cog-push-atomspace 'documentation
+"
+ cog-push-atomspace -- Create a temporary AtomSpace.
+
+    This creates a new AtomSpace, derived from the current AtomSpace,
+    and makes it current. Thus, all subsequent atom operations will
+    create Atoms in this new AtomSpace. To delete it, simply pop it;
+    after popping, all of the Atoms placed into it will also be
+    deleted (unless they are referred to in some way).
+
+    The stack of AtomSpaces is per-thread; a push in one thread does
+    not affect the current AtomSpace in other threads. The stack is
+    shared with Python, so cross-language push/pop operations work
+    correctly.
+
+    Returns the previous (base) AtomSpace.
+
+    See also:
+       cog-pop-atomspace -- Delete a temporary AtomSpace.
+       cog-set-atomspace! -- Set the current AtomSpace.
+")
+
+(set-procedure-property! cog-pop-atomspace 'documentation
+"
+ cog-pop-atomspace -- Delete a temporary AtomSpace.
+
+    This pops the current AtomSpace from the stack, clears it, and
+    removes it from the parent AtomSpace. The previous AtomSpace
+    becomes the current one.
+
+    The stack is shared with Python, so cross-language push/pop
+    operations work correctly.
+
+    See also:
+       cog-push-atomspace -- Create a temporary AtomSpace.
+")
+
 (set-procedure-property! cog-atomspace-clear 'documentation
 "
  cog-atomspace-clear [ATOMSPACE]

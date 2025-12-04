@@ -40,6 +40,7 @@ TARGET_LINK_LIBRARIES(smob
 	foreign
 	atombase
 	atomspace
+	framestack
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
