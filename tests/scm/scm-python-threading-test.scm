@@ -233,6 +233,270 @@ def py_call_scm_with_idx(idx):
 
 
 ; ============================================================================
+; Cross-Language Atom Sharing Tests
+;
+; These tests verify that atoms are truly shared between Scheme and Python.
+; Values set in one language should be readable in the other.
+; ============================================================================
+
+; Define Python functions for atom sharing tests
+(python-eval "
+from opencog.type_constructors import *
+from opencog.type_ctors import get_thread_atomspace
+
+def py_set_string_value(atom, key, value_str):
+    '''Set a StringValue on an atom'''
+    asp = get_thread_atomspace()
+    # value_str is an Atom (Concept), extract its name
+    val = value_str.name if hasattr(value_str, 'name') else str(value_str)
+    asp.set_value(atom, key, StringValue(val))
+    return atom
+
+def py_get_string_value(atom, key):
+    '''Get a StringValue from an atom and return as Concept with the value'''
+    val = atom.get_value(key)
+    if val is None:
+        return Concept('VALUE_NOT_FOUND')
+    return Concept(val.to_list()[0])
+
+def py_set_float_value(atom, key, f1, f2, f3):
+    '''Set a FloatValue on an atom'''
+    asp = get_thread_atomspace()
+    v1 = float(f1.name)
+    v2 = float(f2.name)
+    v3 = float(f3.name)
+    asp.set_value(atom, key, FloatValue([v1, v2, v3]))
+    return atom
+
+def py_get_float_value_sum(atom, key):
+    '''Get a FloatValue and return sum as NumberNode'''
+    val = atom.get_value(key)
+    if val is None:
+        return Number(-999)
+    flist = val.to_list()
+    return Number(sum(flist))
+
+def py_create_atom_with_value(name_node, key, value_str):
+    '''Create an atom in Python and set a value on it'''
+    atom_name = name_node.name
+    atom = Concept(atom_name)
+    asp = get_thread_atomspace()
+    # value_str is an Atom (Concept), extract its name
+    val = value_str.name if hasattr(value_str, 'name') else str(value_str)
+    asp.set_value(atom, key, StringValue(val))
+    return atom
+
+def py_modify_value(atom, key, new_value_str):
+    '''Modify an existing value on an atom'''
+    asp = get_thread_atomspace()
+    # new_value_str is an Atom (Concept), extract its name
+    val = new_value_str.name if hasattr(new_value_str, 'name') else str(new_value_str)
+    asp.set_value(atom, key, StringValue(val))
+    return atom
+")
+
+(define tname-sharing "scm-python-atom-sharing")
+(test-begin tname-sharing)
+
+; ----------------------------------------------------------------------------
+; Test: Scheme creates atom and sets value, Python reads it
+; ----------------------------------------------------------------------------
+(cog-set-value!
+    (Concept "scm-created-atom-1")
+    (Predicate "scm-key-1")
+    (StringValue "hello from scheme"))
+
+(define py-read-scm-value
+    (cog-execute!
+        (ExecutionOutput
+            (GroundedSchema "py:py_get_string_value")
+            (List (Concept "scm-created-atom-1") (Predicate "scm-key-1")))))
+
+(test-assert "scheme-creates-python-reads"
+    (string=? "hello from scheme" (cog-name py-read-scm-value)))
+
+; ----------------------------------------------------------------------------
+; Test: Python creates atom and sets value, Scheme reads it
+; ----------------------------------------------------------------------------
+(cog-execute!
+    (ExecutionOutput
+        (GroundedSchema "py:py_create_atom_with_value")
+        (List (Concept "py-created-atom-1")
+              (Predicate "py-key-1")
+              (Concept "hello from python"))))
+
+(define scm-read-py-value
+    (cog-value (Concept "py-created-atom-1") (Predicate "py-key-1")))
+
+(test-assert "python-creates-scheme-reads"
+    (and scm-read-py-value
+         (string=? "hello from python" (cog-value-ref scm-read-py-value 0))))
+
+; ----------------------------------------------------------------------------
+; Test: Scheme creates FloatValue, Python reads it
+; ----------------------------------------------------------------------------
+(cog-set-value!
+    (Concept "float-test-atom")
+    (Predicate "float-key")
+    (FloatValue 1.5 2.5 3.5))
+
+(define py-read-float-sum
+    (cog-execute!
+        (ExecutionOutput
+            (GroundedSchema "py:py_get_float_value_sum")
+            (List (Concept "float-test-atom") (Predicate "float-key")))))
+
+; Sum should be 7.5
+(test-assert "scheme-floatvalue-python-reads"
+    (< (abs (- 7.5 (string->number (cog-name py-read-float-sum)))) 0.001))
+
+; ----------------------------------------------------------------------------
+; Test: Python creates FloatValue, Scheme reads it
+; ----------------------------------------------------------------------------
+(cog-execute!
+    (ExecutionOutput
+        (GroundedSchema "py:py_set_float_value")
+        (List (Concept "py-float-atom")
+              (Predicate "py-float-key")
+              (Number 10.0) (Number 20.0) (Number 30.0))))
+
+(define scm-read-py-float (cog-value (Concept "py-float-atom") (Predicate "py-float-key")))
+
+(test-assert "python-floatvalue-scheme-reads"
+    (and scm-read-py-float
+         (< (abs (- 10.0 (cog-value-ref scm-read-py-float 0))) 0.001)
+         (< (abs (- 20.0 (cog-value-ref scm-read-py-float 1))) 0.001)
+         (< (abs (- 30.0 (cog-value-ref scm-read-py-float 2))) 0.001)))
+
+; ----------------------------------------------------------------------------
+; Test: Atom identity - same atom in both languages
+; Scheme creates atom with one key, Python adds another key, Scheme sees both
+; ----------------------------------------------------------------------------
+(cog-set-value!
+    (Concept "identity-atom")
+    (Predicate "scheme-added-key")
+    (StringValue "from-scheme"))
+
+; Python adds a different key to the same atom
+(cog-execute!
+    (ExecutionOutput
+        (GroundedSchema "py:py_set_string_value")
+        (List (Concept "identity-atom")
+              (Predicate "python-added-key")
+              (Concept "from-python"))))
+
+; Scheme should see both keys on the same atom
+(define val-from-scm-key (cog-value (Concept "identity-atom") (Predicate "scheme-added-key")))
+(define val-from-py-key (cog-value (Concept "identity-atom") (Predicate "python-added-key")))
+
+(test-assert "atom-identity-scheme-key"
+    (and val-from-scm-key
+         (string=? "from-scheme" (cog-value-ref val-from-scm-key 0))))
+
+(test-assert "atom-identity-python-key"
+    (and val-from-py-key
+         (string=? "from-python" (cog-value-ref val-from-py-key 0))))
+
+; ----------------------------------------------------------------------------
+; Test: Bidirectional value modification
+; Scheme sets value, Python overwrites, Scheme reads new value
+; ----------------------------------------------------------------------------
+(cog-set-value!
+    (Concept "overwrite-atom")
+    (Predicate "overwrite-key")
+    (StringValue "original-from-scheme"))
+
+; Verify Scheme sees original
+(define orig-val (cog-value (Concept "overwrite-atom") (Predicate "overwrite-key")))
+(test-assert "bidirectional-original"
+    (string=? "original-from-scheme" (cog-value-ref orig-val 0)))
+
+; Python overwrites
+(cog-execute!
+    (ExecutionOutput
+        (GroundedSchema "py:py_modify_value")
+        (List (Concept "overwrite-atom")
+              (Predicate "overwrite-key")
+              (Concept "modified-by-python"))))
+
+; Scheme reads modified value
+(define modified-val (cog-value (Concept "overwrite-atom") (Predicate "overwrite-key")))
+(test-assert "bidirectional-modified"
+    (string=? "modified-by-python" (cog-value-ref modified-val 0)))
+
+(test-end tname-sharing)
+
+
+; ============================================================================
+; Threaded Cross-Language Atom Sharing
+; ============================================================================
+
+(python-eval "
+def py_thread_modify_value(atom, key, thread_id):
+    '''Modify value with thread-specific content'''
+    asp = get_thread_atomspace()
+    tid = int(float(thread_id.name))
+    asp.set_value(atom, key, StringValue(f'py-modified-{tid}'))
+    return atom
+
+def py_thread_read_value(atom, key):
+    '''Read value and return it as Concept'''
+    val = atom.get_value(key)
+    if val is None:
+        return Concept('NOT_FOUND')
+    return Concept(val.to_list()[0])
+")
+
+(define tname-threaded-sharing "scm-python-threaded-atom-sharing")
+(test-begin tname-threaded-sharing)
+
+; Create atoms for each thread beforehand
+(for-each
+    (lambda (n)
+        (cog-set-value!
+            (Concept (format #f "thread-atom-~a" n))
+            (Predicate (format #f "thread-key-~a" n))
+            (StringValue (format #f "scm-original-~a" n))))
+    (iota 10))
+
+; Have Python modify each atom in parallel threads
+(define threaded-modify
+    (ExecuteThreaded
+        (Number 5)
+        (Set
+            (map
+                (lambda (n)
+                    (ExecutionOutput
+                        (GroundedSchema "py:py_thread_modify_value")
+                        (List (Concept (format #f "thread-atom-~a" n))
+                              (Predicate (format #f "thread-key-~a" n))
+                              (Number n))))
+                (iota 10)))))
+
+(define modify-results (cog-execute! threaded-modify))
+(define modify-collected (cog-value->list modify-results))
+
+(test-assert "threaded-sharing-modify-count"
+    (= 10 (length modify-collected)))
+
+; Scheme verifies all modifications
+(define all-modified-correctly
+    (every
+        (lambda (n)
+            (let* ((val (cog-value
+                            (Concept (format #f "thread-atom-~a" n))
+                            (Predicate (format #f "thread-key-~a" n))))
+                   (expected (format #f "py-modified-~a" n)))
+                (and val (string=? expected (cog-value-ref val 0)))))
+        (iota 10)))
+
+(test-assert "threaded-sharing-all-values-correct"
+    all-modified-correctly)
+
+(test-end tname-threaded-sharing)
+
+
+; ============================================================================
 ; Final summary
 ; ============================================================================
 
