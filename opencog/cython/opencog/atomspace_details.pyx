@@ -94,11 +94,19 @@ cdef object raise_python_exception_from_cpp(const cPythonException& exc):
 
 
 cdef class AtomSpace(Atom):
-    def __init__(self, object parent=None):
+    def __init__(self, arg=None, object parent=None):
         """Create a new AtomSpace.
 
         Args:
-            parent: Optional parent atomspace reference.
+            arg: Optional first argument - either a string (name) or
+                 an AtomSpace (parent reference).
+            parent: Optional parent atomspace reference (keyword only).
+
+        Examples:
+            AtomSpace()                    # unnamed, no parent
+            AtomSpace("my-space")          # named, no parent
+            AtomSpace(parent_as)           # unnamed, with parent
+            AtomSpace("my-space", parent_as)  # named, with parent
 
         Creates a new C++ AtomSpace. If there is a current thread
         atomspace, the new atomspace is inserted into it. (The guile
@@ -106,9 +114,27 @@ cdef class AtomSpace(Atom):
 
         To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
         """
+        # Parse the first argument - could be name (string) or parent (AtomSpace)
+        cdef object name = None
+        if arg is not None:
+            if isinstance(arg, str):
+                name = arg
+            elif isinstance(arg, AtomSpace):
+                if parent is not None:
+                    raise TypeError("Parent specified twice")
+                parent = arg
+            else:
+                raise TypeError("First argument must be a string (name) or AtomSpace (parent)")
+
         cdef cHandle new_as = createAtomSpace(<cAtomSpace*> NULL)
         self.shared_ptr = static_pointer_cast[cValue, cAtom](new_as)
         self.parent_atomspace = parent
+
+        # Set the name if provided
+        cdef cAtomSpace* asp
+        if name is not None:
+            asp = <cAtomSpace*>self.shared_ptr.get()
+            asp.set_name(name.encode('UTF-8'))
 
         # Insert into current atomspace if one exists
         cdef cValuePtr ctx = get_context_atomspace()

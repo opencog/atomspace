@@ -144,6 +144,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         bint is_valid_handle(cHandle h) nogil const
         int get_size() nogil const
         string get_name() nogil const
+        void set_name(const string&) nogil
 
         # ==== query methods ====
         # get by type
