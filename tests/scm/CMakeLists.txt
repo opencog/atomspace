@@ -28,6 +28,7 @@ IF (HAVE_CYTHON)
 	ADD_GUILE_TEST(ScmPythonTest scm-python-test.scm)
 	ADD_GUILE_TEST(ScmPythonSharedAtomspaceTest scm-python-shared-atomspace-test.scm)
 	ADD_GUILE_TEST(ScmPythonArityTest scm-python-arity-test.scm)
+	ADD_GUILE_TEST(ScmPythonThreadingTest scm-python-threading-test.scm)
 
 	# Set PYTHONPATH so Python can find the opencog module in the build directory
 	SET_PROPERTY(TEST ScmPythonTest
@@ -35,5 +36,7 @@ IF (HAVE_CYTHON)
 	SET_PROPERTY(TEST ScmPythonSharedAtomspaceTest
 		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 	SET_PROPERTY(TEST ScmPythonArityTest
+		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
+	SET_PROPERTY(TEST ScmPythonThreadingTest
 		APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 ENDIF (HAVE_CYTHON)
