@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
 from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
-from opencog.type_ctors cimport cPythonException
+from opencog.type_ctors cimport cPythonException, get_context_atomspace
 import cython
 
 # from atomspace cimport *
@@ -94,23 +94,28 @@ cdef object raise_python_exception_from_cpp(const cPythonException& exc):
 
 
 cdef class AtomSpace(Atom):
-    # these are defined in atomspace.pxd:
-    # cdef object parent_atomspace
-
     def __init__(self, object parent=None):
         """Create a new AtomSpace.
 
         Args:
-            parent: Optional parent atomspace reference (for Python tracking only)
+            parent: Optional parent atomspace reference.
 
-        Creates a new C++ AtomSpace. Does NOT create a child atomspace -
-        use create_child_atomspace() for that.
+        Creates a new C++ AtomSpace. If there is a current thread
+        atomspace, the new atomspace is inserted into it. (The guile
+        bindings also do it this way.)
 
         To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
         """
         cdef cHandle new_as = createAtomSpace(<cAtomSpace*> NULL)
         self.shared_ptr = static_pointer_cast[cValue, cAtom](new_as)
         self.parent_atomspace = parent
+
+        # Insert into current atomspace if one exists
+        cdef cValuePtr ctx = get_context_atomspace()
+        cdef cAtomSpace* ctx_as
+        if ctx.get() != NULL:
+            ctx_as = <cAtomSpace*>ctx.get()
+            ctx_as.add_atom(new_as)
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
