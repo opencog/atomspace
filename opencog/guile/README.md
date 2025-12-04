@@ -2,6 +2,7 @@
 The Guile Scheme API
 ====================
 Linas Vepstas, May 2008
+Rvision of December 2025
 
 
 This directory contains (Guile) Scheme bindings to Atomese. These allow
