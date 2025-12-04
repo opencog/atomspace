@@ -3,7 +3,7 @@
 ;
 ; Part of the unit test for ExecuteThreadedLink.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Inheritance (Concept "rock") (Concept "mineral"))
 (Inheritance (Concept "flower") (Concept "plant"))

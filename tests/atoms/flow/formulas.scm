@@ -4,7 +4,7 @@
 ; This is a modified copy of an example program. It helps verify that
 ; the example actually works.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 

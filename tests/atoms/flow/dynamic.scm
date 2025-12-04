@@ -2,7 +2,7 @@
 ; dynamic.scm -- test-case version of `flow-formulas.scm` example.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; For DynamicUTest::test_predicate_formula()
 

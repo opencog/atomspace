@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Inheritance (Concept "Jim") (Concept "Father"))
 (Inheritance (Concept "Jane") (Concept "Mother"))

@@ -13,7 +13,7 @@
 ;
 ; A more complex demo is in the `flow-futures.scm` file.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Atomese is verbose, and this demo is easier to understand if some
 ; of that is hidden a bit. So, define two scheme functions that get

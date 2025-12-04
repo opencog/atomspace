@@ -6,7 +6,7 @@
 ; Invented after discussions at opencog/atomspace#2203
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Three baskets holding balls
 (Inheritance (Concept "reds basket") (Concept "basket"))

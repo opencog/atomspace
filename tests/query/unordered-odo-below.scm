@@ -8,7 +8,7 @@
 ; unordered link, thus taking a different code path through
 ; the pattern matcher.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (List (Concept "A")
 	(Set (Concept "A") (Predicate "P") (Predicate "Q") (Predicate "R")))

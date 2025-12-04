@@ -1,7 +1,7 @@
 ;
 ; link-column-test.scm -- Verify that LinkColumn works.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

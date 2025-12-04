@@ -99,7 +99,6 @@
    (Predicate "weight_in_kg") (FloatValue 12.5))
 ;
 ; and then search for it:
-(use-modules (opencog exec))
 (cog-execute!
    (Get
       (GreaterThan

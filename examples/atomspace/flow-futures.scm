@@ -16,7 +16,7 @@
 ; See https://en.wikipedia.org/wiki/Futures_and_promises for the general
 ; idea.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------------------------------------------------------
 ; Below is a toy pair-counting framework.  It increments counts

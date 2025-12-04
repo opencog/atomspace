@@ -1,7 +1,7 @@
 ;
 ; string-of-test.scm -- Test the LinkSignatureLink for basic fuction
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

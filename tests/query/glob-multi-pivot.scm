@@ -4,7 +4,7 @@
 ; multi-pivot version of glob-pivot.scm
 ; 
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (EvaluationLink
 	(PredicateNode "pred-1")

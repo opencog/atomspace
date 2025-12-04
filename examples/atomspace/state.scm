@@ -19,7 +19,7 @@
 ; values, such as video and audio streams, there is a different
 ; mechanism, given in later examples.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The current state of "fruit" is "apple".
 (State (Anchor "fruit") (Concept "apple"))

@@ -4,7 +4,7 @@
 ; One of the most basic usages of the GroundedSchemaNode is to
 ; recompute the truth values on an atom, once its been found.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Define the key used to store truth values (2 floats: mean, confidence)
 (define tvkey (Predicate "*-TruthValueKey-*"))

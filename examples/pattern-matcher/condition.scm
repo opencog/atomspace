@@ -6,7 +6,7 @@
 ; use of GroundedSchemaNodes to perform some action, depending
 ; on whether or not the predicate accepted the match.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Define a condition that will be checked, to see if a subsequent action
 ; should be taken or not. It returns a TruthValue of true or false,

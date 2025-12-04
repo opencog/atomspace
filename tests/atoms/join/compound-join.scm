@@ -3,7 +3,7 @@
 ; CompoundJoinUTest
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Data
 (Evaluation (Predicate "above") (List (Concept "sky")))

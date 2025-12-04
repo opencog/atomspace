@@ -5,7 +5,7 @@
 ; This resembles the simpler unordered-odometer.scm except that
 ; here, they are layered.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Set (Concept "A")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R")))

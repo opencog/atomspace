@@ -26,7 +26,7 @@
 ; See the `flow-formulas.scm` example for how to work with dynamically
 ; updating flows.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The Value is located at key (Predicate "*-TruthValueKey-*")
 (define tvkey (Predicate "*-TruthValueKey-*"))

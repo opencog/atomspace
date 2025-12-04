@@ -38,7 +38,7 @@
 ; in it.  That is, DeleteLinks can NEVER be "ground terms", as, by
 ; definition, grounding it causes it to vanish.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; A utility function to print all Edges in the AtomSpace.
 ; Very handy to see what is in the AtomSpace. Don't worry about the

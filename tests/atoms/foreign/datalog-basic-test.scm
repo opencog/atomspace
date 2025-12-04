@@ -2,7 +2,7 @@
 ; datalog-basic-test.scm - Store DataLog expressions.
 ; Make sure that the code doesn't crash.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

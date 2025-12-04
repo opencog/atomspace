@@ -12,7 +12,7 @@
 ; and controlling the read-only flag.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Create three AtomSpaces; two singletons, and a third that contains
 ; the first two.

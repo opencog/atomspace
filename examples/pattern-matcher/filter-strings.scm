@@ -10,7 +10,7 @@
 ; This example shows how to work around this issue, by using the
 ; LinkSignatureLink to encode a StringValue in a pattern.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; A mockup of a stream of data to be filtered.
 (define stream (LinkValue

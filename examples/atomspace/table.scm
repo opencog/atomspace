@@ -20,7 +20,7 @@
 ; This is. of course, exactly what AS-MOSES does. This is effectively
 ; a demo of a sub-component of the AS-MOSES subsystem.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog csv-table))
 
 ; Create an Atom on which the table will be located.

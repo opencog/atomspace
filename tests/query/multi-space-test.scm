@@ -3,7 +3,7 @@
 ; This is the unit test for the `multi-space.scm` demo.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

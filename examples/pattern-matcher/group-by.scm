@@ -36,7 +36,7 @@
 ; variables and complex terms can be used to define a grouping kernel;
 ; this demo shows only the simplest case.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Create a collection of trees to search over.
 ; The structure should be obvious, but a few points bear empahsis:

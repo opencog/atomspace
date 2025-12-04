@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Unit test for Issue #1596
 ;

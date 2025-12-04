@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 ;
 ; Test data for a stack-handling bug found by Samir
 

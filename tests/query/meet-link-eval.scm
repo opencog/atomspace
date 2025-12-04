@@ -1,6 +1,6 @@
 ; https://github.com/opencog/atomspace/issues/211
 
-(use-modules ((opencog exec)))
+(use-modules (opencog))
 
 (EdgeLink
    (ConceptNode "arkle")

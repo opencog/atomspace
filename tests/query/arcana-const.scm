@@ -2,7 +2,6 @@
 ; Unit testing for a constant pattern
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 (define marconi
 	(ListLink

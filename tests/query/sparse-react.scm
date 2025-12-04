@@ -5,7 +5,6 @@
 ; (its missing constraints) the other is good.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; (load-from-path "chem_types.scm")
 

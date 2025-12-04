@@ -44,7 +44,7 @@ public:
 
 		as = createAtomSpace();
 		eval = SchemeEval::get_scheme_evaluator(as);
-		eval->eval("(use-modules (opencog exec) (opencog type-utils))");
+		eval->eval("(use-modules (opencog type-utils))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 

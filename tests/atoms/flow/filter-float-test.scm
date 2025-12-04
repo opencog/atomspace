@@ -4,7 +4,7 @@
 ; https://wiki.opencog.org/w/PromiseLink
 ; works as promised.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (srfi srfi-1))
 (use-modules (opencog test-runner))
 

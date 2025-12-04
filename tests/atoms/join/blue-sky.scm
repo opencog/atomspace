@@ -2,7 +2,7 @@
 ; blue-sky.scm
 ; JoinLink unit test ... more complicated.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; test data
 (Context

@@ -5,7 +5,7 @@
 ; Creates a stream of ConceptNodes (A C A B A) and counts them
 ; both individually and in total.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

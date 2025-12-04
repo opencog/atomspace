@@ -7,7 +7,7 @@
 ; See `execute.scm` for more `cog-execute!` examples.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; First, just give it some broken junk.  See what happens.
 (cog-execute!

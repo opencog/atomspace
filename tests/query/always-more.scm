@@ -15,7 +15,7 @@
 ; balls, and no others. A fancier query finds those baskets that
 ; have balls all of the same color (whatever color that might be).
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------
 ; Populate the atomspace with baskets holding balls.

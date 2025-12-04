@@ -1,7 +1,7 @@
 ;
 ; sexpr-column-test.scm -- Verify that SexprColumn works
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

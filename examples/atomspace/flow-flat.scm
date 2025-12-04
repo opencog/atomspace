@@ -13,7 +13,7 @@
 ; The `parse-pipeline.scm` example in the `sensory` project
 ; demonstrates this.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Create a list of items.
 (define item-list

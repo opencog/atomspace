@@ -2,7 +2,7 @@
 ; Data and tests for MeetLink with embedded variable decls.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Inheritance (Concept "Ben") (Concept "human"))
 (Inheritance (Concept "Linas") (Concept "human"))

@@ -78,7 +78,6 @@ void SCMExecutionOutputUTest::setUp(void)
 {
 	as = createAtomSpace();
 	eval = SchemeEval::get_scheme_evaluator(as);
-	eval->eval("(use-modules (opencog exec))");
 }
 
 void SCMExecutionOutputUTest::tearDown(void)

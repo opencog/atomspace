@@ -5,7 +5,7 @@
 ; ConceptNode A or ConceptNode B, with a probability of 70-30.  It then
 ; counts how often each of these choices occurred.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Pick A with 70% probability, pick B with 30% probability.
 (Define (DefinedProcedure "randy")

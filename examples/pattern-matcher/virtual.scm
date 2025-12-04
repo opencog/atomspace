@@ -36,7 +36,6 @@
 
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Define three cities
 (Edge (Predicate "phone") (List (Concept "Paris") (Number 10)))

@@ -100,7 +100,6 @@ class SchemeTest(TestCase):
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
 
-        scheme_eval(self.space, "(use-modules (opencog exec))")
         question = scheme_eval_v(self.space, "find-animals")
         self.assertTrue(question)
         print ("\nThe question is:", question)

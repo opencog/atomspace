@@ -2,7 +2,7 @@
 ; filter-glob-test.scm -- Verify that globs in filters work.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

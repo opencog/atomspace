@@ -5,7 +5,7 @@
 ; Get the current time, see how much time has elapsed, and
 ; return true or false, depending on the elapsed time.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (StateLink (SchemaNode "start-interaction-timestamp") (NumberNode 0))
 (StateLink (SchemaNode "current expression duration") (NumberNode 2.0)) ; in seconds

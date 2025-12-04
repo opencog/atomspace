@@ -47,7 +47,7 @@
 ; is not yet in the AtomSpace, but whose description is. When it is
 ; triggered, the description is turned into the actual link.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Clause to match during query.  This is the Edge whose
 ; presence or absence we will be testing for.

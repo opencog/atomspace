@@ -4,7 +4,7 @@
 ; This is a mashup of `dot-choice`, `dot-identical` and `dot-lambda`
 ; So, its using the most complicated mashup of all of these.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

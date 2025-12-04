@@ -18,7 +18,6 @@
 ; patterns, `create` or `destroy`.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Clause to match during query
 (define query 

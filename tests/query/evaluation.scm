@@ -4,7 +4,6 @@
 ; a version that uses `EqualLink`.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;;; Populate the atomspace with a cover of a directed bouquet
 ;;; of four circles. A bouquet has just one vertex, and so all

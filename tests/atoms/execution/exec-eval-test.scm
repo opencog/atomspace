@@ -3,7 +3,7 @@
 ; evaluatable links.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 ;;; (use-modules (opencog logger))

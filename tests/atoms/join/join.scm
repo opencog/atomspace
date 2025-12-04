@@ -3,7 +3,7 @@
 ; JoinLink unit test.
 ; See `join-content.scm` for the data that these search for.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; --------------------------------------
 (define max-join

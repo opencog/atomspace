@@ -2,7 +2,7 @@
 ; dot-lambda-test.scm -- take dot products of vectors for query
 ; See `dot-product-test.scm` for the base cse.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

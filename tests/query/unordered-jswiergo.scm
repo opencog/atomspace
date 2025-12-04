@@ -4,7 +4,7 @@
 ; Unordered link nesting tests, from Jacek Świergocki
 ; AKA issue #148
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define shared (Unordered (Concept "A")))
 (List shared (List shared (Concept "B")))

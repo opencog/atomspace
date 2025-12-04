@@ -1,7 +1,7 @@
 ;
 ; grant-test.scm -- test that GrantLink works.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

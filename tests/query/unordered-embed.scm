@@ -4,7 +4,7 @@
 ; Test odometer concepts, for UnorderedLinks that are deeper down
 ; in the search.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (List (Concept "A") (Set (Predicate "P") (Predicate "Q")))
 

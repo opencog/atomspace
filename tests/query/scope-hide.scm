@@ -3,7 +3,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;; The Lambda link is a ScopeLink, and so (VariableNode "$X")
 ;; is a bound var.

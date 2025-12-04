@@ -1,6 +1,6 @@
 ; https://github.com/opencog/atomspace/issues/2400
 
-(use-modules ((opencog exec)))
+(use-modules (opencog))
 
 (ListLink
   (ConceptNode "glib")

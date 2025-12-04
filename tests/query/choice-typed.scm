@@ -5,7 +5,7 @@
 ; to the variable-initiate-search, which failed because the variables
 ; were typed. (and was also wildly inefficient).
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (EvaluationLink
    (PredicateNode "OpenPsi:Decrease")

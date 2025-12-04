@@ -3,7 +3,7 @@
 ;
 ; Test arithmetic links with globs
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; From issue #2528
 (PlusLink (Number "1") (Number "2") (Number "3") (Number "4"))

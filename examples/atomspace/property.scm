@@ -17,7 +17,7 @@
 ; This example shows how to set properties, and three different ways
 ; of getting a named property on a atom.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Two different atoms, to which a number will be associated.
 (Concept "asdf")

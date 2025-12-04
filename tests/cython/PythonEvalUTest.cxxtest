@@ -207,7 +207,6 @@ public:
         // Create a scheme evaluator to trigger cog-execute.
         SchemeEval* scheme = SchemeEval::get_scheme_evaluator(as);
 
-        scheme->eval("(use-modules (opencog exec))");
 
         // Test execute -> PythonEval::apply
         scheme->eval_h(

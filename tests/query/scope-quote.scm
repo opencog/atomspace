@@ -16,7 +16,6 @@
 ; to simplify debugging, in case there is a bug.
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 
 ; Sample data

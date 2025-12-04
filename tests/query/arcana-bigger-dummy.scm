@@ -2,7 +2,6 @@
 ; Unit testing for addition of more complex dummy clauses
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Data  -- This is the answer we expect to get.
 (define stfu

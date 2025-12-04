@@ -2,7 +2,7 @@
 ; filter-strings-test.scm -- Unit test for filter-strings.scm example.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

@@ -18,7 +18,7 @@
 ; This example shows how to set properties, and three different ways
 ; of getting a named property on a atom.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The StateLink associates a property to a atom. In this case, the
 ; property is a number. The "key" is just a list, combining the atom

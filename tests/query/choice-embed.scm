@@ -2,7 +2,6 @@
 ; Unit testing for ChoiceLinks in the pattern matcher.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;;; Populate the atomspace with four small trees.
 (MemberLink

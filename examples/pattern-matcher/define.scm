@@ -1,7 +1,7 @@
 ;
 ; define.scm -- Using DefineLink to give names to things.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;; Some data to populate the AtomSpace.
 (Inheritance

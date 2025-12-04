@@ -7,7 +7,7 @@
 ; -- Tail recursion optimization in the SequentialAndLink
 ; -- Lazy/Eager execution of FunctionLink arguments.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Pick A with 70% probability, pick B with 30% probability.
 (Define (DefinedProcedure "rand-transpose")

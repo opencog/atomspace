@@ -5,7 +5,6 @@
 ; Much link choice-embed, except it ahs two choice links
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;;; Populate the atomspace with four small trees.
 (Member (Concept "Tom") (Concept "ways and means"))

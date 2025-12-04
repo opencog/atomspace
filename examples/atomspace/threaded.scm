@@ -10,7 +10,7 @@
 ; See also `parallel.scm`, which does something similar, but is more
 ; appropriate for scripting control.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Populate the AtomSpace with some data.
 (Inheritance (Concept "rock") (Concept "mineral"))

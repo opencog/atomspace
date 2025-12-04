@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Compute the factorial of a NumberNode, using the classic
 ; recursive algorithm.

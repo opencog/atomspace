@@ -1,7 +1,7 @@
 ;
 ; filter-rule-test.scm -- Test of filters with rules.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

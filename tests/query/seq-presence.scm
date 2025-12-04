@@ -9,7 +9,7 @@
 ;; If the atomspace does contain the above, then the print-msg function
 ;; is run.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;; Is the room empty, or is someone in it?
 ;; One of several different states can be linked to the state variable.

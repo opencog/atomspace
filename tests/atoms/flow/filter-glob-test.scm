@@ -1,7 +1,7 @@
 ;
 ; filter-glob-test.scm -- Simple tests of top-level globs.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

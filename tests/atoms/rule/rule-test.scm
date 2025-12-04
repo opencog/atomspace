@@ -1,7 +1,7 @@
 ;
 ; rule-test.scm - Test the basic RuleLink syntax.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

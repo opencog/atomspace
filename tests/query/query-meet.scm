@@ -1,7 +1,7 @@
 ;
 ; query-meet.scm -- MeetLink usage example.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------
 ; Create three bits of "knowledge".

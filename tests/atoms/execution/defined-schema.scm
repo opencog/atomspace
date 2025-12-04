@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; A simple DAG w/ InheritanceLinks
 ;
