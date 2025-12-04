@@ -279,7 +279,7 @@ void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 	set_frame(nas);
 }
 
-AtomSpacePtr SchemeSmob::ss_get_env_as(const char* subr)
+const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
 {
 	return get_frame();
 }

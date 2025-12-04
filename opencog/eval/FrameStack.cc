@@ -18,10 +18,11 @@ namespace opencog {
 
 thread_local std::deque<AtomSpacePtr> frame_stack = std::deque<AtomSpacePtr>();
 
-AtomSpacePtr get_frame(void)
+const AtomSpacePtr& get_frame(void)
 {
+	static AtomSpacePtr nullasp;
 	if (frame_stack.empty())
-		return nullptr;
+		return nullasp;
 	return frame_stack.back();
 }
 

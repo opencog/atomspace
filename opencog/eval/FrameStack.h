@@ -20,7 +20,7 @@
 namespace opencog
 {
 
-AtomSpacePtr get_frame(void);
+const AtomSpacePtr& get_frame(void);
 void push_frame(const AtomSpacePtr&);
 void push_frame(const ValuePtr&);
 AtomSpacePtr pop_frame(void);

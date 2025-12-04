@@ -237,7 +237,7 @@ public:
 	static void init();
 
 	// This is used in the guile module wrappers for foreign calls.
-	static AtomSpacePtr ss_get_env_as(const char *);
+	static const AtomSpacePtr& ss_get_env_as(const char *);
 };
 
 // This assumes that sizeof(ValuePtr) == 16. If it ever changes
