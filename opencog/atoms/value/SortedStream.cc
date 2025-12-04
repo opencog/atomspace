@@ -114,7 +114,7 @@ void SortedStream::init_cmp(void)
 				LIST_LINK)}),
 			EXECUTION_OUTPUT_LINK);
 
-	// Scratch space in which temproaries are evaluated. This
+	// Scratch space in which temporaries are evaluated. This
 	// overlays the AtomSpace in which the schema sits, and thus,
 	// the schema can use this for context.
 	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
