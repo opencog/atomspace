@@ -152,13 +152,23 @@ threading.Thread.run = _patched_thread_run
 
 # -----------------------
 
-def set_thread_atomspace(AtomSpace atomspace):
+def set_thread_atomspace(atomspace):
     """
     Set the AtomSpace used in the current thread.
+
+    Args:
+        atomspace: An AtomSpace instance to use for this thread.
+
+    Raises:
+        TypeError: If atomspace is None or not an AtomSpace instance.
     """
-    if atomspace is not None:
-        set_frame(handle_cast(atomspace.shared_ptr))
-        _atomspace_context.set(atomspace)
+    if atomspace is None:
+        raise TypeError("atomspace cannot be None")
+    if not isinstance(atomspace, AtomSpace):
+        raise TypeError(
+            f"atomspace must be an AtomSpace, not {type(atomspace).__name__}")
+    set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+    _atomspace_context.set(atomspace)
 
 
 def push_thread_atomspace():
