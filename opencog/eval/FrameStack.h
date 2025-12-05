@@ -58,6 +58,7 @@ inline void push_frame(void)
 
 // Pop the most recently pushed atomspace.
 // Restores the saved atomspace as current.
+// Clears the pushed atomspace.
 // Removes the pushed atomspace from its parent.
 // Returns the pushed atomspace.
 inline AtomSpacePtr pop_frame(void)
@@ -70,6 +71,10 @@ inline AtomSpacePtr pop_frame(void)
 
 	// Restore the saved atomspace as current
 	current_frame = entry.saved;
+
+	// Clear the pushed atomspace, making any atoms in it into orphans.
+	if (entry.pushed)
+		entry.pushed->clear();
 
 	// Remove the pushed atomspace from its parent (the saved atomspace)
 	if (entry.pushed and entry.saved)

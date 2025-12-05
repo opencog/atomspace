@@ -390,20 +390,16 @@ SCM SchemeSmob::ss_push_atomspace (void)
 /* ============================================================== */
 /**
  * Pop a temporary atomspace from the unified frame stack.
- * Clear the popped atomspace, making any atoms in it into orphans.
+ * The pushed atomspace is cleared and removed from its parent.
  * Return unspecified.
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
-	AtomSpacePtr top_as = get_frame();
-	if (nullptr == top_as)
+	// pop_frame() clears the pushed atomspace and removes it from parent.
+	AtomSpacePtr pushed_as = pop_frame();
+	if (nullptr == pushed_as)
 		scm_misc_error("cog-pop-atomspace",
 			"More pops than pushes!", SCM_EOL);
-
-	pop_frame();
-
-	// Clear the atomspace, making any atoms in it into orphans.
-	top_as->clear();
 
 	// Update the fluid, too. I suspect this is not needed.
 	// but best keep things in sync to avoid crazy-making.
