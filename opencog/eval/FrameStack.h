@@ -60,11 +60,10 @@ inline void push_frame(void)
 // Restores the saved atomspace as current.
 // Clears the pushed atomspace.
 // Removes the pushed atomspace from its parent.
-// Returns the pushed atomspace.
-inline AtomSpacePtr pop_frame(void)
+inline void pop_frame(void)
 {
 	if (pushed_stack.empty())
-		return AtomSpacePtr();
+		return;
 
 	PushEntry entry = pushed_stack.back();
 	pushed_stack.pop_back();
@@ -79,8 +78,6 @@ inline AtomSpacePtr pop_frame(void)
 	// Remove the pushed atomspace from its parent (the saved atomspace)
 	if (entry.pushed and entry.saved)
 		entry.saved->extract_atom(HandleCast(entry.pushed));
-
-	return entry.pushed;
 }
 
 // Set the current atomspace. Does NOT affect the push/pop stack.

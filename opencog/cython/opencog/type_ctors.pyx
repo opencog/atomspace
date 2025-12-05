@@ -86,6 +86,7 @@ def get_thread_atomspace():
 
 def pop_thread_atomspace():
     """
-    Pop the top atomspace from the frame stack and return it.
+    Pop the top atomspace from the frame stack.
+    The pushed atomspace is cleared and removed from its parent.
     """
-    return AtomSpace_factoid(handle_cast(pop_frame()))
+    pop_frame()

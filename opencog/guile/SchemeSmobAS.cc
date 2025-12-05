@@ -396,10 +396,7 @@ SCM SchemeSmob::ss_push_atomspace (void)
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
 	// pop_frame() clears the pushed atomspace and removes it from parent.
-	AtomSpacePtr pushed_as = pop_frame();
-	if (nullptr == pushed_as)
-		scm_misc_error("cog-pop-atomspace",
-			"More pops than pushes!", SCM_EOL);
+	pop_frame();
 
 	// Update the fluid, too. I suspect this is not needed.
 	// but best keep things in sync to avoid crazy-making.
