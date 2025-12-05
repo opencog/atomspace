@@ -28,8 +28,10 @@ cdef inline void _current_atomspace():
     cdef cValuePtr context = get_frame()
     if context.get() == NULL:
         atomspace = _atomspace_context.get()
-        if atomspace is not None:
-            set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+        set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+
+# Run it at least once.
+_current_atomspace()
 
 def add_link(Type t, outgoing):
     _current_atomspace()
