@@ -97,7 +97,7 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     init();
 }
 
-AtomSpace::AtomSpace(AtomSpacePtr& parent) :
+AtomSpace::AtomSpace(const AtomSpacePtr& parent) :
     Frame(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(false),

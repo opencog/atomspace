@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -46,7 +47,7 @@ protected:
 	void init(void);
 	virtual void update() const;
 	HandleSeq _formula;
-	AtomSpace* _scratch;
+	AtomSpacePtr _scratch;
 
 public:
 	FutureStream(const Handle&);

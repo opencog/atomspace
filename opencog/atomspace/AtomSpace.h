@@ -156,7 +156,7 @@ public:
      * with. See COW below.
      */
     AtomSpace(AtomSpace* base=nullptr, bool transient=false);
-    AtomSpace(AtomSpacePtr&);
+    AtomSpace(const AtomSpacePtr&);
     AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
