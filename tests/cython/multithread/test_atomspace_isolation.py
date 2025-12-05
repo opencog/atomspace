@@ -192,8 +192,6 @@ class Test_2_2_SharedAtomSpaceReadHeavy(ThreadTestCase):
         def worker(thread_id):
             """Worker performing read operations."""
             try:
-                set_thread_atomspace(self.shared_atomspace)
-
                 # Look up specific atoms (simple reads)
                 atom_idx = thread_id % 20
                 atom = ConceptNode(f"shared_atom_{atom_idx}")
@@ -265,8 +263,6 @@ class Test_2_3_SharedAtomSpaceReadWriteMix(ThreadTestCase):
         def worker(thread_id):
             """Worker performing mixed read/write."""
             try:
-                set_thread_atomspace(self.shared_atomspace)
-
                 if thread_id % 2 == 0:
                     # Writer thread - add a few atoms
                     atom1 = ConceptNode(f"writer_{thread_id}_atom_1")
