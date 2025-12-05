@@ -60,8 +60,7 @@ def add_node(Type t, atom_name):
 
 def set_thread_atomspace(AtomSpace atomspace):
     """
-    Set the default atomspace for the current thread.
-    Sets (replaces top of) the frame stack.
+    Set the AtomSpace used in the current thread.
     """
     if atomspace is not None:
         set_frame(handle_cast(atomspace.shared_ptr))
@@ -69,8 +68,17 @@ def set_thread_atomspace(AtomSpace atomspace):
 
 def push_thread_atomspace():
     """
-    Push a new atomspace onto the frame stack for the current thread.
-    Creates a child of the current atomspace.
+    Create a temporary scratch-space AtomSpace for the current thread.
+    Everything in the current AtomSpace will be visible in this
+    scratch space. Any changes will be made ONLY to the temporary;
+    those changes will be discarded when the temporary is popped.
+
+    If you need to make some changes permanent, you can either copy
+    those Atoms into whatever desired AtomSpace you wish. Alternately,
+    disable the copy-on-write (COW) flag on *this* AtomSpace; this
+    will cause changes to pass through to the base AtomSpace.
+
+    Use pop_thread_atomspace() to pop.
     """
     push_frame()
     return get_thread_atomspace()
@@ -78,7 +86,7 @@ def push_thread_atomspace():
 
 def get_thread_atomspace():
     """
-    Get the default atomspace for the current thread from the frame stack.
+    Get the AtomSpace being used in this thread.
     """
     cdef cValuePtr context = get_frame()
     return AtomSpace_factoid(handle_cast(context))
@@ -86,7 +94,9 @@ def get_thread_atomspace():
 
 def pop_thread_atomspace():
     """
-    Pop the top atomspace from the frame stack.
-    The pushed atomspace is cleared and removed from its parent.
+    Pop the temporary scratch-space AtomSpace from the stack.
+
+    Ths assumes the stack was previously pushed with
+    push_thread_atomspace().
     """
     pop_frame()
