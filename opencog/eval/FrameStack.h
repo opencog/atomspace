@@ -63,18 +63,6 @@ inline void set_frame(const ValuePtr& vasp)
 	set_frame(AtomSpaceCast(vasp));
 }
 
-// Simple RAII guard for the current AtomSpace frame.
-struct ASGuard
-{
-	ASGuard(AtomSpace* as)
-	{ push_frame(AtomSpaceCast(as)); }
-	ASGuard(const AtomSpacePtr& asp)
-	{ push_frame(asp); }
-	~ASGuard() { pop_frame(); }
-	ASGuard(const ASGuard&) = delete;
-	ASGuard& operator=(const ASGuard&) = delete;
-};
-
 }
 
 #endif // _OPENCOG_FRAMESTACK_H

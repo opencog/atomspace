@@ -69,6 +69,21 @@ class scope_exit
 using namespace opencog;
 using namespace std::chrono_literals;
 
+// RAII guard to save and restore the current AtomSpace.
+struct ASGuard
+{
+	AtomSpacePtr _saved;
+	ASGuard(AtomSpace* as)
+		: _saved(get_frame())
+	{ set_frame(AtomSpaceCast(as)); }
+	ASGuard(const AtomSpacePtr& asp)
+		: _saved(get_frame())
+	{ set_frame(asp); }
+	~ASGuard() { set_frame(_saved); }
+	ASGuard(const ASGuard&) = delete;
+	ASGuard& operator=(const ASGuard&) = delete;
+};
+
 /*
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
