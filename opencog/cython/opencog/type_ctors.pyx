@@ -30,8 +30,6 @@ cdef inline void _current_atomspace():
         atomspace = _atomspace_context.get()
         set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
 
-# Run it at least once.
-_current_atomspace()
 
 def add_link(Type t, outgoing):
     _current_atomspace()
@@ -122,6 +120,9 @@ def add_node(Type t, atom_name):
 
 # ContextVar to maintain AtomSpace across Python threads.
 _atomspace_context: ContextVar = ContextVar('atomspace', default=None)
+cdef cValuePtr _init_context = get_frame()
+if _init_context.get() != NULL:
+    _atomspace_context.set(AtomSpace_factoid(handle_cast(_init_context)))
 
 # Monkey-patch threading.Thread to inherit context variables.
 # Python's ContextVar doesn't automatically copy to child threads,
