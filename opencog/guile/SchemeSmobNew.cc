@@ -516,7 +516,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// Now, look for the actual node... in the actual AtomSpace.
 	Handle h(asp->get_node(t, std::string(name)));
-	if (nullptr == h) return SCM_EOL;
+	if (nullptr == h) return SCM_BOOL_F;
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -765,7 +765,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
-	if (nullptr == h) return SCM_EOL;
+	if (nullptr == h) return SCM_BOOL_F;
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

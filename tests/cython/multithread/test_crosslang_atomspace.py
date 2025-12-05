@@ -823,7 +823,7 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
         # Load required modules
 
         # Execute the full test sequence in Scheme
-        # Note: cog-node returns '() (empty list) when not found, not #f
+        # Note: cog-node returns #f when not found
         result = scheme_eval(base_atomspace, '''
             ; Push a new temporary atomspace
             (define base-as (cog-push-atomspace))
@@ -837,9 +837,9 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
                         (List))))
 
             ; Check if we can see the atom and value
-            ; Note: cog-node returns '() when not found, not #f
+            ; Note: cog-node returns #f when not found
             (define marker (cog-node 'ConceptNode "python-created-marker"))
-            (define marker-found (not (null? marker)))
+            (define marker-found (if marker #t #f))
             (define key (Predicate "python-key"))
             (define val (if marker-found (cog-value marker key) #f))
             (define val-correct (if val
@@ -851,7 +851,7 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
 
             ; Check if atom is gone from base
             (define marker-after-pop (cog-node 'ConceptNode "python-created-marker"))
-            (define marker-gone (null? marker-after-pop))
+            (define marker-gone (not marker-after-pop))
 
             ; Return results as a string
             (format #f "py-ok:~a marker:~a val-correct:~a gone-after-pop:~a"

@@ -37,7 +37,7 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that Apple was created.
 (test-assert "Apple atom was created"
-	(not (eq? '() (cog-node 'ConceptNode "Apple"))))
+	(cog-node 'ConceptNode "Apple"))
 
 ; Make sure the scheme version of Apple has the same FloatValue on it that
 ; the python code placed on it.

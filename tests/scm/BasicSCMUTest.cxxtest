@@ -271,7 +271,7 @@ void BasicSCMUTest::test_clear(void)
 	for (int i = 0; i < n; ++i)
 		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
 
-	std::string rs = eval->eval("(clear)");
+	std::string rs = eval->eval("(cog-atomspace-clear)");
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error
