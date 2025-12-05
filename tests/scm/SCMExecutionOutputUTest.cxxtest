@@ -143,9 +143,8 @@ void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 		counter ++;
 
 		std::ostringstream oss;
-		oss << "(begin "
-		    << "(define inh (InheritanceLink (ConceptNode "
-		    << jules.str() << ") (ConceptNode \"prince\"))) "
+		oss << "(let ((inh (InheritanceLink (ConceptNode "
+		    << jules.str() << ") (ConceptNode \"prince\")))) "
 		    << "(cog-set-value! inh (Predicate \"*-TruthValueKey-*\") (FloatValue " << strength << " " << confidence << ")) "
 		    << "inh)";
 
@@ -161,7 +160,7 @@ void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 		       "(GroundedSchemaNode \"scm: make-king\") "
              "(ListLink (ConceptNode " << jules.str() << "))))";
 		ev->eval(ess.str());
-		CHKEV(eval);
+		CHKEV(ev);
 	}
 }
 
