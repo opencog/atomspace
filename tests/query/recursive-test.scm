@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; recursive-test.scm -- unit test for the recursive.scm demo.
 ;

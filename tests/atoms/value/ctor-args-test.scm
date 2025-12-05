@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; ctor-args-test.scm -- Test that scheme Value constructors work properly
 ;

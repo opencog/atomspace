@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; filter-glob-test.scm -- Simple tests of top-level globs.
 ;

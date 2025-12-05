@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; deep-space-test.scm
 ; Assorted tests of change-sets in the atomspace.

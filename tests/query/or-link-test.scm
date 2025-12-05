@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; or-link-test.scm -- Verify that OrLink produces sums during search.
 ; Reflects the discussion in issue opencog/atomspace#2644

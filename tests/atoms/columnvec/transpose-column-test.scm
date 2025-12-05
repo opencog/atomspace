@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; transpose-column-test.scm -- Verify that TransposeColumn works.
 ;

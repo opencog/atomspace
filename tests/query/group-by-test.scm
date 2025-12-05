@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; group-by-test.scm -- Unit test for the GroupLink
 ;

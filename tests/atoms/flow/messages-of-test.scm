@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; messages-of-test.scm -- Verify that MessagesOfLink works.
 ;

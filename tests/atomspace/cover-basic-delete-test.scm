@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; cover-basic-delete-test.scm
 ; Verify that deletion works in a "common sense" fashion when

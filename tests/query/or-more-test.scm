@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; or-more-test.scm -- Verify more variations involving the OrLink.
 ; Reflects the discussion in issue opencog/atomspace#2644

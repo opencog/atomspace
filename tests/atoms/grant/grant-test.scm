@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; grant-test.scm -- test that GrantLink works.
 ;

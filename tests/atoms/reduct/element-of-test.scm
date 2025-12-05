@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; element-of-test.scm -- Test the ElementOfLink.
 ;

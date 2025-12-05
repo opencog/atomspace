@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; split-test.scm -- Verify that SplitLink works.
 ;

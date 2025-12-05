@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; math-library-test.scm -- Test assorted elementary numerical functions
 ;

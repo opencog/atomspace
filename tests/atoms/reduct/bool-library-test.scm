@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; bool-library-test.scm -- Test assorted BoolValue logic ops.
 ;

@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; cover-basic-test.scm
 ; Verify basic operations of layere atomspace frames.

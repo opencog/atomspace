@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; filter-float-test.scm -- Verify that various wiki pages don't lie.
 ; Specifically, that the demo in

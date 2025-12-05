@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; frame-incoming-test.scm
 ; Verify that getIncomingSet() works on AtomSpaces.

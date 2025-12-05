@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; drain-test.scm -- Verify that DrainLink works.
 ;

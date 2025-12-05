@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; inline-values.scm -- Unit test values specified in-line with atom.
 ;

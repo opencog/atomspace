@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; string-of-test.scm -- Test the LinkSignatureLink for basic fuction
 ;

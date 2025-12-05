@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; link-column-test.scm -- Verify that LinkColumn works.
 ;

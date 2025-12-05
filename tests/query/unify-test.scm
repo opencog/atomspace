@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; unify-test.scm -- Port of UnifyTest.cxxtest
 ;

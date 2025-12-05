@@ -1,3 +1,8 @@
+#! /usr/bin/env -S guile -s
+!#
+;
+; test copying ... uhhh
+;
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog test-runner))

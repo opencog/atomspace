@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; filter-glob-test.scm -- Verify that globs in filters work.
 ;

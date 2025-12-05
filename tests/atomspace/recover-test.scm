@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; recover-test.scm
 ; Test ability to delete and re-add atoms in different layers.

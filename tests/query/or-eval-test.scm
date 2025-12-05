@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; or-eval-test.scm -- Verify OrLink with GroundedPredicates in it
 ; Tests for problem reported in opencog/atomspace#2931

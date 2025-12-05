@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; dot-identical-test.scm -- take dot products of vectors for query
 ; See `dot-product-test.scm` for the basic version and explanation.

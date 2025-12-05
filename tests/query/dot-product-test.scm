@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; dot-product.scm -- take dot products of vectors for query
 ; This is the unit-test version of one of the demos.

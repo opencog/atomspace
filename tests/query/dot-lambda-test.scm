@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; dot-lambda-test.scm -- take dot products of vectors for query
 ; See `dot-product-test.scm` for the base cse.

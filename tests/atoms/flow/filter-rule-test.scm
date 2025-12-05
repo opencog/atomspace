@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; filter-rule-test.scm -- Test of filters with rules.
 ;

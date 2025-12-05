@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; filter-irc-eltof-test.scm -- Failiing FilterLink.
 ;

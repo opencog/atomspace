@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; json-split-test.scm -- Verify that JsonSplitLink works.
 ;

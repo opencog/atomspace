@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; datalog-basic-test.scm - Store DataLog expressions.
 ; Make sure that the code doesn't crash.

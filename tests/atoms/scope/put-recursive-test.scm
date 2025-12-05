@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; put-recursive-test.scm -- test for crash on recursive PutLink
 ;

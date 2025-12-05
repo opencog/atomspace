@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; sexpr-column-test.scm -- Verify that SexprColumn works
 ;

@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; rule-test.scm - Test the basic RuleLink syntax.
 ;

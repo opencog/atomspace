@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; or-meet-test.scm -- Verify that OrLink works in MeetLink, QueryLink too.
 ; Fixes Bug opencog/atomspace#2918

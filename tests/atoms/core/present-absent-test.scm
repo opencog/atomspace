@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; present-test.scm -- test that PresentLink, AbsentLink work.
 ;

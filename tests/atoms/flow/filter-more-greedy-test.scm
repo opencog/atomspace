@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;;;
 ;;; filter-more-greedy-test.scm
 ;;;

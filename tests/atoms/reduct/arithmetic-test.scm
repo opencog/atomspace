@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; arithmetic-test.scm -- Test basic arithmetic
 ;

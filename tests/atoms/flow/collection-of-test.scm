@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; collection-of-test.scm -- Verify that CollectionOf works.
 ;

@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; exec-eval-test.scm -- Verify that ExecutionOutput can run
 ; evaluatable links.

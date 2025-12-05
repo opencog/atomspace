@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; sorting-test.scm -- Test SortedStream sorting by size
 ;

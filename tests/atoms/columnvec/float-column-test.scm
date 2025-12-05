@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; float-column-test.scm -- Verify that FloatColumn works.
 ; Also depends on both SexprColumn and ListColumn in the final

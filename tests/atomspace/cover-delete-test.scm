@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; cover-delete-test.scm
 ; Verify that deleted atoms will cover underlying atoms in nested

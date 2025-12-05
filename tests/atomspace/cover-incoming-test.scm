@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; cover-incoming-test.scm
 ; Verify that incoming sets are correctly computed in nested

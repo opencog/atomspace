@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; cover-space-test.scm
 ; Verify that links are correctly covered/uncovered in deeply nested

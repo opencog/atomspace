@@ -1,3 +1,5 @@
+#! /usr/bin/env -S guile -s
+!#
 ;
 ; increment-value-test.scm -- Verify that IncrementValue works.
 ;
