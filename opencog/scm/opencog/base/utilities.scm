@@ -9,7 +9,6 @@
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
-; -- clear -- extract all atoms in the atomspace.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
@@ -25,7 +24,6 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs))  ; Needed for define*-public
-(use-modules (ice-9 threads))  ; Needed for par-map par-for-each
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
@@ -62,10 +60,6 @@
 (define-public (gdadr x) (gdr (gar (gdr x))) )
 (define-public (gddar x) (gdr (gdr (gar x))) )
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
-
-; A more aggressive way of doing the above:
-; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
-; But this would probably lead to various painful debugging situations.
 
 ; --------------------------------------------------------------------
 (define-public (extract-hypergraph atom)
