@@ -29,7 +29,6 @@
 #include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 #include "JoinLink.h"
 
@@ -354,8 +353,8 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	Transient scratch(as);
-	Handle meet = scratch.tmp->add_atom(_meet);
+	AtomSpacePtr scratch = createAtomSpace(as);
+	Handle meet = scratch->add_atom(_meet);
 	ValuePtr vp = meet->execute();
 
 	// The MeetLink returned everything that the variables in the
@@ -603,7 +602,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
                               Traverse& trav) const
 {
 	HandleSet rejects;
-	Transient scratch(as);
+	AtomSpacePtr scratch = createAtomSpace(as);
 
 	for (const Handle& h : trav.containers)
 	{
@@ -631,8 +630,8 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 
 			// Plug in any variables ...
 			Handle topper = Replacement::replace_nocheck(toc, plugs);
-			topper = scratch.tmp->add_atom(topper);
-			if (not topper->bevaluate(scratch.tmp, silent))
+			topper = scratch->add_atom(topper);
+			if (not topper->bevaluate(scratch.get(), silent))
 			{
 				rejects.insert(h);
 				break;

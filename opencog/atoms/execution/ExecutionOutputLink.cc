@@ -24,7 +24,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -96,9 +95,9 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 ///
 ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 {
-	Transient scratch(as);
+	AtomSpacePtr scratch = createAtomSpace(as);
 
-	ValuePtr vp(execute_once(as, scratch.tmp, silent));
+	ValuePtr vp(execute_once(as, scratch.get(), silent));
 
 	// Should never happen. But it can happen if the API implementation
 	// is screwed up. Since nothing should ever be screwed up, this can't
@@ -110,9 +109,9 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 
 	if (not vp->is_atom()) return vp;
 
-	Handle res(scratch.tmp->add_atom(HandleCast(vp)));
+	Handle res(scratch->add_atom(HandleCast(vp)));
 	if (res->is_executable())
-		vp = res->execute(scratch.tmp, silent);
+		vp = res->execute(scratch.get(), silent);
 
 	if (vp and vp->is_atom())
 		return as->add_atom(HandleCast(vp));

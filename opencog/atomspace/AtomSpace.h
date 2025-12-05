@@ -90,7 +90,6 @@ private:
 
     bool _read_only;
     bool _copy_on_write;
-    bool _transient;
 
     /// Base AtomSpaces wrapped by this space. Empty if top-level.
     /// This AtomSpace will behave like the set-union of the base
@@ -162,12 +161,6 @@ public:
 
     bool is_node(void) const { return true; }
     bool is_link(void) const { return true; }
-
-    /// Transient atomspaces are lighter-weight, faster, but are missing
-    /// some features. They are used during pattern matching, to hold
-    /// temporary results. The are always copy-on-write spaces.
-    void ready_transient(AtomSpace* parent);
-    void clear_transient();
 
     /// Read-only (RO) atomspaces provide protection against update of the
     /// AtomSpace contents. Atoms in a read-only atomspace cannot be

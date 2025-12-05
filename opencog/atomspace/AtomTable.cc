@@ -82,7 +82,6 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     Frame(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(transient),
-    _transient(transient),
     _nameserver(nameserver()),
     addedTypeConnection(0)
 {
@@ -101,7 +100,6 @@ AtomSpace::AtomSpace(const AtomSpacePtr& parent) :
     Frame(ATOM_SPACE),
     _read_only(false),
     _copy_on_write(false),
-    _transient(false),
     _nameserver(nameserver()),
     addedTypeConnection(0)
 {
@@ -120,7 +118,6 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     Frame(ATOM_SPACE, bases),
     _read_only(false),
     _copy_on_write(false),
-    _transient(false),
     _nameserver(nameserver()),
     addedTypeConnection(0)
 {
@@ -141,33 +138,6 @@ AtomSpace::~AtomSpace()
 {
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
     clear_all_atoms();
-}
-
-void AtomSpace::ready_transient(AtomSpace* parent)
-{
-    _copy_on_write = true;
-
-    if (not _transient or nullptr == parent)
-        throw RuntimeException(TRACE_INFO,
-                "AtomSpace - ready called on non-transient atom table.");
-
-    // Set the new parent environment and holder atomspace.
-    _environ.push_back(AtomSpaceCast(parent));
-    _outgoing.push_back(HandleCast(parent));
-}
-
-void AtomSpace::clear_transient()
-{
-    if (not _transient)
-        throw RuntimeException(TRACE_INFO,
-                "AtomSpace - clear_transient called on non-transient atom table.");
-
-    // Clear all the atoms
-    clear_all_atoms();
-
-    // Clear the  parent environment and holder atomspace.
-    _environ.clear();
-    _outgoing.clear();
 }
 
 void AtomSpace::clear_all_atoms()
@@ -275,13 +245,6 @@ Handle AtomSpace::check(const Handle& orig, bool force)
     if (not _copy_on_write)
         return lookupHandle(orig);
 
-    // If this is a transient atomspace, then just grab any version
-    // we find. This alters the behavior of glob matching in the
-    // MinerUTest (specifically, test_glob and test_typed_glob).
-    // I'm not sure what the deal is, though, why we need to check?
-    if (_transient)
-        return lookupHandle(orig);
-
     // If its a node, then the shallowest matching node will do.
     if (not orig->is_link())
         return lookupHandle(orig);
@@ -384,7 +347,7 @@ Handle AtomSpace::add(const Handle& orig, bool force,
     }
 
     // If we are shadowing a deeper atom, copy it's values.
-    if ((_transient or _copy_on_write) and atom == orig)
+    if (_copy_on_write and atom == orig)
     {
         Handle covered(lookupHandle(orig));
         if (covered)

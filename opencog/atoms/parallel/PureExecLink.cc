@@ -24,7 +24,6 @@
 #include <opencog/atoms/parallel/PureExecLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 using namespace opencog;
 
@@ -84,8 +83,8 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		}
 
 		// No AtomSpace provided. Use a temporary.
-		Transient scratch(as);
-		vseq.push_back(h->execute(scratch.tmp, silent));
+		AtomSpacePtr scratch = createAtomSpace(as);
+		vseq.push_back(h->execute(scratch.get(), silent));
 	}
 
 	return createLinkValue(std::move(vseq));
