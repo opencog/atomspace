@@ -103,12 +103,18 @@ void opencog::global_python_initialize()
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
     } else {
-        // Create and set a default atomspace for the initial thread.
-        // This allows type constructors to work without requiring
-        // explicit set_default_atomspace() calls.
-        AtomSpacePtr default_atomspace = createAtomSpace();
-        push_frame(default_atomspace);
-        logger().info("[global_python_initialize] Created default atomspace");
+        // Only create and set a default atomspace if there isn't one
+        // already in the frame stack (e.g., set by Scheme before Python
+        // was initialized). This allows type constructors to work without
+        // requiring explicit set_default_atomspace() calls, while also
+        // respecting atomspaces that were set up before Python init.
+        if (nullptr == get_frame()) {
+            AtomSpacePtr default_atomspace = createAtomSpace();
+            set_frame(default_atomspace);
+            logger().info("[global_python_initialize] Created default atomspace");
+        } else {
+            logger().info("[global_python_initialize] Using existing atomspace from frame stack");
+        }
     }
 
     // Release the GIL, otherwise the Python shell hangs on startup.

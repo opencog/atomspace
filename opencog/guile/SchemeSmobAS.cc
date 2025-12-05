@@ -55,7 +55,7 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
-	// Create new AtomSpace with the indicated decendents.
+	// Create new AtomSpace with the indicated descendants.
 	AtomSpacePtr asp = createAtomSpace(spaces);
 
 	// If a name was provided, set that name.
@@ -244,7 +244,41 @@ SCM SchemeSmob::ss_as(SCM satom)
 
 /* ============================================================== */
 /**
- * Return current atomspace for this dynamic state.
+ * Holds the current AtomSpace for this dynamic state. Mostly.
+ * There is some non-obvious hackery going on here, due to the need
+ * to satisfy multiple requirements and over-come C++ TLS weakness
+ * and python integration.
+ *
+ * The first requirement is that new scheme threads get the same
+ * AtomSpace as the one that created the new thread. Scheme fluids are
+ * ideal for this: new threads get a copy of the creator's fluid state.
+ *
+ * The second requirement is that the AtomSpace be shared between scheme
+ * and python, so that cross-language calls through GroundedPredicate and
+ * GroundedSchema both use the same AtomSpace. This necessitates the use
+ * of `opencog/eval/FrameStack.h` to share the AtomSpace across languages.
+ * This works, and we are mostly happy. But ...
+ *
+ * FrameStack uses TLS, and TLS state is NOT copied when a new thread is
+ * created. TLS does not behave like a fluid. This causes major issues:
+ * A new scheme thread is created. We try to find the atomspace in TLS,
+ * but its a null pointer! Aiee! So we fall back to getting it from the
+ * fluid, and then tell the FrameStack what it is, so that python can
+ * find it later.
+ *
+ * Otherwise, if get_frame() returns non-null, we assume that this is
+ * some AtomSpace that python set up for us, and we just go ahead, and
+ * use it. And that's all good. But we also better cache it in our fluid,
+ * just in case some scheme code creates some threads.
+ *
+ * So, in a sense, the get_frame() is always the master authority for
+ * what the AtomSpace is for this thread. Unless its nullptr, in which
+ * case the fluid offers the ground-truth. Which we then immediately
+ * hand over with set_frame() so that get_frame() can remain the master
+ * authority. The scheme fluid just shadows what is in the frame, and
+ * should always be in sync.
+ *
+ * Phew. It works, and there's lots of unit tests for this.
  */
 SCM SchemeSmob::atomspace_fluid;
 

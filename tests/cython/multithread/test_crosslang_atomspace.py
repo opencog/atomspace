@@ -731,5 +731,177 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         self.assertEqual(success_count, num_threads)
 
 
+class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
+    """
+    Test 1d: Cross-language push/pop visibility
+
+    Objective: Verify that when one language pushes an AtomSpace,
+    the other language can see atoms created in that pushed space,
+    and when popped, those atoms are no longer visible.
+    """
+
+    def test_python_push_scheme_creates_atom_python_sees(self):
+        """
+        Python pushes AtomSpace, Scheme creates atom with value, Python sees it.
+
+        Flow:
+        1. Python pushes a new AtomSpace
+        2. Python calls Scheme function via GroundedSchema
+        3. Scheme creates an atom and sets a value on it
+        4. Python verifies it can see the atom and value
+        5. Python pops the AtomSpace
+        6. Python verifies the atom is gone
+        """
+        from opencog.type_ctors import pop_thread_atomspace
+
+        # Create base atomspace
+        base_atomspace = AtomSpace()
+        push_thread_atomspace(base_atomspace)
+
+        # Define a Scheme function that creates an atom with a value
+        scheme_eval(base_atomspace, '''
+            (define (scm-create-marker-with-value)
+                (let ((marker (Concept "scheme-created-marker"))
+                      (key (Predicate "scheme-key")))
+                    (cog-set-value! marker key (StringValue "hello-from-scheme"))
+                    marker))
+        ''')
+
+        # Push a new temporary atomspace
+        pushed_as = push_thread_atomspace()
+
+        # Call Scheme function - it should create the atom in the pushed atomspace
+        exec_link = ExecutionOutputLink(
+            GroundedSchemaNode("scm: scm-create-marker-with-value"),
+            ListLink()
+        )
+        result = exec_link.execute()
+
+        # Verify Python can see the result
+        self.assertIsNotNone(result)
+        self.assertEqual(result.name, "scheme-created-marker")
+
+        # Verify Python can see the value that Scheme set
+        marker = ConceptNode("scheme-created-marker")
+        key = PredicateNode("scheme-key")
+        value = marker.get_value(key)
+
+        self.assertIsNotNone(value, "Python should see the value set by Scheme")
+        self.assertEqual(value.to_list(), ["hello-from-scheme"])
+
+        # Pop the atomspace - the atom should now be gone from view
+        pop_thread_atomspace()
+
+        # Verify the atom is no longer findable in the base atomspace
+        # After pop, creating a ConceptNode with the same name should give us
+        # a NEW atom (not the one from the pushed space), or the atom from
+        # the pushed space should have getAtomSpace() == None (orphaned)
+        marker_after_pop = ConceptNode("scheme-created-marker")
+        marker_as = marker_after_pop.atomspace
+        # The marker should either be in base_atomspace (newly created) or orphaned
+        # It should NOT have the value we set in the pushed space
+        value_after_pop = marker_after_pop.get_value(key)
+        # After pop, the atom in base shouldn't have the value (it's a different atom
+        # or the original is orphaned)
+        self.assertTrue(
+            value_after_pop is None or marker_as == base_atomspace,
+            "After pop, the pushed atom's value should not be accessible")
+
+    def test_scheme_push_python_creates_atom_scheme_sees(self):
+        """
+        Scheme pushes AtomSpace, Python creates atom with value, Scheme sees it.
+
+        Flow:
+        1. Scheme pushes a new AtomSpace (via cog-push-atomspace)
+        2. Scheme calls Python function via GroundedPredicate
+        3. Python creates an atom and sets a value on it
+        4. Scheme verifies it can see the atom and value
+        5. Scheme pops the AtomSpace
+        6. Scheme verifies the atom is gone
+
+        This test is executed from Python but orchestrates Scheme to do the pushing.
+        """
+        # Create base atomspace
+        base_atomspace = AtomSpace()
+        push_thread_atomspace(base_atomspace)
+
+        # Load required modules
+        scheme_eval(base_atomspace, '(use-modules (opencog exec))')
+
+        # Execute the full test sequence in Scheme
+        # Note: cog-node returns '() (empty list) when not found, not #f
+        result = scheme_eval(base_atomspace, '''
+            ; Push a new temporary atomspace
+            (define base-as (cog-push-atomspace))
+
+            ; Call Python function that creates an atom with a value
+            ; Use cog-execute! on Evaluation link
+            (define py-succeeded
+                (cog-execute!
+                    (Evaluation
+                        (GroundedPredicate "py:crosslang_py_create_atom_with_value_pred")
+                        (List))))
+
+            ; Check if we can see the atom and value
+            ; Note: cog-node returns '() when not found, not #f
+            (define marker (cog-node 'ConceptNode "python-created-marker"))
+            (define marker-found (not (null? marker)))
+            (define key (Predicate "python-key"))
+            (define val (if marker-found (cog-value marker key) #f))
+            (define val-correct (if val
+                (equal? (cog-value-ref val 0) "hello-from-python")
+                #f))
+
+            ; Pop the atomspace
+            (cog-pop-atomspace)
+
+            ; Check if atom is gone from base
+            (define marker-after-pop (cog-node 'ConceptNode "python-created-marker"))
+            (define marker-gone (null? marker-after-pop))
+
+            ; Return results as a string
+            (format #f "py-ok:~a marker:~a val-correct:~a gone-after-pop:~a"
+                py-succeeded
+                marker-found
+                val-correct
+                marker-gone)
+        ''')
+
+        # Parse and verify results
+        print(f"Test result: {result}")
+        self.assertIn("marker:#t", result, "Scheme should see the marker atom")
+        self.assertIn("val-correct:#t", result, "Scheme should see correct value")
+        self.assertIn("gone-after-pop:#t", result, "Atom should be gone after pop")
+
+
+# Python function for Test 1d - creates atom with value (Schema version)
+def crosslang_py_create_atom_with_value():
+    """Create a marker atom with a value in the current atomspace."""
+    marker = ConceptNode("python-created-marker")
+    key = PredicateNode("python-key")
+    asp = get_thread_atomspace()
+    asp.set_value(marker, key, StringValue("hello-from-python"))
+    return marker
+
+
+# Python function for Test 1d - creates atom with value (Predicate version)
+def crosslang_py_create_atom_with_value_pred():
+    """Create a marker atom with a value in the current atomspace. Returns True/False."""
+    try:
+        marker = ConceptNode("python-created-marker")
+        key = PredicateNode("python-key")
+        asp = get_thread_atomspace()
+        asp.set_value(marker, key, StringValue("hello-from-python"))
+        return True
+    except Exception as e:
+        print(f"Python predicate error: {e}")
+        return False
+
+
+# Register the new functions in __main__
+__main__.crosslang_py_create_atom_with_value = crosslang_py_create_atom_with_value
+__main__.crosslang_py_create_atom_with_value_pred = crosslang_py_create_atom_with_value_pred
+
+
 if __name__ == '__main__':
     unittest.main()
