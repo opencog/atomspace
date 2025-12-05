@@ -10,7 +10,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 #include <opencog/eval/FrameStack.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/oc_assert.h>
@@ -369,7 +368,7 @@ const AtomSpacePtr& SchemeSmob::get_as_from_list(SCM slist)
 /* ============================================================== */
 /**
  * Push a new temporary atomspace onto the unified frame stack.
- * Grabs a transient atomspace from the pool, with the current as parent.
+ * Creates a new atomspace with the current as parent.
  * Return the previous (base) atomspace.
  */
 SCM SchemeSmob::ss_push_atomspace (void)
@@ -377,9 +376,8 @@ SCM SchemeSmob::ss_push_atomspace (void)
 	// Get current atomspace (from frame stack or fluid)
 	AtomSpacePtr base_as = get_current_as();
 
-	// Grab a transient atomspace from the pool
-	AtomSpace* tmp = grab_transient_atomspace(base_as.get());
-	AtomSpacePtr new_as = AtomSpaceCast(tmp);
+	// Create a new atomspace with the current as parent
+	AtomSpacePtr new_as = createAtomSpace(base_as);
 
 	// Push the new atomspace onto the unified frame stack
 	push_frame(new_as);
@@ -394,7 +392,7 @@ SCM SchemeSmob::ss_push_atomspace (void)
 /* ============================================================== */
 /**
  * Pop a temporary atomspace from the unified frame stack.
- * Returns the transient atomspace to the pool.
+ * Clear the popped atomspace, making any atoms in it into orphans.
  * Return unspecified.
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
@@ -406,9 +404,8 @@ SCM SchemeSmob::ss_pop_atomspace (void)
 
 	pop_frame();
 
-	// Release the transient atomspace back to the pool.
-	// This clears it, making any atoms in it into orphans.
-	release_transient_atomspace(top_as.get());
+	// Clear the atomspace, making any atoms in it into orphans.
+	top_as->clear();
 
 	// Update the fluid, too. I suspect this is not needed.
 	// but best keep things in sync to avoid crazy-making.
