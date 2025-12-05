@@ -4,7 +4,6 @@
 ; Same as sparse-react.scm but using ordered links.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; (load-from-path "chem_types.scm")
 

@@ -5,7 +5,7 @@
 ; It triggered an exception during pattern analysis.
 ; If the MeetLink can be created without a throw, then test passes.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define (meet)
 (Meet

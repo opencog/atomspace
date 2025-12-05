@@ -7,7 +7,7 @@
 ; implements 'transitive closure', in that the recursive search extends
 ; the relation transitively.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ----------
 ; Populate the AtomSpace with a tiny fragment of an upper ontology.

@@ -43,7 +43,6 @@ public:
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 		eval->eval("(load-from-path \"opencog/scm/opencog.scm\")");
-		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~GlobUTest()

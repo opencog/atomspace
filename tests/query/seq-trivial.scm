@@ -1,7 +1,7 @@
 ;
 ; Some trivial sequences.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define get-something (Query (True) (Concept "it's true")))
 (define get-nothing   (Query (False) (Concept "it's false")))

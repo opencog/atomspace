@@ -7,7 +7,7 @@
 ; See also unordered-odo-equal.scm for same test case, but with
 ; equality constraints.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ----------------------------------------------------
 ; Coupled sets, expect 2! * 2! = 4 permutations

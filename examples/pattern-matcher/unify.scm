@@ -5,7 +5,7 @@
 ; term unification. The below is a very short, simple demo of
 ; this ability.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Populate the AtomSpace with some initial data. This includes
 ; the data we want to match, and also some confounding data,

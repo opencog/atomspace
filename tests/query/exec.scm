@@ -1,6 +1,6 @@
 ;; Used by ExecutionOutputUTest::test_query_exec
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;; Grounds
 

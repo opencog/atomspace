@@ -5,7 +5,7 @@
 ; them by returning one item at a time. Each access to the stream via
 ; printing or comparison advances the stream state.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

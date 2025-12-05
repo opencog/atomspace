@@ -21,7 +21,7 @@
 ; Taken as a whole, it demos a toy parallel processing pipeline.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------
 ; Create three bits of "knowledge".

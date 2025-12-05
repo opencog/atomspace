@@ -6,7 +6,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 (Concept "alice")
 (Concept "bob")

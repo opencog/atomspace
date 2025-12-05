@@ -3,7 +3,7 @@
 ; See `dot-product-test.scm` for the basic version and explanation.
 ; Variant using ChoiceLinks underneath IdenticalLinks.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

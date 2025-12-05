@@ -145,16 +145,6 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
 
-		case COG_LOGGER:
-		{
-			Logger* al = (Logger *) SCM_SMOB_DATA(a);
-			Logger* bl = (Logger *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			/* Just a simple pointer comparison */
-			if (al == bl) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
 		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
@@ -320,6 +310,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
+	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));

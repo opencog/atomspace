@@ -5,7 +5,7 @@
 ; (multiple-mandatory) terms wrapped into a single alternative.
 ; Derived from issue https://github.com/opencog/atomspace/issues/2644
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Data
 (State (List (Concept "Andrew") (Predicate "called robot")) (Concept "true"))

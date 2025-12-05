@@ -2,7 +2,7 @@
 ; Data and tests for Executable Pattern
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (PlusLink (NumberNode 3) (NumberNode 5))
 

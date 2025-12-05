@@ -15,7 +15,7 @@
 ; This may change; ask on the mailing list or open a github feature
 ; request.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;;; Populate the AtomSpace with some "sentences".
 (ListLink

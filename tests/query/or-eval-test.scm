@@ -15,7 +15,7 @@
 ; is superficially bizarre, it is testing a bug that actually
 ; shows up.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 ;; Functions

@@ -3,7 +3,7 @@
 ;
 ; Unit test for bug #2167
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (EvaluationLink
 	(PredicateNode "pred-1")

@@ -9,7 +9,6 @@
 ; Load this AFTER sudoku-rules.scm
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; ============================================================
 ; Non-consecutive predicate (string-based, intentionally ugly)

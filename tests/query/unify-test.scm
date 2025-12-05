@@ -33,7 +33,7 @@
 ; Ignoring this critical difference, this is a port of UnifyTest.cxxtest
 ; that "does the same thing", ignoring the subtleties above.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 ; Populate AtomSpace with test data.

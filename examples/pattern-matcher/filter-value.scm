@@ -21,7 +21,7 @@
 ;
 ; See https://wiki.opencog.org/w/FilterLink for general documentation.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Begin by creating a mockup of a complicated data stream. What makes
 ; this "complicated" is that it will consist of nested LinkValues,

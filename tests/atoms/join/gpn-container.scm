@@ -3,7 +3,7 @@
 ; GPNJoinUTest
 ; Make sure named containers work.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "cherry pie") (List (Concept "A")))
 (Evaluation (Predicate "hello daddy") (List (Concept "B")))

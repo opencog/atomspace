@@ -1,7 +1,7 @@
 ;
 ; sorting-test.scm -- Test SortedStream sorting by size
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

@@ -2,7 +2,6 @@
 ; Unit testing for disconnected patterns within ChoiceLinks.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;;; Populate the atomspace with three small trees.
 (EvaluationLink

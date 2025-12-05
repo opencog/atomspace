@@ -5,7 +5,7 @@
 ; and that these are properly converted to BoolValue.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 ;; Scheme predicates that return scheme booleans

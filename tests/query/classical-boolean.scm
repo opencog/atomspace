@@ -1,7 +1,7 @@
 ;
 ; Most users assume basic classical logic. Lets make sure they get that.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (State (Concept "me") (Predicate "hungry"))
 (State (Concept "you") (Predicate "bored"))

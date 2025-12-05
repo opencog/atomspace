@@ -84,7 +84,6 @@ class Test_1a_SchemeToPython(ThreadTestCase):
         push_thread_atomspace(atomspace)
 
         # Load required Scheme modules
-        scheme_eval(atomspace, '(use-modules (opencog exec))')
 
         # Execute Scheme code that calls Python
         result = scheme_eval_v(atomspace, '''
@@ -105,7 +104,6 @@ class Test_1a_SchemeToPython(ThreadTestCase):
         push_thread_atomspace(atomspace)
 
         # Load required Scheme modules
-        scheme_eval(atomspace, '(use-modules (opencog exec))')
 
         result = scheme_eval_v(atomspace, '''
             (cog-execute!
@@ -136,7 +134,6 @@ class Test_1a_SchemeToPython(ThreadTestCase):
                 push_thread_atomspace(thread_atomspace)
 
                 # Load required Scheme modules
-                scheme_eval(thread_atomspace, '(use-modules (opencog exec))')
 
                 # Execute Scheme that calls Python with thread-specific args
                 result = scheme_eval_v(thread_atomspace, f'''
@@ -192,7 +189,6 @@ class Test_1a_SchemeToPython(ThreadTestCase):
                 push_thread_atomspace(thread_atomspace)
 
                 # Load required Scheme modules
-                scheme_eval(thread_atomspace, '(use-modules (opencog exec))')
 
                 for call_idx in range(calls_per_thread):
                     result = scheme_eval_v(thread_atomspace, f'''
@@ -435,7 +431,6 @@ class Test_1c_CrossLangWithAtomspaceSwitch(ThreadTestCase):
         push_thread_atomspace(atomspace)
 
         # Load required Scheme modules
-        scheme_eval(atomspace, '(use-modules (opencog exec))')
 
         # Add a marker to identify this atomspace
         ConceptNode("original_marker")
@@ -826,7 +821,6 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
         push_thread_atomspace(base_atomspace)
 
         # Load required modules
-        scheme_eval(base_atomspace, '(use-modules (opencog exec))')
 
         # Execute the full test sequence in Scheme
         # Note: cog-node returns '() (empty list) when not found, not #f

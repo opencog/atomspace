@@ -19,7 +19,7 @@
 ; The next example, `flows.scm`, shows how to attach such TV's to
 ; arbitrary Atoms.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 

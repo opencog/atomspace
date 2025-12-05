@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Inheritance (Concept "mouse") (Concept "animal"))
 (Inheritance (Concept "mouse") (Concept "mammal"))

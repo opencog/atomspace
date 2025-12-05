@@ -13,7 +13,7 @@
 ; The stuff in here looks kind of crazy, but all of it is needed
 ; to provoke the bug. Simplifying further makes the bug go away.
 
-(use-modules (opencog) (opencog exec) (opencog logger))
+(use-modules (opencog) (opencog logger))
 ; (cog-logger-set-level! "fine")
 ; (cog-logger-set-stdout! #t)
 ; (cog-logger-set-timestamp! #f)

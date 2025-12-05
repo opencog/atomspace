@@ -77,7 +77,6 @@ void EvaluationUTest::tearDown(void)
 void EvaluationUTest::setUp(void)
 {
 	as->clear();
-	eval->eval("(use-modules (opencog exec))");
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 }

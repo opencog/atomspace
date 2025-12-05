@@ -17,7 +17,6 @@ ADD_LIBRARY (smob
 	SchemeSmobNew.cc
 	SchemeSmobPrint.cc
 	SchemeSmobValue.cc
-	SchemeSmobLogger.cc
 )
 
 TARGET_LINK_LIBRARIES(smob

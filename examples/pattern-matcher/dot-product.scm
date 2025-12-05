@@ -7,7 +7,7 @@
 ; a query that returns two vectors of numbers, which are multiplied
 ; and accumulated, resulting in a dot-product of the two.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "counting key"))
 (define (count-of ATOM) (ElementOf (Number 2) (ValueOf ATOM tvkey)))

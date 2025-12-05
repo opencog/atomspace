@@ -30,7 +30,7 @@
 ; Here, the AtomSpace becomes a "source" (opposite of "sink") for
 ; a stream.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Given the (PredicateNode "bar"), create the (ConceptNode "bar")
 

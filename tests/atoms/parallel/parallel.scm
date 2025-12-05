@@ -3,7 +3,7 @@
 ;
 ; Part of the unit test for ParallelLink and ExecuteThreadedLink.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define nnn 0)
 (define (incr) (set! nnn (+ nnn 1)) #t)

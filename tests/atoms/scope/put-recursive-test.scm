@@ -1,7 +1,7 @@
 ;
 ; put-recursive-test.scm -- test for crash on recursive PutLink
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

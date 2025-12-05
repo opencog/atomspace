@@ -1,5 +1,4 @@
 (use-modules (opencog logger))
-(use-modules (opencog exec))
 
 ;; Well formed PutLink
 (define put-1

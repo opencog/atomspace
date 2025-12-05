@@ -3,7 +3,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; (use-modules (opencog logger))
 ; (cog-logger-set-level! "fine")

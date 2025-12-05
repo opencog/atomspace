@@ -1,7 +1,7 @@
 ;
 ; query-exclusive.scm -- ExclusiveLink usage example.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (State (Concept "stop light") (Concept "red light"))
 

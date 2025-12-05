@@ -29,7 +29,7 @@
 ; and the simpler SatisfactionLink is enough.
 ;
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define green-light  (Concept "green light"))
 (define red-light  (Concept "red light"))

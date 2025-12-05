@@ -24,7 +24,7 @@
 ;    processing of Values. Values are inherently fleeting, and are much
 ;    more numerically-oriented. Other examples show how.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Compute the factorial of a NumberNode, using the classic
 ; recursive algorithm.

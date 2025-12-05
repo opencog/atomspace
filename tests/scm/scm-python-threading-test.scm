@@ -13,7 +13,7 @@
 ; Uses ExecuteThreadedLink instead of (ice-9 threads) for threading.
 ;
 
-(use-modules (opencog) (opencog exec) (opencog python))
+(use-modules (opencog) (opencog python))
 (use-modules (opencog test-runner))
 (use-modules (srfi srfi-1))  ; For 'every' function
 

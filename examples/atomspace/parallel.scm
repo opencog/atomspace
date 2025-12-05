@@ -10,7 +10,7 @@
 ; easier to use in many situations.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Define a simple counter that will be incremented
 (define (make-counter)

@@ -1,5 +1,4 @@
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;
 ; The famous "Miracle Sudoku" puzzle by Mitchell Lee.

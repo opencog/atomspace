@@ -8,7 +8,7 @@
 ; a query that returns two vectors of numbers, which are multiplied
 ; and accumulated, resulting in a dot-product of the two.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

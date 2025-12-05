@@ -5,7 +5,6 @@
 ; and how they can be searched for.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Store an s-expression in the AtomSpace
 ; It is passed in as a string.

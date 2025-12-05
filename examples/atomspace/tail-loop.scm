@@ -17,7 +17,7 @@
 ; executed. The more general case is to work with Values of any kind,
 ; using DefinedProcedure. See `tail-procedure.scm` for that demo.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Create a stream of random-number values, between 0 and 1.
 ; See `stream.scm` for an extended demonstration of streams.

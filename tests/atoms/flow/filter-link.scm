@@ -1,7 +1,7 @@
 ;
 ; filter-link.scm -- Data for running the FilterLinkUTest
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ----------------------------------------------------------
 

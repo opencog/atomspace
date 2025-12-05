@@ -28,7 +28,7 @@
 ; slow, high-low watermarks are used on the sorted buffer. These are
 ; currently hard-coded.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 : Demoing a running stream is difficult, and so the demo below will
 ; demonstrate sorting on a static list. This has little overall impact.

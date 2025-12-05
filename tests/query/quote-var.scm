@@ -5,7 +5,7 @@
 ; quoted variable.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (EvaluationLink
 	(PredicateNode "similar")

@@ -8,7 +8,7 @@
 ; direct constraints.  See unordered-odo-equal.scm for the same test,
 ; but with virtual EqualLink.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "equal") (List (Concept "L") (Concept "L")))
 (Evaluation (Predicate "equal") (List (Concept "M") (Concept "M")))

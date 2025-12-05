@@ -14,7 +14,7 @@
 ; incremented as well. That the stream drained to completion can
 ; be checked by looking at these counts at the end.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Create a static list of five items.
 ; Null-terminate the list, as otherwise the FlatStream below

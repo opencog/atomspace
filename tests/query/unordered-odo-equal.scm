@@ -8,7 +8,7 @@
 ; direct constraints. See also unordered-odo-equpr.scm for the
 ; same test, but with equality predicates.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ----------------------------------------------------
 ; Coupled sets, expect 2! * 2! = 4 permutations

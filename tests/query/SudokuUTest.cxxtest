@@ -45,7 +45,6 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			eval = SchemeEval::get_scheme_evaluator(as);
 			eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
-			eval->eval("(use-modules (opencog exec))");
 		}
 
 		~SudokuPuzzle()

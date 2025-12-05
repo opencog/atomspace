@@ -22,7 +22,7 @@
 ; Then, scroll to the bottom, and some of the commented-out
 ; examples.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;; Define the key used to store probability values
 (define prob-key (Predicate "*-ProbabilityKey-*"))

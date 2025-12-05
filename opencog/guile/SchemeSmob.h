@@ -53,13 +53,11 @@ class SchemeSmob
 	friend class PrimitiveEnviron;
 	template<class... Args> friend class SchemeArgConverters;
 	friend class SchemeReturnConverters;
-	friend class LoggerSCM;
 
 private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
 	};
 
@@ -107,6 +105,7 @@ private:
 	static SCM ss_link(SCM, SCM);
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
+	static SCM ss_execute(SCM);
 	static SCM ss_value_p(SCM);
 	static SCM ss_atom_p(SCM);
 	static SCM ss_node_p(SCM);
@@ -186,16 +185,6 @@ private:
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);
 
-	// Logger XXX TODO these do not belong here, they
-	// need to be moved to their own module.
-	static SCM logger_to_scm(Logger*);
-	static Logger* ss_to_logger(SCM);
-	static std::string logger_to_string(const Logger *);
-	static void release_logger(Logger*);
-	static Logger* new_logger();
-	static std::mutex lgr_mtx;
-	static std::set<Logger*> deleteable_lgr;
-	
 	// validate arguments coming from scheme passing into C++
 	[[ noreturn ]] static void throw_exception(const std::exception&,
 	                                           const char *, SCM);
@@ -225,7 +214,6 @@ private:
 	                         const char *msg = "boolean");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
-	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(const AtomSpacePtr&);

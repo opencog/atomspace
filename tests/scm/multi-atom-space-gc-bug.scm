@@ -2,7 +2,6 @@
 ;; created from scheme.
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog logger))
 
 ;; Create a new atomspace to not by-pass the problem (due to

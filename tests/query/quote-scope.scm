@@ -3,7 +3,7 @@
 ;
 ; This shows up in the URE, as a meta-pattern searching for patterns.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Rule
 	(TypedVariable (Variable "X") (Type 'Concept))

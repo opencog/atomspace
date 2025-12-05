@@ -6,7 +6,7 @@
 ; or not.  This can be done using the GroundedPredicateNode, as shown
 ; in this demo.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Define a function that takes an atom and returns an OpenCog truth
 ; value. In this case, it randomly returns true or false, about half the

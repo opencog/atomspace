@@ -2,7 +2,7 @@
 ; filter-irc-test.scm -- Test filter with executable terms in LinkValues
 ; 
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

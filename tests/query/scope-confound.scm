@@ -3,7 +3,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; -------------------------------------------------------------
 ; From "opencog/pln/rules/evaluation-to-member-rule.scm"

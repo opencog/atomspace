@@ -3,7 +3,7 @@
 ; JoinLink unit test. Performs an actual join, for real,
 ; i.e. an actual set intersection of the filters.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Data
 (Evaluation (Predicate "Pa") (List (Concept "A")))

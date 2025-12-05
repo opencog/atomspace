@@ -3,7 +3,7 @@
 ; TrueJoinUTest
 ; Validate that UpperSet works correctly.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "ontology")
 	(List

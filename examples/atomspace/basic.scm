@@ -133,7 +133,6 @@ fff
 ; -----------------
 ; The above set and get can be done in pure Atomese. We'll need to load
 ; one more module:
-(use-modules (opencog exec))
 
 (cog-execute! (ValueOf (Concept "asdf") (Predicate "some key")))
 (cog-execute! (SetValue

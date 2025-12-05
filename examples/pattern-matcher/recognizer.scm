@@ -44,7 +44,7 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Two different pseudo-AIML rules:
 ;    I * you   --> I * you too

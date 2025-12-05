@@ -1,6 +1,5 @@
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog python))
 (use-modules (opencog test-runner))
 

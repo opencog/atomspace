@@ -54,7 +54,7 @@
 ;;
 ;; thus falsely discarding the match.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define top
   (Lambda

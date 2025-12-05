@@ -41,7 +41,6 @@ public:
 
 		as = createAtomSpace();
 		eval = SchemeEval::get_scheme_evaluator(as);
-		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~ReductUTest()

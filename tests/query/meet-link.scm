@@ -2,7 +2,7 @@
 ; Data and tests for MeetLink
 ;
 
-(use-modules ((opencog exec)))
+(use-modules (opencog))
 
 (InheritanceLink (ConceptNode "Ben") (ConceptNode "human"))
 (InheritanceLink (ConceptNode "Linas") (ConceptNode "human"))

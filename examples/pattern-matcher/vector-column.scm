@@ -28,7 +28,7 @@
 ; AtomSpace. To be useful in compute applications, they need to be
 ; packaged up as vectors. This demo illustrates how this can be done.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ------------------------------------------------------------
 ; Begin with a trivial case: serialize a list of numbers.

@@ -1,7 +1,7 @@
 ;
 ; present-test.scm -- test that PresentLink, AbsentLink work.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

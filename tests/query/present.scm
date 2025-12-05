@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define get5 (MeetLink
   (VariableList

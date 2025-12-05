@@ -2,7 +2,7 @@
 ; json-split-test.scm -- Verify that JsonSplitLink works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

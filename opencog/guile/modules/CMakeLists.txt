@@ -1,15 +1,10 @@
 # Assorted scheme modules
 # --------------------------------
 
-ADD_LIBRARY (exec ExecSCM.cc)
-
-TARGET_LINK_LIBRARIES(exec execution smob)
-
-ADD_GUILE_EXTENSION(SCM_CONFIG exec "opencog-ext-path-exec")
-
+# The exec module is now a pure-scheme stub; cog-execute! is provided
+# by the core (opencog) module. This stub exists for backward compat.
 ADD_GUILE_MODULE (FILES
    opencog/exec.scm
-   DEPENDS exec
 #  COMPILE
 )
 
@@ -18,7 +13,7 @@ ADD_GUILE_MODULE (FILES
 ADD_LIBRARY (logger LoggerSCM.cc)
 
 TARGET_LINK_LIBRARIES(logger
-	smob
+	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 ADD_GUILE_EXTENSION(SCM_CONFIG logger "opencog-ext-path-logger")
@@ -63,7 +58,7 @@ ADD_GUILE_MODULE (FILES
 
 # --------------------------------
 
-INSTALL (TARGETS exec logger randgen type-utils
+INSTALL (TARGETS logger randgen type-utils
 	EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

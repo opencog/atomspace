@@ -33,8 +33,6 @@
 
 #include <libguile.h>
 
-#include <opencog/util/Logger.h>
-
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -143,11 +141,6 @@ protected:
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_protom(arg, scheme_name, idx);
-	}
-	Logger* scm_to(SCM args, size_t idx, const Logger*) const
-	{
-		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_logger(arg, scheme_name, idx);
 	}
 };
 
@@ -322,10 +315,6 @@ protected:
 	SCM scm_from(const ValuePtr& pa)
 	{
 		return SchemeSmob::protom_to_scm(pa);
-	}
-	SCM scm_from(Logger* lg)
-	{
-		return SchemeSmob::logger_to_scm(lg);
 	}
 };
 

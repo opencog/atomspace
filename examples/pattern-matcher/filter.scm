@@ -22,7 +22,7 @@
 ; illustrate actual "mapping", that is, graph re-writing or graph
 ; transformation as a result of applying a mapping function.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define single
 	(Filter

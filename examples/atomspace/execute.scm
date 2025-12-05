@@ -50,7 +50,7 @@
 ; something fancy, and reason on it, create new Atom types, and
 ; write C++ classes to bring them alive.
 ;
-(use-modules (opencog) (opencog exec) (opencog python))
+(use-modules (opencog) (opencog python))
 
 ; The below demonstrates the use of python code in an ExecutionOutputLink.
 ; Begin by loading the python code. (See `python.scm` for more details).

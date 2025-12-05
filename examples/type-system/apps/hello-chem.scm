@@ -1,7 +1,7 @@
 ;
 ; Example chemistry app, in scheme
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog demo-types))
 
 (define dihydrogen-monoxide

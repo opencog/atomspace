@@ -3,7 +3,7 @@
 ;
 ; Run this manually by saying "guile -s group-by-test.scm"
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

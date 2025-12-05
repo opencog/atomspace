@@ -2,7 +2,7 @@
 ; value-flows.scm -- Flowing Values unit test.
 ; Copy of /examples/atomspace/flows.scm
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define foo (Concept "foo"))
 (define bar (Concept "bar"))

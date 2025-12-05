@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; A lot like put-get-multi.scm, but the Gets have been previously run.
 

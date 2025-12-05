@@ -6,7 +6,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Raw data to populate the search space
 ;

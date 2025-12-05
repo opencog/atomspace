@@ -5,7 +5,7 @@
 ; Since they are in series, they force the "odometer" to run,
 ; during search.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (List (Concept "A")
 	(Set (Predicate "P") (Predicate "Q") (Predicate "R")))

@@ -4,7 +4,6 @@
 ; Create some misc atoms.
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 (ListLink (Concept "hello") (Concept "world"))
 (cog-set-value! (Concept "hello") (Predicate "*-TruthValueKey-*") (FloatValue 0.5 0.5))

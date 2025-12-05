@@ -6,7 +6,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-64))
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
