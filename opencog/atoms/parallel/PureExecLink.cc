@@ -85,6 +85,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		// No AtomSpace provided. Use a temporary.
 		AtomSpacePtr scratch = createAtomSpace(as);
 		vseq.push_back(h->execute(scratch.get(), silent));
+		scratch->clear();
 	}
 
 	return createLinkValue(std::move(vseq));

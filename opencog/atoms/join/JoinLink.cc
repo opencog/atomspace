@@ -356,6 +356,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 	AtomSpacePtr scratch = createAtomSpace(as);
 	Handle meet = scratch->add_atom(_meet);
 	ValuePtr vp = meet->execute();
+	scratch->clear();
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
@@ -638,6 +639,8 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 			}
 		}
 	}
+
+	scratch->clear();
 
 	// Remove the rejects
 	HandleSet accept;

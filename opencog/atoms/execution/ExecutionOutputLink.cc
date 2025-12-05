@@ -113,6 +113,8 @@ ValuePtr ExecutionOutputLink::execute(AtomSpace* as, bool silent)
 	if (res->is_executable())
 		vp = res->execute(scratch.get(), silent);
 
+	scratch->clear();
+
 	if (vp and vp->is_atom())
 		return as->add_atom(HandleCast(vp));
 
