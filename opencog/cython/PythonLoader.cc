@@ -137,11 +137,6 @@ void opencog::global_python_finalize()
     if (!already_initialized)
         return;
 
-    // Clear the context stack to release any atomspace references
-    // before Python finalization. This prevents the thread_local
-    // deque destructor from trying to access Python during shutdown.
-    clear_frame_stack();
-
     // Cleanup Python.
     if (!initialized_outside_opencog)
     {

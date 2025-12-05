@@ -16,6 +16,10 @@
 
 namespace opencog {
 
-thread_local std::deque<AtomSpacePtr> frame_stack;
+// Thread-local current atomspace
+thread_local AtomSpacePtr current_frame;
+
+// Thread-local stack of pushed atomspaces
+thread_local std::deque<PushEntry> pushed_stack;
 
 }

@@ -16,7 +16,6 @@ cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
 
 cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
     cValuePtr get_frame() nogil
-    void push_frame(cHandle atomspace) nogil
-    cValuePtr pop_frame() nogil
+    void push_frame() nogil
+    void pop_frame() nogil
     void set_frame(cHandle atomspace) nogil
-    void clear_frame_stack() nogil

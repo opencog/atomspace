@@ -376,13 +376,11 @@ SCM SchemeSmob::ss_push_atomspace (void)
 	// Get current atomspace (from frame stack or fluid)
 	AtomSpacePtr base_as = get_current_as();
 
-	// Create a new atomspace with the current as parent
-	AtomSpacePtr new_as = createAtomSpace(base_as);
-
-	// Push the new atomspace onto the unified frame stack
-	push_frame(new_as);
+	// Create and push a new atomspace (child of current)
+	push_frame();
 
 	// Also set the fluid for thread inheritance
+	const AtomSpacePtr& new_as = get_frame();
 	scm_fluid_set_x(atomspace_fluid, make_as(new_as));
 
 	// Return the previous (base) atomspace
@@ -392,25 +390,26 @@ SCM SchemeSmob::ss_push_atomspace (void)
 /* ============================================================== */
 /**
  * Pop a temporary atomspace from the unified frame stack.
- * Clear the popped atomspace, making any atoms in it into orphans.
+ * The pushed atomspace is cleared and removed from its parent.
  * Return unspecified.
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
-	AtomSpacePtr top_as = get_frame();
-	if (nullptr == top_as)
-		scm_misc_error("cog-pop-atomspace",
-			"More pops than pushes!", SCM_EOL);
+	// Excplicitly decrement the use count on the old AtomSpacePtr
+	// inside the old SMOB.
+	SCM old_fluid = scm_fluid_ref(atomspace_fluid);
+	SCM_SMOB_VALUE_PTR_LOC(old_fluid)->reset();
+	scm_remember_upto_here_1(old_fluid);
 
 	pop_frame();
 
-	// Clear the atomspace, making any atoms in it into orphans.
-	top_as->clear();
+	const AtomSpacePtr& current = get_frame();
+	scm_fluid_set_x(atomspace_fluid, make_as(current));
 
-	// Update the fluid, too. I suspect this is not needed.
-	// but best keep things in sync to avoid crazy-making.
-	const AtomSpacePtr& new_top = get_frame();
-	scm_fluid_set_x(atomspace_fluid, make_as(new_top));
+	// Force GC to collect any remaining smobs that may hold references.
+	// Without this, we get smobs pointing at zombie Atomspaces whose
+	// dtors never run. The rocks ThreadCountUTest hits this hard.
+	scm_gc();
 
 	return SCM_UNSPECIFIED;
 }

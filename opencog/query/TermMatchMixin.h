@@ -108,7 +108,7 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		const Variables* _gnd_bound_vars;
 
 		// Temp atomspace used for test-groundings of virtual links.
-		AtomSpace* _temp_aspace;
+		AtomSpacePtr _temp_aspace;
 
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;

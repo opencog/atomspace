@@ -200,28 +200,6 @@ class AtomSpaceTest(TestCase):
         self.assertFalse(b in self.space)
 
 
-    def test_push_pop_new(self):
-        a = ConceptNode('a')
-
-        # Create temporary workspace
-        current_as = push_thread_atomspace(AtomSpace())
-        self.assertFalse(get_thread_atomspace() == self.space)
-        b = ConceptNode('b')
-        # verify that 'a' is NOT in the current space.
-        self.assertFalse(a in current_as)
-        self.assertTrue(b in current_as)
-        self.assertTrue(a in self.space)
-        self.assertFalse(b in self.space)
-        pop_thread_atomspace()
-
-        self.assertTrue(get_thread_atomspace() == self.space)
-        c = ConceptNode('c')
-        # verify that current default atomspace is self.space
-        self.assertTrue(c in self.space)
-        self.assertTrue(a in self.space)
-        self.assertFalse(b in self.space)
-
-
 class AtomTest(TestCase):
 
     def setUp(self):

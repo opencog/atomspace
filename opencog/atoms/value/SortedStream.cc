@@ -25,7 +25,6 @@
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 #include <opencog/util/oc_assert.h>
 
 using namespace opencog;
@@ -82,8 +81,6 @@ SortedStream::~SortedStream()
 
 	if (_source)
 		_puller.join();
-
-	release_transient_atomspace(_scratch);
 }
 
 // ==============================================================
@@ -117,7 +114,7 @@ void SortedStream::init_cmp(void)
 	// Scratch space in which temporaries are evaluated. This
 	// overlays the AtomSpace in which the schema sits, and thus,
 	// the schema can use this for context.
-	_scratch = grab_transient_atomspace(_schema->getAtomSpace());
+	_scratch = createAtomSpace(_schema->getAtomSpace());
 }
 
 // ==============================================================
@@ -261,7 +258,7 @@ void SortedStream::add(const ValuePtr& vp)
 		return;
 	}
 
-	_scratch->clear_transient();
+	_scratch->clear();
 	_set.insert(vp);
 }
 
@@ -274,7 +271,7 @@ void SortedStream::add(ValuePtr&& vp)
 		return;
 	}
 
-	_scratch->clear_transient();
+	_scratch->clear();
 	_set.insert(std::move(vp));
 }
 
@@ -287,7 +284,7 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
 	_right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
 
-	ValuePtr vp = _exout->execute(_scratch);
+	ValuePtr vp = _exout->execute(_scratch.get());
 
 	if (not vp->is_type(BOOL_VALUE))
 		throw RuntimeException(TRACE_INFO,

@@ -12,7 +12,7 @@ from opencog.atomspace import AtomSpace
 from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode, ListLink
 )
-from opencog.type_ctors import push_thread_atomspace
+from opencog.type_ctors import set_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator
@@ -54,7 +54,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
             """Worker that may raise exception based on thread ID."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 if thread_id % 2 == 0:
                     # Even threads: execute successful function
@@ -152,7 +152,7 @@ class Test_3_1_ExceptionIsolation(ThreadTestCase):
             """Worker that raises specific exception type."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Select exception type based on thread ID
                 func_name, expected_exc_type, expected_msg_part = exception_functions[thread_id % 4]
@@ -240,7 +240,7 @@ class Test_3_2_ModuleImportErrors(ThreadTestCase):
             """Worker that attempts invalid import."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Try to execute function from non-existent module
                 exec_link = ExecutionOutputLink(
@@ -322,7 +322,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
             """Worker that calls non-existent function."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Try to call non-existent function
                 exec_link = ExecutionOutputLink(
@@ -383,7 +383,7 @@ class Test_3_3_InvalidFunctionCalls(ThreadTestCase):
             """Worker that calls function with wrong args."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 if thread_id % 2 == 0:
                     # Call function_with_args with no arguments (expects 2)

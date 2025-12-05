@@ -67,18 +67,13 @@ def set_thread_atomspace(AtomSpace atomspace):
         set_frame(handle_cast(atomspace.shared_ptr))
 
 
-def push_thread_atomspace(AtomSpace new_atomspace = None):
+def push_thread_atomspace():
     """
     Push a new atomspace onto the frame stack for the current thread.
-    If no atomspace is provided, creates a child of the current atomspace.
+    Creates a child of the current atomspace.
     """
-    if new_atomspace is None:
-        parent_atomspace = get_thread_atomspace()
-        if parent_atomspace is None:
-            raise RuntimeError("Atomspace is not set!")
-        new_atomspace = create_child_atomspace(parent_atomspace)
-    push_frame(handle_cast(new_atomspace.shared_ptr))
-    return new_atomspace
+    push_frame()
+    return get_thread_atomspace()
 
 
 def get_thread_atomspace():
@@ -91,6 +86,7 @@ def get_thread_atomspace():
 
 def pop_thread_atomspace():
     """
-    Pop the top atomspace from the frame stack and return it.
+    Pop the top atomspace from the frame stack.
+    The pushed atomspace is cleared and removed from its parent.
     """
-    return AtomSpace_factoid(handle_cast(pop_frame()))
+    pop_frame()
