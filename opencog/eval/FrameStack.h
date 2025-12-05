@@ -72,12 +72,10 @@ inline void pop_frame(void)
 	current_frame = entry.saved;
 
 	// Clear the pushed atomspace, making any atoms in it into orphans.
-	if (entry.pushed)
-		entry.pushed->clear();
+	entry.pushed->clear();
 
-	// Remove the pushed atomspace from its parent (the saved atomspace)
-	if (entry.pushed and entry.saved)
-		entry.saved->extract_atom(HandleCast(entry.pushed));
+	// Remove the transient atomspace from its base.
+	entry.saved->extract_atom(HandleCast(entry.pushed));
 }
 
 // Set the current atomspace. Does NOT affect the push/pop stack.
