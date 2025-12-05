@@ -68,17 +68,13 @@
     Example:
         ; Check to see if a node exists:
         guile> (cog-node 'Concept \"asdf\")
-        ()
-
-        ; Verify that the return value is actually a true null:
-        guile> (null? (cog-node 'Concept \"asdf\"))
-        #t
+        #f
 
         ; Now, create the node, and see if it exists:
         guile> (cog-new-node 'Concept \"asdf\")
         (ConceptNode \"asdf\")
-        guile> (null? (cog-node 'Concept \"asdf\"))
-        #f
+        guile> (cog-node 'Concept \"asdf\")
+        (ConceptNode \"asdf\")
 ")
 
 (set-procedure-property! cog-new-link 'documentation

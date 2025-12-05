@@ -376,19 +376,12 @@
   of this call. Thus, the name is almost unique -- there still is
   a tiny window in which a race can occur.
 "
-	(define (check-name? node-name node-type)
-	"
-	  Return #t if there is a node of type node-type with name
-      node-name in the current atomspace.
-	"
-		(not (null? (cog-node node-type node-name))))
-
 	(define node-name (random-string random-length))
 	(define prefix-length (string-length prefix))
 	(if (> prefix-length 0)
 		(set! node-name (string-append prefix node-name))
 	)
-	(while (check-name? node-name node-type)
+	(while (cog-node node-type node-name)
 		(if (> prefix-length 0)
 			(set! node-name (string-append prefix (random-string random-length)))
 			(set! node-name (random-string random-length))

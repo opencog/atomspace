@@ -354,10 +354,10 @@ SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
 	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
 
-	if (not h->is_link()) return SCM_EOL;
+	if (not h->is_link()) return SCM_BOOL_F;
 
 	const HandleSeq& oset = h->getOutgoingSet();
-	if (oset.size() <= pos) return SCM_EOL;
+	if (oset.size() <= pos) return SCM_BOOL_F;
 
 	return handle_to_scm(oset[pos]);
 }
