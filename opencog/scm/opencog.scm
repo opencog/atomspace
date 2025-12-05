@@ -8,18 +8,24 @@
 ; (use-modules (opencog))
 ;
 ;
-; This should result in a utf8 locale being used!
+; The default guile locale is "C", the POSIX locale that is "inherited
+; by default" from the shell. But all Atomese string processing is done
+; in utf8; so we have utf8 being mandatory. Note that this is still
+; required for guile-3.0.x and will likely stay like this "forever".
 ; See https://github.com/opencog/opencog/issues/937
 (setlocale LC_CTYPE "")
 (setlocale LC_NUMERIC "C")
 
 (define-module (opencog))
 
-; When compiling this file, before any install has been made, a call to
-; (use-modules (opencog as-config))
+; When run from the build env, without saying `make install` to install
+; into the main filesystem, then the expression
+;     (use-modules (opencog as-config))
 ; will fail because (duh) it's not installed. So, instead, we manually
-; hunt for it, and use the local build version.  This is yet another
-; hairy hack needed to be able to run unit tests without installing.
+; hunt for it, and use the version found in the build tree.  This is
+; a hairy hack needed to be able to run unit tests without installing.
+; Note: FYI: the build version of `as-config.scm` is different from the
+; install version of `asconfig.scm` -- the two hold different filepaths.
 (if (resolve-module (list 'opencog 'as-config) #:ensure #f)
 	(use-modules (opencog as-config))
 	(load-from-path "opencog/as-config.scm"))
@@ -150,5 +156,4 @@ cog-value-type
 (include-from-path "opencog/base/atom-cache.scm")
 (include-from-path "opencog/base/types.scm")
 
-; Obsolete functions
-(define-public (cog-undefined-handle) "obsolete function" '())
+; --- The End ---
