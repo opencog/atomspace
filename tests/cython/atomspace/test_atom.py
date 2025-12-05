@@ -6,7 +6,7 @@ from opencog.atomspace import Atom, tvkey
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
 from opencog.type_constructors import *
-from opencog.type_ctors import push_thread_atomspace, pop_thread_atomspace
+from opencog.type_ctors import set_thread_atomspace
 
 from time import sleep
 
@@ -14,11 +14,7 @@ class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        push_thread_atomspace(self.space)
-
-    def tearDown(self):
-        self.space = None
-        pop_thread_atomspace()
+        set_thread_atomspace(self.space)
 
     def test_get_value(self):
         atom = Concept('foo')

@@ -81,7 +81,7 @@ class Test_1a_SchemeToPython(ThreadTestCase):
         Verifies the basic mechanism works before testing multi-threaded.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Load required Scheme modules
 
@@ -101,7 +101,7 @@ class Test_1a_SchemeToPython(ThreadTestCase):
         Single thread: Scheme calls Python with arguments.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Load required Scheme modules
 
@@ -131,7 +131,7 @@ class Test_1a_SchemeToPython(ThreadTestCase):
             """Worker executing Scheme→Python."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Load required Scheme modules
 
@@ -186,7 +186,7 @@ class Test_1a_SchemeToPython(ThreadTestCase):
             """Worker with multiple Scheme→Python calls."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Load required Scheme modules
 
@@ -238,7 +238,7 @@ class Test_1b_PythonToScheme(ThreadTestCase):
         Verifies the basic mechanism works before testing multi-threaded.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # First define a Scheme function
         scheme_eval(atomspace, '''
@@ -262,7 +262,7 @@ class Test_1b_PythonToScheme(ThreadTestCase):
         Single thread: Python calls Scheme with arguments.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Define Scheme function that takes arguments
         scheme_eval(atomspace, '''
@@ -301,7 +301,7 @@ class Test_1b_PythonToScheme(ThreadTestCase):
             """Worker executing Python→Scheme."""
             try:
                 thread_atomspace = AtomSpace()
-                push_thread_atomspace(thread_atomspace)
+                set_thread_atomspace(thread_atomspace)
 
                 # Define Scheme function in this atomspace
                 scheme_eval(thread_atomspace, f'''
@@ -361,7 +361,7 @@ class Test_1b_PythonToScheme(ThreadTestCase):
 
         # Create shared atomspace with the Scheme function
         shared_atomspace = AtomSpace()
-        push_thread_atomspace(shared_atomspace)
+        set_thread_atomspace(shared_atomspace)
 
         scheme_eval(shared_atomspace, '''
             (define (shared-scm-func arg)
@@ -372,7 +372,7 @@ class Test_1b_PythonToScheme(ThreadTestCase):
             """Worker calling shared Scheme function."""
             try:
                 # Use the shared atomspace
-                push_thread_atomspace(shared_atomspace)
+                set_thread_atomspace(shared_atomspace)
 
                 arg = ConceptNode(f"t{thread_id}")
 
@@ -428,7 +428,7 @@ class Test_1c_CrossLangWithAtomspaceSwitch(ThreadTestCase):
         This characterizes current behavior for documentation purposes.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Load required Scheme modules
 
@@ -454,7 +454,7 @@ class Test_1c_CrossLangWithAtomspaceSwitch(ThreadTestCase):
         This characterizes current behavior for documentation purposes.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Add markers
         ConceptNode("py_marker")
@@ -494,7 +494,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         This verifies the atomspace is truly shared.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Scheme creates atom and sets a StringValue on it
         scheme_eval(atomspace, '''
@@ -517,7 +517,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         Python creates an atom and sets a value, Scheme reads it back.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Python creates atom and sets a StringValue on it
         atom = ConceptNode("shared-atom-2")
@@ -539,7 +539,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         Scheme creates a FloatValue, Python reads it and verifies values match.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Scheme sets a FloatValue with specific numbers
         scheme_eval(atomspace, '''
@@ -566,7 +566,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         Python creates a FloatValue, Scheme reads it and verifies values match.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Python sets a FloatValue
         atom = ConceptNode("py-float-atom")
@@ -594,7 +594,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         Create atom in Python, modify in Scheme, verify in Python.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         # Python creates an atom
         atom = ConceptNode("identity-test-atom")
@@ -628,7 +628,7 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         Python sets value, Scheme overwrites, Python reads new value.
         """
         atomspace = AtomSpace()
-        push_thread_atomspace(atomspace)
+        set_thread_atomspace(atomspace)
 
         atom = ConceptNode("overwrite-test")
         key = PredicateNode("overwrite-key")
@@ -667,12 +667,12 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
 
         # Shared atomspace for all threads
         shared_atomspace = AtomSpace()
-        push_thread_atomspace(shared_atomspace)
+        set_thread_atomspace(shared_atomspace)
 
         def worker(thread_id):
             """Worker that tests cross-language atom sharing."""
             try:
-                push_thread_atomspace(shared_atomspace)
+                set_thread_atomspace(shared_atomspace)
 
                 # Unique atom names for this thread
                 atom_name = f"thread-{thread_id}-atom"
@@ -751,7 +751,7 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
 
         # Create base atomspace
         base_atomspace = AtomSpace()
-        push_thread_atomspace(base_atomspace)
+        set_thread_atomspace(base_atomspace)
 
         # Define a Scheme function that creates an atom with a value
         scheme_eval(base_atomspace, '''
@@ -818,7 +818,7 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
         """
         # Create base atomspace
         base_atomspace = AtomSpace()
-        push_thread_atomspace(base_atomspace)
+        set_thread_atomspace(base_atomspace)
 
         # Load required modules
 
