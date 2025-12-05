@@ -126,13 +126,6 @@ cog-value-type
 		; Initialize a default atomspace, just to keep things sane...
 		(cog-set-atomspace! cog-initial-as)))
 
-; Renamed functions
-(define-public (cog-as ATOM) "See cog-atomspace" (cog-atomspace ATOM))
-(define-public (cog-extract ATOM) "See cog-extract!" (cog-extract! ATOM))
-(define-public (cog-extract-recursive ATOM)
-	"See cog-extract-recursive!" (cog-extract-recursive! ATOM))
-(define-public (cog-remove ATOM) "See cog-extract!" (cog-extract! ATOM))
-
 ; A very special association-list ctor.
 (define-public (alist . x) (list 'alist x))
 
