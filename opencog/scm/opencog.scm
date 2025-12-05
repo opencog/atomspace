@@ -105,25 +105,22 @@ cog-value-type
 (set-exception-printer! 'C++-EXCEPTION cpp-exception-printer)
 
 ; Create a global to hold the atomspace ... to (try to) prevent guile
-; GC from collecting it.  Unfortunately, there appears to be a GC bug
-; in guile-2.1 that causes this to be collected, anyway.  Its as if
-; guile forgets about this ... how? why? I don't get it.
+; GC from collecting it.
 ;
-; In various bad scenarios, the cogserver creates it's own atomspace,
-; before the code here runs.  We want to avoid creating a second
-; atomspace as a result. The below tries to avoid problems by simply
-; grabbing the existing atomspace, if there already is one.
+; There are scenarios where python might run before scheme, or where
+; the cogserver may run, and create an AtomSpace; we want to use that
+; one, so that everyone agrees about what "this" AtomSpace is. So we
+; go look to see if the current AtomSpace is already set. If it is not,
+; then create one.
 ;
-; FIXME: Both of the above-described problems might no longer exist.
-; I'm not sure. The below is simple and painless, I'm leaving it for
-; now.
-
+; This is kind-of squonky, I don't entirely like it. However, the
+; alternative is to do this in the c++ code, and that's uglier. So
+; keep it fresh, and do it here.
+;
 (define-public cog-initial-as (cog-atomspace))
-(define-public my-as (cog-atomspace))
 (if (nil? cog-initial-as)
 	(begin
 		(set! cog-initial-as (cog-new-atomspace))
-		; Initialize a default atomspace, just to keep things sane...
 		(cog-set-atomspace! cog-initial-as)))
 
 ; A very special association-list ctor.
