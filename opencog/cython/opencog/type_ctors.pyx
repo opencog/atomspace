@@ -17,7 +17,22 @@ import contextvars
 # ========================================================================
 # Helper functions to add Atoms to the current AtomSpace for this thread.
 
+# Make sure the current thread has some reasonable AtomSpace
+# If TLS came up empty-handed, get the context from python
+# and then tell c++ about it. FYI: the AtomSpace returned by
+# `get_frame()` should be identical to what python `atomspace`
+# is pointing at. The two should be in perfect sync, and since
+# we think our code is bug-free, we don't actually check. This
+# saves a tad of cpu-time.
+cdef inline void _current_atomspace():
+    cdef cValuePtr context = get_frame()
+    if context.get() == NULL:
+        atomspace = _atomspace_context.get()
+        if atomspace is not None:
+            set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+
 def add_link(Type t, outgoing):
+    _current_atomspace()
 
     # Unwrap double-wrapped lists. The type constructors create these.
     if 1 == len(outgoing) and isinstance(outgoing[0], list):
@@ -41,6 +56,7 @@ def add_node(Type t, atom_name):
     """
     Add Node to the atomspace from the current context
     """
+    _current_atomspace()
 
     # NumberNodes can take lists of numbers.
     if type(atom_name) is list :
@@ -69,6 +85,38 @@ def add_node(Type t, atom_name):
 
 # ========================================================================
 # AtomSpace management for above.
+#
+# The code here is slightly non-obvious, so an explanation follows.
+# When working with an AtomSpace, it is convenient to have all
+# operations happen for "this AtomSpace", where "this" is the current
+# AtomSpace for this thread. When working cross-language, i.e. with
+# scheme code (GroundedPredicate, etc.) and with external c++ libs,
+# all users need to agree about what "this" AtomSpace is, for this
+# thread. This is solved with c++ code; the get_frame() and set_frame()
+# calls. The c++ get_frame() call is the final authority for what the
+# correct AtomSpace is for this thread. And it all works great!
+#
+# ... except when new threads are created. We want the new threads to
+# get the same AtomSpace as this thread. For scheme, fluids work great,
+# and do exactly that.  But `get_frame()` is implemented in c++, and
+# uses TLS to hold the current AtomSpace. There is no concept of a fluid
+# in c++. For that matter, there is no concept of a fluid in python,
+# either. But we really really really want child threads to use the
+# AtomSpace of the parent thread, and so we hack that up here.
+#
+# Here's how it works. The c++ get_frame() is the authority for what
+# the AtomSpace is for the current thread. That's perfect, unless a
+# brand-new thread has been created, and TLS delivers us a null pointer.
+# For this case, we fall back to the python context-var to find out
+# what the AtomSpace should have been for this thread. We promptly tell
+# c++ what it is, so that the c++ code can remain the master authority
+# on this topic. And bingo! it just all works great!
+#
+# ... except that python contextvars are for python asyncio green
+# threads, instead of OS kernel threads. That is, python contextvars
+# are fluids, but only fluids for green threads. Which makes them kind
+# of useless. So to get around that limitation, we monkey-patch python
+# threads. Perhaps a tad stinky, but I don't see any other solution.
 
 # ContextVar to maintain AtomSpace across Python threads.
 _atomspace_context: ContextVar = ContextVar('atomspace', default=None)
