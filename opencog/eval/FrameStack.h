@@ -63,11 +63,6 @@ inline void set_frame(const ValuePtr& vasp)
 	set_frame(AtomSpaceCast(vasp));
 }
 
-inline void clear_frame_stack(void)
-{
-	frame_stack.clear();
-}
-
 // Simple RAII guard for the current AtomSpace frame.
 struct ASGuard
 {

@@ -19,4 +19,3 @@ cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
     void push_frame(cHandle atomspace) nogil
     cValuePtr pop_frame() nogil
     void set_frame(cHandle atomspace) nogil
-    void clear_frame_stack() nogil
