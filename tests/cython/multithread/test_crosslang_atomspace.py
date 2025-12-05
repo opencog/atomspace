@@ -371,9 +371,6 @@ class Test_1b_PythonToScheme(ThreadTestCase):
         def worker(thread_id):
             """Worker calling shared Scheme function."""
             try:
-                # Use the shared atomspace
-                set_thread_atomspace(shared_atomspace)
-
                 arg = ConceptNode(f"t{thread_id}")
 
                 exec_link = ExecutionOutputLink(
@@ -672,8 +669,6 @@ class Test_CrossLangAtomSharing(ThreadTestCase):
         def worker(thread_id):
             """Worker that tests cross-language atom sharing."""
             try:
-                set_thread_atomspace(shared_atomspace)
-
                 # Unique atom names for this thread
                 atom_name = f"thread-{thread_id}-atom"
                 key_name = f"thread-{thread_id}-key"
