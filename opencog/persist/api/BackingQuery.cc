@@ -26,7 +26,6 @@
 #include <time.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 #include <opencog/atoms/join/JoinLink.h>
 #include <opencog/atoms/pattern/QueryLink.h>
@@ -232,9 +231,10 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		Transient scratch(as);
-		BackingImplicator impl(this, scratch.tmp, cvp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingImplicator impl(this, scratch.get(), cvp);
 		impl.satisfy(qlp);
+		scratch->clear();
 
 		qv = svp;
 	}
@@ -244,28 +244,32 @@ void BackingStore::runQuery(const Handle& query, const Handle& key,
 		svp->close();
 		ContainerValuePtr cvp(svp);
 
-		Transient scratch(as);
-		BackingSatisfyingSet sater(this, scratch.tmp, cvp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingSatisfyingSet sater(this, scratch.get(), cvp);
 		sater.satisfy(PatternLinkCast(query));
+		scratch->clear();
 
 		qv = svp;
 	}
 	else if (nameserver().isA(qt, JOIN_LINK))
 	{
-		Transient scratch(as);
-		BackingJoinCallback rjcb(this, scratch.tmp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		BackingJoinCallback rjcb(this, scratch.get());
 
-		qv = JoinLinkCast(query)->execute_cb(scratch.tmp, &rjcb);
+		qv = JoinLinkCast(query)->execute_cb(scratch.get(), &rjcb);
+		scratch->clear();
 	}
 	else if (query->is_executable())
 	{
-		Transient scratch(as);
-		qv = query->execute(scratch.tmp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		qv = query->execute(scratch.get());
+		scratch->clear();
 	}
 	else if (query->is_evaluatable())
 	{
-		Transient scratch(as);
-		qv = query->evaluate(scratch.tmp);
+		AtomSpacePtr scratch = createAtomSpace(as);
+		qv = query->evaluate(scratch.get());
+		scratch->clear();
 	}
 	else
 	{

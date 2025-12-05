@@ -130,7 +130,7 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		{
 			in_continuation = true;
 			Handle plk = _continuation->getOutgoingAtom(0);
-			AtomSpace* tas = TermMatchMixin::_temp_aspace;
+			AtomSpace* tas = TermMatchMixin::_temp_aspace.get();
 			tas->clear();
 			bool crispy = plk->bevaluate(tas);
 

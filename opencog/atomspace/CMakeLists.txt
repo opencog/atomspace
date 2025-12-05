@@ -12,7 +12,6 @@ ADD_LIBRARY (atomspace
 	AtomTable.cc
 	Frame.cc
 	# IncomeIndex.cc Disabled. See notes in header file.
-	Transient.cc
 	TypeIndex.cc
 )
 
@@ -52,7 +51,6 @@ INSTALL (FILES
 	AtomSpace.h
 	Frame.h
 	# IncomeIndex.h
-	Transient.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

@@ -25,7 +25,6 @@
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 using namespace opencog;
 
@@ -83,7 +82,7 @@ void FutureStream::init(void)
 		}
 	}
 
-	_scratch = grab_transient_atomspace(_formula[0]->getAtomSpace());
+	_scratch = createAtomSpace(_formula[0]->getAtomSpace());
 }
 
 
@@ -91,16 +90,16 @@ void FutureStream::init(void)
 
 void FutureStream::update() const
 {
-	// Don't allow the transient to accumulate cruft.
-	_scratch->clear_transient();
+	// Don't allow the scratch space to accumulate cruft.
+	_scratch->clear();
 
 	std::vector<ValuePtr> newval;
 	for (const Handle& h : _formula)
 	{
 		if (h->is_executable())
-			newval.emplace_back(h->execute(_scratch));
+			newval.emplace_back(h->execute(_scratch.get()));
 		else if (h->is_evaluatable())
-			newval.emplace_back(h->evaluate(_scratch));
+			newval.emplace_back(h->evaluate(_scratch.get()));
 	}
 	_value.swap(newval);
 }

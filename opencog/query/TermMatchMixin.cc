@@ -27,7 +27,6 @@
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/free/Replacement.h>
 #include <opencog/atoms/grant/StateLink.h>
-#include <opencog/atomspace/Transient.h>
 
 #include "TermMatchMixin.h"
 
@@ -71,7 +70,7 @@ Set set_intersection(const Set& s1, const Set& s2)
 TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
-	_temp_aspace = grab_transient_atomspace(as);
+	_temp_aspace = createAtomSpace(AtomSpaceCast(as));
 
 	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(SEQUENTIAL_OR_LINK);
@@ -86,12 +85,8 @@ TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 
 TermMatchMixin::~TermMatchMixin()
 {
-	// If we have a transient atomspace, release it.
-	if (_temp_aspace)
-	{
-		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = nullptr;
-	}
+	// The temp atomspace will be automatically released
+	// when the shared_ptr goes out of scope.
 }
 
 /* ======================================================== */
@@ -415,7 +410,7 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// assumption is that the EvaluationLink is actually evaluatable,
 		// which seems reasonable.
 		_temp_aspace->clear();
-		bool crispy = grnd->bevaluate(_temp_aspace);
+		bool crispy = grnd->bevaluate(_temp_aspace.get());
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
 		                      << crispy << std::endl;})
@@ -520,7 +515,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	_temp_aspace->clear();
 	try
 	{
-		bool crispy = gvirt->bevaluate(_temp_aspace, true);
+		bool crispy = gvirt->bevaluate(_temp_aspace.get(), true);
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
 		                      << crispy << std::endl;})
 		return crispy;
