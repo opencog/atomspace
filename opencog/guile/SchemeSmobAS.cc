@@ -395,13 +395,21 @@ SCM SchemeSmob::ss_push_atomspace (void)
  */
 SCM SchemeSmob::ss_pop_atomspace (void)
 {
-	// pop_frame() clears the pushed atomspace and removes it from parent.
+	// Excplicitly decrement the use count on the old AtomSpacePtr
+	// inside the old SMOB.
+	SCM old_fluid = scm_fluid_ref(atomspace_fluid);
+	SCM_SMOB_VALUE_PTR_LOC(old_fluid)->reset();
+	scm_remember_upto_here_1(old_fluid);
+
 	pop_frame();
 
-	// Update the fluid, too. I suspect this is not needed.
-	// but best keep things in sync to avoid crazy-making.
-	const AtomSpacePtr& new_top = get_frame();
-	scm_fluid_set_x(atomspace_fluid, make_as(new_top));
+	const AtomSpacePtr& current = get_frame();
+	scm_fluid_set_x(atomspace_fluid, make_as(current));
+
+	// Force GC to collect any remaining smobs that may hold references.
+	// Without this, we get smobs pointing at zombie Atomspaces whose
+	// dtors never run. The rocks ThreadCountUTest hits this hard.
+	scm_gc();
 
 	return SCM_UNSPECIFIED;
 }
