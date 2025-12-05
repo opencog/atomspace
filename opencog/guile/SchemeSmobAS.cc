@@ -376,13 +376,11 @@ SCM SchemeSmob::ss_push_atomspace (void)
 	// Get current atomspace (from frame stack or fluid)
 	AtomSpacePtr base_as = get_current_as();
 
-	// Create a new atomspace with the current as parent
-	AtomSpacePtr new_as = createAtomSpace(base_as);
-
-	// Push the new atomspace onto the unified frame stack
-	push_frame(new_as);
+	// Create and push a new atomspace (child of current)
+	push_frame();
 
 	// Also set the fluid for thread inheritance
+	const AtomSpacePtr& new_as = get_frame();
 	scm_fluid_set_x(atomspace_fluid, make_as(new_as));
 
 	// Return the previous (base) atomspace

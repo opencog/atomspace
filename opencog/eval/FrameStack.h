@@ -33,14 +33,12 @@ inline const AtomSpacePtr& get_frame(void)
 	return frame_stack.back();
 }
 
-inline void push_frame(const AtomSpacePtr& asp)
+// Create a new atomspace (child of current) and push it onto the stack.
+inline void push_frame(void)
 {
+	AtomSpacePtr parent = get_frame();
+	AtomSpacePtr asp = createAtomSpace(parent);
 	frame_stack.push_back(asp);
-}
-
-inline void push_frame(const ValuePtr& vasp)
-{
-	frame_stack.push_back(AtomSpaceCast(vasp));
 }
 
 inline AtomSpacePtr pop_frame(void)
