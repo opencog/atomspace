@@ -1,12 +1,21 @@
-from cython.operator cimport dereference as deref
+#
+# Helper functions to add Atoms to the current AtomSpace for this thread.
+#
 from libcpp.string cimport string
-from libcpp.set cimport set as cpp_set
 from opencog.atomspace cimport AtomSpace, Atom, Value
 from opencog.atomspace cimport cHandle, cValuePtr, create_python_value_from_c_value
 from opencog.atomspace cimport AtomSpace_factoid, handle_cast
 
-from contextlib import contextmanager
+# create_child_atomspace is obsolete, but we re-export for backwards compat.
 from opencog.atomspace import create_child_atomspace
+
+from contextlib import contextmanager
+from contextvars import ContextVar
+import threading
+import contextvars
+
+# ========================================================================
+# Helper functions to add Atoms to the current AtomSpace for this thread.
 
 def add_link(Type t, outgoing):
 
@@ -58,12 +67,48 @@ def add_node(Type t, atom_name):
     if result == result.UNDEFINED: return None
     return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
 
+# ========================================================================
+# AtomSpace management for above.
+
+# ContextVar to maintain AtomSpace across Python threads.
+_atomspace_context: ContextVar = ContextVar('atomspace', default=None)
+
+# Monkey-patch threading.Thread to inherit context variables.
+# Python's ContextVar doesn't automatically copy to child threads,
+# so we patch Thread to capture and restore the parent's context.
+#
+# The goal here is to emulate scheme's fluids, so that new python
+# threads automatically inherit the current AtomSpace from the parent
+# thread. The monkey-patch here avoids endless hackery in user-space
+# code to get and set AtomSpaces when toggling around multi-threaded
+# processing. Basically, this just makes things work "as expected":
+# whatever AtomSpace is being used "right now" is the one that the
+# child thread will use, also.
+_original_thread_init = threading.Thread.__init__
+_original_thread_run = threading.Thread.run
+
+def _patched_thread_init(self, *args, **kwargs):
+    self._parent_context = contextvars.copy_context()
+    _original_thread_init(self, *args, **kwargs)
+
+def _patched_thread_run(self):
+    if hasattr(self, '_parent_context'):
+        self._parent_context.run(_original_thread_run, self)
+    else:
+        _original_thread_run(self)
+
+threading.Thread.__init__ = _patched_thread_init
+threading.Thread.run = _patched_thread_run
+
+# -----------------------
+
 def set_thread_atomspace(AtomSpace atomspace):
     """
     Set the AtomSpace used in the current thread.
     """
     if atomspace is not None:
         set_frame(handle_cast(atomspace.shared_ptr))
+        _atomspace_context.set(atomspace)
 
 
 def push_thread_atomspace():
@@ -89,7 +134,19 @@ def get_thread_atomspace():
     Get the AtomSpace being used in this thread.
     """
     cdef cValuePtr context = get_frame()
-    return AtomSpace_factoid(handle_cast(context))
+    if context.get() != NULL:
+        return AtomSpace_factoid(handle_cast(context))
+
+    # TLS is empty; the Python contextvar will hold the correct
+    # AtomSpace for this thread.
+    atomspace = _atomspace_context.get()
+    if atomspace is not None:
+        # Sync TLS with contextvar
+        set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+        return atomspace
+
+    # No atomspace anywhere
+    return None
 
 
 def pop_thread_atomspace():
