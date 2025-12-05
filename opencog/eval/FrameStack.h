@@ -21,39 +21,67 @@
 namespace opencog
 {
 
-// Thread-local stack of AtomSpaces. Declared extern to ensure a single
+// Entry tracking a pushed atomspace and the atomspace that was current
+// before the push. This allows set_frame() to change the current atomspace
+// without corrupting the push/pop stack.
+struct PushEntry
+{
+	AtomSpacePtr saved;   // The atomspace before the push
+	AtomSpacePtr pushed;  // The atomspace created by push_frame
+};
+
+// Thread-local current atomspace. Declared extern to ensure a single
 // instance shared across all shared libraries. Definition in FrameStack.cc.
-extern thread_local std::deque<AtomSpacePtr> frame_stack;
+extern thread_local AtomSpacePtr current_frame;
+
+// Thread-local stack of pushed atomspaces.
+extern thread_local std::deque<PushEntry> pushed_stack;
 
 inline const AtomSpacePtr& get_frame(void)
 {
-	static AtomSpacePtr nullasp;
-	if (frame_stack.empty())
-		return nullasp;
-	return frame_stack.back();
+	return current_frame;
 }
 
 // Create a new atomspace (child of current) and push it onto the stack.
+// Sets the current frame to the new child atomspace.
 inline void push_frame(void)
 {
-	AtomSpacePtr parent = get_frame();
-	AtomSpacePtr asp = createAtomSpace(parent);
-	frame_stack.push_back(asp);
+	AtomSpacePtr parent = current_frame;
+	AtomSpacePtr child = createAtomSpace(parent);
+
+	// Track this push so we can properly clean up on pop
+	pushed_stack.push_back({parent, child});
+
+	// Set current to the new child
+	current_frame = child;
 }
 
+// Pop the most recently pushed atomspace.
+// Restores the saved atomspace as current.
+// Removes the pushed atomspace from its parent.
+// Returns the pushed atomspace.
 inline AtomSpacePtr pop_frame(void)
 {
-	AtomSpacePtr result = get_frame();
-	frame_stack.pop_back();
-	return result;
+	if (pushed_stack.empty())
+		return AtomSpacePtr();
+
+	PushEntry entry = pushed_stack.back();
+	pushed_stack.pop_back();
+
+	// Restore the saved atomspace as current
+	current_frame = entry.saved;
+
+	// Remove the pushed atomspace from its parent (the saved atomspace)
+	if (entry.pushed and entry.saved)
+		entry.saved->extract_atom(HandleCast(entry.pushed));
+
+	return entry.pushed;
 }
 
+// Set the current atomspace. Does NOT affect the push/pop stack.
 inline void set_frame(const AtomSpacePtr& asp)
 {
-	if (frame_stack.empty())
-		frame_stack.push_back(asp);
-	else
-		frame_stack.back() = asp;
+	current_frame = asp;
 }
 
 inline void set_frame(const ValuePtr& vasp)
