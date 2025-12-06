@@ -58,7 +58,7 @@ void opencog::global_python_initialize()
     if (already_initialized) return;
     already_initialized = true;
 
-    logger().info("[global_python_initialize] Start");
+    logger().debug("[global_python_initialize] Start");
 
     _dlso = dlopen(PYLIBNAME, RTLD_LAZY | RTLD_GLOBAL);
 
@@ -111,9 +111,9 @@ void opencog::global_python_initialize()
         if (nullptr == get_frame()) {
             AtomSpacePtr default_atomspace = createAtomSpace();
             set_frame(default_atomspace);
-            logger().info("[global_python_initialize] Created default atomspace");
+            logger().debug("[global_python_initialize] Created default atomspace");
         } else {
-            logger().info("[global_python_initialize] Using existing atomspace from frame stack");
+            logger().debug("[global_python_initialize] Using existing atomspace from frame stack");
         }
     }
 
@@ -128,7 +128,7 @@ void opencog::global_python_initialize()
         // instead, and indeed ... that works! Woo hoo!
         PyEval_SaveThread();
 
-    logger().info("[global_python_initialize] Finish");
+    logger().debug("[global_python_initialize] Finish");
 }
 
 void opencog::global_python_finalize()
