@@ -143,7 +143,7 @@ bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
  * Equality operator.  Both the content must match, and the path
  * taken to get to the content must match.
  */
-bool PatternTerm::operator==(const PatternTerm& other)
+bool PatternTerm::operator==(const PatternTerm& other) const
 {
 	if (_handle != other._handle) return false;
 	if (_parent != other._parent) return false;

@@ -276,7 +276,7 @@ public:
 		return false;
 	}
 
-	bool operator==(const PatternTerm&);
+	bool operator==(const PatternTerm&) const;
 
 	// Work around gdb's inability to build a string on the fly;
 	// See http://stackoverflow.com/questions/16734783 for explanation.
