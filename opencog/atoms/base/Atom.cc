@@ -352,12 +352,24 @@ bool Atom::setPresent(void)
 
 void Atom::markIsKey(void)
 {
-    _flags.fetch_or(IS_KEY_FLAG);
+    uint8_t old_flags = _flags.fetch_or(IS_KEY_FLAG);
+    if (old_flags & IS_KEY_FLAG) return;
+
+    // We could do this without an atomspace, but that seems wrong.
+    OC_ASSERT(_atom_space != nullptr, "Internal error: expect to have AtomSpace!");
+    Handle mark = _atom_space->add_node(PREDICATE_NODE, "*-IsKeyFlag-*");
+    setValue(mark, createBoolValue(true));
 }
 
 void Atom::markIsMessage(void)
 {
-    _flags.fetch_or(IS_MESSAGE_FLAG);
+    uint8_t old_flags = _flags.fetch_or(IS_MESSAGE_FLAG);
+    if (old_flags & IS_MESSAGE_FLAG) return;
+
+    // We could do this without an atomspace, but that seems wrong.
+    OC_ASSERT(_atom_space != nullptr, "Internal error: expect to have AtomSpace!");
+    Handle mark = _atom_space->add_node(PREDICATE_NODE, "*-IsMessageFlag-*");
+    setValue(mark, createBoolValue(true));
 }
 
 // ==============================================================
