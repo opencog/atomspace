@@ -431,11 +431,8 @@ public:
     inline Handle get_node(Type t, std::string&& name) const {
         return lookupHandle(createNode(t, std::move(name)));
     }
-    inline Handle xget_handle(Type t, std::string str) const {
-        return get_node(t, std::move(str));
-    }
-    inline Handle get_handle(Type t, std::string str) const {
-        return get_node(t, std::move(str));
+    inline Handle xget_handle(Type t, std::string name) const {
+        return get_node(t, std::move(name));
     }
 
     /**
@@ -452,9 +449,6 @@ public:
         return lookupHandle(createLink(std::move(outgoing), t));
     }
     inline Handle xget_handle(Type t, HandleSeq outgoing) const {
-        return get_link(t, std::move(outgoing));
-    }
-    inline Handle get_handle(Type t, HandleSeq outgoing) const {
         return get_link(t, std::move(outgoing));
     }
 
