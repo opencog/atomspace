@@ -86,7 +86,9 @@ const Handle& truth_key(void)
 void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
 	// We want to know if the key is .. being used as a key.
-	key->markIsKey();
+	// Self-keys don't count. This ends up weirdly recursive.
+	if (key.get() != this and *key != *this)
+		key->markIsKey();
 
 	// This is rather irritating, but we fake it for the
 	// PredicateNode "*-TruthValueKey-*" because if we don't
@@ -352,12 +354,32 @@ bool Atom::setPresent(void)
 
 void Atom::markIsKey(void)
 {
-    _flags.fetch_or(IS_KEY_FLAG);
+	uint8_t old_flags = _flags.fetch_or(IS_KEY_FLAG);
+	if (old_flags & IS_KEY_FLAG) return;
+
+	// Avoid recursion!
+	if (is_type(PREDICATE_NODE) and 0 == get_name().compare("*-IsKeyFlag-*"))
+		return;
+
+	Handle mark = createNode(PREDICATE_NODE, "*-IsKeyFlag-*");
+
+	// We should force-insert this into read-only AtmSpaces,
+	// but I am too tired to fight with making this atomic, right now.
+	if (_atom_space and 0 == _atom_space->get_read_only())
+		mark = _atom_space->add_atom(mark);
+	setValue(mark, createBoolValue(true));
 }
 
 void Atom::markIsMessage(void)
 {
-    _flags.fetch_or(IS_MESSAGE_FLAG);
+	uint8_t old_flags = _flags.fetch_or(IS_MESSAGE_FLAG);
+	if (old_flags & IS_MESSAGE_FLAG) return;
+
+	Handle mark = createNode(PREDICATE_NODE, "*-IsMessageFlag-*");
+
+	if (_atom_space and 0 == _atom_space->get_read_only())
+		mark = _atom_space->add_atom(mark);
+	setValue(mark, createBoolValue(true));
 }
 
 // ==============================================================

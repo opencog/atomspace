@@ -53,7 +53,9 @@ class AtomTest(TestCase):
         # No guarantee of the order in which Atoms are returned.
         # self.assertEqual(lissy, [atom, getall])
         # self.assertEqual(lissy, [getall, atom])
-        setty = set(getall.execute())
+        # Filter out internal marker atoms like *-IsKeyFlag-*
+        marker = Predicate("*-IsKeyFlag-*")
+        setty = set(a for a in getall.execute() if a != marker)
         self.assertEqual(setty, set([atom, getall]))
 
     def test_get_out(self):

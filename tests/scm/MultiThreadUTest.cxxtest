@@ -171,8 +171,8 @@ void MultiThreadUTest::test_multi_threads(void)
 	std::cout << "atomspace size:" << size << std::endl;
 
 	// We should get num_atoms * n_threads distinct atoms
-	// Plus one, for the (Predicate "*-TruthValueKey-*")
-	TS_ASSERT_EQUALS(size, num_atoms * n_threads + 1);
+	// Plus two: (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
+	TS_ASSERT_EQUALS(size, num_atoms * n_threads + 2);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
