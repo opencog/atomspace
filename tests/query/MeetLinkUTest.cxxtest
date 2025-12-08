@@ -282,8 +282,11 @@ void MeetLinkUTest::test_not_equal(void)
 	                    al(TYPED_VARIABLE_LINK,
 	                       Qvar,
                           an(TYPE_NODE, "PredicateNode")));
+	// Exclude internal marker atoms from matching
+	Handle marker = an(PREDICATE_NODE, "*-IsKeyFlag-*");
 	Handle body = al(AND_LINK,
 	                 al(NOT_LINK, al(EQUAL_LINK, P, Qvar)),
+	                 al(NOT_LINK, al(EQUAL_LINK, marker, Qvar)),
 	                 al(PRESENT_LINK, Qvar));
 	Handle gl = al(MEET_LINK, vardecl, body);
 
