@@ -192,13 +192,14 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 	// 1 grounded schema
 	// 1 king
 	// 1 Predicate "*-TruthValueKey-*"
+	// 1 Predicate "*-IsKeyFlag-*"
 	// num_atoms * n_threads  Concept    julians
 	// num_atoms * n_threads  Inheritance  julian prince
 	// num_atoms * n_threads  ListLink  julian
 	// num_atoms * n_threads  ExecutionOutputLink
 	// num_atoms * n_threads  Inheritance  julian king
-	// for a total of 4 + 5 * num_atoms * n_threads atoms created, total.
-	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 4);
+	// for a total of 5 + 5 * num_atoms * n_threads atoms created, total.
+	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 5);
 
 	// Everyone gets to be a king!  Yayyyy!
 	Handle king = as->add_node(CONCEPT_NODE, "king");
@@ -289,19 +290,19 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 
-	// Initially, atomspace has two atoms: julian + tvkey predicate
+	// Initially, atomspace has three atoms: julian + tvkey + iskeyflag predicates
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 2);
+	TS_ASSERT_EQUALS(size, 3);
 
 	eval->eval(
 		"(royalize julian)"
 	);
 	CHKEV(eval);
 
-	// Now, the atomspace has three atoms (Inheritance julian king)
-	// Plus also (Predicate "*-TruthValueKey-*")
+	// Now, the atomspace has these atoms: (Inheritance julian king)
+	// Plus also (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 4);
+	TS_ASSERT_EQUALS(size, 5);
 
 	// Start out with Anneliese a newborn princess.
 	eval->eval(
@@ -312,20 +313,20 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 5);
+	TS_ASSERT_EQUALS(size, 6);
 
 	eval->eval(
 		"(exe-royalize anne)"
 	);
 	CHKEV(eval);
 
-	// Now, the atomspace has nine atoms
+	// Now, the atomspace has these atoms:
 	// 3:  (Inheritance julian king)
 	// 3:  (Inheritance anne queen)
 	// 3:  (ExecutionLink (GroundedSchemaNode) (ListLink anne))
-	// Plus also (Predicate "*-TruthValueKey-*")
+	// Plus also (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 10);
+	TS_ASSERT_EQUALS(size, 11);
 
 	size = as->get_size();
 
