@@ -1289,11 +1289,6 @@ PURE_EXEC_LINK <- EXECUTABLE_LINK
 // a database, etc.
 OBJECT_NODE <- NODE
 //
-// The ObjectNode is the base class for StorageNode, because all
-// StorageNodes are stateful objects, existing in the real physical
-// world, and accept the messages that define the storage API.
-STORAGE_NODE <- OBJECT_NODE
-//
 // These form the foundation for a different way of looking at
 // Values and Predicates: they generalize the notion of "predicate"
 // so that any Value or Atom can be the result of evaluation

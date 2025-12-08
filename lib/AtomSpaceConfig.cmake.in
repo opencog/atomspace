@@ -61,7 +61,6 @@ set(ATOMSPACE_LIBRARIES
 	grant
 	signature
 	smob
-	backing
 	atomspace
 )
 
