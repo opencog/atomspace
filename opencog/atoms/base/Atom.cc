@@ -252,12 +252,6 @@ void Atom::copyValues(const Handle& other)
 
 void Atom::bulkCopyValues(const Handle& other)
 {
-	// Copy the persistent flags (IS_KEY_FLAG and IS_MESSAGE_FLAG).
-	static constexpr uint8_t PERSISTENT_FLAGS = IS_KEY_FLAG | IS_MESSAGE_FLAG;
-	uint8_t other_flags = other->_flags.load() & PERSISTENT_FLAGS;
-	if (other_flags)
-		_flags.fetch_or(other_flags);
-
 	// Note that other has exactly the same content hash as we do,
 	// and thus the same lock protects `other` as well as `this`.
 	KVP_UNIQUE_LOCK;

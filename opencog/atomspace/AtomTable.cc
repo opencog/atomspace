@@ -451,6 +451,10 @@ bool AtomSpace::extract_atom(const Handle& h, bool recursive)
     // Report success if its already gone.
     if (nullptr == handle) return true;
 
+    // Refuse to extract atoms that are actively in use as keys
+    // or messages. Note this over-rides the recursive flag.
+    if (h->isKey() or h->isMessage()) return false;
+
     // If the recursive-flag is set, then extract all the links in the
     // atom's incoming set. This might not succeed, if those atoms are
     // in other (higher) atomspaces (because recursion must not reach up
