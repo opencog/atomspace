@@ -1,6 +1,9 @@
 # Assorted scheme modules
 # --------------------------------
 
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
 # The exec module is now a pure-scheme stub; cog-execute! is provided
 # by the core (opencog) module. This stub exists for backward compat.
 ADD_GUILE_MODULE (FILES
@@ -23,6 +26,9 @@ ADD_GUILE_MODULE (FILES
    DEPENDS logger
 #  COMPILE
 )
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(logger opencog_atom_types)
 
 # --------------------------------
 
