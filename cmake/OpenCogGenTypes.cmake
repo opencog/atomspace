@@ -63,8 +63,14 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 		ENDFOREACH(I RANGE ${LIST_LENGTH})
 	ENDIF (TYPE_NAME STREQUAL "")
 
-	# Create short CamelCase names
+	# Create short CamelCase names (e.g., ConceptNode -> Concept, ListLink -> List)
+	# Only meaningful for types ending in Link or Node.
 	STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
+	# If regex didn't match (no Link/Node suffix), SHORT_NAME equals TYPE_NAME.
+	# Clear it to avoid generating duplicate definitions.
+	IF (SHORT_NAME STREQUAL TYPE_NAME)
+		SET(SHORT_NAME "")
+	ENDIF ()
 	# MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 	MESSAGE(DEBUG "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 
