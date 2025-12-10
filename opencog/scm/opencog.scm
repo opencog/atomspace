@@ -30,6 +30,10 @@
 	(use-modules (opencog as-config))
 	(load-from-path "opencog/as-config.scm"))
 
+; Use module-ref to avoid "possibly unbound variable" warning at compile time.
+(define opencog-ext-path-smob
+	(module-ref (resolve-module '(opencog as-config)) 'opencog-ext-path-smob))
+
 (load-extension (string-append opencog-ext-path-smob "libsmob") "opencog_guile_init")
 
 ; List everything to be exported from the C++ code i.e. from libsmob,
