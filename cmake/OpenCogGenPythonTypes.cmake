@@ -36,69 +36,59 @@ ENDMACRO()
 # since we don't want to create a function with the same
 # identifier as the Python Atom object.
 MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
-	IF (NOT TYPE_NAME STREQUAL "Atom")
 
-		# XXX This is broken in two ways. First, createValue() is
-		# a C++ template, and so it can't be used like this.
-		# Also, PYTHON_SUPPORTED_VALUE_LIST is an empty list (above)
-		# so this is a no-op, anyway. XXX FIXME someday, I guess
-		# Until then, the value ctors are hard-coded into
-		# opencog/cython/opencog/type_constructors.pyx
-		IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
-			LIST(FIND PYTHON_SUPPORTED_VALUE_LIST ${TYPE_NAME} _INDEX)
-			IF (${_INDEX} GREATER -1)
-				# Single arg will work as all of the value constructors
-				# have a single argument: either a value or a vector.
-				FILE(APPEND "${PYTHON_FILE}"
-					"def ${TYPE_NAME}(arg):\n"
-					"    return createValue(types.${TYPE_NAME}, arg)\n"
-				)
-			ENDIF (${_INDEX} GREATER -1)
-		ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+	# Args and Sigs are not "real types"; they are helpers for the dynamic
+	# type constructors and type signatures. Skip generating python bindings.
+	IF (NOT ISARG STREQUAL "ARG" AND NOT ISSIG STREQUAL "SIG")
 
-		IF (ISNODE STREQUAL "NODE")
-			FILE(APPEND "${PYTHON_FILE}"
-				"def ${TYPE_NAME}(node_name):\n"
-				"    return add_node(types.${TYPE_NAME}, node_name)\n"
-			)
-			IF (NOT SHORT_NAME STREQUAL "")
+		IF (NOT TYPE_NAME STREQUAL "Atom")
+
+			# XXX This is broken in two ways. First, createValue() is
+			# a C++ template, and so it can't be used like this.
+			# Also, PYTHON_SUPPORTED_VALUE_LIST is an empty list (above)
+			# so this is a no-op, anyway. XXX FIXME someday, I guess
+			# Until then, the value ctors are hard-coded into
+			# opencog/cython/opencog/type_constructors.pyx
+			IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+				LIST(FIND PYTHON_SUPPORTED_VALUE_LIST ${TYPE_NAME} _INDEX)
+				IF (${_INDEX} GREATER -1)
+					# Single arg will work as all of the value constructors
+					# have a single argument: either a value or a vector.
+					FILE(APPEND "${PYTHON_FILE}"
+						"def ${TYPE_NAME}(arg):\n"
+						"    return createValue(types.${TYPE_NAME}, arg)\n"
+					)
+				ENDIF (${_INDEX} GREATER -1)
+			ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+
+			IF (ISNODE STREQUAL "NODE")
 				FILE(APPEND "${PYTHON_FILE}"
-					"def ${SHORT_NAME}(node_name):\n"
+					"def ${TYPE_NAME}(node_name):\n"
 					"    return add_node(types.${TYPE_NAME}, node_name)\n"
 				)
-			ENDIF (NOT SHORT_NAME STREQUAL "")
-		ENDIF (ISNODE STREQUAL "NODE")
+				IF (NOT SHORT_NAME STREQUAL "")
+					FILE(APPEND "${PYTHON_FILE}"
+						"def ${SHORT_NAME}(node_name):\n"
+						"    return add_node(types.${TYPE_NAME}, node_name)\n"
+					)
+				ENDIF (NOT SHORT_NAME STREQUAL "")
+			ENDIF (ISNODE STREQUAL "NODE")
 
-		IF (ISLINK STREQUAL "LINK")
-			FILE(APPEND "${PYTHON_FILE}"
-				"def ${TYPE_NAME}(*args):\n"
-				"    return add_link(types.${TYPE_NAME}, args)\n"
-			)
-			IF (NOT SHORT_NAME STREQUAL "")
+			IF (ISLINK STREQUAL "LINK")
 				FILE(APPEND "${PYTHON_FILE}"
-					"def ${SHORT_NAME}(*args):\n"
+					"def ${TYPE_NAME}(*args):\n"
 					"    return add_link(types.${TYPE_NAME}, args)\n"
 				)
-			ENDIF (NOT SHORT_NAME STREQUAL "")
-		ENDIF (ISLINK STREQUAL "LINK")
-	ENDIF (NOT TYPE_NAME STREQUAL "Atom")
+				IF (NOT SHORT_NAME STREQUAL "")
+					FILE(APPEND "${PYTHON_FILE}"
+						"def ${SHORT_NAME}(*args):\n"
+						"    return add_link(types.${TYPE_NAME}, args)\n"
+					)
+				ENDIF (NOT SHORT_NAME STREQUAL "")
+			ENDIF (ISLINK STREQUAL "LINK")
+		ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
-	# If not named as a node or a link, assume its a link
-	# This is kind of hacky, but I don't know what else to do ...
-	IF (NOT ISATOMSPACE STREQUAL "ATOM_SPACE" AND
-		NOT ISNODE STREQUAL "NODE" AND
-		NOT ISLINK STREQUAL "LINK" AND
-		NOT ISVALUE STREQUAL "VALUE" AND
-		NOT ISSTREAM STREQUAL "STREAM")
-		FILE(APPEND "${PYTHON_FILE}"
-			"def ${TYPE_NAME}(*args):\n"
-			"    return add_link(types.${TYPE_NAME}, args)\n"
-		)
-	ENDIF (NOT ISATOMSPACE STREQUAL "ATOM_SPACE" AND
-		NOT ISNODE STREQUAL "NODE" AND
-		NOT ISLINK STREQUAL "LINK" AND
-		NOT ISVALUE STREQUAL "VALUE" AND
-		NOT ISSTREAM STREQUAL "STREAM")
+	ENDIF (NOT ISARG STREQUAL "ARG" AND NOT ISSIG STREQUAL "SIG")
 ENDMACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 
 # ------------
