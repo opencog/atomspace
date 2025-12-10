@@ -55,14 +55,15 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 				"(set-procedure-property! ${TYPE_NAME} 'documentation\n"
 				"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 			)
-			IF (NOT SHORT_NAME STREQUAL "")
+			# Only generate short name if it differs from TYPE_NAME
+			IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
 				FILE(APPEND "${SCM_FILE}"
 					"(define-public (${SHORT_NAME} . x)\n"
 					"\t(apply cog-new-node (cons ${TYPE_NAME}Type x)))\n"
 					"(set-procedure-property! ${SHORT_NAME} 'documentation\n"
 					"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 				)
-			ENDIF (NOT SHORT_NAME STREQUAL "")
+			ENDIF ()
 		ENDIF (ISNODE STREQUAL "NODE")
 
 		IF (ISLINK STREQUAL "LINK")
@@ -72,14 +73,15 @@ MACRO(OPENCOG_SCM_WRITE_DEFS SCM_FILE)
 				"(set-procedure-property! ${TYPE_NAME} 'documentation\n"
 				"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 			)
-			IF (NOT SHORT_NAME STREQUAL "")
+			# Only generate short name if it differs from TYPE_NAME
+			IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
 				FILE(APPEND "${SCM_FILE}"
 					"(define-public (${SHORT_NAME} . x)\n"
 					"\t(apply cog-new-link (cons ${TYPE_NAME}Type x)))\n"
 					"(set-procedure-property! ${SHORT_NAME} 'documentation\n"
 					"\" ${TYPE_NAME} -- See https://wiki.opencog.org/w/${TYPE_NAME} for documentation.\")\n"
 				)
-			ENDIF (NOT SHORT_NAME STREQUAL "")
+			ENDIF ()
 		ENDIF (ISLINK STREQUAL "LINK")
 
 		# Create and then add.

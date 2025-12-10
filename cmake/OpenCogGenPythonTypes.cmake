@@ -66,12 +66,13 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 					"def ${TYPE_NAME}(node_name):\n"
 					"    return add_node(types.${TYPE_NAME}, node_name)\n"
 				)
-				IF (NOT SHORT_NAME STREQUAL "")
+				# Only generate short name if it differs from TYPE_NAME
+				IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
 					FILE(APPEND "${PYTHON_FILE}"
 						"def ${SHORT_NAME}(node_name):\n"
 						"    return add_node(types.${TYPE_NAME}, node_name)\n"
 					)
-				ENDIF (NOT SHORT_NAME STREQUAL "")
+				ENDIF ()
 			ENDIF (ISNODE STREQUAL "NODE")
 
 			IF (ISLINK STREQUAL "LINK")
@@ -79,12 +80,13 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 					"def ${TYPE_NAME}(*args):\n"
 					"    return add_link(types.${TYPE_NAME}, args)\n"
 				)
-				IF (NOT SHORT_NAME STREQUAL "")
+				# Only generate short name if it differs from TYPE_NAME
+				IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
 					FILE(APPEND "${PYTHON_FILE}"
 						"def ${SHORT_NAME}(*args):\n"
 						"    return add_link(types.${TYPE_NAME}, args)\n"
 					)
-				ENDIF (NOT SHORT_NAME STREQUAL "")
+				ENDIF ()
 			ENDIF (ISLINK STREQUAL "LINK")
 		ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
