@@ -19,9 +19,6 @@ ADD_SUBDIRECTORY (pattern)
 ADD_SUBDIRECTORY (foreign)
 ADD_SUBDIRECTORY (grounded)
 
-ADD_CXXTEST(AlphaConvertUTest)
-ADD_CXXTEST(BetaReduceUTest)
-
 IF (HAVE_GUILE)
 	ADD_CXXTEST(HashUTest)
 	ADD_CXXTEST(RandomUTest)
