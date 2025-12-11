@@ -130,4 +130,6 @@ SET_TARGET_PROPERTIES(test_chempydemo PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME test_chempydemo)
 
+ADD_DEPENDENCIES(tests test_chempydemo)
+
 ENDIF (HAVE_CYTHON)
