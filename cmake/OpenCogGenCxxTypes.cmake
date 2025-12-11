@@ -117,7 +117,6 @@ MACRO(OPENCOG_CXX_WRITE_DEFS)
 	ENDIF ()
 	# Generate TYPE_NAME ctor for link types that don't end in Link/Node
 	# (e.g., VariableList, CrossSection) where SHORT_NAME equals TYPE_NAME
-	# but NOT for custom-named types (they already got their ctor above)
 	IF (ISLINK STREQUAL "LINK" AND
 		NOT HAS_CUSTOM_NAME AND
 		SHORT_NAME STREQUAL TYPE_NAME AND
@@ -125,6 +124,21 @@ MACRO(OPENCOG_CXX_WRITE_DEFS)
 		NOT TYPE_NAME STREQUAL "Frame" AND
 		NOT TYPE_NAME STREQUAL "Notype")
 		FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${TYPE_NAME}, ${TYPE})\n")
+	ENDIF ()
+	# For custom-named types, ALSO generate the CAMEL_TYPE_NAME ctor
+	IF (HAS_CUSTOM_NAME AND NOT CAMEL_TYPE_NAME STREQUAL "")
+		# Strip Link/Node suffix from CAMEL_TYPE_NAME for the ctor name
+		STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" CAMEL_SHORT_NAME ${CAMEL_TYPE_NAME})
+		IF (ISNODE STREQUAL "NODE" AND NOT CAMEL_SHORT_NAME STREQUAL "")
+			FILE(APPEND "${CNAMES_FILE}" "NODE_CTOR(${CAMEL_SHORT_NAME}, ${TYPE})\n")
+		ENDIF ()
+		IF (ISLINK STREQUAL "LINK" AND
+			NOT CAMEL_SHORT_NAME STREQUAL "" AND
+			NOT CAMEL_SHORT_NAME STREQUAL "Atom" AND
+			NOT CAMEL_SHORT_NAME STREQUAL "Frame" AND
+			NOT CAMEL_SHORT_NAME STREQUAL "Notype")
+			FILE(APPEND "${CNAMES_FILE}" "LINK_CTOR(${CAMEL_SHORT_NAME}, ${TYPE})\n")
+		ENDIF ()
 	ENDIF ()
 	# Special case, because `Type` is being used in C++ code as a C++ type.
 	IF (ISNODE STREQUAL "NODE" AND
