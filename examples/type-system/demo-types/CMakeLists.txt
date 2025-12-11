@@ -147,8 +147,19 @@ ADD_LIBRARY(chempydemo SHARED
 	chempydemo.cpp
 )
 
+# Tell Cython-generated code to use C linkage for extern declarations
+# since chem_types_init is declared with extern "C" in the source.
+TARGET_COMPILE_DEFINITIONS(chempydemo PRIVATE
+	CYTHON_EXTERN_C=extern\ \"C\"
+)
+
+# Use --no-as-needed to force linking chem-demo-types even though the
+# chem_types_init symbol is only referenced via cython extern, not
+# direct C++ code.
 TARGET_LINK_LIBRARIES(chempydemo
+	-Wl,--no-as-needed
 	chem-demo-types
+	-Wl,--as-needed
 	${ATOMSPACE_LIBRARIES}
 	${Python3_LIBRARIES}
 )
