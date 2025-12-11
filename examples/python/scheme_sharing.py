@@ -14,9 +14,11 @@ ConceptNode("this is a test")
 
 # Print the AtomSpace contents, using scheme:
 asp = get_thread_atomspace()
-scheme_eval(asp, '(cog-prt-atomspace)')
-scheme_eval(asp,
-     '(format #t "Yes this is really scheme: ~A\n" (+ 2 2))')
+print("Printing the AtomSpace from scheme:",
+    scheme_eval(asp, '(cog-prt-atomspace)'))
+print("Printing result of running some scheme code:",
+    scheme_eval(asp,
+        '(format #t "Yes this is really scheme: ~A\n" (+ 2 2))'))
 
 # Add an Atom, using scheme. The scheme_eval_v() function returns
 # a handle to that Atom, and python can use that handle, just as if
