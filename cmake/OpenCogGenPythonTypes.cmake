@@ -66,8 +66,9 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 					"def ${TYPE_NAME}(node_name):\n"
 					"    return add_node(types.${TYPE_NAME}, node_name)\n"
 				)
-				# Only generate short name if it differs from TYPE_NAME
-				IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
+				# Generate short name if it differs from TYPE_NAME OR if custom name
+				IF (NOT SHORT_NAME STREQUAL "" AND
+					(HAS_CUSTOM_NAME OR NOT SHORT_NAME STREQUAL TYPE_NAME))
 					FILE(APPEND "${PYTHON_FILE}"
 						"def ${SHORT_NAME}(node_name):\n"
 						"    return add_node(types.${TYPE_NAME}, node_name)\n"
@@ -80,8 +81,9 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 					"def ${TYPE_NAME}(*args):\n"
 					"    return add_link(types.${TYPE_NAME}, args)\n"
 				)
-				# Only generate short name if it differs from TYPE_NAME
-				IF (NOT SHORT_NAME STREQUAL "" AND NOT SHORT_NAME STREQUAL TYPE_NAME)
+				# Generate short name if it differs from TYPE_NAME OR if custom name
+				IF (NOT SHORT_NAME STREQUAL "" AND
+					(HAS_CUSTOM_NAME OR NOT SHORT_NAME STREQUAL TYPE_NAME))
 					FILE(APPEND "${PYTHON_FILE}"
 						"def ${SHORT_NAME}(*args):\n"
 						"    return add_link(types.${TYPE_NAME}, args)\n"
