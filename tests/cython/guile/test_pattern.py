@@ -1,24 +1,18 @@
 from unittest import TestCase
 
-from opencog.atomspace import AtomSpace, Atom, tvkey
-from opencog.type_constructors import FloatValue
+from opencog.atomspace import Atom, tvkey
+from opencog.type_constructors import FloatValue, ConceptNode
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme import *
 import os
 
 
-# We are poking atoms into this from the scm files, so we want
-# them to still be there, later.
-shared_space = AtomSpace()
-
 class SchemeTest(TestCase):
 
     def setUp(self):
-        global shared_space
-        self.space = shared_space
-        scheme_eval(self.space, '(add-to-load-path "' +
+        scheme_eval('(add-to-load-path "' +
                     os.environ['PROJECT_SOURCE_DIR'] + '")')
-        scheme_eval(self.space, '(add-to-load-path "' +
+        scheme_eval('(add-to-load-path "' +
                     os.environ['PROJECT_SOURCE_DIR'] + '/opencog/scm")')
 
     def tearDown(self):
@@ -29,19 +23,17 @@ class SchemeTest(TestCase):
     # These don't actually put any atoms into the atomspace.
 
     def test_a_load_core_types(self):
-
-        scheme_eval(self.space, "(use-modules (opencog))")
+        scheme_eval("(use-modules (opencog))")
 
     # Load a file that results in atoms placed in the atomspace.
     # Make sure the loaded atom is what we think it is.
     def test_b_load_file(self):
-
         print("Enter load-file test\n")
-        status = scheme_eval(self.space, '(load-from-path "tests/cython/guile/basic_unify.scm")')
+        status = scheme_eval('(load-from-path "tests/cython/guile/basic_unify.scm")')
         self.assertTrue(status)
 
         print("Loaded file\n")
-        a1 = self.space.add_node(types.ConceptNode, "hello")
+        a1 = ConceptNode("hello")
         self.assertTrue(a1)
 
         print("Added atom\n")
@@ -57,9 +49,9 @@ class SchemeTest(TestCase):
     # to sometimes manifest in strange circle-ci failures!? ???
     def test_c_gc(self):
         print("Enter garbage-collection-test\n")
-        status = scheme_eval(self.space, '(define n 0)')
+        status = scheme_eval('(define n 0)')
         self.assertTrue(status)
-        status = scheme_eval(self.space, """
+        status = scheme_eval("""
             (for-each
                 (lambda (y)
                     (let* ((bigstr (list->string (map
@@ -71,16 +63,16 @@ class SchemeTest(TestCase):
                         (set! n (+ 1 n))))
                     (iota 2000))""")
         self.assertTrue(status)
-        status = scheme_eval(self.space, '(gc-stats)')
+        status = scheme_eval('(gc-stats)')
         self.assertTrue(status)
         print("Finish garbage-collection-test\n")
 
     # Run some basic evaluation tests
     def test_d_eval(self):
-        basic = scheme_eval_v(self.space,
+        basic = scheme_eval_v(
             "(cog-set-value! (ConceptNode \"whatever\") (Predicate \"*-TruthValueKey-*\") (FloatValue 0.5 0.5))")
 
-        a1 = self.space.add_node(types.ConceptNode, "whatever")
+        a1 = ConceptNode("whatever")
         self.assertTrue(a1)
 
         # Make sure the truth value is what's in the SCM file.
@@ -91,8 +83,8 @@ class SchemeTest(TestCase):
         self.assertEqual(a1, basic)
 
         # Do it again, from a define in the scm file.
-        again = scheme_eval_v(self.space, "wobbly")
-        a2 = self.space.add_node(types.ConceptNode, "wobbly")
+        again = scheme_eval_v("wobbly")
+        a2 = ConceptNode("wobbly")
         self.assertTrue(a2)
         self.assertEqual(a2, again)
 
@@ -100,11 +92,11 @@ class SchemeTest(TestCase):
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
 
-        question = scheme_eval_v(self.space, "find-animals")
+        question = scheme_eval_v("find-animals")
         self.assertTrue(question)
         print ("\nThe question is:", question)
 
-        answer = scheme_eval_v(self.space, "(cog-execute! find-animals)")
+        answer = scheme_eval_v("(cog-execute! find-animals)")
         self.assertTrue(answer)
         print ("\nThe answer is:", answer)
         self.assertEqual(answer.type, types.SetLink)

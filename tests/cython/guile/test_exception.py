@@ -1,6 +1,5 @@
 import unittest
 
-from opencog.atomspace import AtomSpace
 from opencog.type_constructors import *
 from opencog.scheme import scheme_eval
 
@@ -10,15 +9,15 @@ import __main__
 # crash when a C++ exception is thrown.
 class TestExceptions(unittest.TestCase):
     def setUp(self):
-        self.space = AtomSpace()
+        pass
 
     def tearDown(self):
-        del self.space
+        pass
 
     def test_bogus_scheme(self):
         try:
             code = """(Meet (Concept "a") (Concept "a") (Concept "a"))"""
-            scheme_eval(self.space, code)
+            scheme_eval(code)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
@@ -28,7 +27,7 @@ class TestExceptions(unittest.TestCase):
     def test_bogus_path(self):
         try:
             code = """(load-from-path "/blargle/Betelgeuse")"""
-            scheme_eval(self.space, code)
+            scheme_eval(code)
             self.assertFalse("call should fail")
         except RuntimeError as e:
             # Use `nosetests3 --nocapture` to see this print...
