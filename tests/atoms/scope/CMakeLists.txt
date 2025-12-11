@@ -1,4 +1,6 @@
 
+ADD_CXXTEST(AlphaConvertUTest)
+ADD_CXXTEST(BetaReduceUTest)
 ADD_CXXTEST(VariablesUTest)
 
 IF(HAVE_GUILE)
