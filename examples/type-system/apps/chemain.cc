@@ -34,6 +34,16 @@ int main(int argc, char* argv[])
 	printf("Methane looks like this:\n%s\n\n",
 		methane->to_short_string().c_str());
 
+	// The longer names also work.
+	Handle ammonia = asp->add_atom(
+		Molecule(
+			SingleBond(Carbon("carbon"), Hydrogen("proton 1")),
+			SingleBond(Carbon("carbon"), Hydrogen("proton 2")),
+			SingleBond(Carbon("carbon"), Hydrogen("proton 3"))));
+
+	printf("Ammonia looks like this:\n%s\n\n",
+		ammonia->to_short_string().c_str());
+
 	// Atoms can also be created indirectly, from thier types.
 	// This form is more verbose, but avoids using named functions,
 	// and instead uses only two functions: createNode and createLink.
