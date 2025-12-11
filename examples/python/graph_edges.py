@@ -12,13 +12,8 @@ and most things can be represented in a variety of ways. As they say,
 which is why it is recommended.
 """
 
-# Boilerplate. Import what we need.
-from opencog.atomspace import AtomSpace
+# Import all Atom types.
 from opencog.type_constructors import *
-
-# Specify an AtomSpace to work with.
-space = AtomSpace()
-set_thread_atomspace(space)
 
 # Create a labelled directed graph edge. In ASCII graphics:
 #

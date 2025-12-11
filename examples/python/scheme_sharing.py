@@ -6,7 +6,6 @@
 Demonstration of mixing python and scheme Atomese.
 """
 
-from opencog.atomspace import *
 from opencog.type_constructors import *
 from opencog.scheme import *
 

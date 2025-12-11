@@ -6,17 +6,11 @@
 #
 # --------------------------------------------------------------
 
-# Import the AtomSpace, and the basic AtomSpace types
-from opencog.atomspace import AtomSpace
+# Import the basic AtomSpace types
 from opencog.type_constructors import *
 
 # Import all of the chemical element types, and bond types too.
 from opencog.chempydemo import *
-
-# Nothing works without a default AtomSpace, so create that first.
-spa = get_thread_atomspace()
-
-print(f'Hello! The AtomSpace is {str(spa)}')
 
 # Lets create a Magnesium atom named 'foo'
 Mg('foo')
