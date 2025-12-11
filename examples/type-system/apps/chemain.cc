@@ -73,4 +73,7 @@ int main(int argc, char* argv[])
 
 	printf("Cyanide looks like this:\n%s\n\n",
 		cyanide->to_short_string().c_str());
+
+
+	printf("The End. This is the end of the demo.\n");
 }
