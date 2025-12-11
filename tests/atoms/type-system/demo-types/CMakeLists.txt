@@ -79,11 +79,17 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/test-demo-types"
 )
 
-# Copy the generated chem_types.scm so it can be found via include-from-path.
-ADD_GUILE_MODULE (FILES
-	${CMAKE_CURRENT_BINARY_DIR}/chem_types.scm
-	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/test-demo-types"
-	DEPENDS test_chem_atom_types
+# Copy the generated chem_types.scm so it can be found.
+# The ADD_GUILE_MODULE should have done this, but the
+# ALL target that does this copying is not built for unit
+# tests, which explicitly say 'EXCLUDE_FROM_ALL'.
+ADD_CUSTOM_COMMAND(TARGET test-chem-types POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_CURRENT_SOURCE_DIR}/test-demo-types.scm
+		${GUILE_BIN_DIR}/opencog/test-demo-types.scm
+	COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_CURRENT_BINARY_DIR}/chem_types.scm
+		${GUILE_BIN_DIR}/opencog/test-demo-types/chem_types.scm
 )
 
 # --------------------------------------------------------------
