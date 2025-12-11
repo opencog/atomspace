@@ -4,21 +4,11 @@
 # The chem_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-# C++ test executable
-ADD_EXECUTABLE(chem-types-cxx-test
-   chem-types-test.cc
-)
-
-TARGET_LINK_LIBRARIES(chem-types-cxx-test
+ADD_CXXTEST(ChemTypesUTest)
+TARGET_LINK_LIBRARIES(ChemTypesUTest
+	-Wl,--no-as-needed
 	test-chem-types
-	atomspace
-)
-
-# Add C++ test
-ADD_TEST(NAME ChemTypesTest
-	COMMAND chem-types-cxx-test
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+	-Wl,--as-needed)
 
 # Add Scheme test
 IF (HAVE_GUILE)
@@ -26,12 +16,12 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 # Add Python test
-IF (HAVE_CYTHON)
-	ADD_TEST(NAME ChemTypesPythonTest
-		COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/chem-types-test.py
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-	)
-	SET_TESTS_PROPERTIES(ChemTypesPythonTest PROPERTIES
-		ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${CMAKE_CURRENT_BINARY_DIR}/../demo-types"
-	)
-ENDIF (HAVE_CYTHON)
+IF (HAVE_CYTHON AND HAVE_PYTEST)
+	ADD_TEST(ChemTypesPythonTest ${PYTEST_EXECUTABLE} -v
+		${CMAKE_CURRENT_SOURCE_DIR}/chem-types-test.py)
+	SET_PROPERTY(TEST ChemTypesPythonTest
+		PROPERTY DEPENDS test_chempydemo)
+	SET_PROPERTY(TEST ChemTypesPythonTest
+		APPEND PROPERTY ENVIRONMENT
+		"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython:${CMAKE_CURRENT_BINARY_DIR}/../demo-types")
+ENDIF (HAVE_CYTHON AND HAVE_PYTEST)

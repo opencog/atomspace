@@ -1,0 +1,119 @@
+/*
+ * tests/atoms/type-system/apps/ChemTypesUTest.cxxtest
+ *
+ * Unit test for custom atom types with custom short names.
+ * Based on examples/type-system/apps/chemain.cc
+ *
+ * Copyright (C) 2024 OpenCog Foundation
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <string>
+
+#include <opencog/atomspace/AtomSpace.h>
+
+// These include files are in the build directory.
+#include "tests/atoms/type-system/demo-types/chem_types.h"
+#include "tests/atoms/type-system/demo-types/atom_names.h"
+
+using namespace opencog;
+
+class ChemTypesUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr asp;
+
+public:
+	ChemTypesUTest()
+	{
+		asp = createAtomSpace();
+	}
+
+	void setUp() {}
+	void tearDown() {}
+
+	// Test short-name constructors
+	void test_short_name_constructors()
+	{
+		Handle methane = asp->add_atom(
+			Molecule(
+				SB(C("carbon"), H("proton 1")),
+				SB(C("carbon"), H("proton 2")),
+				SB(C("carbon"), H("proton 3")),
+				SB(C("carbon"), H("proton 4"))));
+
+		TS_ASSERT(methane != nullptr);
+
+		Handle carbon = asp->add_atom(C("carbon"));
+		TS_ASSERT_EQUALS(carbon->get_type(), CARBON_NODE);
+
+		Handle hydrogen = asp->add_atom(H("proton 1"));
+		TS_ASSERT_EQUALS(hydrogen->get_type(), HYDROGEN_NODE);
+	}
+
+	// Test long-form type names
+	void test_long_form_type_constructors()
+	{
+		Handle water = asp->add_atom(
+			createLink(MOLECULE,
+				createLink(SINGLE_BOND,
+					createNode(OXYGEN_NODE, "oxy"),
+					createNode(HYDROGEN_NODE, "h1")),
+				createLink(SINGLE_BOND,
+					createNode(OXYGEN_NODE, "oxy"),
+					createNode(HYDROGEN_NODE, "h2"))));
+
+		TS_ASSERT(water != nullptr);
+	}
+
+	// Test type constants
+	void test_type_constants()
+	{
+		Type ta = CARBON_NODE;
+		Type tb = NITROGEN_NODE;
+		std::string sa = "carbo";
+		std::string sb = "nitro";
+
+		Handle cyanide = asp->add_atom(
+			createLink(MOLECULE,
+				createLink(TRIPLE_BOND,
+					createNode(ta, sa),
+					createNode(tb, sb))));
+
+		TS_ASSERT(cyanide != nullptr);
+	}
+
+	// Test types without custom short names
+	void test_types_without_short_names()
+	{
+		Handle isotope = asp->add_atom(createNode(ISOTOPE_NODE, "some isotope"));
+		TS_ASSERT(isotope != nullptr);
+		TS_ASSERT_EQUALS(isotope->get_type(), ISOTOPE_NODE);
+	}
+
+	// Test all bond types with short names
+	void test_all_bond_types()
+	{
+		Handle sb_bond = asp->add_atom(SB(C("c1"), C("c2")));
+		Handle db_bond = asp->add_atom(DB(C("c3"), C("c4")));
+		Handle tb_bond = asp->add_atom(TB(C("c5"), N("n1")));
+		Handle ab_bond = asp->add_atom(AB(C("c6"), C("c7")));
+
+		TS_ASSERT_EQUALS(sb_bond->get_type(), SINGLE_BOND);
+		TS_ASSERT_EQUALS(db_bond->get_type(), DOUBLE_BOND);
+		TS_ASSERT_EQUALS(tb_bond->get_type(), TRIPLE_BOND);
+		TS_ASSERT_EQUALS(ab_bond->get_type(), AROMATIC_BOND);
+	}
+
+	// Test long CamelCase names
+	void test_long_camelcase_names()
+	{
+		Handle sb_long = asp->add_atom(SingleBond(Carbon("lc1"), Hydrogen("lh1")));
+		Handle db_long = asp->add_atom(DoubleBond(Carbon("lc2"), Oxygen("lo1")));
+		Handle tb_long = asp->add_atom(TripleBond(Carbon("lc3"), Nitrogen("ln1")));
+
+		TS_ASSERT_EQUALS(sb_long->get_type(), SINGLE_BOND);
+		TS_ASSERT_EQUALS(db_long->get_type(), DOUBLE_BOND);
+		TS_ASSERT_EQUALS(tb_long->get_type(), TRIPLE_BOND);
+	}
+};
