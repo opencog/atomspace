@@ -443,7 +443,11 @@ protected:
     virtual void install();
     virtual void remove();
 
+protected:
     virtual ContentHash compute_hash() const = 0;
+
+    /** Indicate this Atom is used as a message */
+    void markIsMessage();
 
 private:
     //! Returns whether this atom is marked for removal.
@@ -467,9 +471,6 @@ private:
 
     /** Indicate this Atom is used as a key */
     void markIsKey();
-
-    /** Indicate this Atom is used as a message */
-    void markIsMessage();
 
     void getLocalInc(const AtomSpace*, HandleSet&, Type) const;
     void getCoveredInc(const AtomSpace*, HandleSet&, Type) const;
