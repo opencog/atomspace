@@ -14,8 +14,7 @@ from opencog.type_constructors import *
 from opencog.chempydemo import *
 
 # Nothing works without a default AtomSpace, so create that first.
-spa = AtomSpace()
-set_default_atomspace(spa)
+spa = get_thread_atomspace()
 
 print(f'Hello! The AtomSpace is {str(spa)}')
 
