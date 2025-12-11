@@ -66,6 +66,69 @@ __main__.crosslang_py_get_atomspace_name = crosslang_py_get_atomspace_name
 __main__.crosslang_py_create_marker = crosslang_py_create_marker
 
 
+class Test_SchemeEvalVariants(ThreadTestCase):
+    """
+    Test that scheme_eval and scheme_eval_v work both with explicit atomspace
+    argument and without (using the thread atomspace).
+    """
+
+    def test_scheme_eval_with_explicit_atomspace(self):
+        """
+        Test scheme_eval with explicit atomspace argument.
+        """
+        atomspace = AtomSpace()
+        set_thread_atomspace(atomspace)
+
+        result = scheme_eval(atomspace, '(+ 2 3)')
+        self.assertIn('5', result)
+
+    def test_scheme_eval_without_atomspace(self):
+        """
+        Test scheme_eval without atomspace argument - uses thread atomspace.
+        """
+        result = scheme_eval('(+ 4 5)')
+        self.assertIn('9', result)
+
+    def test_scheme_eval_v_with_explicit_atomspace(self):
+        """
+        Test scheme_eval_v with explicit atomspace argument.
+        """
+        atomspace = AtomSpace()
+        set_thread_atomspace(atomspace)
+
+        result = scheme_eval_v(atomspace, '(Concept "explicit-test")')
+        self.assertIsNotNone(result)
+        self.assertEqual(result.name, "explicit-test")
+
+    def test_scheme_eval_v_without_atomspace(self):
+        """
+        Test scheme_eval_v without atomspace argument - uses thread atomspace.
+        """
+        result = scheme_eval_v('(Concept "implicit-test")')
+        self.assertIsNotNone(result)
+        self.assertEqual(result.name, "implicit-test")
+
+    def test_both_variants_use_same_atomspace(self):
+        """
+        Verify that explicit and implicit variants use the same atomspace
+        when the explicit atomspace matches the thread atomspace.
+        """
+        atomspace = AtomSpace()
+        set_thread_atomspace(atomspace)
+
+        # Create atom with explicit atomspace
+        atom1 = scheme_eval_v(atomspace, '(Concept "shared-atom")')
+
+        # Create value with implicit atomspace (should use same atomspace)
+        scheme_eval('(cog-set-value! (Concept "shared-atom") (Predicate "key") (StringValue "hello"))')
+
+        # Verify the value is on the same atom
+        key = PredicateNode("key")
+        value = atom1.get_value(key)
+        self.assertIsNotNone(value)
+        self.assertEqual(value.to_list(), ["hello"])
+
+
 class Test_1a_SchemeToPython(ThreadTestCase):
     """
     Test 1a: Multi-threaded Scheme→Python Execution
@@ -85,7 +148,8 @@ class Test_1a_SchemeToPython(ThreadTestCase):
 
         # Load required Scheme modules
 
-        # Execute Scheme code that calls Python
+        # Execute Scheme code that calls Python - test both variants
+        # First with explicit atomspace
         result = scheme_eval_v(atomspace, '''
             (cog-execute!
                 (ExecutionOutput
@@ -96,6 +160,17 @@ class Test_1a_SchemeToPython(ThreadTestCase):
         self.assertIsNotNone(result)
         self.assertEqual(result.name, "py_result")
 
+        # Then without explicit atomspace (uses thread atomspace)
+        result2 = scheme_eval_v('''
+            (cog-execute!
+                (ExecutionOutput
+                    (GroundedSchema "py:crosslang_py_simple")
+                    (List)))
+        ''')
+
+        self.assertIsNotNone(result2)
+        self.assertEqual(result2.name, "py_result")
+
     def test_scheme_to_python_with_args(self):
         """
         Single thread: Scheme calls Python with arguments.
@@ -105,6 +180,7 @@ class Test_1a_SchemeToPython(ThreadTestCase):
 
         # Load required Scheme modules
 
+        # Test with explicit atomspace
         result = scheme_eval_v(atomspace, '''
             (cog-execute!
                 (ExecutionOutput
@@ -114,6 +190,17 @@ class Test_1a_SchemeToPython(ThreadTestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(result.name, "py_result_foo_bar")
+
+        # Test without explicit atomspace
+        result2 = scheme_eval_v('''
+            (cog-execute!
+                (ExecutionOutput
+                    (GroundedSchema "py:crosslang_py_with_args")
+                    (List (Concept "baz") (Concept "qux"))))
+        ''')
+
+        self.assertIsNotNone(result2)
+        self.assertEqual(result2.name, "py_result_baz_qux")
 
     def test_15_threads_scheme_to_python(self):
         """
