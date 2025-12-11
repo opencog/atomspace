@@ -79,14 +79,10 @@ ADD_GUILE_MODULE (FILES
 	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/test-demo-types"
 )
 
-# Copy the generated chem_types.scm to the guile module path
-# so that it can be found via include-from-path.
-ADD_CUSTOM_TARGET(test_chem_types_scm_copy ALL
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${GUILE_BIN_DIR}/opencog/test-demo-types
-	COMMAND ${CMAKE_COMMAND} -E copy
-		${CMAKE_CURRENT_BINARY_DIR}/chem_types.scm
-		${GUILE_BIN_DIR}/opencog/test-demo-types/chem_types.scm
+# Copy the generated chem_types.scm so it can be found via include-from-path.
+ADD_GUILE_MODULE (FILES
+	${CMAKE_CURRENT_BINARY_DIR}/chem_types.scm
+	MODULE_DESTINATION "${GUILE_SITE_DIR}/opencog/test-demo-types"
 	DEPENDS test_chem_atom_types
 )
 
