@@ -43,7 +43,8 @@ c14 = Carbon14Node('found in wood')
 
 print(f'The carbon-14 atom is {str(c14)}')
 decay_products = c14.execute()
-print(f'The carbon-14 decay products are {str(decay_products)}')
+print(f'The carbon-14 decay products are {str(decay_products)}\n')
 
+print('Very funny! That\'s the end of the demo!')
 # The end.
 # That's all, folks!
