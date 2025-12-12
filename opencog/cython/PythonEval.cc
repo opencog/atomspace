@@ -252,8 +252,16 @@ std::string PythonEval::execute_string(const char* command)
         Py_DECREF(pyResult);
     }
 
+    // Flush Python's sys.stdout internal buffer.
     PyObject *f = PySys_GetObject((char *) "stdout");
-    if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
+    if (f) {
+        // fsync() only flushes file system buffers; not Python's
+        // internal buffer. So this naive fsync doesn't work.
+        // fsync(PyObject_AsFileDescriptor(f));
+        PyObject* flush_result = PyObject_CallMethod(f, "flush", NULL);
+        if (flush_result) Py_DECREF(flush_result);
+        PyErr_Clear();  // Clear any errors from flush
+    }
 
     return retval;
 }
