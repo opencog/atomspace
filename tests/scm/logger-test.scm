@@ -10,6 +10,7 @@
 (use-modules (opencog))
 (use-modules (opencog test-runner))
 (use-modules (opencog logger))
+(use-modules (ice-9 rdelim))
 
 (opencog-test-runner)
 (define tname "logger-test")
@@ -34,17 +35,32 @@
 (test-assert "info-enabled-is-bool"
    (boolean? (cog-logger-info-enabled?)))
 
-;; Test that we can log a message without error
-(test-assert "log-info-message"
-   (begin
-      (cog-logger-info "Logger test message")
-      #t))
+;; Test that logging to a file works
+(define test-logfile "/tmp/opencog-logger-test.log")
+(define test-message "Logger unit test marker message 12345")
 
-;; Test flush works without error
-(test-assert "flush-logger"
+(test-assert "log-to-file"
    (begin
+      ;; Set up test logging
+      (cog-logger-set-filename! test-logfile)
+      (cog-logger-set-level! "info")
+      (cog-logger-set-sync! #t)
+
+      ;; Write test message
+      (cog-logger-info test-message)
       (cog-logger-flush)
-      #t))
+
+      ;; Read the log file and check for our message
+      (let* ((port (open-input-file test-logfile))
+             (content (read-string port))
+             (found (string-contains content test-message)))
+         (close-port port)
+
+         ;; Clean up test file
+         (delete-file test-logfile)
+
+         ;; Return whether message was found
+         found)))
 
 (test-end tname)
 
