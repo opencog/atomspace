@@ -37,9 +37,9 @@ IF (CXXTEST_FOUND)
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
 
-	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
+	IF (HAVE_CYTHON AND HAVE_PYTEST)
 		MESSAGE(STATUS "Found cython and nosetests, enabling python unit tests")
 		ADD_SUBDIRECTORY (cython)
-	ENDIF (HAVE_CYTHON AND HAVE_NOSETESTS)
+	ENDIF (HAVE_CYTHON AND HAVE_PYTEST)
 
 ENDIF (CXXTEST_FOUND)
