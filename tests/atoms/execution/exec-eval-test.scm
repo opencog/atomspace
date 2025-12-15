@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; exec-eval-test.scm -- Verify that ExecutionOutput can run

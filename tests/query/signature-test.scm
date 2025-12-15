@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; signature-test.scm -- Verify that SignatureLinks work.

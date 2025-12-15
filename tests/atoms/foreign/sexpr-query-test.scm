@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; sexpr-query-test.scm - Store and query s-expressions.

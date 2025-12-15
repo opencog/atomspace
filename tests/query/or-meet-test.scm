@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; or-meet-test.scm -- Verify that OrLink works in MeetLink, QueryLink too.

@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; flat-stream-test.scm -- Test FlatStream flattening behavior

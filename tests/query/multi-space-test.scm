@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; multi-space-test.scm -- Using multiple AtomSpaces at the same time.

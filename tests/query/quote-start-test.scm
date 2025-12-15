@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; quote-start-test.scm -- Verify a Quote appearing at the top level works.

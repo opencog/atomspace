@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; filter-value-test.scm -- Verify that the demo filter-value.scm works.

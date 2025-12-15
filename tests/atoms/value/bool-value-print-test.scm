@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; bool-value-print-test.scm -- Verify that BoolValue to_string() works

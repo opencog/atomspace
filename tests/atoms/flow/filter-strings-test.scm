@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; filter-strings-test.scm -- Unit test for filter-strings.scm example.

@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; atomspace-of-test.scm -- Verify that AtomSpaceOfLink works.

@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; boolean-predicate-test.scm -- Test boolean returns from GroundedPredicates

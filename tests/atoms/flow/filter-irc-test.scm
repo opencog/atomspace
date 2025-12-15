@@ -1,4 +1,5 @@
-#! /usr/bin/env -S guile -s
+#! /usr/bin/env guile
+-s
 !#
 ;
 ; filter-irc-test.scm -- Test filter with executable terms in LinkValues
