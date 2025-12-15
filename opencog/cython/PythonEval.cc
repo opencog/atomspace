@@ -41,10 +41,6 @@
 #include <chrono>    // for std::chrono_literals
 #include <utility>   // for std::forward
 
-#ifdef __APPLE__
-  #define secure_getenv getenv
-#endif
-
 // A simple callback wrapper to do RAII when coing out of scope,
 // capable of handling exceptions. Boost provides this (in the form of
 // BOOST_SCOPE_EXIT macros), but we want to avoid the overkill of boost.
