@@ -38,9 +38,10 @@ requires = [
 ]
 build-backend = "py_build_cmake.build"
 
+# Match version number with opencog/atomspace/version.h
 [project]
 name = "atomspace"
-version = "5.0.5"
+version = "5.2.0"
 description = "The AtomSpace Hypergraph Database"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
