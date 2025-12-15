@@ -11,6 +11,15 @@ def createBoolValue(arg):
 
 cdef class BoolValue(Value):
 
+    def __init__(self, arg=None):
+        cdef shared_ptr[cBoolValue] c_ptr
+        if arg is not None:
+            if isinstance(arg, list):
+                c_ptr = c_createBoolValue_vector(BoolValue.list_of_bool_to_vector(arg))
+            else:
+                c_ptr = c_createBoolValue_single(<bool>arg)
+            self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def to_list(self):
         return BoolValue.vector_of_bool_to_list(
             (<cBoolValue*>self.get_c_raw_ptr()).value())

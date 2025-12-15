@@ -15,7 +15,7 @@ import unittest
 import threading
 
 from opencog.atomspace import AtomSpace
-from opencog.type_constructors import (
+from opencog.atomspace import (
     ConceptNode, PredicateNode, ListLink, NumberNode,
     ExecutionOutputLink, GroundedSchemaNode, Evaluation,
     GroundedPredicate, StringValue, FloatValue

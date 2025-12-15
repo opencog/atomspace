@@ -16,6 +16,17 @@ def createUnisetValue(arg=None):
 
 cdef class UnisetValue(Value):
 
+    def __init__(self, arg=None):
+        # Allow construction: UnisetValue(), UnisetValue([val1, val2]), UnisetValue(val)
+        cdef shared_ptr[cUnisetValue] c_ptr
+        if arg is None:
+            c_ptr = c_createUnisetValue_empty()
+        elif isinstance(arg, list):
+            c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector(arg))
+        else:
+            c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector([arg]))
+        self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def open(self):
         """Open the set for adding/removing values."""
         cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()

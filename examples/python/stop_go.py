@@ -19,7 +19,7 @@ clause.
 """
 
 from opencog.atomspace import *
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.logger import Logger, log
 
 # Logging will be written to opencog.log in the current directory.

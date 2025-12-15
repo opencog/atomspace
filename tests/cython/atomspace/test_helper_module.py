@@ -5,7 +5,7 @@ This module provides simple functions that can be called via GroundedSchema
 to test module resolution in multi-threaded contexts.
 """
 
-from opencog.type_constructors import ConceptNode, NumberNode
+from opencog.atomspace import ConceptNode, NumberNode
 
 
 def simple_function():

@@ -16,7 +16,7 @@
 ; Define a python func returning a boolean
 (python-eval "
 from opencog.atomspace import AtomSpace, types
-from opencog.type_constructors import FloatValue, PredicateNode
+from opencog.atomspace import FloatValue, PredicateNode
 
 
 # Twiddle some atoms in the atomspace

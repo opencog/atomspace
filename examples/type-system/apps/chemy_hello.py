@@ -7,7 +7,7 @@
 # --------------------------------------------------------------
 
 # Import the basic AtomSpace types
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 # Import all of the chemical element types, and bond types too.
 from opencog.chempydemo import *

@@ -11,7 +11,7 @@ python is easier. See `create_atoms.py` for a simpler variant.
 """
 
 from opencog.atomspace import AtomSpace, Atom
-from opencog.type_constructors import FloatValue, StringValue
+from opencog.atomspace import FloatValue, StringValue
 from opencog.atomspace import types
 
 a = AtomSpace()

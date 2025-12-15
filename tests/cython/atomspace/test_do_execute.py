@@ -1,7 +1,7 @@
 import unittest
 import threading
 
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.atomspace import set_thread_atomspace, get_thread_atomspace
 
 

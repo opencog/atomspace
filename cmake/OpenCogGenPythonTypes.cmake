@@ -67,7 +67,9 @@ MACRO(OPENCOG_PYTHON_WRITE_DEFS PYTHON_FILE)
 					"    return add_node(types.${TYPE_NAME}, node_name)\n"
 				)
 				# Generate short name if it differs from TYPE_NAME OR if custom name
+				# Skip "Type" as it conflicts with Cython's Type keyword
 				IF (NOT SHORT_NAME STREQUAL "" AND
+					NOT SHORT_NAME STREQUAL "Type" AND
 					(HAS_CUSTOM_NAME OR NOT SHORT_NAME STREQUAL TYPE_NAME))
 					FILE(APPEND "${PYTHON_FILE}"
 						"def ${SHORT_NAME}(node_name):\n"

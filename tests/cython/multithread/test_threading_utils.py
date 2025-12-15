@@ -295,26 +295,26 @@ class TestHelperModule:
     @staticmethod
     def simple_function():
         """Simple function returning a ConceptNode."""
-        from opencog.type_constructors import ConceptNode
+        from opencog.atomspace import ConceptNode
         return ConceptNode("success")
 
     @staticmethod
     def function_with_sleep(sleep_ms: int = 100):
         """Function with simulated I/O delay."""
-        from opencog.type_constructors import ConceptNode
+        from opencog.atomspace import ConceptNode
         time.sleep(sleep_ms / 1000.0)
         return ConceptNode(f"slept_{sleep_ms}ms")
 
     @staticmethod
     def function_with_args(arg1, arg2):
         """Function that processes arguments."""
-        from opencog.type_constructors import ConceptNode
+        from opencog.atomspace import ConceptNode
         return ConceptNode(f"result_{arg1.name}_{arg2.name}")
 
     @staticmethod
     def cpu_intensive(iterations: int = 1000):
         """CPU-intensive function for GIL contention testing."""
-        from opencog.type_constructors import NumberNode
+        from opencog.atomspace import NumberNode
         result = 0
         for i in range(iterations):
             result += i * i

@@ -11,7 +11,7 @@ import sys
 
 # Import the AtomSpace, and the basic AtomSpace types
 from opencog.atomspace import AtomSpace
-from opencog.type_constructors import set_thread_atomspace
+from opencog.atomspace import set_thread_atomspace
 
 # Import all of the chemical element types, and bond types too.
 from test_chempydemo import *

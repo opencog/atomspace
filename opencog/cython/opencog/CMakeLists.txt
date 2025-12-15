@@ -99,37 +99,12 @@ INSTALL (FILES
 	DESTINATION "include/opencog/cython/opencog"
 )
 
-############################## type constructors #####################
-# FYI The second and remaining args to CYTHON_ADD_MODULE_PYX are
-# dependencies, telling cmake what order to build things in,
-# and when a rebuild is needed.
-
-CYTHON_ADD_MODULE_PYX(type_constructors
-	"atomspace.pxd" opencog_atom_types
-)
-
-ADD_LIBRARY(type_constructors
-	type_constructors.cpp
-)
-
-TARGET_LINK_LIBRARIES(type_constructors
-	${NO_AS_NEEDED}
-	atomspace
-	${Python3_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(type_constructors PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME type_constructors)
-
-
 ############################## execute module #####################
 
 ### Install the modules ###
 INSTALL(TARGETS
 	atomspace_cython
 	logger_cython
-	type_constructors
 	DESTINATION "${PYTHON_DEST}")
 
 # This custom target allows *only* the Python bindings to be installed;
@@ -140,8 +115,7 @@ INSTALL(TARGETS
 # $ENV{VIRTUAL_ENV}, which is what python wants. Argh. Its a mess.
 ADD_CUSTOM_TARGET(PythonBindings DEPENDS
 	atomspace_cython
-	logger_cython
-	type_constructors)
+	logger_cython)
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
@@ -178,5 +152,6 @@ ENDIF (HAVE_GUILE)
 
 INSTALL (FILES
 	__init__.py
+	type_constructors.py
 	utilities.py
 	DESTINATION "${PYTHON_DEST}")

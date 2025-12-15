@@ -23,6 +23,8 @@ INCLUDE_DIRECTORIES(
 # Python Module init
 FILE(MAKE_DIRECTORY opencog)
 FILE(COPY opencog/__init__.py DESTINATION opencog)
+FILE(COPY opencog/utilities.py DESTINATION opencog)
+FILE(COPY opencog/type_constructors.py DESTINATION opencog)
 
 ADD_LIBRARY(PythonEval
 	PythonError.cc
@@ -30,7 +32,7 @@ ADD_LIBRARY(PythonEval
 	PythonLoader.cc
 )
 
-ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython type_constructors)
+ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	pattern

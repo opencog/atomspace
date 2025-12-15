@@ -18,7 +18,7 @@
 ; AtomSpaces are automatically shared between scheme and python. This is
 ; demonstrated below.
 (python-eval "
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.atomspace import createFloatValue
 
 # Create atoms in the current (scheme) atomspace

@@ -11,6 +11,15 @@ def createStringValue(arg):
 
 cdef class StringValue(Value):
 
+    def __init__(self, arg=None):
+        cdef shared_ptr[cStringValue] c_ptr
+        if arg is not None:
+            if isinstance(arg, list):
+                c_ptr = c_createStringValue_vector(StringValue.list_of_strings_to_vector(arg))
+            else:
+                c_ptr = c_createStringValue_single(<string>(arg.encode('UTF-8')))
+            self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def to_list(self):
         return StringValue.vector_of_strings_to_list(
             &((<cStringValue*>self.get_c_raw_ptr()).value()))

@@ -1,5 +1,5 @@
 import unittest
-from opencog.atomspace import AtomSpace
+from opencog.type_constructors import AtomSpace
 from opencog.type_constructors import *
 
 

@@ -3,7 +3,7 @@ import unittest
 from opencog.atomspace import (types, decl_type, type_decl_context, AtomSpace,
         get_type_name)
 from opencog.atomspace import add_node, add_link, set_thread_atomspace
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 # Types must be declared once per module
 with type_decl_context(__name__):
@@ -25,7 +25,7 @@ class NameserverTest(unittest.TestCase):
     def _get_atoms_by_type(self, type):
         type_name = get_type_name(type)
         return Meet(VariableList(
-            TypedVariable(Variable("X"), Type(type_name))),
+            TypedVariable(Variable("X"), TypeNode(type_name))),
             And(Variable("X"))).execute()
 
     def test_decl_node(self):

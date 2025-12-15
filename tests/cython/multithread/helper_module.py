@@ -6,7 +6,7 @@ in multi-threaded test scenarios.
 """
 
 import time
-from opencog.type_constructors import ConceptNode, NumberNode
+from opencog.atomspace import ConceptNode, NumberNode
 
 
 def simple_function():

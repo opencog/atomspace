@@ -2,7 +2,7 @@
 # Test Functions
 
 from opencog.atomspace import types, Atom, tvkey
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 
 def print_arguments(argOne, argTwo):

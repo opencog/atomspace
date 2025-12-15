@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from opencog.atomspace import Atom, tvkey
-from opencog.type_constructors import FloatValue, ConceptNode
+from opencog.atomspace import FloatValue, ConceptNode
 from opencog.atomspace import types, is_a, get_type, get_type_name
 from opencog.scheme import *
 import os

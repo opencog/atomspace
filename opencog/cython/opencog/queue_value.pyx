@@ -16,6 +16,18 @@ def createQueueValue(arg=None):
 
 cdef class QueueValue(Value):
 
+    def __init__(self, arg=None):
+        # Allow construction: QueueValue(), QueueValue([val1, val2]), QueueValue(val)
+        # Note: __init__ is always called after __new__, so we check if already initialized
+        cdef shared_ptr[cQueueValue] c_ptr
+        if arg is None:
+            c_ptr = c_createQueueValue_empty()
+        elif isinstance(arg, list):
+            c_ptr = c_createQueueValue_vector(QueueValue.list_of_values_to_vector(arg))
+        else:
+            c_ptr = c_createQueueValue_vector(QueueValue.list_of_values_to_vector([arg]))
+        self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def open(self):
         """Open the queue for adding/removing values."""
         cdef cQueueValue* queue_ptr = <cQueueValue*>self.get_c_raw_ptr()

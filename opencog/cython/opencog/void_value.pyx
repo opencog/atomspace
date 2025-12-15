@@ -8,6 +8,10 @@ def createVoidValue():
 
 cdef class VoidValue(Value):
 
+    def __init__(self):
+        cdef cValuePtr c_ptr = c_createVoidValue[int]()
+        self.shared_ptr = c_ptr
+
     def to_list(self):
         # VoidValue has no data, return empty list
         return []

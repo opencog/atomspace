@@ -27,7 +27,7 @@
 
 (python-eval "
 from opencog.atomspace import AtomSpace
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.atomspace import get_thread_atomspace
 
 # Simple Python function
@@ -243,7 +243,7 @@ def py_call_scm_with_idx(idx):
 
 ; Define Python functions for atom sharing tests
 (python-eval "
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.atomspace import get_thread_atomspace
 
 def py_set_string_value(atom, key, value_str):

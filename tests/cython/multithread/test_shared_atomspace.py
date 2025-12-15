@@ -10,7 +10,7 @@ import unittest
 import threading
 
 from opencog.atomspace import AtomSpace
-from opencog.type_constructors import ConceptNode, PredicateNode
+from opencog.atomspace import ConceptNode, PredicateNode
 from opencog.atomspace import get_thread_atomspace, set_thread_atomspace
 
 from test_threading_utils import ThreadTestCase, ThreadSafetyValidator
@@ -203,7 +203,7 @@ class Test_SharedAtomSpaceWithExecution(ThreadTestCase):
         """
         Child threads can execute GroundedSchemas.
         """
-        from opencog.type_constructors import (
+        from opencog.atomspace import (
             ExecutionOutputLink, GroundedSchemaNode, ListLink
         )
 

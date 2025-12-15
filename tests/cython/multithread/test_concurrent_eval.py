@@ -10,7 +10,7 @@ import threading
 import time
 
 from opencog.atomspace import AtomSpace
-from opencog.type_constructors import (
+from opencog.atomspace import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )

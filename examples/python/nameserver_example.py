@@ -9,7 +9,7 @@ walk the Type hierarchy.
 """
 
 from opencog.atomspace import *
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 
 # A SetLink is of the type UnorderedLink. This can be checked directly.

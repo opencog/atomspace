@@ -13,7 +13,7 @@ which is why it is recommended.
 """
 
 # Import all Atom types.
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 # Create a labelled directed graph edge. In ASCII graphics:
 #

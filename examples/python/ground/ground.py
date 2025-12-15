@@ -9,7 +9,7 @@ Both regular function calls, and class instance method calls are demoed.
 
 import sys
 from opencog.atomspace import types
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 import mymodule as mm
 

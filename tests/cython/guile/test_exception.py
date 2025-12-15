@@ -1,6 +1,6 @@
 import unittest
 
-from opencog.type_constructors import *
+from opencog.atomspace import *
 from opencog.scheme import scheme_eval
 
 import __main__

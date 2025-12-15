@@ -14,7 +14,7 @@ be a big deal.
 """
 
 from opencog.atomspace import *
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 # Add three nodes
 A = ConceptNode('Apple')

@@ -19,6 +19,11 @@ include "type_ctors.pyx"
 include "atomspace_details.pyx"
 
 # -----------------------------------------------------------------
+# Type constructors - auto-generated atom creation functions
+# (ConceptNode, ListLink, etc.)
+include "opencog/atoms/atom_types/core_types.pyx"
+
+# -----------------------------------------------------------------
 # Module initialization: Create and set a default atomspace if one
 # doesn't already exist. This allows type constructors to work
 # without requiring explicit set_default_atomspace() calls.
