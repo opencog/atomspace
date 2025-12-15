@@ -20,7 +20,7 @@ from opencog.type_constructors import (
     ExecutionOutputLink, GroundedSchemaNode, Evaluation,
     GroundedPredicate, StringValue, FloatValue
 )
-from opencog.type_ctors import (
+from opencog.atomspace import (
     set_thread_atomspace, push_thread_atomspace, get_thread_atomspace
 )
 from opencog.scheme import scheme_eval, scheme_eval_v
@@ -829,7 +829,7 @@ class Test_1d_CrossLangPushPopVisibility(ThreadTestCase):
         5. Python pops the AtomSpace
         6. Python verifies the atom is gone
         """
-        from opencog.type_ctors import pop_thread_atomspace
+        from opencog.atomspace import pop_thread_atomspace
 
         # Create base atomspace
         base_atomspace = AtomSpace()

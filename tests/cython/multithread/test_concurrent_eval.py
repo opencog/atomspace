@@ -14,7 +14,7 @@ from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode,
     ListLink, NumberNode
 )
-from opencog.type_ctors import set_thread_atomspace
+from opencog.atomspace import set_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator, check_memory_leaks

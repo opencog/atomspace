@@ -5,7 +5,7 @@ from opencog.atomspace import Atom, tvkey
 from opencog.atomspace import types, is_a, get_type, get_type_name
 
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
+from opencog.atomspace import get_thread_atomspace, set_thread_atomspace
 
 from time import sleep
 

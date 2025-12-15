@@ -15,14 +15,13 @@ include "uniset_value.pyx"
 include "void_value.pyx"
 include "atom.pyx"
 include "nameserver.pyx"
+include "type_ctors.pyx"
 include "atomspace_details.pyx"
 
 # -----------------------------------------------------------------
 # Module initialization: Create and set a default atomspace if one
 # doesn't already exist. This allows type constructors to work
 # without requiring explicit set_default_atomspace() calls.
-
-from opencog.type_ctors cimport get_frame, set_frame
 
 cdef void _init_default_atomspace():
     cdef cHandle default_as

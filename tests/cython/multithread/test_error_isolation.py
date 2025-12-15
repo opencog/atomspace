@@ -12,7 +12,7 @@ from opencog.atomspace import AtomSpace
 from opencog.type_constructors import (
     ConceptNode, ExecutionOutputLink, GroundedSchemaNode, ListLink
 )
-from opencog.type_ctors import set_thread_atomspace
+from opencog.atomspace import set_thread_atomspace
 
 from test_threading_utils import (
     ThreadTestCase, ThreadSafetyValidator

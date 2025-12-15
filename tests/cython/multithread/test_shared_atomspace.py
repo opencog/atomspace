@@ -11,7 +11,7 @@ import threading
 
 from opencog.atomspace import AtomSpace
 from opencog.type_constructors import ConceptNode, PredicateNode
-from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
+from opencog.atomspace import get_thread_atomspace, set_thread_atomspace
 
 from test_threading_utils import ThreadTestCase, ThreadSafetyValidator
 

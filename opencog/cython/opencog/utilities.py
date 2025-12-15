@@ -23,12 +23,7 @@ warnings.warn(
     stacklevel=2
 )
 
-# Re-export everything from opencog.atomspace
 from opencog.atomspace import *
-
-# Re-export everything from opencog.type_ctors
-from opencog.type_ctors import *
-
 
 # Backwards-compatibility wrappers (deprecated)
 def set_default_atomspace(atomspace):
@@ -56,7 +51,6 @@ def get_default_atomspace():
 # Ensure __all__ is propagated if it exists
 try:
     from opencog.atomspace import __all__ as _atomspace_all
-    from opencog.type_ctors import __all__ as _type_ctors_all
-    __all__ = list(set(_atomspace_all + _type_ctors_all))
+    __all__ = list(_atomspace_all)
 except ImportError:
     pass

@@ -15,16 +15,16 @@ from opencog.atomspace cimport (cValuePtr, Value, cAtomSpace,
                                 Atom, AtomSpace, cAtom, cHandle,
                                 AtomSpace_factoid, handle_cast,
                                 create_python_value_from_c_value)
-from opencog.type_ctors cimport get_frame
 
-
-# basic wrapping for std::string conversion
 cdef extern from "<string>" namespace "std":
     cdef cppclass string:
         string()
         string(char *)
         const char * c_str()
         int size()
+
+cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
+    cValuePtr get_frame() nogil
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     string eval_scheme(cAtomSpace* as, const string& s) except +

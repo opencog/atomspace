@@ -2,12 +2,23 @@
 # Helper functions to add Atoms to the current AtomSpace for this thread.
 #
 from libcpp.string cimport string
-from opencog.atomspace cimport AtomSpace, Atom, Value
-from opencog.atomspace cimport cHandle, cValuePtr, create_python_value_from_c_value
-from opencog.atomspace cimport AtomSpace_factoid, handle_cast
+from libcpp.vector cimport vector
 
-# create_child_atomspace is obsolete, but we re-export for backwards compat.
-from opencog.atomspace import create_child_atomspace
+# Internal C++ declarations (not exposed in atomspace.pxd)
+cdef extern from "opencog/util/exceptions.h" namespace "opencog":
+    cdef cppclass cPythonException "opencog::PythonException":
+        const string& get_python_exception_type() except +
+        const char* get_message() except +
+
+cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
+    cValuePtr get_frame() nogil
+    void push_frame() nogil
+    void pop_frame() nogil
+    void set_frame(cHandle atomspace) nogil
+
+cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
+    cHandle c_add_node "opencog::add_node" (Type t, const string s) nogil except +
+    cHandle c_add_link "opencog::add_link" (Type t, const vector[cHandle]) nogil except +
 
 from contextlib import contextmanager
 from contextvars import ContextVar

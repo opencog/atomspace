@@ -4,7 +4,7 @@ import os
 from opencog.atomspace import Atom, types
 
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace
+from opencog.atomspace import get_thread_atomspace
 
 from test_functions import green_count, red_count
 import test_functions

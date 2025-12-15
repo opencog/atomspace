@@ -18,13 +18,13 @@ from opencog.atomspace import (createBoolValue,
                                # createRandomStream
                                )
 from opencog.atomspace import types, AtomSpace
-from opencog.type_ctors import add_node, add_link
+from opencog.atomspace import add_node, add_link
 
 # The code below never uses these imports, but users do, when they say
 #    from opencog.type_constructors import *
 # and expect to get these functions below.
-from opencog.type_ctors import push_thread_atomspace, pop_thread_atomspace
-from opencog.type_ctors import get_thread_atomspace, set_thread_atomspace
+from opencog.atomspace import push_thread_atomspace, pop_thread_atomspace
+from opencog.atomspace import get_thread_atomspace, set_thread_atomspace
 
 # -----------------------------------------------------------------
 # The core Atom types are taken from an auto-generated file

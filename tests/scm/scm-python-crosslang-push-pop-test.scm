@@ -19,7 +19,7 @@
 ; Define a Python function that creates an atom with a value
 (python-eval "
 from opencog.type_constructors import *
-from opencog.type_ctors import get_thread_atomspace
+from opencog.atomspace import get_thread_atomspace
 
 def scm_test_create_marker():
     '''Create a marker atom with a value in the current atomspace.'''

@@ -48,7 +48,7 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 ###################### atomspace ####################################
 
 CYTHON_ADD_MODULE_PYX(atomspace
-	"atom.pyx" "nameserver.pyx"
+	"atom.pyx" "nameserver.pyx" "type_ctors.pyx"
 	"atomspace_details.pyx" "value.pyx" "float_value.pyx" "string_value.pyx"
 	"link_value.pyx" "queue_value.pyx" "uniset_value.pyx" "bool_value.pyx" opencog_atom_types
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
@@ -60,6 +60,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
 	ExecuteStub.cc
+	TypeCtors.cc
 	atomspace.cpp
 )
 
@@ -122,37 +123,6 @@ SET_TARGET_PROPERTIES(type_constructors PROPERTIES
 	OUTPUT_NAME type_constructors)
 
 
-#################### type_ctors #####################
-
-CYTHON_ADD_MODULE_PYX(type_ctors
-	"atomspace.pxd" "type_ctors.pxd" opencog_atom_types
-)
-
-ADD_LIBRARY(type_ctors_cython
-	TypeCtors.cc
-	type_ctors.cpp
-)
-
-TARGET_LINK_LIBRARIES(type_ctors_cython
-	PythonEval
-	atomspace
-	framestack
-	${Python3_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(type_ctors_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME type_ctors)
-
-INSTALL (TARGETS type_ctors_cython EXPORT AtomSpaceTargets
-   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	TypeCtors.h
-	DESTINATION "include/opencog/cython/opencog"
-)
-
 ############################## execute module #####################
 
 ### Install the modules ###
@@ -160,7 +130,6 @@ INSTALL(TARGETS
 	atomspace_cython
 	logger_cython
 	type_constructors
-	type_ctors_cython
 	DESTINATION "${PYTHON_DEST}")
 
 # This custom target allows *only* the Python bindings to be installed;
@@ -172,8 +141,7 @@ INSTALL(TARGETS
 ADD_CUSTOM_TARGET(PythonBindings DEPENDS
 	atomspace_cython
 	logger_cython
-	type_constructors
-	type_ctors_cython)
+	type_constructors)
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################

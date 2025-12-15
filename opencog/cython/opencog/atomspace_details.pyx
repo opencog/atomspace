@@ -4,7 +4,6 @@ from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
 from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
-from opencog.type_ctors cimport cPythonException, get_frame
 import cython
 import warnings
 

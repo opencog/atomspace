@@ -11,7 +11,7 @@
 # for an example of using this.
 
 from opencog.atomspace import regenerate_types
-from opencog.type_ctors import add_node, add_link
+from opencog.atomspace import add_node, add_link
 
 # The chem_types_init() function is defined in the ChemTypes.cc file.
 # Calling it causes the shared library defining the type constructors
