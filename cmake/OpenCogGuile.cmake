@@ -156,6 +156,10 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     # as otherwise, there will be build errors.
     IF (NOT (${MODULE_NAME} STREQUAL opencog))
         ADD_DEPENDENCIES(${PHONY_TARGET}_go opencog_go)
+        # Also add file-level dependency so parallel builds work correctly
+        SET(OPENCOG_GO_DEP ${FILE_BUILD_PATH}/opencog.go)
+    ELSE()
+        SET(OPENCOG_GO_DEP "")
     ENDIF()
 
     # Remainder of the arguments is a list of dependencies.
@@ -164,15 +168,18 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     # Perform the actual compilation
     # Disable auto-compilation to prevent guild from trying to recompile
     # dependencies that appear newer in the build directory.
+    # Set GUILE_LOAD_COMPILED_PATH so that guild can find opencog.go.
     ADD_CUSTOM_COMMAND(
         OUTPUT ${FILE_BUILD_PATH}/${MODULE_NAME}.go
-        COMMAND ${CMAKE_COMMAND} -E env GUILE_AUTO_COMPILE=0
+        COMMAND ${CMAKE_COMMAND} -E env
+                GUILE_AUTO_COMPILE=0
+                GUILE_LOAD_COMPILED_PATH=${GUILE_BIN_DIR}
                 guild compile
                 ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}.scm
                 -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
                 -L ${CMAKE_CURRENT_SOURCE_DIR}
-                -L ${FILE_BUILD_PATH}
-        DEPENDS ${MODULE_FILES}
+                -L ${GUILE_BIN_DIR}
+        DEPENDS ${MODULE_FILES} ${OPENCOG_GO_DEP}
         COMMENT "Compiling ${MODULE_NAME}.scm"
         VERBATIM)
 
