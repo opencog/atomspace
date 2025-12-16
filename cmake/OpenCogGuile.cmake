@@ -169,6 +169,8 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
     # Disable auto-compilation to prevent guild from trying to recompile
     # dependencies that appear newer in the build directory.
     # Set GUILE_LOAD_COMPILED_PATH so that guild can find opencog.go.
+    # Add PROJECT_SOURCE_DIR/opencog/scm to load path so that files like
+    # opencog/base/core-docs.scm can be found when loading opencog module.
     ADD_CUSTOM_COMMAND(
         OUTPUT ${FILE_BUILD_PATH}/${MODULE_NAME}.go
         COMMAND ${CMAKE_COMMAND} -E env
@@ -179,6 +181,7 @@ FUNCTION(COMPILE_MODULE MODULE_NAME)
                 -o ${FILE_BUILD_PATH}/${MODULE_NAME}.go
                 -L ${CMAKE_CURRENT_SOURCE_DIR}
                 -L ${GUILE_BIN_DIR}
+                -L ${PROJECT_SOURCE_DIR}/opencog/scm
         DEPENDS ${MODULE_FILES} ${OPENCOG_GO_DEP}
         COMMENT "Compiling ${MODULE_NAME}.scm"
         VERBATIM)
