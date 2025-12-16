@@ -34,6 +34,12 @@
 	cog-logger-flush
 )
 
+(define do-log-error-str (module-ref (current-module) 'cog-logger-error-str))
+(define do-log-warn-str (module-ref (current-module) 'cog-logger-warn-str))
+(define do-log-info-str (module-ref (current-module) 'cog-logger-info-str))
+(define do-log-debug-str (module-ref (current-module) 'cog-logger-debug-str))
+(define do-log-fine-str (module-ref (current-module) 'cog-logger-fine-str))
+
 ;; Documentation for the functions implemented as C++ code
 
 (set-procedure-property! cog-logger-get-filename 'documentation
@@ -120,7 +126,7 @@
     Print MSG into the log file, at the \"error\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-error-str (apply format #f msg args)))
+  (do-log-error-str (apply format #f msg args)))
 
 (define (cog-logger-warn msg . args)
 "
@@ -128,7 +134,7 @@
     Print MSG into the log file, at the \"warn\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-warn-str (apply format #f msg args)))
+  (do-log-warn-str (apply format #f msg args)))
 
 (define (cog-logger-info msg . args)
 "
@@ -136,7 +142,7 @@
     Print MSG into the log file, at the \"info\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-info-str (apply format #f msg args)))
+  (do-log-info-str (apply format #f msg args)))
 
 (define (cog-logger-debug msg . args)
 "
@@ -144,7 +150,7 @@
     Print MSG into the log file, at the \"debug\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-debug-str (apply format #f msg args)))
+  (do-log-debug-str (apply format #f msg args)))
 
 (define (cog-logger-fine msg . args)
 "
@@ -152,4 +158,4 @@
     Print MSG into the log file, at the \"fine\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-fine-str (apply format #f msg args)))
+  (do-log-fine-str (apply format #f msg args)))
