@@ -79,7 +79,7 @@ IF(HAVE_GUILE)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
 		DEPENDS PythonSCM
-	#	COMPILE
+		COMPILE
 	)
 
 	INSTALL (TARGETS PythonSCM

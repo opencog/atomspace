@@ -7,8 +7,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # The exec module is now a pure-scheme stub; cog-execute! is provided
 # by the core (opencog) module. This stub exists for backward compat.
 ADD_GUILE_MODULE (FILES
-   opencog/exec.scm
-#  COMPILE
+	opencog/exec.scm
 )
 
 # --------------------------------
@@ -23,9 +22,9 @@ TARGET_LINK_LIBRARIES(logger
 ADD_GUILE_EXTENSION(SCM_CONFIG logger "opencog-ext-path-logger")
 
 ADD_GUILE_MODULE (FILES
-   opencog/logger.scm
-   DEPENDS logger
-#  COMPILE
+	opencog/logger.scm
+	DEPENDS logger
+	COMPILE
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -42,9 +41,9 @@ TARGET_LINK_LIBRARIES(randgen
 ADD_GUILE_EXTENSION(SCM_CONFIG randgen "opencog-ext-path-randgen")
 
 ADD_GUILE_MODULE (FILES
-   opencog/randgen.scm
-   DEPENDS randgen
-#  COMPILE
+	opencog/randgen.scm
+	DEPENDS randgen
+	COMPILE
 )
 
 # --------------------------------
@@ -58,9 +57,9 @@ TARGET_LINK_LIBRARIES(type-utils
 ADD_GUILE_EXTENSION(SCM_CONFIG type-utils "opencog-ext-path-type-utils")
 
 ADD_GUILE_MODULE (FILES
-   opencog/type-utils.scm
-   DEPENDS type-utils
-#  COMPILE
+	opencog/type-utils.scm
+	DEPENDS type-utils
+	COMPILE
 )
 
 # --------------------------------
