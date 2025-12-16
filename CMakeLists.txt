@@ -79,14 +79,10 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 # Cogutil
-FIND_PACKAGE(CogUtil CONFIG)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
+FIND_PACKAGE(CogUtil 2.2.1 CONFIG REQUIRED)
+IF (NOT COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
-ENDIF (COGUTIL_FOUND)
+ENDIF ()
 
 # add the 'cmake' directory from cogutil to search path
 list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
@@ -144,7 +140,7 @@ IF (SPARSEHASH_FOUND)
 	# The below is used in atomspace.pc for pkg-config
 	# SET(ATOMSPACE_CFLAGS "-DHAVE_SPARSEHASH -DUSE_SPARSE_INCOMING")
 ELSE (SPARSEHASH_FOUND)
-	MESSAGE(STATUS "SparseHash missing: provides more efficient std::set replacement.")
+	MESSAGE(STATUS "SparseHash missing: provides efficient std::set replacement.")
 ENDIF (SPARSEHASH_FOUND)
 
 # ----------------------------------------------------------

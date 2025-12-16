@@ -22,25 +22,6 @@ set_property(TARGET atom_types
 	atombase
 )
 
-# These names are used in various projects e.g. opencog, as-moses, etc.
-# XXX FIXME ... they probably should not be! It would be best if the all
-# of the libs were specified i.e. LINK_LIBRARIES(${ATOMSPACE_LIBRARIES})
-set(ATOMSPACE_LIBRARY atomspace)
-set(ATOMSPACE_atombase_LIBRARY atombase)
-set(ATOMSPACE_atomcore_LIBRARY atomcore)
-set(ATOMSPACE_atomflow_LIBRARY atomflow)
-set(ATOMSPACE_atomproto_LIBRARY value)
-set(ATOMSPACE_atomspace_LIBRARY atomspace)
-set(ATOMSPACE_atomtypes_LIBRARY atom_types)
-set(ATOMSPACE_clearbox_LIBRARY clearbox)
-set(ATOMSPACE_execution_LIBRARY execution)
-set(ATOMSPACE_grounded_LIBRARY grounded)
-set(ATOMSPACE_join_LIBRARY join)
-set(ATOMSPACE_pattern_LIBRARY pattern)
-set(ATOMSPACE_scope_LIBRARY scope)
-set(ATOMSPACE_smob_LIBRARY smob)
-set(ATOMSPACE_value_LIBRARY value)
-
 # XXX why are these listed in reverse dependency order?
 # Doesn't the linker care about this?
 set(ATOMSPACE_LIBRARIES
@@ -77,6 +58,8 @@ set(ATOMSPACE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_VERSION "@SEMANTIC_VERSION@")
 set(ATOMSPACE_FOUND 1)
+
+MESSAGE(STATUS "AtomSpace version ${ATOMSPACE_VERSION} found.")
 
 # Add atomspace's cmake modules to the module path. This is used by
 # guix and NIX to find OpenCogMacros, OpenCogGuile, OpenCogCython.
