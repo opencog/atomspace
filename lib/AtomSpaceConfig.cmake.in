@@ -77,3 +77,7 @@ set(ATOMSPACE_DATA_DIR "@CMAKE_INSTALL_PREFIX@/share/opencog")
 set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
 set(ATOMSPACE_VERSION "@SEMANTIC_VERSION@")
 set(ATOMSPACE_FOUND 1)
+
+# Add atomspace's cmake modules to the module path. This is used by
+# guix and NIX to find OpenCogMacros, OpenCogGuile, OpenCogCython.
+list(APPEND CMAKE_MODULE_PATH "${ATOMSPACE_DATA_DIR}/cmake")
