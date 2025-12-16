@@ -58,6 +58,11 @@ TARGET_LINK_LIBRARIES(test-chem-types
 	atomspace
 )
 
+# Ensure test-chem-types is built before running scheme tests.
+IF (HAVE_GUILE)
+	ADD_DEPENDENCIES(tests test-chem-types)
+ENDIF()
+
 # --------------------------------------------------------------
 # Part Three: Build the scheme module
 #
