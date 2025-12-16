@@ -259,8 +259,7 @@ FUNCTION(ADD_GUILE_MODULE)
             # Make COPY depend on _go so .go file exists before we touch it
             ADD_DEPENDENCIES(${COPY_TARGET_NAME} ${GO_TARGET_NAME}_go)
             ADD_CUSTOM_COMMAND(TARGET ${COPY_TARGET_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E touch ${GO_BUILD_OUTPUT}
-                COMMENT "Touching ${GO_BUILD_OUTPUT} to ensure newer timestamp")
+                COMMAND ${CMAKE_COMMAND} -E touch ${GO_BUILD_OUTPUT})
         ENDIF()
 
 # Arghhh FILE TOUCH first appears in version 3.12.0
