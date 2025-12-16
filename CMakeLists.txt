@@ -75,17 +75,12 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 # Listed in alphabetical order, more or less.
 # CogUtil must come first, because it supplies various FindXXX macros.
 
-# Add the 'lib' dir to cmake's module search path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
-
 # Cogutil
 FIND_PACKAGE(CogUtil 2.2.1 CONFIG REQUIRED)
 IF (NOT COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
 ENDIF ()
 
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 include(OpenCogGccOptions)
 include(OpenCogLibOptions)
 include(OpenCogInstallOptions)
@@ -344,8 +339,7 @@ SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.1)"
 	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
-	"libpq-dev (>=9.3.24)"
-	"libcogutil-dev (>= 2.0.2)"
+	"libcogutil-dev (>= 2.2.1)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
