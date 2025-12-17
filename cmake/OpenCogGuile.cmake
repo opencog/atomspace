@@ -357,9 +357,9 @@ endif()
 ENDFUNCTION(ADD_GUILE_MODULE)
 
 FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
-    # srfi-64 is installed in guile 2.2 and above, thus check for it.
-    IF(HAVE_GUILE AND (GUILE_VERSION VERSION_GREATER 2.2))
-        SET(FILE_PATH  "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}")
+    IF(HAVE_GUILE)
+        SET(FILE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME}")
+
         # Check if the file exists in the current source directory.
         IF(NOT EXISTS ${FILE_PATH})
             MESSAGE(FATAL_ERROR "${FILE_NAME} file does not exist in "
@@ -370,9 +370,10 @@ FUNCTION(ADD_GUILE_TEST TEST_NAME FILE_NAME)
             COMMAND guile -L ${PROJECT_BINARY_DIR}/opencog/scm
                       --use-srfi=64 ${FILE_PATH}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
         IF (GUILE_LOAD_PATH)
             SET_PROPERTY(TEST ${TEST_NAME} PROPERTY
-                ENVIRONMENT "GUILE_LOAD_PATH=${GUILE_LOAD_PATH}")
+                ENVIRONMENT "GUILE_LOAD_PATH=${GUILE_LOAD_PATH}:$ENV{GUILE_LOAD_PATH}")
         ENDIF(GUILE_LOAD_PATH)
     ENDIF()
 ENDFUNCTION(ADD_GUILE_TEST)
