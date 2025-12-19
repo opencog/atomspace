@@ -67,10 +67,10 @@ void GroupValueUTest::test_group_by_size(void)
 	// Create a GroupValue that groups items by their arity (size).
 	// Two items are equivalent if they have the same size.
 	ValuePtr group_val = eval->eval_v(R"(
-		(GroupValue 
+		(GroupValue
 			(Lambda
 				(VariableList (Variable "$A") (Variable "$B"))
-				(Equal (Variable "$A") (Variable "$B"))))
+				(Equal (SizeOf (Variable "$A")) (SizeOf (Variable "$B")))))
 	)");
 
 	GroupValuePtr gvp = GroupValueCast(group_val);
