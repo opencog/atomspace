@@ -59,3 +59,29 @@ bool ContainerValue::operator==(const Value& other) const
 }
 
 // ==============================================================
+
+/// Provide override ordering for non-closed containers.
+/// As currently implemented, this is not a stable ordering;
+/// it will change when the container closes. This seems like
+/// maybe a bad idea; on the other hand, we do want to get the
+/// contentional lexicographic compare when they are closed.
+/// So this is a confused mashup. Punt on a final decision to
+/// some future date, when this becomes more clear.
+///
+/// Why is this a concern? Well, UnisetValues can contain *other*
+/// (open) UnisetValues, and if we don't get this right, they get
+/// deduplicated by accident.
+bool ContainerValue::operator<(const Value& other) const
+{
+	if (this == &other) return false;
+
+	if (not is_closed()) return this < &other;
+
+	if (other.is_type(CONTAINER_VALUE) and
+	    not ((const ContainerValue*) &other)->is_closed())
+		return this < &other;
+
+	return LinkValue::operator<(other);
+}
+
+// ==============================================================
