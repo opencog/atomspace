@@ -29,6 +29,7 @@ cdef extern from "opencog/util/Logger.h" namespace "opencog":
         void set_sync_flag(bool flag) nogil
 
         void log(loglevel lvl, string txt) nogil
+        void flush() nogil
 
         bool is_enabled(loglevel lvl) nogil
 
