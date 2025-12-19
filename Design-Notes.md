@@ -293,7 +293,7 @@ like a FlatStream, except it does sorting, and deduplication.
 
 OK, that sounds like a plan...
 
-### GroupStream
+### GroupStream (or GroupValue?!)
 I am implementing GroupStream now. It is based on SortedStream. To keep
 the implementation slightly simpler, I will skip the puller thread for
 now, because I think it won't be needed because the pattern matcher will
@@ -310,12 +310,12 @@ So now: should it be GroupValue, which is a ContainerValue that blocks
 until closed? Or a GroupStream that blocks only when empty? Given one,
 is there an easy way to convert into the other?
 
-Answer: lets do GroupValue, its easier, and the user could just use
+Answer: Lets do GroupValue, its easier, and the user could just use
 FlatStream if they want to stream it out.
 
 ### Stream <--> ContainerValue conversion.
 If we accept that ContainerValue semantics is "block until closed" and
-stream semantics is "block when empty; indicate closer with VoidValue"
+stream semantics is "block when empty; indicate closing with VoidValue"
 then what is the correct way to generically convert one into the other?
 
 FlatStream will accept a ContainerValue and dole out elements from it
@@ -327,28 +327,36 @@ have DrainValue inherits from ContainerValue, polls forever, bloocking
 until it gets a VoidValue, and then it unblocks and returns the big
 gulp.
 
-But now there's additional confusion: Currently, ContainerValue
-inherits from STREAM_VALUE but clearly these is wrong because we
-are now creating different semantics for each. So it seems we must
-have this hierachy:
+But now there's additional confusion: Currently, ContainerValue inherits
+from STREAM_VALUE but clearly these is wrong because we are now creating
+different semantics for each. The appropriate solution seems to be to
+declare two different SIGS: BLOCKING_SIG and STREAMING_SIG.
 
-FLOAT_STREAM <- FLOAT_VALUE  xxx no ??
-STREAM_VALUE <- LINK_VALUE   xxx Maybe no?
+FLOAT_STREAM <- FLOAT_VALUE, STREAMING_SIG
+STREAM_VALUE <- LINK_VALUE, STREAMING_SIG
 CONTAINER_VALUE <- LINK_VALUE
+QUEUE_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 DRAIN_VALUE <- CONTAINER_VALUE
 
-But the naming convention here gets in the way. FloatValue is already
-a strean, by design, because it has the update() method. So we don't a
-new name for that, right?
+The Sigs partly solve some of the issues. All Values have always been
+explicitly time-varying. The BLOCKING_SIG and STREAMING_SIG indicate
+two different kinds of behaviors. The ContainerValue explcitly adds
+thread-safe container manipulation functions. These can now be grouped
+according to these two sigs.
 
-Same argument for STREAM_VALUE vs. LINK_VALUE except that we baked
-StreamValue into snesory already, for some unclear reason. ...
-... or a semi-clear reason: we can to distinguish between "constant"
-values, which we know for sure won't change, and streams. But if we
-just need constant values, why not use Atoms? i.e. Links? Becuase
-maybe we don't want to put them into the AtomSpace, as they're temp
-values... but this is qhat we have temp spaces for ... this is confusing.
-Do we have a technical reason for StreamValue or is it a feel-good item?
+Note that the distinction betweem STREAM_VALUE vs. LINK_VALUE has been
+baked into sensory already, and elsewhere. The reasoning may have been
+backwards: what was really needed was a LinkValue that truly was a
+"constant" and thus could behave like a conventional OO struct.
+(i.e. it just holds data; it does not change over time.)
+
+Arguably, constant LinkValues "should have been" Atoms, but for various
+vague reasons, we don't want these in any AtomSpace, and so they are
+not; they're just "constant".
+
+The above arguments suggest that SortedStream should be simplified into
+a SortedValue, and that FlatStream should do the heavy lifting of
+turning contents into a true stream.
 
 TODO: Implement DrainValue ...
 
