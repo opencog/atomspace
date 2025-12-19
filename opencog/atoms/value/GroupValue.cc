@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/GroupStream.cc
+ * opencog/atoms/value/GroupValue.cc
  *
  * Copyright (C) 2025 BrainyBlaze LLC
  * All Rights Reserved
@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <opencog/atoms/value/GroupStream.h>
+#include <opencog/atoms/value/GroupValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -27,13 +27,13 @@ using namespace opencog;
 
 // ==============================================================
 
-GroupStream::GroupStream(const Handle& h)
-	: UnisetValue(GROUP_STREAM), _schema(h)
+GroupValue::GroupValue(const Handle& h)
+	: UnisetValue(GROUP_VALUE), _schema(h)
 {
 	init_equiv();
 }
 
-GroupStream::~GroupStream()
+GroupValue::~GroupValue()
 {
 }
 
@@ -42,7 +42,7 @@ GroupStream::~GroupStream()
 // Set up the equivalence comparator by wrapping the given relation in
 // an ExecutionOutputLink, fed by a pair of ValueShims that will pass
 // the Values into the relation.
-void GroupStream::init_equiv(void)
+void GroupValue::init_equiv(void)
 {
 	// ValueShims for left and right comparison arguments
 	_left_shim = createValueShimLink();
@@ -66,7 +66,7 @@ void GroupStream::init_equiv(void)
 // ==============================================================
 
 // Use the provided schema to test if two values are equivalent.
-bool GroupStream::equivalent(const Value& lhs, const Value& rhs) const
+bool GroupValue::equivalent(const Value& lhs, const Value& rhs) const
 {
 	// Set the values to be compared in the shims.
 	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
@@ -78,7 +78,7 @@ bool GroupStream::equivalent(const Value& lhs, const Value& rhs) const
 
 // ==============================================================
 
-void GroupStream::add(const ValuePtr& vp)
+void GroupValue::add(const ValuePtr& vp)
 {
 	add(ValuePtr(vp));
 }
@@ -87,7 +87,7 @@ void GroupStream::add(const ValuePtr& vp)
 /// with other equivalent items. If no equivalent bucket exists,
 /// a new bucket is created. If the item is a VoidValue or an
 /// empty LinkValue, the stream closes.
-void GroupStream::add(ValuePtr&& vp)
+void GroupValue::add(ValuePtr&& vp)
 {
 	// VoidValue or empty LinkValue signals end-of-stream.
 	if ((vp->get_type() == VOID_VALUE) or
@@ -124,7 +124,7 @@ void GroupStream::add(ValuePtr&& vp)
 
 // ==============================================================
 
-std::string GroupStream::to_string(const std::string& indent) const
+std::string GroupValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	rv += "\n";
@@ -136,4 +136,4 @@ std::string GroupStream::to_string(const std::string& indent) const
 // ==============================================================
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(GROUP_STREAM, createGroupStream, const Handle&)
+DEFINE_VALUE_FACTORY(GROUP_VALUE, createGroupValue, const Handle&)

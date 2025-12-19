@@ -9,7 +9,7 @@ ADD_LIBRARY (value
 	FloatValue.cc
 	FormulaStream.cc
 	FutureStream.cc
-	GroupStream.cc
+	GroupValue.cc
 	LinkValue.cc
 	QueueValue.cc
 	RandomStream.cc
@@ -41,7 +41,7 @@ INSTALL (FILES
 	FloatValue.h
 	FormulaStream.h
 	FutureStream.h
-	GroupStream.h
+	GroupValue.h
 	LinkValue.h
 	QueueValue.h
 	RandomStream.h

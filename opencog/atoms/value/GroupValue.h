@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/GroupStream.h
+ * opencog/atoms/value/GroupValue.h
  *
  * Copyright (C) 2025 BrainyBlaze LLC
  * All Rights Reserved
@@ -18,8 +18,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _OPENCOG_GROUP_STREAM_H
-#define _OPENCOG_GROUP_STREAM_H
+#ifndef _OPENCOG_GROUP_VALUE_H
+#define _OPENCOG_GROUP_VALUE_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/value/UnisetValue.h>
@@ -46,7 +46,7 @@ namespace opencog
  * When the source stream closes, all buckets are closed and can be
  * retrieved one at a time via remove().
  */
-class GroupStream
+class GroupValue
 	: public UnisetValue
 {
 protected:
@@ -61,18 +61,18 @@ protected:
 	bool equivalent(const Value& lhs, const Value& rhs) const;
 
 public:
-	GroupStream(const Handle&);
-	virtual ~GroupStream();
+	GroupValue(const Handle&);
+	virtual ~GroupValue();
 
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
 	virtual std::string to_string(const std::string& indent = "") const;
 };
 
-VALUE_PTR_DECL(GroupStream);
-CREATE_VALUE_DECL(GroupStream);
+VALUE_PTR_DECL(GroupValue);
+CREATE_VALUE_DECL(GroupValue);
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_GROUP_STREAM_H
+#endif // _OPENCOG_GROUP_VALUE_H
