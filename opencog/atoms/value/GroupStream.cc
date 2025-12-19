@@ -80,12 +80,46 @@ bool GroupStream::equivalent(const Value& lhs, const Value& rhs) const
 
 void GroupStream::add(const ValuePtr& vp)
 {
-	// TODO: Assign item to appropriate bucket
+	add(ValuePtr(vp));
 }
 
+/// Add one item to the stream. The item is placed into a bucket
+/// with other equivalent items. If no equivalent bucket exists,
+/// a new bucket is created. If the item is a VoidValue or an
+/// empty LinkValue, the stream closes.
 void GroupStream::add(ValuePtr&& vp)
 {
-	// TODO: Assign item to appropriate bucket
+	// VoidValue or empty LinkValue signals end-of-stream.
+	if ((vp->get_type() == VOID_VALUE) or
+	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
+	{
+		// Close all open buckets before closing the stream.
+		for (const ValuePtr& bucket : _set.snapshot())
+			UnisetValueCast(bucket)->close();
+		close();
+		return;
+	}
+
+	_scratch->clear();
+
+	// Search existing buckets for an equivalent item.
+	for (const ValuePtr& bucket : _set.snapshot())
+	{
+		UnisetValuePtr uvp = UnisetValueCast(bucket);
+		ValuePtr rep = uvp->peek();
+		if (nullptr == rep) continue;
+
+		if (equivalent(*vp, *rep))
+		{
+			uvp->add(std::move(vp));
+			return;
+		}
+	}
+
+	// No equivalent bucket found; create a new one.
+	UnisetValuePtr newbucket = createUnisetValue();
+	newbucket->add(std::move(vp));
+	_set.insert(newbucket);
 }
 
 // ==============================================================
