@@ -175,6 +175,19 @@ ALPHA_CONVERTIBLE_SIG <- SIG
 // or not.
 CONSTRAINT_SIG <- SIG
 
+// Values, as originally conceived, are mutable: they were meant to
+// indicate data that can be time varying. In practice, it is
+// advantageous to distinguish between Values that are more-or-less
+// constant, and Values that are guaranteed to change. Of the later,
+// there see to be two basic types: those that block and those that
+// stream.  The blockers block until they are closed for input; once
+// closed, they return their contents in one big lump. By contrast,
+// the streamers deliver content until they are empty, and then they
+// block. When closed, the streamers return an empty value, or
+// VoidValue.
+BLOCKING_SIG <- SIG
+STREAMING_SIG <- SIG
+
 // ==============================================================
 // Values are collections of data that can be associated with Atoms.
 // Think of them as decorations that can be hung on an Atom.
@@ -192,7 +205,7 @@ LINK_VALUE <- VALUE,VALUE_VEC_ARG         // vector of Values ("Link")
 // a bunch of other things (i.e. behave like a "struct") and
 // LinkValues that represent time-varying streams of Values.
 // (... and the streamed items are typically static LinkValues.)
-STREAM_VALUE <- LINK_VALUE            // volatile stream of Values
+STREAM_VALUE <- LINK_VALUE, STREAMING_SIG // volatile stream of Values
 
 // Same thing as Section, but the Value variant thereof.
 // Currently used experimentally in atomese-simd to specify GPU kernels.
@@ -208,27 +221,32 @@ SECTION_VALUE <- LINK_VALUE
 // from FloatValue, but the item streams do not. Both are called
 // streams, leading to confusion.
 
-// An example of a time-varying Value stream
-RANDOM_STREAM <- FLOAT_VALUE,INT_ARG
+// An explicitly time-varying numeric stream. All FloatValues are
+// implicitly time-varying; this type just declares that "yes we really
+// mean it this time".
+FLOAT_STREAM <- FLOAT_VALUE, STREAMING_SIG
+
+// An example of a time-varying numeric stream
+RANDOM_STREAM <- FLOAT_STREAM, INT_ARG
 
 // A stream of FloatValues computed by a formula held in the AtomSpace.
 // Similar to the FutureStream, except it is specialized for FloatValues.
 // Typically computed by one of the FunctionLinks, below.
-FORMULA_STREAM <- FLOAT_VALUE,HANDLE_VEC_ARG
+FORMULA_STREAM <- FLOAT_STREAM, HANDLE_VEC_ARG
 
 // A base class for thread-safe concurrent containers.
-CONTAINER_VALUE <- STREAM_VALUE
+CONTAINER_VALUE <- LINK_VALUE
 
 // A thread-safe FIFO queue of Value sequences.
-QUEUE_VALUE <- CONTAINER_VALUE
+QUEUE_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 
 // A thread-safe set of Values (uniset; deduplicates multiple entries.)
 // Note that 'SET_VALUE' already taken by SET_VALUE_LINK
-UNISET_VALUE <- CONTAINER_VALUE
+UNISET_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 
 // A thread-safe set of Values that is maintained in sorted order.
 // Inherits from UnisetValue to minimize c++ duplication.
-SORTED_STREAM <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
+SORTED_STREAM <- UNISET_VALUE, STREAMING_SIG, HANDLE_ARG, HANDLE_VEC_ARG
 
 // A thread-safe set of UnisetValue, each being a bucket of equivalent
 // Values, where equivalents is determined by the provided lambda.
@@ -237,7 +255,7 @@ GROUP_STREAM <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
 // Convert calls to `LinkValue::value()` into calls to
 // `Atom::execute()`. Conversion is one-to-one: each touch
 // of `value()` is converted to one `execute()`
-FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
+FUTURE_STREAM <- STREAM_VALUE, HANDLE_VEC_ARG
 
 // A stream of Values, obtained by flattening the provided stream.
 // The source stream is assumed to deliver "collections" of items.
@@ -250,7 +268,7 @@ FUTURE_STREAM <- STREAM_VALUE,HANDLE_VEC_ARG
 //
 // Each touch of `value()` returns one item from the current collection,
 // when the collection runs dry, then the next collection is fetched.
-FLAT_STREAM <- STREAM_VALUE,HANDLE_ARG,VALUE_ARG
+FLAT_STREAM <- STREAM_VALUE, HANDLE_ARG, VALUE_ARG
 
 // ===========================================================
 // Base of the Atom hierarchy. Atoms are globally unique; the AtomSpace

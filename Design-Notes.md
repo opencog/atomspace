@@ -293,6 +293,64 @@ like a FlatStream, except it does sorting, and deduplication.
 
 OK, that sounds like a plan...
 
+### GroupStream
+I am implementing GroupStream now. It is based on SortedStream. To keep
+the implementation slightly simpler, I will skip the puller thread for
+now, because I think it won't be needed because the pattern matcher will
+be managing it directly. This, mostly to skip a pointless copy step.
+
+Oh, wait ... there's an unresolved tension between Stream and Value.
+So ContainerValue (specifically, UnisetValue) will block until closed,
+and this is how we wait for all MeetLink results to be returned. But
+of course, we might want to stream these, too, so blocking until done
+is wrong. Having Meet dump into a Stream is easy enough. Deduplication
+will be lost if the consumer pulls too eagerly.
+
+So now: should it be GroupValue, which is a ContainerValue that blocks
+until closed? Or a GroupStream that blocks only when empty? Given one,
+is there an easy way to convert into the other?
+
+Answer: lets do GroupValue, its easier, and the user could just use
+FlatStream if they want to stream it out.
+
+### Stream <--> ContainerValue conversion.
+If we accept that ContainerValue semantics is "block until closed" and
+stream semantics is "block when empty; indicate closer with VoidValue"
+then what is the correct way to generically convert one into the other?
+
+FlatStream will accept a ContainerValue and dole out elements from it
+one at a time. So the conversion ContainerValue->Stream is solved by
+FlatStream.
+
+Going the other way is unsolved, but easy: similar to DrainLink we
+have DrainValue inherits from ContainerValue, polls forever, bloocking
+until it gets a VoidValue, and then it unblocks and returns the big
+gulp.
+
+But now there's additional confusion: Currently, ContainerValue
+inherits from STREAM_VALUE but clearly these is wrong because we
+are now creating different semantics for each. So it seems we must
+have this hierachy:
+
+FLOAT_STREAM <- FLOAT_VALUE  xxx no ??
+STREAM_VALUE <- LINK_VALUE   xxx Maybe no?
+CONTAINER_VALUE <- LINK_VALUE
+DRAIN_VALUE <- CONTAINER_VALUE
+
+But the naming convention here gets in the way. FloatValue is already
+a strean, by design, because it has the update() method. So we don't a
+new name for that, right?
+
+Same argument for STREAM_VALUE vs. LINK_VALUE except that we baked
+StreamValue into snesory already, for some unclear reason. ...
+... or a semi-clear reason: we can to distinguish between "constant"
+values, which we know for sure won't change, and streams. But if we
+just need constant values, why not use Atoms? i.e. Links? Becuase
+maybe we don't want to put them into the AtomSpace, as they're temp
+values... but this is qhat we have temp spaces for ... this is confusing.
+Do we have a technical reason for StreamValue or is it a feel-good item?
+
+TODO: Implement DrainValue ...
 
 ObjectNodes
 -----------
