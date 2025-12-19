@@ -293,6 +293,12 @@ like a FlatStream, except it does sorting, and deduplication.
 
 OK, that sounds like a plan...
 
+### GroupStream
+I am implementing GroupStream now. It is based on SortedStream. To keep
+the implementation slightly simpler, I will skip the puller thread for
+now, because I think it won't be needed because the pattern matcher will
+be managing it directly. This, mostly to skip a pointless copy step.
+
 
 ObjectNodes
 -----------
