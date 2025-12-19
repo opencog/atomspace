@@ -89,16 +89,6 @@ include(Summary)
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
 
 # ----------------------------------------------------------
-# Optional, but needed for unit tests.
-
-FIND_PACKAGE(Cxxtest)
-IF (CXXTEST_FOUND)
-	MESSAGE(STATUS "CxxTest found.")
-ELSE (CXXTEST_FOUND)
-	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
-ENDIF (CXXTEST_FOUND)
-
-# ----------------------------------------------------------
 # Optional, uses slightly more efficient replacement for std::set
 
 # Facebook Folly
@@ -203,86 +193,19 @@ ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
 ADD_SUBDIRECTORY(lib)
 
-IF (CXXTEST_FOUND)
-	ENABLE_TESTING()
-	ADD_CUSTOM_TARGET(tests)
-	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
-	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(covtest
-			# TODO lcov should be found by cmake first
-			# TODO set it up so that we can pick to run coverage per test, or
-			# combined across all tests (the latter is MUCH faster). Use a define?
-			# There is coverage specific stuff in AddCxxTest.cmake now...
-			# -
-			WORKING_DIRECTORY tests
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			COMMENT "Running tests with coverage..."
-		)
-		ADD_CUSTOM_TARGET(check
-			DEPENDS covtest
-			WORKING_DIRECTORY ./
-			# This script combines the coverage analysis of each test,
-			# then creates html in tests/lcov
-			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
-			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
-			COMMENT "Generating lcov report..."
-		)
-	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# Coverage is disabled; test normally
-		ADD_CUSTOM_TARGET(check
-			DEPENDS tests
-			WORKING_DIRECTORY tests
-			# COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
-			COMMENT "Running tests..."
-		)
-	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+# ----------------------------------------------------------
+# Setup testing infrastructure (tests target, check target)
+INCLUDE(OpenCogTestOptions)
+OPENCOG_SETUP_TESTING()
 
-	ADD_CUSTOM_TARGET(test_atomese
-		DEPENDS tests
-		WORKING_DIRECTORY tests/atoms
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Atomese tests..."
-	)
-	ADD_CUSTOM_TARGET(test_atomspace
-		DEPENDS tests
-		WORKING_DIRECTORY tests/atomspace
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Atomspace tests..."
-	)
-	ADD_CUSTOM_TARGET(test_flow
-		DEPENDS tests
-		DEPENDS tests/atoms/flow
-		WORKING_DIRECTORY tests/atoms/flow
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Flow/stream tests..."
-	)
-	ADD_CUSTOM_TARGET(test_guile
-		DEPENDS tests
-		WORKING_DIRECTORY tests/scm
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Guile and Python-bridge tests..."
-	)
-	ADD_CUSTOM_TARGET(test_join
-		DEPENDS tests
-		DEPENDS tests/atoms/container
-		WORKING_DIRECTORY tests/atoms/container
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Pattern Container tests..."
-	)
-	ADD_CUSTOM_TARGET(test_python
-		WORKING_DIRECTORY tests/cython
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Python and Cython tests..."
-	)
-	ADD_CUSTOM_TARGET(test_query
-		DEPENDS tests
-		WORKING_DIRECTORY tests/query
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Pattern Engine tests..."
-	)
-ENDIF (CXXTEST_FOUND)
+# Project-specific test targets
+OPENCOG_ADD_TEST_TARGET(test_atomese   tests/atoms      "Running Atomese tests...")
+OPENCOG_ADD_TEST_TARGET(test_atomspace tests/atomspace  "Running Atomspace tests...")
+OPENCOG_ADD_TEST_TARGET(test_flow      tests/atoms/flow "Running Flow/stream tests...")
+OPENCOG_ADD_TEST_TARGET(test_guile     tests/scm        "Running Guile tests...")
+OPENCOG_ADD_TEST_TARGET(test_join      tests/atoms/container "Running Container tests...")
+OPENCOG_ADD_TEST_TARGET(test_python    tests/cython     "Running Python tests...")
+OPENCOG_ADD_TEST_TARGET(test_query     tests/query      "Running Pattern Engine tests...")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
