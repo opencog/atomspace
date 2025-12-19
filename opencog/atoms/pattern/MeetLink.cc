@@ -50,9 +50,6 @@ MeetLink::MeetLink(const HandleSeq&& hseq, Type t)
 ContainerValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
-	if (nullptr == as)
-		throw RuntimeException(TRACE_INFO,
-			"Cannot run queries outside of an AtomSpace!");
 
 	// Where shall we place results? Why, right here!
 	ValuePtr vp(getValue(get_handle()));
@@ -83,9 +80,20 @@ ContainerValuePtr MeetLink::do_execute(AtomSpace* as, bool silent)
 	}
 }
 
-ValuePtr MeetLink::execute(AtomSpace* as, bool silent)
+ValuePtr MeetLink::execute(AtomSpace* scratch, bool silent)
 {
-	return do_execute(as, silent);
+	// Self-install. We need to execute in some context;
+	// use the provided scratch space if we don't already
+	// have a home.
+	if (nullptr == _atom_space)
+	{
+		if (nullptr == scratch)
+			throw RuntimeException(TRACE_INFO,
+				"Cannot run queries outside of an AtomSpace!");
+		Handle h = scratch->add_atom(get_handle());
+		return h->execute(scratch, silent);
+	}
+	return do_execute(scratch, silent);
 }
 
 DEFINE_LINK_FACTORY(MeetLink, MEET_LINK)
