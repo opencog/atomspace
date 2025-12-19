@@ -286,15 +286,7 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
 	_right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
 
-	ValuePtr vp = _exout->execute(_scratch.get());
-
-	if (not vp->is_type(BOOL_VALUE))
-		throw RuntimeException(TRACE_INFO,
-			"Expecting BoolValue compare; got %s\n",
-			vp->to_string().c_str());
-
-	BoolValuePtr bv = BoolValueCast(vp);
-	return bv->value()[0];
+	return _exout->bevaluate(_scratch.get());
 }
 
 // ==============================================================
