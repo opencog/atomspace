@@ -58,8 +58,6 @@ protected:
 	AtomSpacePtr _scratch;
 
 	void init_equiv(void);
-
-	virtual void update() const override;
 	bool equivalent(const Value& lhs, const Value& rhs) const;
 
 public:

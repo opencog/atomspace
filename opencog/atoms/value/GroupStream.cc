@@ -124,13 +124,6 @@ void GroupStream::add(ValuePtr&& vp)
 
 // ==============================================================
 
-void GroupStream::update() const
-{
-	// TODO: Return next bucket
-}
-
-// ==============================================================
-
 std::string GroupStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
