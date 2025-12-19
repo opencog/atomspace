@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
+#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "ExecutionOutputLink.h"
@@ -74,6 +75,18 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 	: FunctionLink({schema, args}, EXECUTION_OUTPUT_LINK)
 {
 	check_schema(schema);
+}
+
+bool ExecutionOutputLink::bevaluate(AtomSpace* as, bool silent)
+{
+	ValuePtr vp(execute(as, silent));
+	if (not vp->is_type(BOOL_VALUE))
+		throw RuntimeException(TRACE_INFO,
+			"Expecting BoolValue result; got %s\n",
+			vp->to_string().c_str());
+
+	BoolValuePtr bv = BoolValueCast(vp);
+	return bv->value()[0];
 }
 
 /// execute -- execute the function defined in an ExecutionOutputLink
