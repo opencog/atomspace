@@ -30,12 +30,9 @@ using namespace opencog;
 
 std::string ContainerValue::to_string(const std::string& indent) const
 {
-   // The default printer for ContainerValue is LinkValue ...
-   // with only two small problems. One is that containers typically
-	// block in certain states. The other is that to_string()
-	// is used for Value::operator<(). So we need a non-blocking
-	// printer which also prints unique (and stable) ID's. Use the
-	// current 'this` pointer as the unique ID.
+	// The default printer for ContainerValue is LinkValue ...
+	// with only one small problem: containers can block under certain
+	// conditions.  This provides a non-blocking printer.
 	//
 	// The BLOCKING_SIG containers will hang if the container is open,
 	// and the STREAMING_SIG containers will hang if the container is
@@ -44,12 +41,8 @@ std::string ContainerValue::to_string(const std::string& indent) const
 	// XXX FIXME, below is correct only for BLOCKING_SIG ...
 	if (is_closed()) return LinkValue::to_string(indent);
 
-	// std::format("{:p}", (void*) this)
-	std::stringstream uid;
-	uid << (void*) this;
-
 	return indent + "(" + nameserver().getTypeName(get_type()) +
-	   ") ;; " + uid.str() + " open for writing";
+	   ") ;; open for writing";
 }
 
 // ==============================================================
@@ -63,6 +56,32 @@ bool ContainerValue::operator==(const Value& other) const
 	    not ((const ContainerValue*) &other)->is_closed()) return false;
 
 	return LinkValue::operator==(other);
+}
+
+// ==============================================================
+
+/// Provide override ordering for non-closed containers.
+/// As currently implemented, this is not a stable ordering;
+/// it will change when the container closes. This seems like
+/// maybe a bad idea; on the other hand, we do want to get the
+/// contentional lexicographic compare when they are closed.
+/// So this is a confused mashup. Punt on a final decision to
+/// some future date, when this becomes more clear.
+///
+/// Why is this a concern? Well, UnisetValues can contain *other*
+/// (open) UnisetValues, and if we don't get this right, they get
+/// deduplicated by accident.
+bool ContainerValue::operator<(const Value& other) const
+{
+	if (this == &other) return false;
+
+	if (not is_closed()) return this < &other;
+
+	if (other.is_type(CONTAINER_VALUE) and
+	    not ((const ContainerValue*) &other)->is_closed())
+		return this < &other;
+
+	return LinkValue::operator<(other);
 }
 
 // ==============================================================
