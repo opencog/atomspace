@@ -59,8 +59,6 @@ public:
 	virtual ValuePtr remove(void);
 	virtual size_t size(void) const;
 	virtual void clear(void);
-
-	virtual std::string to_string(const std::string& = "") const;
 };
 
 VALUE_PTR_DECL(QueueValue);

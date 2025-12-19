@@ -173,22 +173,6 @@ void QueueValue::clear()
 
 // ==============================================================
 
-std::string QueueValue::to_string(const std::string& indent) const
-{
-	// The default printer for QueueValue is LinkValue ...
-	// with only one small problem: it will hang if the queue
-	// is open. So we use it only if it is closed. Otherwise
-	// we must punt. I mean, we could maybe print the contents
-	// of an active queue, but this would be ... misleading,
-	// as those contents would be changing even as the printer is
-	// running. And would certanily be stale by the time the
-	// print string is returned to the user.
-	if (is_closed()) return LinkValue::to_string(indent);
-	return indent + "(QueueValue) ;; currently open for writing";
-}
-
-// ==============================================================
-
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(QUEUE_VALUE,
                      createQueueValue, std::vector<ValuePtr>)
