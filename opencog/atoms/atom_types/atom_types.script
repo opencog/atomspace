@@ -230,6 +230,10 @@ UNISET_VALUE <- CONTAINER_VALUE
 // Inherits from UnisetValue to minimize c++ duplication.
 SORTED_STREAM <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
 
+// A thread-safe set of UnisetValue, each being a bucket of equivalent
+// Values, where equivalents is determined by the provided lambda.
+GROUP_STREAM <- UNISET_VALUE,HANDLE_ARG,HANDLE_VEC_ARG
+
 // Convert calls to `LinkValue::value()` into calls to
 // `Atom::execute()`. Conversion is one-to-one: each touch
 // of `value()` is converted to one `execute()`
