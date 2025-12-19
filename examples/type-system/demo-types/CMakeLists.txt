@@ -178,7 +178,7 @@ ENDIF (HAVE_CYTHON)
 # Install the C++ shared library.
 INSTALL (TARGETS
 	chem-demo-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES

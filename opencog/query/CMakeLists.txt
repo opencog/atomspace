@@ -32,7 +32,7 @@ TARGET_LINK_LIBRARIES(query-engine
 
 INSTALL (TARGETS query-engine
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
 	ConstraintDomain.h

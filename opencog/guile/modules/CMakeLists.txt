@@ -66,5 +66,5 @@ ADD_GUILE_MODULE (FILES
 
 INSTALL (TARGETS logger randgen type-utils
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )

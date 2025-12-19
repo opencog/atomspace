@@ -11,7 +11,7 @@ ADD_DEPENDENCIES(framestack opencog_atom_types)
 
 INSTALL(TARGETS framestack
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL(FILES
 	GenericEval.h

@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(execution
 
 INSTALL (TARGETS execution
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
 	EvaluatableLink.h
