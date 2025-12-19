@@ -173,17 +173,6 @@ void QueueValue::clear()
 
 // ==============================================================
 
-bool QueueValue::operator==(const Value& other) const
-{
-	if (this == &other) return true;
-
-	if (not is_closed()) return false;
-	if (other.is_type(QUEUE_VALUE) and
-      not ((const QueueValue*) &other)->is_closed()) return false;
-
-	return LinkValue::operator==(other);
-}
-
 std::string QueueValue::to_string(const std::string& indent) const
 {
 	// The default printer for QueueValue is LinkValue ...

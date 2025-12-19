@@ -61,8 +61,6 @@ public:
 	virtual void clear(void);
 
 	virtual std::string to_string(const std::string& = "") const;
-
-	virtual bool operator==(const Value&) const;
 };
 
 VALUE_PTR_DECL(QueueValue);
