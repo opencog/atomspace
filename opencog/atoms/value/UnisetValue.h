@@ -81,8 +81,6 @@ public:
 	virtual ValuePtr peek(void) const;
 	virtual size_t size(void) const;
 	virtual void clear(void);
-
-	virtual bool operator==(const Value&) const;
 };
 
 VALUE_PTR_DECL(UnisetValue);

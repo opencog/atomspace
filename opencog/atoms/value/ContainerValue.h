@@ -69,6 +69,9 @@ public:
 	virtual ValuePtr remove(void) = 0;
 
 	virtual void clear(void) = 0;
+
+	virtual std::string to_string(const std::string& = "") const;
+
 	virtual bool operator==(const Value&) const;
 };
 

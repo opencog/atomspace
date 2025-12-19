@@ -174,19 +174,6 @@ void UnisetValue::clear()
 
 // ==============================================================
 
-bool UnisetValue::operator==(const Value& other) const
-{
-	if (this == &other) return true;
-
-	if (not is_closed()) return false;
-	if (other.is_type(UNISET_VALUE) and
-	    not ((const UnisetValue*) &other)->is_closed()) return false;
-
-	return LinkValue::operator==(other);
-}
-
-// ==============================================================
-
 // Adds factory when library is loaded.
 DEFINE_VALUE_FACTORY(UNISET_VALUE,
                      createUnisetValue, std::vector<ValuePtr>)

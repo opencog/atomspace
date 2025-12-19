@@ -22,19 +22,45 @@
 
 #include <opencog/atoms/value/ContainerValue.h>
 
+#include <sstream>
+
 using namespace opencog;
+
+// ==============================================================
+
+std::string ContainerValue::to_string(const std::string& indent) const
+{
+   // The default printer for ContainerValue is LinkValue ...
+   // with only two small problems. One is that containers typically
+	// block in certain states. The other is that to_string()
+	// is used for Value::operator<(). So we need a non-blocking
+	// printer which also prints unique (and stable) ID's. Use the
+	// current 'this` pointer as the unique ID.
+	//
+	// The BLOCKING_SIG containers will hang if the container is open,
+	// and the STREAMING_SIG containers will hang if the container is
+	// empty.
+	//
+	// XXX FIXME, below is correct only for BLOCKING_SIG ...
+	if (is_closed()) return LinkValue::to_string(indent);
+
+	// std::format("{:p}", (void*) this)
+	std::stringstream uid;
+	uid << (void*) this;
+
+	return indent + "(" + nameserver().getTypeName(get_type()) +
+	   ") ;; " + uid.str() + " open for writing";
+}
 
 // ==============================================================
 
 bool ContainerValue::operator==(const Value& other) const
 {
-	// Derived classes use this, so use get_type()
-	if (get_type() != other.get_type()) return false;
-
 	if (this == &other) return true;
 
 	if (not is_closed()) return false;
-	if (not ((const ContainerValue*) &other)->is_closed()) return false;
+	if (other.is_type(CONTAINER_VALUE) and
+	    not ((const ContainerValue*) &other)->is_closed()) return false;
 
 	return LinkValue::operator==(other);
 }
