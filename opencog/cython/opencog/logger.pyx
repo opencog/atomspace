@@ -116,6 +116,8 @@ cdef class Logger:
         self.clog.set_print_to_stdout_flag(use_it)
     def set_sync(self, s):
         self.clog.set_sync_flag(s)
+    def flush(self):
+        self.clog.flush()
 
 # This is the singleton instance created by cogutil.
 log = Logger()

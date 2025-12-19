@@ -2,6 +2,7 @@
 
 from unittest import TestCase
 import os
+import sys
 import tempfile
 
 import opencog.logger
@@ -41,6 +42,7 @@ class LoggerTest(TestCase):
             lvl = self.log.string_as_level(lvlname)
             print(f"Muted: {lvlname} (value={lvl})")
             self.log.log(lvl,"these messages should be muted")
+            self.log.flush()
             new_size = os.path.getsize(self.tempfn)
             print(f"  File size after: {new_size} (expected same)")
             self.assertEqual(file_size, new_size)
@@ -49,6 +51,7 @@ class LoggerTest(TestCase):
             lvl = self.log.string_as_level(lvlname)
             print(f"Displayed: {lvlname} (value={lvl})")
             self.log.log(lvl,"this should appear")
+            self.log.flush()
             new_size = os.path.getsize(self.tempfn)
             print(f"  File size: {file_size} -> {new_size} (expected growth)")
             # Show file content on failure
