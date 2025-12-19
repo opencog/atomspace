@@ -145,7 +145,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not src->is_type(STREAM_VALUE))
+	if (not src->is_type(STREAMING_SIG) and
+	    not src->is_type(BLOCKING_SIG))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
 		for (const ValuePtr& vp: vsq)
@@ -154,7 +155,7 @@ void SortedStream::init_src(const ValuePtr& src)
 		return;
 	}
 
-	// If it's a container, but its closed, then its a finite,
+	// If it's a container, and its closed, then its a finite,
 	// one-shot deal, just like the above.
 	if (src->is_type(CONTAINER_VALUE) and
 	    ContainerValueCast(src)->is_closed())
@@ -224,7 +225,8 @@ void SortedStream::drainloop(void)
 void SortedStream::drain(void)
 {
 	// Internal bug, if this asserts.
-	OC_ASSERT(_source->is_type(STREAM_VALUE));
+	OC_ASSERT(_source->is_type(STREAMING_SIG) or
+	          _source->is_type(BLOCKING_SIG));
 
 	// This should "never happen", but still ... if there's some weird
 	// bug, and the set gets closed, we will catch an exception. In this
