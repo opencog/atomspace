@@ -263,23 +263,21 @@ void SortedStreamUTest::test_queue_source(void)
 					(SizeOf (Variable "$right")))))
 	)");
 
-	// Create an empty QueueValue as the data source
+	// Create a QueueValue as the data source
 	QueueValuePtr queue = createQueueValue();
 	queue->open();
 
-	// Attach the queue to an atom so we can pass it to SortedStream
-	// SortedStream needs a Handle as the source
+	// Attach the queue to an anchor so we can pass it to SortedStream
 	Handle queue_anchor = eval->eval_h("(Anchor \"queue-source\")");
 	Handle queue_key = eval->eval_h("(Predicate \"queue-data\")");
 	queue_anchor->setValue(queue_key, queue);
 
-	// Create a ValueOf link to access the queue
+	// Provide accessor to the Queue
 	Handle queue_source = eval->eval_h(R"(
 		(ValueOf (Anchor "queue-source") (Predicate "queue-data"))
 	)");
 
-	// Create the SortedStream with the comparison and queue source
-	// Use ValuePtr to control destruction
+	// Create the SortedStream with the queue source
 	HandleSeq args{greater_or_equal, queue_source};
 	ValuePtr sorter = createSortedStream(args);
 	SortedStreamPtr sorted = SortedStreamCast(sorter);
