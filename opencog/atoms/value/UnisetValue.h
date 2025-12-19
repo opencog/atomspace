@@ -78,6 +78,7 @@ public:
 	virtual void add(const ValuePtr&);
 	virtual void add(ValuePtr&&);
 	virtual ValuePtr remove(void);
+	virtual ValuePtr peek(void) const;
 	virtual size_t size(void) const;
 	virtual void clear(void);
 

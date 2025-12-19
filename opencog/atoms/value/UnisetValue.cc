@@ -134,6 +134,15 @@ ValuePtr UnisetValue::remove(void)
 	return createVoidValue();
 }
 
+/// Return one item from the set, without removing it.
+/// Returns nullptr if the set is empty.
+ValuePtr UnisetValue::peek(void) const
+{
+	auto item = _set.peek();
+	if (not item.has_value()) return nullptr;
+	return item.value();
+}
+
 size_t UnisetValue::size(void) const
 {
 	if (is_closed())
