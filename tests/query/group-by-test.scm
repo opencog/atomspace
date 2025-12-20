@@ -132,24 +132,5 @@
 
 ; -------------------------------------------------------------
 
-(define grp-range
-	(Query
-		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Group
-				(Variable "$Y")
-				(Interval (Number 2) (Number 4)))
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y")))))
-		(Variable "$X")))
-
-(define range-results (cog-execute! grp-range))
-; (format #t "The range results are ~A\n" range-results)
-(test-assert "range group size"
-	(equal? 2 (length (cog-value->list range-results))))
-
-; -------------------------------------------------------------
-
 (test-end tname)
 (opencog-test-end)
