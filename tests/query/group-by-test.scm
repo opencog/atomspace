@@ -29,11 +29,20 @@
 (define grp-meet
 	(Meet
 		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Group (Variable "$Y"))
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y")))))))
+		(Present
+			(Edge (Predicate "property")
+				(List (Variable "$X") (Variable "$Y"))))))
+
+; The Lambda compares the $Y component (index 1) of result LinkValues
+(define meet-group-value
+	(GroupValue
+		(Lambda
+			(VariableList (Variable "$A") (Variable "$B"))
+			(Equal
+				(ElementOf (Number 1) (Variable "$A"))
+				(ElementOf (Number 1) (Variable "$B"))))))
+
+(cog-set-value! grp-meet grp-meet meet-group-value)
 
 (define meet-results (cog-execute! grp-meet))
 ; (format #t "The meet results are ~A\n" meet-results)
