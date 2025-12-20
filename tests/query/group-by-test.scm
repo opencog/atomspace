@@ -61,10 +61,35 @@
 
 (define meet-results (cog-execute! meet-edges))
 ; (format #t "The meet results are ~A\n" meet-results)
+; (format #t "There results are ~A\n" (cog-value->list meet-results))
 ; (format #t "There are ~A results\n" (length (cog-value->list meet-results)))
 
 (test-assert "meet group size"
 	(equal? 3 (length (cog-value->list meet-results))))
+
+(define colors
+	(UnisetValue
+		(LinkValue (Item "green") (Item "colors"))
+		(LinkValue (Item "brown") (Item "colors"))
+		(LinkValue (Item "black") (Item "colors"))))
+
+(define shapes
+	(UnisetValue
+		(LinkValue (Item "round") (Item "shapes"))
+		(LinkValue (Item "square") (Item "shapes"))
+		(LinkValue (Item "trident") (Item "shapes"))))
+
+(define clouds
+	(UnisetValue
+		(LinkValue (Item "vague") (Item "cloudy"))))
+
+(define meet-buckets (cog-value->list meet-results))
+(define meet-has-colors (member colors meet-buckets))
+(define meet-has-shapes (member shapes meet-buckets))
+(define meet-has-clouds (member clouds meet-buckets))
+(test-assert "meet has colors" meet-has-colors)
+(test-assert "meet has shapes" meet-has-shapes)
+(test-assert "meet has clouds" meet-has-clouds)
 
 ; -------------------------------------------------------------
 ; Same as above, but uses a Filter to extract the second element.
@@ -90,6 +115,14 @@
 
 (test-assert "meet destructure group size"
 	(equal? 3 (length (cog-value->list meet-destr))))
+
+(define destr-buckets (cog-value->list meet-destr))
+(define destr-has-colors (member colors destr-buckets))
+(define destr-has-shapes (member shapes destr-buckets))
+(define destr-has-clouds (member clouds destr-buckets))
+(test-assert "destr has colors" destr-has-colors)
+(test-assert "destr has shapes" destr-has-shapes)
+(test-assert "destr has clouds" destr-has-clouds)
 
 ; -------------------------------------------------------------
 ; A Query pattern with a rewrite rule. The result of the query is
@@ -129,6 +162,30 @@
 
 (test-assert "query group size"
 	(equal? 3 (length (cog-value->list query-results))))
+
+(define color-edges
+	(UnisetValue
+		(Edge (Predicate "go together") (List (Item "colors") (Item "green")))
+		(Edge (Predicate "go together") (List (Item "colors") (Item "brown")))
+		(Edge (Predicate "go together") (List (Item "colors") (Item "black")))))
+
+(define shape-edges
+	(UnisetValue
+		(Edge (Predicate "go together") (List (Item "shapes") (Item "round")))
+		(Edge (Predicate "go together") (List (Item "shapes") (Item "square")))
+		(Edge (Predicate "go together") (List (Item "shapes") (Item "trident")))))
+
+(define cloud-edges
+	(UnisetValue
+		(Edge (Predicate "go together") (List (Item "cloudy") (Item "vague")))))
+
+(define query-buckets (cog-value->list query-results))
+(define query-has-colors (member color-edges query-buckets))
+(define query-has-shapes (member shape-edges query-buckets))
+(define query-has-clouds (member cloud-edges query-buckets))
+(test-assert "query has color-edges" query-has-colors)
+(test-assert "query has shape-edges" query-has-shapes)
+(test-assert "query has cloud-edges" query-has-clouds)
 
 ; -------------------------------------------------------------
 
