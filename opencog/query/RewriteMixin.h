@@ -77,8 +77,6 @@ class RewriteMixin :
 		void record_marginals(const GroundingMap&);
 
 		size_t _num_results;
-		std::map<GroundingMap, ValueSet> _groups;
-		std::map<GroundingMap, size_t> _group_sizes;
 
 		Instantiator inst;
 	public:
@@ -94,9 +92,6 @@ class RewriteMixin :
 
 		virtual bool propose_grounding(const GroundingMap &var_soln,
 		                               const GroundingMap &term_soln);
-		virtual bool propose_grouping(const GroundingMap &var_soln,
-		                              const GroundingMap &term_soln,
-		                              const GroundingMap &grouping);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

@@ -124,6 +124,16 @@ void GroupValue::add(ValuePtr&& vp)
 
 // ==============================================================
 
+void GroupValue::close(void)
+{
+	// Close all open buckets before closing the stream.
+	for (const ValuePtr& bucket : _set.snapshot())
+		UnisetValueCast(bucket)->close();
+	UnisetValue::close();
+}
+
+// ==============================================================
+
 std::string GroupValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);

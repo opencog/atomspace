@@ -45,7 +45,6 @@ void PatternLink::common_init(void)
 	locate_defines(_pat.pmandatory);
 	locate_defines(_pat.absents);
 	locate_defines(_pat.always);
-	locate_defines(_pat.grouping);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -110,13 +109,11 @@ void PatternLink::common_init(void)
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
 	clauses_get_variables(_pat.always);
-	clauses_get_variables(_pat.grouping);
 
 	// Find prunable terms.
 	locate_cacheable(_pat.pmandatory);
 	locate_cacheable(_pat.absents);
 	locate_cacheable(_pat.always);
-	locate_cacheable(_pat.grouping);
 
 	// Collect and categorize ExclusiveLink constraints for
 	// constraint propagation during pattern matching.
@@ -190,12 +187,10 @@ void PatternLink::categorize_exclusives(void)
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 		collect_exclusives_recursive(ptm);
 
-	// Also check absents, always, grouping
+	// Also check absents, always
 	for (const PatternTermPtr& ptm : _pat.absents)
 		collect_exclusives_recursive(ptm);
 	for (const PatternTermPtr& ptm : _pat.always)
-		collect_exclusives_recursive(ptm);
-	for (const PatternTermPtr& ptm : _pat.grouping)
 		collect_exclusives_recursive(ptm);
 
 	// Precompute the list of variables in each ExclusiveLink.
@@ -259,13 +254,12 @@ void PatternLink::disjointed_init(void)
 		// Unfortunately, unbundle_clauses sets all sorts of other
 		// stuff that we don't need/want, so we have to clobber that
 		// every time through the loop.
-		// BTW, any `absents`, `always` and `grouping` are probably
+		// BTW, any `absents` and `always` are probably
 		// handled incorrectly, so that's a bug that needs fixing.
 		unbundle_clauses(h);
 
 		// Each component consists of the assorted parts.
-		// XXX FIXME, this handles `absents`, `always` and `grouping`
-		// incorrectly.
+		// XXX FIXME, this handles `absents` and `always` incorrectly.
 		HandleSeq clseq;
 		for (const PatternTermPtr& ptm: _pat.pmandatory)
 			clseq.push_back(ptm->getHandle());
@@ -648,49 +642,6 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 		return true;
 	}
 
-	// Pull clauses out of a GroupLink
-	// GroupLinks will have terms that are the groundings that should be
-	// grouped together, and also an optional IntervalLink to specify
-	// min/max grouping sizes.
-	if (not reverse and GROUP_LINK == typ)
-	{
-		for (PatternTermPtr term: clause->getOutgoingSet())
-		{
-			const Handle& ah = term->getQuote();
-
-			// In the current code base, there shouldn't be any constants
-			// so this check should not be needed.
-			if (is_constant(_variables.varset, ah)) continue;
-			pin_term(term);
-			term->markGrouping();
-			_pat.grouping.push_back(term);
-		}
-
-		// Look for IntervalLinks. They've been scrubbed from the
-		// Pattern term because they're constants; we have to look
-		// at the GrouplLink itself to find them.
-		long glo = LONG_MAX;
-		long ghi = 0;
-		for (const Handle& ah: h->getOutgoingSet())
-		{
-			if (INTERVAL_LINK != ah->get_type())
-				continue;
-			NumberNodePtr nlo(NumberNodeCast(ah->getOutgoingAtom(0)));
-			NumberNodePtr nhi(NumberNodeCast(ah->getOutgoingAtom(1)));
-			long ilo = (long) std::round(nlo->get_value());
-			long ihi = (long) std::round(nhi->get_value());
-			if (glo > ilo) glo = ilo;
-			if (ghi < ihi) ghi = ihi;
-			if (ihi < 0) ghi = LONG_MAX;
-		}
-		if (0 != ghi)
-		{
-			_pat.group_min_size = glo;
-			_pat.group_max_size = ghi;
-		}
-		return true;
-	}
-
 	// Handle in-line variable declarations.
 	if (not reverse and TYPED_VARIABLE_LINK == typ)
 	{
@@ -1049,7 +1000,6 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
-	if (GROUP_LINK == t) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
 
@@ -1382,7 +1332,7 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
 		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
-		chk_const = chk_const or ALWAYS_LINK == t or GROUP_LINK == t;
+		chk_const = chk_const or ALWAYS_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
@@ -1501,7 +1451,6 @@ void PatternLink::debug_log(std::string msg) const
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
 	logger().fine("%lu absent clauses", _pat.absents.size());
 	logger().fine("%lu always clauses", _pat.always.size());
-	logger().fine("%lu grouping clauses", _pat.grouping.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
@@ -1528,15 +1477,6 @@ void PatternLink::debug_log(std::string msg) const
 	for (const PatternTermPtr& ptm : _pat.always)
 	{
 		str += "================ Always clause " + std::to_string(num) + ":";
-		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
-		str += "\n";
-		str += ptm->to_full_string() + "\n\n";
-		num++;
-	}
-
-	for (const PatternTermPtr& ptm : _pat.grouping)
-	{
-		str += "================ Grouping clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
 		str += ptm->to_full_string() + "\n\n";

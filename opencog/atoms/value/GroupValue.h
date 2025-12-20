@@ -66,6 +66,7 @@ public:
 
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
+	virtual void close(void) override;
 	virtual std::string to_string(const std::string& indent = "") const;
 };
 
