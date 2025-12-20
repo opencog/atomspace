@@ -1,45 +1,29 @@
 ;
-; group-by.scm -- Demo of the GroupLink
+; group-by.scm -- Demo of the GroupValue
 ;
-; This example demonstrates the use of the GroupLink to group together
+; This example demonstrates the use of the GroupValue to group together
 ; search results into groupings that are similar to one-another in some
 ; way. It is inspired by the SQL `GROUP BY` statement, and works in a
 ; similar fashion.
 ;
 ; Background: Search results are always presented as sets of trees.
 ; These trees are the result of grounding the set of search clauses.
-; If search has two or more variable in it, it can be interesting to
+; If search has two or more variables in it, it can be interesting to
 ; obtain groupings where all results in a group have exactly the same
 ; grounding for that variable.
 ;
-; Such a grouping can be thought of as a connected (hyper-)graph. All
-; trees in the group will share the Atom that grounds the grouped
-; variable. They are connected through that Atom. Different groupings
-; will be disjoint from one another, as they don't share that Atom.
-; They may, of course, be connected in other ways, just not through
-; the grouping Atom/variable.
+; The GroupValue is a streaming post-processor that groups query results
+; as they arrive. It takes a Lambda predicate that compares pairs of
+; results: if the Lambda evaluates to true, the results are placed in
+; the same group (bucket). The Lambda receives two result values and
+; should compare some component of them for equality.
 ;
-; Another way of thinking about groupings is that the grouping Atom
-; forms a "kernel". Many similar trees are all attached to this kernel,
-; these trees differ in various ways from one-another, but they have
-; this kernel in common. In this respect, they are all similar.
-;
-; A third way of thinking of groupings is as "local for-all clauses".
-; Thus, for all members in a group, the property specified in the
-; grouping kernel holds. In this sense, GroupLink is a "local" version
-; of AlwaysLink. The AlwaysLink asks that all search results must have
-; in common the specified clause, or, equivalently, that there must be
-; one and only one group. The GroupLink relaxes this demand for there
-; to be only one, and presents several groupings, as these occur.
-;
-; This demo will use a single, simple grouping variable. Multiple
-; variables and complex terms can be used to define a grouping kernel;
-; this demo shows only the simplest case.
+; This demo will use a simple grouping by a shared variable value.
 
 (use-modules (opencog))
 
 ; Create a collection of trees to search over.
-; The structure should be obvious, but a few points bear empahsis:
+; The structure should be obvious, but a few points bear emphasis:
 ;
 ; * All of these trees are connected to one-another, as they all
 ;   have the Atom `(Predicate "property")` in common with one-another.
@@ -48,9 +32,7 @@
 ; * There are two groupings of three that are evident: the colors and
 ;   the shapes. Ignoring the common `(Predicate "property")`, these
 ;   groupings are obviously disjoint: none of the colors are shapes,
-;   and vice-versa. Each grouping forms a connected sub-hypergraph,
-;   in that the Atom `(Item "colors")` is shared in common by all
-;   of the trees that ... share it.
+;   and vice-versa.
 ;
 ; The goal of the search query will be to define a search pattern
 ; that can find the colors and the shapes, and group these results
@@ -64,104 +46,94 @@
 (Edge (Predicate "property") (List (Item "square") (Item "shapes")))
 (Edge (Predicate "property") (List (Item "trident") (Item "shapes")))
 
-(Edge (Predicate "le grande foobar") (List (Item "blob") (Item "shapes")))
-
 (Edge (Predicate "property") (List (Item "vague") (Item "cloudy")))
 
-; Define a query that will look for relations having "property", and
-; group them together by commonality in the second position of the
-; property: group them by commonality in `(Variable "$Y")`.
+; -------------------------------------------------------------
+; A basic Meet pattern. As results are matched, they are stuffed
+; into the GroupValue. The GroupValue receives a LinkValue wrapping
+; (Variable "$X") (Variable "$Y") because this is how MeetLinks work.
+;
+; The GroupValue Lambda compares results pairwise. It uses ElementOf
+; to extract the second element (index 1) from each result, and checks
+; if they are equal. Results with equal second elements (the category)
+; end up in the same bucket.
 
-(define grp-query
-	(Query
-		; Variable declarations (optional)
+(define meet-edges
+	(Meet
 		(VariableList (Variable "$X") (Variable "$Y"))
+		(Present
+			(Edge (Predicate "property")
+				(List (Variable "$X") (Variable "$Y"))))))
 
-		; Use an AndLink to unite all the search clauses
-		(And
+; The Lambda compares the $Y component (index 1) of result LinkValues.
+; If two results have the same value at index 1, they go in the same group.
+(define group-by-category
+	(GroupValue
+		(Lambda
+			(VariableList (Variable "$A") (Variable "$B"))
+			(Equal
+				(ElementOf (Number 1) (Variable "$A"))
+				(ElementOf (Number 1) (Variable "$B"))))))
 
-			; The "property" must be present in the AtomSpace.
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y"))))
+; Attach the GroupValue to the meet pattern.
+; The pattern itself is used as the key for the value.
+(cog-set-value! meet-edges meet-edges group-by-category)
 
-			; The search results will be grouped together by having
-			; a common value of $Y
-			(Group (Variable "$Y")))
-
-		; The QueryLink is a kind of rewrite-rule; the variable
-		; groundings can be used to create new structures. For this
-		; demo, some nonsense Implication & Edge links are
-		; created. You don't want to use Implication like this in
-		; practice, but visually, it works for this demo.
-		(Edge (Concept "things that go together")
-			(Implication (Variable "$Y") (Variable "$X")))))
-
-; Perform the query, and put the results in a scheme object.
-(define query-results (cog-execute! grp-query))
+; Execute the meet and get grouped results
+(define meet-results (cog-execute! meet-edges))
 
 ; Print a report.
-(format #t "There are ~A results.\n" (length (cog-value->list query-results)))
-(format #t "The query results are:\n~A\n" query-results)
+(format #t "There are ~A groups.\n" (length (cog-value->list meet-results)))
+(format #t "The grouped results are:\n~A\n" meet-results)
+
+; Expected output shows 3 groups:
+; - colors group: (green colors), (brown colors), (black colors)
+; - shapes group: (round shapes), (square shapes), (trident shapes)
+; - cloudy group: (vague cloudy)
 
 ; -------------------------------------------------------------
-; Part the second.
-; This is a variant of the above, perhaps showing more clearly and
-; distinctly the grouping effect.
-
-(define grp-set
-	(Query
-		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y"))))
-			(Group (Variable "$Y")))
-		(Variable "$X")))
-
-(define set-results (cog-execute! grp-set))
-(format #t "The groupings are:\n~A\n" set-results)
-
-; Groupings can be interesting when their sizes can be constrained.
-; The IntervalLink can be used to do this. In the below, groups with
-; fewer than 2 members will not be provided.
+; Part the second: A Query pattern with a rewrite rule.
 ;
-; The IntervalLink behaves as in other contexts. Setting the upper
-; limit to -1 is interpreted as no upper bound.
-(define grp-range
+; The result of the query is an Edge atom created by the rewrite.
+; The GroupValue Lambda extracts the $Y component from the rewritten
+; structure using Filter to match the pattern.
+
+(define query-edges
 	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y"))))
-			(Group
-				(Variable "$Y")
-				(Interval (Number 2) (Number 5))))
-		(Variable "$X")))
+		(Present
+			(Edge (Predicate "property")
+				(List (Variable "$X") (Variable "$Y"))))
+		; Rewrite rule: create a new structure
+		(Edge (Predicate "go together")
+			(List (Variable "$Y") (Variable "$X")))))
 
-(define range-results (cog-execute! grp-range))
-(format #t "The groupings are:\n~A\n" range-results)
+; Extract $Y from (Edge (Predicate "go together") (List $Y $X))
+; by using Filter with a pattern that has $y in the first position
+(define group-by-rewritten
+	(GroupValue
+		(Lambda
+			(VariableList (Variable "$A") (Variable "$B"))
+			(Equal
+				(Filter
+					(Lambda (Variable "$y")
+						(Edge (Predicate "go together")
+							(List (Variable "$y") (Type 'Item))))
+					(Variable "$A"))
+				(Filter
+					(Lambda (Variable "$y")
+						(Edge (Predicate "go together")
+							(List (Variable "$y") (Type 'Item))))
+					(Variable "$B"))))))
 
-; The grouping size constraint applies to the group before the rewrite,
-; and not after. Below, only the group name is reported, and since there
-; is only one name per group, all group members collapsed down to this
-; one name. In general, one is interested in the size of the group,
-; before the collapse, not after. Thus, names are reported for those
-; groups with two or more members.
-(define grp-collapse
-	(Query
-		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y"))))
-			(Group
-				(Variable "$Y")
-				(Interval (Number 2) (Number 5))))
-		(Variable "$Y")))
+(cog-set-value! query-edges query-edges group-by-rewritten)
 
-(define collapse-results (cog-execute! grp-collapse))
-(format #t "The group names are:\n~A\n" collapse-results)
+(define query-results (cog-execute! query-edges))
+
+(format #t "\nQuery with rewrite:\n")
+(format #t "There are ~A groups.\n" (length (cog-value->list query-results)))
+(format #t "The grouped results are:\n~A\n" query-results)
+
+; Expected output shows 3 groups of rewritten edges, grouped by category.
 
 ; ------------ That's All, Folks! The End. ------------------

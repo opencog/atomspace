@@ -152,54 +152,6 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 	return (_num_results >= max_results);
 }
 
-/// Much like the above, but groundings are organized into groupings.
-/// The primary technical problem here is that we cannot report any
-/// search results, until after the search has completed. This is
-/// because the very last item to be reported may belong to the very
-/// first group. So we sit here, stupidly, and wait for search results
-/// to dribble in. Perhaps the engine search could be modified in some
-/// clever way to find groupings in a single batch; but for now, I don't
-/// see how this could be done.
-/// XXX FIXME now I see how it can be done. The groupings should
-/// be converted to marginals, and handled the same way. So this
-/// needs a rewrite. Good thing that almost no one uses this ...
-bool RewriteMixin::propose_grouping(const GroundingMap &var_soln,
-                                    const GroundingMap &term_soln,
-                                    const GroundingMap &grouping)
-{
-	// Do not accept new solution if maximum number has been already reached
-	if (_num_results >= max_results)
-		return true;
-
-	_num_results ++;
-
-	// Obtain the grouping that we'll stuff values into.
-	ValueSet& grp = _groups[grouping];
-
-	// Count the group size. After performing the rewrite below
-	// (in the instantiate code) the reults might collapse to just
-	// one instance per group, thus mis-characterizing the actual
-	// group size. So count explicitly.
-	_group_sizes[grouping] ++;
-
-	try {
-		for (const Handle& himp: _implicand)
-		{
-			ValuePtr v(inst.instantiate(himp, var_soln, true));
-
-			// Insert atom into the atomspace immediately. This avoids having
-			// the atom appear twice, once unassigned to any AS, and the other
-			// in the AS.
-			if (v->is_atom())
-				v = _as->add_atom(HandleCast(v));
-
-			grp.insert(v);
-		}
-	} catch (const SilentException& ex) {}
-
-	return false;
-}
-
 void RewriteMixin::insert_result(ValuePtr v)
 {
 	if (_result_set.end() != _result_set.find(v)) return;
@@ -228,19 +180,6 @@ bool RewriteMixin::start_search(void)
 
 bool RewriteMixin::search_finished(bool done)
 {
-	// If there are groupings, report them now.
-	// Report only those groupings in the requested size range.
-	size_t gmin = _pattern->group_min_size;
-	size_t gmax = ULONG_MAX;
-	if (0 < _pattern->group_max_size) gmax = _pattern->group_max_size;
-	for (const auto& gset : _groups)
-	{
-		// size_t gsz = gset.second.size();
-		size_t gsz = _group_sizes[gset.first];
-		if (gmin <= gsz and gsz <= gmax)
-			_result_queue->add(std::move(createLinkValue(gset.second)));
-	}
-
 	for (auto& mgs : _var_marginals)
 		mgs.second->close();
 

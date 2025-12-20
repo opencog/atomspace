@@ -457,17 +457,6 @@ ABSENT_LINK <- PRESENT_LINK
 // Present is a kind-of `ThereExists`.
 ALWAYS_LINK <- PRESENT_LINK
 
-// A collection of variables or clauses that should be grouped together
-// when presenting results. Inspired by the "GROUP BY" statement in SQL,
-// and intended to have similar semantics & effects. Results having a
-// common grouping will be placed in the same LinkValue. Disjoint
-// results will be presented disjointly.
-//
-// The inheritance from AlwaysLink is meant to indicate that the
-// grouping behaves like an AlwaysLink, in that every member of the
-// grouping always has the same groundings.
-GROUP_LINK <- ALWAYS_LINK
-
 // Continuations are used in the Pattern Engine to implement infinite
 // recursion. They currently behave like an explicit declaration of tail
 // recursion.  (Caution: this may be a misleading name for what this
