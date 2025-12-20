@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/value/GroupValue.cc
  *
- * Copyright (C) 2025 BrainyBlaze LLC
+ * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -130,17 +130,6 @@ void GroupValue::close(void)
 	for (const ValuePtr& bucket : _set.snapshot())
 		UnisetValueCast(bucket)->close();
 	UnisetValue::close();
-}
-
-// ==============================================================
-
-std::string GroupValue::to_string(const std::string& indent) const
-{
-	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	rv += "\n";
-	rv += _schema->to_short_string(indent + "   ");
-	rv += ")\n";
-	return rv;
 }
 
 // ==============================================================

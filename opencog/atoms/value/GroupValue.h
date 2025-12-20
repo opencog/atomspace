@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/value/GroupValue.h
  *
- * Copyright (C) 2025 BrainyBlaze LLC
+ * Copyright (C) 2025 BrainyBlaze Dynamcis, LLC
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,17 +34,23 @@ namespace opencog
  */
 
 /**
- * A streaming Value that groups items into buckets based on an
- * equivalence relation. The equivalence relation is defined by a
- * Lambda that takes two arguments and returns a crisp bool value,
- * indicating whether the two items are equivalent.
+ * A ContainerValue that groups items into buckets based on an
+ * equivalence relation. The equivalence relation cane be any
+ * Atomese function that evaluates to crisp true/false when given
+ * a pair of input values.
  *
- * Items that are equivalent are placed into the same bucket, where
- * each bucket is a UnisetValue. Items that match no existing bucket
- * cause a new bucket to be created.
+ * The canonical form of the equivalence relation is as a LambdaLink:
  *
- * When the source stream closes, all buckets are closed and can be
- * retrieved one at a time via remove().
+ *   (Lambda
+ *      (VariableList (Variable $A) (Variable $B))
+ *      (Equal
+ *          (Some expr that fishes a Value out of $A)
+ *          (Some expr that fishes a Value out of $B)))
+ *
+ * Equivalent items are collected up into buckets. Usage patterns
+ * are as for generic ContainerValues: items may be added at any time;
+ * its thread safe. The Container is created open, and items can be
+ * added up until it is closed.
  */
 class GroupValue
 	: public UnisetValue
@@ -67,7 +73,6 @@ public:
 	virtual void add(const ValuePtr&) override;
 	virtual void add(ValuePtr&&) override;
 	virtual void close(void) override;
-	virtual std::string to_string(const std::string& indent = "") const;
 };
 
 VALUE_PTR_DECL(GroupValue);
