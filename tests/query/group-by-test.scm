@@ -92,18 +92,39 @@
 	(equal? 3 (length (cog-value->list meet-destr))))
 
 ; -------------------------------------------------------------
-(define grp-query
+; A Query pattern with a rewrite rule. The result of the query is
+; an Edge atom. The GroupValue Lambda extracts the first element
+; of the List inside the Edge (which is $Y) using Filter.
+;
+(define query-edges
 	(Query
 		(VariableList (Variable "$X") (Variable "$Y"))
-		(And
-			(Group (Variable "$Y"))
-			(Present
-				(Edge (Predicate "property")
-					(List (Variable "$X") (Variable "$Y")))))
+		(Present
+			(Edge (Predicate "property")
+				(List (Variable "$X") (Variable "$Y"))))
 		(Edge (Predicate "go together")
 			(List (Variable "$Y") (Variable "$X")))))
 
-(define query-results (cog-execute! grp-query))
+; Extract $Y from (Edge (Predicate "go together") (List $Y $X))
+(define group-edges
+	(GroupValue
+		(Lambda
+			(VariableList (Variable "$A") (Variable "$B"))
+			(Equal
+				(Filter
+					(Lambda (Variable "$y")
+						(Edge (Predicate "go together")
+							(List (Variable "$y") (Type 'Item))))
+					(Variable "$A"))
+				(Filter
+					(Lambda (Variable "$y")
+						(Edge (Predicate "go together")
+							(List (Variable "$y") (Type 'Item))))
+					(Variable "$B"))))))
+
+(cog-set-value! query-edges query-edges group-edges)
+
+(define query-results (cog-execute! query-edges))
 ; (format #t "The query results are ~A\n" query-results)
 
 (test-assert "query group size"
