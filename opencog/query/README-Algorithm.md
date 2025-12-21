@@ -300,3 +300,15 @@ Complications are introduced due to the following features:
    black-box links can have a side-effect (e.g. they can send a
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
+
+Bugs
+----
+The pattern engine includes support for AlwaysLink, whose intended
+interpretation is that the predicate specified inside the AlwaysLink
+is true, for the entire search pattern. This is tested in AlwaysUTest;
+the test currently passes. However, this appears to be accidental, as
+the algo used depends on the starting conditions for the search, on the
+order in which the search is done.
+
+How to fix the algo is not clear.  It's not even clear if it's fixable,
+as the semantics is a bit cloudy... Hmm.
