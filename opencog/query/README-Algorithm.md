@@ -304,11 +304,52 @@ Complications are introduced due to the following features:
 Bugs
 ----
 The pattern engine includes support for AlwaysLink, whose intended
-interpretation is that the predicate specified inside the AlwaysLink
-is true, for the entire search pattern. This is tested in AlwaysUTest;
-the test currently passes. However, this appears to be accidental, as
-the algo used depends on the starting conditions for the search, on the
-order in which the search is done.
+interpretation is "for all" or "always the case", scoped to the
+groundings of the search pattern.  When a query contains the AlwaysLink,
+the search results are limited to those for which there are no possible
+groundings where the predicate in AlwaysLink might be false.
 
-How to fix the algo is not clear.  It's not even clear if it's fixable,
-as the semantics is a bit cloudy... Hmm.
+This is tested in AlwaysUTest; the test currently passes. However, this
+appears to be accidental, as the algo used depends on the starting
+conditions for the search, on the order in which the search is done.
+That is, the current code is buggy.
+
+Consider the pattern
+```
+    (SomeStructure X Y)
+    (Always (P X))
+```
+One possible algorithm would be as follows.  The search begins at X,
+looking for all X for which `(P X)` is true. For a fixed grounding of
+`X`, call it `gX`, a search is made over `(SomeStructure gX Y)` to find
+all groundings `Y` that satisfy this. Let's say that `gY`. Then, with
+this fixed `gY`, a search is performed for `(SomeStructure uX gY)`,
+iterating over all possible unknowns `uX`. If there exists a `uX` for
+which `(P uX)` is false, then this search branch is unwound, since the
+Always clause cannot hold for this `gX`. If there are no such `uX`,
+then the grounding (X=gX, Y=gY) is reported. The search proceeds,
+looping over all possible groundings `gX`, until they are all accepted,
+or are all rejected.
+
+The only problem with the algo above, as naively written, is that it
+is inapporpriate to start by looping over "all possible X" and then
+testing `(P X)` on each. The problem is that "all possible X" means
+every Atom in the AtomSpace would need to be considered as X; clearly
+a wasteful and inefficient approach. Instead, the search should proceed
+by "as normal", finding groundings `(SomeStructure cX cY)`, for
+candidates `(X=cX, Y=cY)`. Then, seting aside `cX`, we have a partially
+grounded pattern, `(SomeStructure uX cY)`, which allows looping over
+all `uX`. This loop then checks `(P uX)` and unwinds if ther exists
+some `uX` for which this is false. Thus, the existing logic for
+initiating efficient searches is kept; the only change is to make a
+second pass, a second loop, walking over all `uX`.
+
+The generalization to multiple variables is presumably obvious:
+```
+    (SomeStructure X1 X2 ... Y1 Y2 ...)
+    (Always (P1 X1))
+    (Always (P2 X2))
+    ...
+```
+so that `SomeStructure` is grounded first, and then nested loops make
+a pass over each AlwaysLink.
