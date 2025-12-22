@@ -301,27 +301,59 @@ Complications are introduced due to the following features:
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
 
-Bugs
-----
+AlwaysLink
+----------
 The pattern engine includes support for AlwaysLink, whose intended
-interpretation is "for all" or "always the case", scoped to the
-groundings of the search pattern.  When a query contains the AlwaysLink,
-the search results are limited to those for which there are no possible
-groundings where the predicate in AlwaysLink might be false.
+interpretation is "for all" or "always the case". This is a predicate
+that must evaluate to true for all possible contextualized groundings
+for that predicate, within the context of the search.
 
+When a query contains the AlwaysLink, the search results are limited to
+those for which there are no possible groundings where the predicate in
+AlwaysLink might be false.
+
+### Bugs
 This is tested in AlwaysUTest; the test currently passes. However, this
 appears to be accidental, as the algo used depends on the starting
 conditions for the search, on the order in which the search is done.
 That is, the current code is buggy.
 
-Consider the pattern
+### Algorithm
+The idea, and the appropriate algorithm can be exposed through a series
+of examples.  Fisrt, consider the pattern where the AlwaysLink is the
+only clause:
 ```
-    (SomeStructure X Y)
     (Always (P X))
 ```
-One possible algorithm would be as follows.  The search begins at X,
-looking for all X for which `(P X)` is true. For a fixed grounding of
-`X`, call it `gX`, a search is made over `(SomeStructure gX Y)` to find
+In this case, all possible groundings gX for X are considered; if there
+exists any gX for which `(P gX)` is false, then this pattern is not
+satisfiable, and the query returns the empty set.  If `(P gX)` is true
+for all `gX`, then the query returns the set of all of these `gX`.
+
+In practice, the above is not actually satisfiable as written in this
+naive form: the "universe of discourse" for `gX` will be the entire
+AtomSpace, and surely there will be some `gX` for which `(P gX)` is
+false. Thus the AlwaysLink is useful only when the domain if discourse
+is limited in some way. This is done with a pattern of the form
+```
+    (SomeStructure X)
+    (Always (P X))
+```
+The domain of discourse is then the set of `gX` for which
+`(SomeStructure gX)` is present in the AtomSpace. If `(P gX)` is true
+for all of these `gX`, then the full set of `gX` can be returned; else
+the query result is the empty set.
+
+There are two algos for the above. The naive algo is to obtain the set
+`{gX}` first, and then, as a post-processing stage, evaluate `P` on each
+member. A more sophisticated algo is to evaluate `P` as each candidate
+`gX` dribbles in, so that the search can be terminated early if one of
+them evaluates to false.
+
+
+---------
+
+Suppose that 
 all groundings `Y` that satisfy this. Let's say that `gY`. Then, with
 this fixed `gY`, a search is performed for `(SomeStructure uX gY)`,
 iterating over all possible unknowns `uX`. If there exists a `uX` for
@@ -330,6 +362,7 @@ Always clause cannot hold for this `gX`. If there are no such `uX`,
 then the grounding (X=gX, Y=gY) is reported. The search proceeds,
 looping over all possible groundings `gX`, until they are all accepted,
 or are all rejected.
+
 
 The only problem with the algo above, as naively written, is that it
 is inapporpriate to start by looping over "all possible X" and then
