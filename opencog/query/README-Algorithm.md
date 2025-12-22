@@ -350,10 +350,32 @@ member. A more sophisticated algo is to evaluate `P` as each candidate
 `gX` dribbles in, so that the search can be terminated early if one of
 them evaluates to false.
 
+A more interesting variant arises when the search pattern has the form
+```
+    (SomeStructure X Y)
+    (Always (P X))
+```
+For this example, the domain of discourse is parameterized by the
+variable `Y`. Here, a potential grounding `gY` of `Y` is acceptable if
+and only if the "contextualized" `gX` all satisfy the predicate. If
+they do, then the `gY` is acceptable; else `gY` must be discarded.
+
+Note that the satsifying set `{gX}` depends on `gY`.
+
+This suggests several algorithms. One is to proceed with the grounding
+of the clause `(SomeStructure X Y)` as normal. Then, for each candidate
+`(X := gX, Y:= gY)`, the value of `gX` is ignored/discarded, the clause
+`(SomeStructure X gY)` is constructed, and then a loop exploration of
+this parameterized clause is performed (evaluating `P` on each result).
+
+A variant algorithm is to proceed with the grounding of the clause in
+such a way that `Y` is grounded first. The loop over `X` is saved for
+last; then for each candidate `gX`, the `P` is evaluated.
+
 
 ---------
 
-Suppose that 
+Suppose that
 all groundings `Y` that satisfy this. Let's say that `gY`. Then, with
 this fixed `gY`, a search is performed for `(SomeStructure uX gY)`,
 iterating over all possible unknowns `uX`. If there exists a `uX` for
