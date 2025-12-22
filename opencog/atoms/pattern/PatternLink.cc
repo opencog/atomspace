@@ -87,8 +87,7 @@ void PatternLink::common_init(void)
 	validate_variables(_variables.varset, concrete_clauses);
 
 	// Split into connected components by splitting virtual clauses.
-	get_bridged_components(_variables.varset, _fixed, _pat.absents,
-	                       _components, _component_vars);
+	get_bridged_components(_variables.varset, _fixed, _pat.absents, _parts);
 
 	// We created the list of fixed clauses for only one reason:
 	// to determine pattern connectivity (get_bridged_components)
@@ -96,9 +95,9 @@ void PatternLink::common_init(void)
 	_fixed.clear();
 
 	// Make sure every variable is in some component.
-	check_satisfiability(_variables.varset, _component_vars);
+	check_satisfiability(_variables.varset, _parts);
 
-	_num_comps = _components.size();
+	_num_comps = _parts.size();
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -150,7 +149,7 @@ void PatternLink::collect_exclusives_recursive(const PatternTermPtr& ptm)
 			{
 				for (size_t i = 0; i < _num_comps; i++)
 				{
-					if (_component_vars[i].count(var))
+					if (_parts[i]._part_vars.count(var))
 						components_touched.insert(i);
 				}
 			}
@@ -217,14 +216,13 @@ void PatternLink::setup_components(void)
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
-	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i],
+		Handle h(createPatternLink(_parts[i]._part_vars,
 		                           _variables,
-		                           _components[i],
+		                           _parts[i]._part_clauses,
 		                           _pat.absents));
-		_component_patterns.emplace_back(h);
+		_parts[i]._part_pattern = h;
 	}
 }
 
@@ -238,6 +236,8 @@ void PatternLink::disjointed_init(void)
 
 	for (const Handle& h: _body->getOutgoingSet())
 	{
+		PatternParts pp;
+
 		// The variables for that component are just the variables
 		// that can be found in that component.
 		// XXX FIXME, more correct would be to loop over
@@ -245,7 +245,7 @@ void PatternLink::disjointed_init(void)
 		// no difference in most cases.
 		FindAtoms fv(_variables.varset);
 		fv.search_set(h);
-		_component_vars.emplace_back(fv.varset);
+		pp._part_vars = fv.varset;
 
 		// This one weird little trick will unpack the components
 		// that we need. We cannot just push_back `h` into it's own
@@ -260,11 +260,10 @@ void PatternLink::disjointed_init(void)
 
 		// Each component consists of the assorted parts.
 		// XXX FIXME, this handles `absents` and `always` incorrectly.
-		HandleSeq clseq;
 		for (const PatternTermPtr& ptm: _pat.pmandatory)
-			clseq.push_back(ptm->getHandle());
+			pp._part_clauses.push_back(ptm->getHandle());
 
-		_components.emplace_back(clseq);
+		_parts.emplace_back(pp);
 
 		// Clear things we don't need.
 		// Cannot clear _pat.connected_terms_map;
@@ -279,7 +278,7 @@ void PatternLink::disjointed_init(void)
 	// We do want to keep a record of the real body.
 	_pat.body = _body;
 
-	_num_comps = _components.size();
+	_num_comps = _parts.size();
 	setup_components();
 }
 
@@ -484,7 +483,9 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
-	_components.emplace_back(compo);
+	PatternParts pp;
+	pp._part_clauses = compo;
+	_parts.emplace_back(pp);
 	_num_comps = 1;
 
 	make_connectivity_map();
@@ -1161,12 +1162,12 @@ void PatternLink::make_map_recursive(const Handle& var,
 /// containing them can be evaluated. Throw an error if some variable
 /// wasn't explicitly specified in a groundable clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
-                                       const HandleSetSeq& compvars)
+                                       const PartsSeq& parts)
 {
 	// Compute the set-union of all component vars.
 	HandleSet vunion;
-	for (const HandleSet& vset : compvars)
-		vunion.insert(vset.begin(), vset.end());
+	for (const PatternParts& pp : parts)
+		vunion.insert(pp._part_vars.begin(), pp._part_vars.end());
 
 	// Is every variable in some component? The user can give
 	// us mal-formed things like this:
@@ -1516,12 +1517,17 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 	ss << indent << "_virtual:" << std::endl
 	   << oc_to_string(_virtual, indent_p) << std::endl;
 	ss << indent << "_num_comps = " << _num_comps << std::endl;
-	ss << indent << "_components:" << std::endl
-	   << oc_to_string(_components, indent_p) << std::endl;
-	ss << indent << "_component_vars:" << std::endl
-	   << oc_to_string(_component_vars, indent_p) << std::endl;
-	ss << indent << "_component_patterns:" << std::endl
-	   << oc_to_string(_component_patterns, indent_p);
+	ss << indent << "_parts:" << std::endl;
+	for (size_t i = 0; i < _parts.size(); i++)
+	{
+		ss << indent_p << "part[" << i << "]:" << std::endl;
+		ss << indent_p << "  _part_clauses: "
+		   << oc_to_string(_parts[i]._part_clauses, indent_p + "  ") << std::endl;
+		ss << indent_p << "  _part_vars: "
+		   << oc_to_string(_parts[i]._part_vars, indent_p + "  ") << std::endl;
+		ss << indent_p << "  _part_pattern: "
+		   << oc_to_string(_parts[i]._part_pattern, indent_p + "  ") << std::endl;
+	}
 	return ss.str();
 }
 

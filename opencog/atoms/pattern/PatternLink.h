@@ -103,12 +103,9 @@ protected:
 	size_t _num_virts;
 	HandleSeq _virtual;
 
-	/// The list of component_vars are the variables that appear
-	/// in the corresponding component.
+	/// The list of disconnected components of the pattern.
 	size_t _num_comps;
-	HandleSeqSeq _components;
-	HandleSetSeq _component_vars;
-	HandleSeq _component_patterns;
+	PartsSeq _parts;
 
 	PatternTermPtr make_term_tree(const Handle&);
 	void make_ttree_recursive(const PatternTermPtr&,
@@ -141,7 +138,7 @@ protected:
 	void make_map_recursive(const Handle&, const PatternTermPtr&);
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
-	                          const HandleSetSeq&);
+	                          const PartsSeq&);
 
 	void get_clause_variables(const PatternTermPtr&);
 	void clauses_get_variables(const PatternTermSeq&);
@@ -186,9 +183,7 @@ public:
 	const Variables& get_variables(void) const { return _variables; }
 	const Pattern& get_pattern(void) const { return _pat; }
 
-	const HandleSeqSeq& get_components(void) const { return _components; }
-	const HandleSeq& get_component_patterns(void) const
-		{ return _component_patterns; }
+	const PartsSeq& get_parts(void) const { return _parts; }
 
 	// Return the list virtual clauses we are holding.
 	const HandleSeq& get_virtual(void) const { return _virtual; }

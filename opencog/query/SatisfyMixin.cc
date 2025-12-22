@@ -379,8 +379,8 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 
 	set_pattern(vars, pat);
 
-	const HandleSeqSeq& comps = jit->get_components();
-	size_t num_comps = comps.size();
+	const PartsSeq& parts = jit->get_parts();
+	size_t num_comps = parts.size();
 
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
@@ -451,7 +451,6 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 	bool have_orlink = (OR_LINK == patty) or (CHOICE_LINK == patty);
 	GroundingMapSeqSeq comp_term_gnds;
 	GroundingMapSeqSeq comp_var_gnds;
-	const HandleSeq& comp_patterns = jit->get_component_patterns();
 
 	for (size_t i = 0; i < num_comps; i++)
 	{
@@ -460,7 +459,7 @@ bool SatisfyMixin::satisfy(const PatternLinkPtr& form)
 		              << " of " << num_comps << ": ===========\n";
 #endif
 
-		PatternLinkPtr clp(PatternLinkCast(comp_patterns.at(i)));
+		PatternLinkPtr clp(PatternLinkCast(parts.at(i)._part_pattern));
 		const Pattern& pat(clp->get_pattern());
 		bool is_pure_absent = false;
 		if (pat.pmandatory.size() == 0 and pat.absents.size() > 0)

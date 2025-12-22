@@ -149,6 +149,16 @@ struct Pattern
 std::string oc_to_string(const Pattern& pattern,
                          const std::string& indent=empty_string);
 
+/// A connected component of a pattern. Patterns may consist of multiple
+/// disconnected subgraphs; each is placed into its own `PatternParts` struct.
+struct PatternParts
+{
+	Handle _part_pattern;      // compiled PatternLink for this component
+	HandleSet _part_vars;      // variables in this component
+	HandleSeq _part_clauses;   // clauses in this component
+};
+typedef std::vector<PatternParts> PartsSeq;
+
 /** @}*/
 } // namespace opencog
 

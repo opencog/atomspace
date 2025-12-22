@@ -122,8 +122,7 @@ bool is_connected(const Handle& cl, const HandleSet& cur_vars)
 
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
-                              HandleSeqSeq& components,
-                              HandleSetSeq& component_vars)
+                              PartsSeq& parts)
 {
 	HandleSeq todo(clauses);
 
@@ -140,16 +139,16 @@ void get_connected_components(const HandleSet& vars,
 
 			// Which component might this clause possibly belong to?
 			// Try them all.
-			size_t nc = components.size();
+			size_t nc = parts.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				HandleSet& cur_vars(component_vars[i]);
+				HandleSet& cur_vars(parts[i]._part_vars);
 				// If clause cl is connected to this component,
 				// then add it to this component.
 				if (is_connected(cl, cur_vars))
 				{
 					// Extend this component
-					components[i].emplace_back(cl);
+					parts[i]._part_clauses.emplace_back(cl);
 
 					// Add to the varset cache for this component.
 					FindAtoms fv(vars);
@@ -180,19 +179,21 @@ void get_connected_components(const HandleSet& vars,
 
 		// If we are here, we found a disconnected clause.
 		// Start a new component
-		components.push_back({ncl});
+		PatternParts pp;
+		pp._part_clauses.push_back(ncl);
 
 		FindAtoms fv(vars);
 		fv.search_set(ncl);
-		component_vars.emplace_back(fv.varset);
+		pp._part_vars = fv.varset;
+
+		parts.emplace_back(pp);
 	}
 }
 
 void get_bridged_components(const HandleSet& vars,
                             const PatternTermSeq& prsnts,
                             const PatternTermSeq& absnts,
-                            HandleSeqSeq& components,
-                            HandleSetSeq& component_vars)
+                            PartsSeq& parts)
 {
 	HandleSeq nonopts;
 	for (const PatternTermPtr& ptm: prsnts)
@@ -204,43 +205,46 @@ void get_bridged_components(const HandleSet& vars,
 
 	if (0 == opts.size())
 	{
-		get_connected_components(vars, nonopts, components, component_vars);
+		get_connected_components(vars, nonopts, parts);
 		return;
 	}
 
 	if (0 == nonopts.size())
 	{
-		get_connected_components(vars, opts, components, component_vars);
+		get_connected_components(vars, opts, parts);
 		return;
 	}
 
 	// Some optionals bridge across components; others simply
 	// connect to some of them. We need to figure out which is which.
-	get_connected_components(vars, nonopts, components, component_vars);
+	get_connected_components(vars, nonopts, parts);
 
 	// Now try to attach opts.
 	for (const Handle& opt: opts)
 	{
 		// Count how many components this opt might attach to.
 		size_t cnt = 0;
-		for (const HandleSet& vars: component_vars)
+		for (const PatternParts& pp: parts)
 		{
-			if (any_unquoted_in_tree(opt, vars)) cnt++;
+			if (any_unquoted_in_tree(opt, pp._part_vars)) cnt++;
 		}
 
 		// If its not attached to anything, create a new component.
 		if (0 == cnt)
 		{
-			components.push_back({opt});
+			PatternParts pp;
+			pp._part_clauses.push_back(opt);
 
 			FindAtoms fv(vars);
 			fv.search_set(opt);
-			component_vars.emplace_back(fv.varset);
+			pp._part_vars = fv.varset;
+
+			parts.emplace_back(pp);
 		}
 		else if (1 == cnt)
 		{
 			// Attach it to that one component.
-			get_connected_components(vars, {opt}, components, component_vars);
+			get_connected_components(vars, {opt}, parts);
 		}
 
 		// else `(1 < cnt)` and its a bridge. Do nothing.

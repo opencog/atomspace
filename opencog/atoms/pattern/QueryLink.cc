@@ -120,7 +120,7 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	 * in the URE, for doing disconnected searches.
 	 */
 	bool do_conn_check = false;
-	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
+	if (do_conn_check and 0 == _virtual.size() and 1 < _parts.size())
 		throw InvalidParamException(TRACE_INFO,
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");

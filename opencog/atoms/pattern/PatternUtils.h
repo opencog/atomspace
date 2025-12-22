@@ -54,14 +54,12 @@ bool is_black_box(const Handle& clause);
 // See C file for description
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
-                              HandleSeqSeq& compset,
-                              HandleSetSeq& compvars);
+                              PartsSeq& parts);
 
 void get_bridged_components(const HandleSet& vars,
                             const PatternTermSeq& clauses,
                             const PatternTermSeq& opts,
-                            HandleSeqSeq& compset,
-                            HandleSetSeq& compvars);
+                            PartsSeq& parts);
 
 } // namespace opencog
 
