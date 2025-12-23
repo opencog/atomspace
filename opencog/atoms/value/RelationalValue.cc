@@ -46,8 +46,14 @@ void RelationalValue::init_schema(void)
 	_left_shim = createValueShimLink();
 	_right_shim = createValueShimLink();
 
-	// The ExecutionOutputLink provides general machinery that can run
-	// the schema on the pair to be compared.
+	// The ExecutionOutputLink provides us with general machinery
+	// that can run the schema on the pair to be compared. The
+	// only gotcha here is that the shims cannot be placed in any
+	// AtomSpace, and thus theExOutLink can't be, either. So far,
+	// that's OK. There's also an annoying meta-issue: the schema
+	// can't be applied without beta-reduction, which is ...
+	// annoying. But that's the best we can do with the current
+	// architecture. For now.
 	_exout =
 		createLink(HandleSeq({
 			_schema,
@@ -57,7 +63,9 @@ void RelationalValue::init_schema(void)
 				LIST_LINK)}),
 			EXECUTION_OUTPUT_LINK);
 
-	// Scratch space in which temporaries are evaluated.
+	// Scratch space in which temporaries are evaluated. It overlays
+	// the AtomSpace in which the schema lives, and thus the schema has
+	// access to this, to use as context.
 	_scratch = createAtomSpace(_schema->getAtomSpace());
 }
 

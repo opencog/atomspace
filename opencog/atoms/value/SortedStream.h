@@ -24,9 +24,7 @@
 #define _OPENCOG_SORTED_STREAM_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/value/UnisetValue.h>
-#include <opencog/atoms/flow/ValueShimLink.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/RelationalValue.h>
 #include <thread>
 
 namespace opencog
@@ -43,23 +41,15 @@ namespace opencog
  * and must return a crisp bool value, indicating the order.
  */
 class SortedStream
-	: public UnisetValue
+	: public RelationalValue
 {
 protected:
-	// Ordering schema and its evaluation
-	Handle _schema;
-	ValueShimLinkPtr _left_shim;
-	ValueShimLinkPtr _right_shim;
-	Handle _exout;
-	AtomSpacePtr _scratch;
-
 	// Data source, and the thread that pulls from it.
 	LinkValuePtr _source;
 	std::thread _puller;
 	void drain(void);
 	void drainloop(void);
 
-	void init_cmp(void);
 	void init_src(const ValuePtr&);
 
 	virtual void update() const override;
