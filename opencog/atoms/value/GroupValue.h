@@ -53,9 +53,6 @@ namespace opencog
 class GroupValue
 	: public RelationalValue
 {
-protected:
-	bool equivalent(const Value& lhs, const Value& rhs) const;
-
 public:
 	GroupValue(const Handle&);
 	virtual ~GroupValue();

@@ -36,14 +36,6 @@ GroupValue::~GroupValue()
 
 // ==============================================================
 
-// Use the provided schema to test if two values are equivalent.
-bool GroupValue::equivalent(const Value& lhs, const Value& rhs) const
-{
-	return compare(lhs, rhs);
-}
-
-// ==============================================================
-
 void GroupValue::add(const ValuePtr& vp)
 {
 	add(ValuePtr(vp));
@@ -75,7 +67,7 @@ void GroupValue::add(ValuePtr&& vp)
 		ValuePtr rep = uvp->peek();
 		if (nullptr == rep) continue;
 
-		if (equivalent(*vp, *rep))
+		if (compare(*vp, *rep))
 		{
 			uvp->add(std::move(vp));
 			return;
