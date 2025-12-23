@@ -320,7 +320,7 @@ That is, the current code is buggy.
 
 ### Algorithm
 The idea, and the appropriate algorithm can be exposed through a series
-of examples.  Fisrt, consider the pattern where the AlwaysLink is the
+of examples.  First, consider the pattern where the AlwaysLink is the
 only clause:
 ```
     (Always (P X))
@@ -360,7 +360,7 @@ variable `Y`. Here, a potential grounding `gY` of `Y` is acceptable if
 and only if the "contextualized" `gX` all satisfy the predicate. If
 they do, then the `gY` is acceptable; else `gY` must be discarded.
 
-Note that the satsifying set `{gX}` depends on `gY`.
+Note that the satisfying set `{gX}` depends on `gY`.
 
 This suggests several algorithms. One is to proceed with the grounding
 of the clause `(SomeStructure X Y)` as normal. Then, for each candidate
