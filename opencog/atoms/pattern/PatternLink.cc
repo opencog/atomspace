@@ -1063,7 +1063,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 /// Add dummy clauses for patterns that would otherwise not have any
 /// non-evaluatable clauses.  One example of such is
 ///
-///    (GetLink (GreaterThan (Number 42) (Variable $x)))
+///    (MeetLink (GreaterThan (Number 42) (Variable $x)))
 ///
 /// The only clause here is the GreaterThan, and it is virtual
 /// (evaluatable) so we know that in general it cannot be found in
@@ -1078,7 +1078,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 ///
 /// Another example is
 ///
-///    (GetLink (Identical (Variable "$whole") (Implication ...)))
+///    (MeetLink (Identical (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
 /// If the ImplicationLink is suitably simple, it can be added

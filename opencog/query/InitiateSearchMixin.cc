@@ -540,6 +540,7 @@ return legacy_search(pmc);
 	return found;
 }
 
+// XXX currently stubbed out up above, not working ...
 bool InitiateSearchMixin::conjoin_search(PatternMatchCallback& pmc,
                                          const PatternTermSeq& clauses)
 {
