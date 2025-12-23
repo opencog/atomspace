@@ -331,7 +331,7 @@ is determined by the presence of some structure in the AtomSpace:
 One may proceed by grounding the structure first, by finding the set
 `{gX}` of all `gX` for which `(SomeStructure gX)` is present in the
 AtomSpace. More generally, the structure can contain evaluatable terms,
-and so the set is of those `gX` which satsify the structure.
+and so the set is of those `gX` which satisfy the structure.
 
 After this is obtained, one can loop over all `gX` in the set, compute
 `(P gx)` for each, and then accept or reject the entire set `{gX}`
@@ -387,6 +387,20 @@ connecting term between those clauses; thus, it gets a provisional
 grounding before the full set of clauses in `SomeStructure` have been
 fully evaluated.
 
+To give a concrete example:
+```
+    (SomeStructure X Y)
+    (OtherStructure X Z)
+    (Always (P X))
+```
+Here, both `Y` and `Z` act as parameters. But, before `gY` and `gZ` can
+be found, there must be some connecting `cX` that is used to avoid the
+full Cartesian product implied above: but the provisional `cX` might be
+discarded if there are no appropriate `gY` and `gZ`.  That is, when
+`(SomeStructure cX gY)` exists, but `(OtherStructure cX gZ)` does not.
+Such a provisional `cX` is not part of the domain of discourse, and one
+must NOT accidentally evaluate `(P cX)`.
+
 ### Multiple Variables
 Several generalizations to multiple variables are possible. One is
 presumably obvious:
@@ -409,26 +423,24 @@ Here, the AlwaysLink becomes the "virtual", bridging over the
 disconnected components.
 
 ### Connectivity
-The proper algorithm for implementing the search so that the Always
-variables are last seems to require converting the connectivity graph
-into a (partially) directed graph. It is "partially" directed, only to
-the extent that no attempt is made to ground variables appearing in an
-Always clause is made, before *every* other variable is grounded.
-Giving these the names of "early" and "late" variables, the connectivity
-graph must be arranged such there are connectivity paths to all of the
-early variables (so that they can be grounded) that do NOT require the
-path to go through any of the late variables. This does not directly
-constrain the starting point for a search, but the requirement that
-there is a path to all of the early variables might constrain the
-starting points indirectly.
+The above considerations suggest that perhaps the order in which the
+graph crawl is done should be formalized, and computed during the pattern
+analysis stage. That is, some clauses can be grounded before others; the
+crawl can start in some places but not others, and ForAll/Always terms
+should be saved for last.
 
-Maintaining a set of valid search start points seems like a reasonable
-thing to do, even in the absence of the Always constraint. It seems that
-several intermediate orderings are needed. The idea here is that this is
-doen at pattern-analysis time, rather than at query-execution time.
+The pattern analysis code already generates a connectivity graph, but it
+does not encode this ordering information; it is not semi-directed to
+indicate the plausible search order.
+
+Note that a full analysis cannot be made at pattern-compilation time;
+efficient algos start with the "thinnest" Atoms, and the measure of the
+"thickness" is available only at crawl time, and not at compilation
+time.  Thus, a collection of candidate starting points can be
+pre-computed, but the actual starts must be deferred.
 
 Currently, this is implemented in a rather ad-hoc fashion, and is
-performed at query time, not at pattern analysis time. At query time,
+performed at crawl time, not at pattern analysis time. At crawl time,
 the `InitiateSearchMixin::get_next_clause()` method performs this
 determination.
 
@@ -447,5 +459,9 @@ Claude Code; each was a hopeless failure. The complexity of the current
 pattern engine appears to be far beyond what Claude is capable of
 understanding, and the offered solutions were always wildly insane and
 insanely over-complex.  After the first attempt, I focused on
-baby-steps, yet even these were overwhelming.  For now, punt. Maybe
-there's a bug in the current code, but even this is not clear.
+baby-steps, yet even these were overwhelming.  For now, punt.
+
+(N.B. There was an early suggestion that the current code is buggy,
+but perhaps Claude was lying to me about this. It did not offer up any
+actual unit test that actually fails. There may be a bug; but we don't
+know of it, yet.)
