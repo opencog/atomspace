@@ -316,7 +316,8 @@ AlwaysLink might be false.
 This is tested in AlwaysUTest; the test currently passes. However, this
 appears to be accidental, as the algo used depends on the starting
 conditions for the search, on the order in which the search is done.
-That is, the current code is buggy.
+That is, the current code is buggy. I think. I am not so sure any more,
+as I don't have a unit test that clearly fails. Argh.
 
 ### Algorithm
 The idea, and the appropriate algorithm can be exposed through a series
@@ -377,6 +378,15 @@ The more direct variant algorithm is to proceed with the grounding of
 the clause in such a way that `Y` is grounded first. The loop over `X`
 is saved for last; then for each candidate `gX`, the `P` is evaluated.
 
+The difficulty here is in saving the loop over 'X' for last. Instead,
+the currently implemented algorithm appears to save all `gX` that are
+found along the way, and the loop over `(P gX)` is saved up until the
+end. This works, because during the graph crawl, there might be
+tentative `gY` found, and thus, tentative `gX`, which are then discarded
+before it's all over. That is, during graph crawl, there might be "false
+positives", reports of `gX`'s that are not actually in the domain of
+discourse, and therefore must not be tested with `(P X)`.  Ugh.
+
 ### Multiple Variables
 Several generalizations to multiple variables are possible. One is
 presumably obvious:
@@ -414,23 +424,28 @@ starting points indirectly.
 
 Maintaining a set of valid search start points seems like a reasonable
 thing to do, even in the absence of the Always constraint. It seems that
-several intermediate orderings are needed. Currently, this is
-implemented in a rather ad-hoc fashion, in the
-InitiateSearchMixin::get_next_clause() function; this analysis could
-have been done during pattern analysis, i.e. before run-time.
+several intermediate orderings are needed. The idea here is that this is
+doen at pattern-analysis time, rather than at query-execution time.
 
-The de-facto implementation uses InitiateSearchMixin::get_clause_list()
+Currently, this is implemented in a rather ad-hoc fashion, and is
+performed at query time, not at pattern analysis time. At query time,
+the `InitiateSearchMixin::get_next_clause()` method performs this
+determination.
+
+The de-facto implementation uses `InitiateSearchMixin::get_clause_list()`
 to return a starting set of clauses to be grounded; these are the
-mandatory clauses in the commo case. The next clause to ground is
-set up by InitiateSearchMixin::next_connections() and this appears to
-hold off the AlwaysLinks until last, from what I can tell.  This is
-called by PatternMatchEngine::do_next_clause() which then calls
-PatternMatchEngine::explore_clause() which calls explore_clause_always()
-which is the right location where to perform this check.
+mandatory clauses in the common case. The next clause to ground is
+set up by `InitiateSearchMixin::next_connections()` This is called by
+`PatternMatchEngine::do_next_clause()` which then calls
+`PatternMatchEngine::explore_clause()`. This could be a good place
+to implement an `explore_clause_always()` method, if it can be
+guaranteed that there will be no false positives (no false reports of
+membership in the domain of discourse).
 
-The above logic is carried out at time of query. I made three attempts
-at moving/converting the above logic into the pattern analysis stage;
-all were failures. Basically, Claude got tangled up; the pattern engine
-is too complicated for it to grok, and I could not write the needed
-prompts. But it's also not clear that there is much of a savings from
-doing the analysis early.
+I made five distinct attempts to reform, rewrite, rework the above using
+Claude Code; each was a hopeless failure. The complexity of the current
+pattern engine appears to be far beyond what Claude is capable of
+understanding, and the offered solutions were always wildly insane and
+insanely over-complex.  After the first attempt, I focused on
+baby-steps, yet even these were overwhelming.  For now, punt. Maybe
+there's a bug in the current code, but even this is not clear.

@@ -3079,23 +3079,6 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 }
 
 /**
- * Explore a clause that is an AlwaysLink. Such clauses wrap evaluatable
- * predicates which must evaluate to true for every possible grounding
- * of the variables that they contain. Thus, an exhaustive search must
- * be made of those groundings, before continuing.
- */
-bool PatternMatchEngine::explore_clause_always(const PatternTermPtr& term,
-                                               const Handle& grnd,
-                                               const PatternTermPtr& pclause)
-{
-	if (not pclause->hasAnyEvaluatable())
-		return explore_clause_cacheable(term, grnd, pclause);
-
-	// XXX FIXME just a stub, right now. i.e. broken.
-	return explore_clause_evaluatable(term, grnd, pclause);
-}
-
-/**
  * Same as explore_clause_direct, but looks at the cache of pre-grounded
  * clauses, first. This saves some CPU time for certain patterns that
  * have repeated re-explorations of clauses. An example pattern is given
@@ -3165,10 +3148,6 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	// hasAnyEvaluatable() since ExclusiveLink also triggers that flag.
 	if (pclause->isExclusive())
 		return explore_clause_direct(term, grnd, pclause);
-
-	// Always clauses mst be exhaustively explored, before continuing.
-	if (pclause->isAlways())
-		return explore_clause_always(term, grnd, pclause);
 
 	// Evaluatable clauses are not cacheable.
 	if (pclause->hasAnyEvaluatable())
