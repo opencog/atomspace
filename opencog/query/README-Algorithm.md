@@ -418,3 +418,19 @@ several intermediate orderings are needed. Currently, this is
 implemented in a rather ad-hoc fashion, in the
 InitiateSearchMixin::get_next_clause() function; this analysis could
 have been done during pattern analysis, i.e. before run-time.
+
+The de-facto implementation uses InitiateSearchMixin::get_clause_list()
+to return a starting set of clauses to be grounded; these are the
+mandatory clauses in the commo case. The next clause to ground is
+set up by InitiateSearchMixin::next_connections() and this appears to
+hold off the AlwaysLinks until last, from what I can tell.  This is
+called by PatternMatchEngine::do_next_clause() which then calls
+PatternMatchEngine::explore_clause() which calls explore_clause_always()
+which is the right location where to perform this check.
+
+The above logic is carried out at time of query. I made three attempts
+at moving/converting the above logic into the pattern analysis stage;
+all were failures. Basically, Claude got tangled up; the pattern engine
+is too complicated for it to grok, and I could not write the needed
+prompts. But it's also not clear that there is much of a savings from
+doing the analysis early.
