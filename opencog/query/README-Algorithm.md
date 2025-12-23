@@ -368,43 +368,32 @@ of the clause `(SomeStructure X Y)` as normal. Then, for each candidate
 `(SomeStructure X gY)` is constructed, and then a loop exploration of
 this parameterized clause is performed (evaluating `P` on each result).
 
-A variant algorithm is to proceed with the grounding of the clause in
-such a way that `Y` is grounded first. The loop over `X` is saved for
-last; then for each candidate `gX`, the `P` is evaluated.
+Implementing the above is remarkably hard for the current query engine:
+First, it is hard to "forget" `gX`, and second, it requires finding a
+"starting point" for the search, which is not available at this point
+(it's in the InitiateSearch mixin.)
 
+The more direct variant algorithm is to proceed with the grounding of
+the clause in such a way that `Y` is grounded first. The loop over `X`
+is saved for last; then for each candidate `gX`, the `P` is evaluated.
 
----------
-
-Suppose that
-all groundings `Y` that satisfy this. Let's say that `gY`. Then, with
-this fixed `gY`, a search is performed for `(SomeStructure uX gY)`,
-iterating over all possible unknowns `uX`. If there exists a `uX` for
-which `(P uX)` is false, then this search branch is unwound, since the
-Always clause cannot hold for this `gX`. If there are no such `uX`,
-then the grounding (X=gX, Y=gY) is reported. The search proceeds,
-looping over all possible groundings `gX`, until they are all accepted,
-or are all rejected.
-
-
-The only problem with the algo above, as naively written, is that it
-is inapporpriate to start by looping over "all possible X" and then
-testing `(P X)` on each. The problem is that "all possible X" means
-every Atom in the AtomSpace would need to be considered as X; clearly
-a wasteful and inefficient approach. Instead, the search should proceed
-by "as normal", finding groundings `(SomeStructure cX cY)`, for
-candidates `(X=cX, Y=cY)`. Then, seting aside `cX`, we have a partially
-grounded pattern, `(SomeStructure uX cY)`, which allows looping over
-all `uX`. This loop then checks `(P uX)` and unwinds if ther exists
-some `uX` for which this is false. Thus, the existing logic for
-initiating efficient searches is kept; the only change is to make a
-second pass, a second loop, walking over all `uX`.
-
-The generalization to multiple variables is presumably obvious:
+### Multiple Variables
+Several generalizations to multiple variables are possible. One is
+presumably obvious:
 ```
     (SomeStructure X1 X2 ... Y1 Y2 ...)
     (Always (P1 X1))
     (Always (P2 X2))
     ...
 ```
-so that `SomeStructure` is grounded first, and then nested loops make
+Here `SomeStructure` is grounded first, and then nested loops make
 a pass over each AlwaysLink.
+
+Difficulties arise for disconnected components:
+```
+    (SomeStructure X1 ... Y1 ...)
+    (OtherStructure X3 ... Y3 ...)
+    (Always (P1 X1 X3))
+```
+Here, the AlwaysLink becomes the "virtual", bridging over the
+disconnected components.
