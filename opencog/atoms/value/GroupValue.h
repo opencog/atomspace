@@ -22,9 +22,7 @@
 #define _OPENCOG_GROUP_VALUE_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/value/UnisetValue.h>
-#include <opencog/atoms/flow/ValueShimLink.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/RelationalValue.h>
 
 namespace opencog
 {
@@ -53,17 +51,9 @@ namespace opencog
  * added up until it is closed.
  */
 class GroupValue
-	: public UnisetValue
+	: public RelationalValue
 {
 protected:
-	// Equivalence schema and its evaluation
-	Handle _schema;
-	ValueShimLinkPtr _left_shim;
-	ValueShimLinkPtr _right_shim;
-	Handle _exout;
-	AtomSpacePtr _scratch;
-
-	void init_equiv(void);
 	bool equivalent(const Value& lhs, const Value& rhs) const;
 
 public:
