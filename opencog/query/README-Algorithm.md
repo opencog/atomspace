@@ -308,50 +308,50 @@ interpretation is "for all" or "always the case". This is a predicate
 that must evaluate to true for all possible contextualized groundings
 for that predicate, within the context of the search.
 
-When a query contains the AlwaysLink, the search results are limited to
-those for which there are no possible groundings where the predicate in
-AlwaysLink might be false.
-
-### Bugs
-This is tested in AlwaysUTest; the test currently passes. However, this
-appears to be accidental, as the algo used depends on the starting
-conditions for the search, on the order in which the search is done.
-That is, the current code is buggy. I think. I am not so sure any more,
-as I don't have a unit test that clearly fails. Argh.
-
-### Algorithm
-The idea, and the appropriate algorithm can be exposed through a series
-of examples.  First, consider the pattern where the AlwaysLink is the
-only clause:
 ```
     (Always (P X))
 ```
-In this case, all possible groundings gX for X are considered; if there
-exists any gX for which `(P gX)` is false, then this pattern is not
-satisfiable, and the query returns the empty set.  If `(P gX)` is true
-for all `gX`, then the query returns the set of all of these `gX`.
+The above can be read as "for all `X`, `(P X)` is true".
 
-In practice, the above is not actually satisfiable as written in this
-naive form: the "universe of discourse" for `gX` will be the entire
-AtomSpace, and surely there will be some `gX` for which `(P gX)` is
-false. Thus the AlwaysLink is useful only when the domain if discourse
-is limited in some way. This is done with a pattern of the form
+When a pattern contains the AlwaysLink, the variable `X` ranges over the
+"domain of discourse" for the search: over all `X` that are allowed by
+the other clauses in the query. The interpretation then becomes that the
+pattern is satisfiable if and only if `(P X)` is true for all groundings
+of `X` that occur in the query; else the pattern is not satisfiable and
+returns no results.
+
+### Algorithms
+The idea, and appropriate algorithms, can be exposed through a series
+of examples.  First, consider a pattern where the domain of discourse
+is determined by the presence of some structure in the AtomSpace:
 ```
     (SomeStructure X)
     (Always (P X))
 ```
-The domain of discourse is then the set of `gX` for which
-`(SomeStructure gX)` is present in the AtomSpace. If `(P gX)` is true
-for all of these `gX`, then the full set of `gX` can be returned; else
-the query result is the empty set.
+One may proceed by grounding the structure first, by finding the set
+`{gX}` of all `gX` for which `(SomeStructure gX)` is present in the
+AtomSpace. More generally, the structure can contain evaluatable terms,
+and so the set is of those `gX` which satsify the structure.
 
-There are two algos for the above. The naive algo is to obtain the set
-`{gX}` first, and then, as a post-processing stage, evaluate `P` on each
-member. A more sophisticated algo is to evaluate `P` as each candidate
-`gX` dribbles in, so that the search can be terminated early if one of
-them evaluates to false.
+After this is obtained, one can loop over all `gX` in the set, compute
+`(P gx)` for each, and then accept or reject the entire set `{gX}`
+depending on whether or not they are all true. This has the form of a
+post-processing step: the entire set `{gX}` is obtained before any of
+the `(P gX)` are evaluated.
 
-A more interesting variant arises when the search pattern has the form
+Clearly it seems that perhaps early termination should be possible: as
+the `gX` dribble in, each can be tested, and the query can be terminated
+early when the first false `(P gX)` is observed. This sounds like the
+right thing to do in principle. In practice, the pattern `SomeStructure`
+can be so complicated that there are provisional groundings `gX` that
+float around early on, and are later discarded. The trick is then to
+sample sufficiently late in the grounding algorithm such that there are
+no such stray false members of the domain of discourse. Finding this
+sampling point is difficult, given the current rather ad-hoc structure
+of the grounding algorithm.  Thus, below, some alternatives are
+considered.
+
+An interesting variant arises when the search pattern has the form
 ```
     (SomeStructure X Y)
     (Always (P X))
@@ -361,31 +361,31 @@ variable `Y`. Here, a potential grounding `gY` of `Y` is acceptable if
 and only if the "contextualized" `gX` all satisfy the predicate. If
 they do, then the `gY` is acceptable; else `gY` must be discarded.
 
-Note that the satisfying set `{gX}` depends on `gY`.
+That is, the satisfying set `{gX}` depends on `gY` (is parameterized
+by `gY`.)
 
 This suggests several algorithms. One is to proceed with the grounding
 of the clause `(SomeStructure X Y)` as normal. Then, for each candidate
-`(X := gX, Y:= gY)`, the value of `gX` is ignored/discarded, the clause
-`(SomeStructure X gY)` is constructed, and then a loop exploration of
-this parameterized clause is performed (evaluating `P` on each result).
+`(X := gX, Y:= gY)`, the value of `gX` is ignored/discarded, the (new)
+clause `(SomeStructure X gY)` is constructed, and then a grounding loop
+of this parameterized clause is performed (evaluating `P` on each result).
 
 Implementing the above is remarkably hard for the current query engine:
 First, it is hard to "forget" `gX`, and second, it requires finding a
-"starting point" for the search, which is not available at this point
-(it's in the InitiateSearch mixin.)
+"starting point" for the search, which is not generally available late
+in the game (it's in the InitiateSearch mixin.)
 
 The more direct variant algorithm is to proceed with the grounding of
 the clause in such a way that `Y` is grounded first. The loop over `X`
 is saved for last; then for each candidate `gX`, the `P` is evaluated.
 
-The difficulty here is in saving the loop over 'X' for last. Instead,
-the currently implemented algorithm appears to save all `gX` that are
-found along the way, and the loop over `(P gX)` is saved up until the
-end. This works, because during the graph crawl, there might be
-tentative `gY` found, and thus, tentative `gX`, which are then discarded
-before it's all over. That is, during graph crawl, there might be "false
-positives", reports of `gX`'s that are not actually in the domain of
-discourse, and therefore must not be tested with `(P X)`.  Ugh.
+The difficulty here is in saving the loop over 'X' for last. The
+expressions for `X` can be sufficiently tangled into `SomeStructure`
+that candidates `gX` are offered up, that are later discarded. This
+can happen when `X` appears in multiple clauses, and is the only common,
+connecting term between those clauses; thus, it gets a provisional
+grounding before the full set of clauses in `SomeStructure` have been
+fully evaluated.
 
 ### Multiple Variables
 Several generalizations to multiple variables are possible. One is
