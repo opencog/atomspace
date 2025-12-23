@@ -397,3 +397,20 @@ Difficulties arise for disconnected components:
 ```
 Here, the AlwaysLink becomes the "virtual", bridging over the
 disconnected components.
+
+### Connectivity
+The proper algorithm for implementing the search so that the Always
+variables are last seems to require converting the connectivity graph
+into a (partially) directed graph. It is "partially" directed, only to
+the extent that no attempt is made to ground variables appearing in an
+Always clause is made, before *every* other variable is grounded.
+Giving these the names of "early" and "late" variables, the connectivity
+graph must be arranged such there are connectivity paths to all of the
+early variables (so that they can be grounded) that do NOT require the
+path to go through any of the late variables. This does not directly
+constrain the starting point for a search, but the requirement that
+there is a path to all of the early variables might constrain the
+starting points indirectly.
+
+Maintaining a set of valid search start points seems like a reasonable
+thing to do, even in the absence of the Always constraint.
