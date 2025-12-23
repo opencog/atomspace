@@ -413,4 +413,8 @@ there is a path to all of the early variables might constrain the
 starting points indirectly.
 
 Maintaining a set of valid search start points seems like a reasonable
-thing to do, even in the absence of the Always constraint.
+thing to do, even in the absence of the Always constraint. It seems that
+several intermediate orderings are needed. Currently, this is
+implemented in a rather ad-hoc fashion, in the
+InitiateSearchMixin::get_next_clause() function; this analysis could
+have been done during pattern analysis, i.e. before run-time.
