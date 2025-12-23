@@ -3088,11 +3088,11 @@ bool PatternMatchEngine::explore_clause_always(const PatternTermPtr& term,
                                                const Handle& grnd,
                                                const PatternTermPtr& pclause)
 {
-	// XXX FIXME just a stub, right now. i.e. broken.
-	if (pclause->hasAnyEvaluatable())
-		return explore_clause_evaluatable(term, grnd, pclause);
+	if (not pclause->hasAnyEvaluatable())
+		return explore_clause_cacheable(term, grnd, pclause);
 
-	return explore_clause_cacheable(term, grnd, pclause);
+	// XXX FIXME just a stub, right now. i.e. broken.
+	return explore_clause_evaluatable(term, grnd, pclause);
 }
 
 /**
