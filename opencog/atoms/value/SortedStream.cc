@@ -210,8 +210,7 @@ void SortedStream::drain(void)
 /// or an empty LinkValue, the stream closes.
 void SortedStream::add(const ValuePtr& vp)
 {
-	if ((vp->get_type() == VOID_VALUE) or
-	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
+	if (0 == vp->size())
 	{
 		close();
 		return;
@@ -223,8 +222,7 @@ void SortedStream::add(const ValuePtr& vp)
 
 void SortedStream::add(ValuePtr&& vp)
 {
-	if ((vp->get_type() == VOID_VALUE) or
-	    (vp->is_type(LINK_VALUE) and 0 == vp->size()))
+	if (0 == vp->size())
 	{
 		close();
 		return;
