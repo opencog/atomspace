@@ -340,11 +340,11 @@ DRAIN_VALUE <- CONTAINER_VALUE
 
 The Sigs partly solve some of the issues. All Values have always been
 explicitly time-varying. The BLOCKING_SIG and STREAMING_SIG indicate
-two different kinds of behaviors. The ContainerValue explcitly adds
+two different kinds of behaviors. The ContainerValue explicitly adds
 thread-safe container manipulation functions. These can now be grouped
 according to these two sigs.
 
-Note that the distinction betweem STREAM_VALUE vs. LINK_VALUE has been
+Note that the distinction between STREAM_VALUE vs. LINK_VALUE has been
 baked into sensory already, and elsewhere. The reasoning may have been
 backwards: what was really needed was a LinkValue that truly was a
 "constant" and thus could behave like a conventional OO struct.
@@ -379,14 +379,33 @@ We seem to have multiple ideas, but its not clear how to combine them:
 * MeetLink streams, until it is done, and then it signals being done by
   closing.
 * The Uni/Group/Sorts are hoarders.
-* Hoarders work best if the try to drain the upstream, and block/hold
+* Hoarders work "best" if the try to drain the upstream, and block/hold
   off the downstream.
 * Hoarders can be streamers; as long as they are open, they can block if
   empty.
 * Streaming and BlockingSig do seem incompatbile: both block, but in
   different places, for different reasnos.
+* It only makes sense to be a BlockerSig if upstream is known to be
+  finite; otherwise, low/high-watermark management is required (and is
+  currently implemented in SortedStream.)
 
 TODO: Implement DrainValue ...
+
+### Mixins
+The above seem to be a collection of conflicting operational
+requirements, which can be re-arranged in dozens of different
+mix-n-match scenarios. The can be rolled up, hard-coded all-in-one
+classes, like the current SortedStream, or modularized into Atomese
+pieces that are assembled using ... Atomese.
+
+Which raises issues of syntax. We need hoarders and streamers and
+blockers and hi/lo container managers. Combining these as
+multi-inherited c++ classes is not just unworkable in the long run,
+it is already generating issues and problems in the present.
+The bullet points above seem to describe a collection of mixins;
+desirable aspects that are naturally combinable; but we have no Atomese
+syntax for mixins.
+
 
 ObjectNodes
 -----------
