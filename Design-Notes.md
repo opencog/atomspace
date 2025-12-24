@@ -427,6 +427,13 @@ a proxy for for whatever it is wrapping.
 ```
 Provides the streaming semantics for SortedValue. Ummm...
 
+I'm confused ... this starts resembling the chaining of stream
+processing filters, except that it's done ... differently. Adding to
+the confusion is that the current design for chaining filters is
+awkward, confusing, verbose (as they go through anchor points).
+So it seems what we really want is a better way of describing and
+assembling streams.
+
 
 ObjectNodes
 -----------
