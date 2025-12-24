@@ -323,7 +323,7 @@ one at a time. So the conversion ContainerValue->Stream is solved by
 FlatStream.
 
 Going the other way is unsolved, but easy: similar to DrainLink we
-have DrainValue inherits from ContainerValue, polls forever, bloocking
+have DrainValue inherits from ContainerValue, polls forever, blocking
 until it gets a VoidValue, and then it unblocks and returns the big
 gulp.
 
@@ -357,6 +357,34 @@ not; they're just "constant".
 The above arguments suggest that SortedStream should be simplified into
 a SortedValue, and that FlatStream should do the heavy lifting of
 turning contents into a true stream.
+
+### DrainValue
+The above paints a simple picture of DrainValue: it is a container that
+polls forever, and closes only when the input source closes. But I'm
+confused:
+* The above describes blocking semantics. But it could stream, just
+  fine; there's no particular reason for it to block...
+* The current SortedStream implements draining; Can this be removed and
+  replaced by DrainValue? How?
+* The natural mode for Uniset, GroupValue and SortedStream is to "hoard"
+  -- to collect as much as possible to deduplicate, group or sort.
+  So these should be characterized as being "drainers". The idea of
+  "blocking" is a stand-in for their wanting to be hoarders.
+* By contrast, QueueValue, nominally blocking, really doesn't care.
+  It has no reason to hoard. The QueueValue could be (should be) a
+  streamer...
+* Perhaps the idea of BlockingSig is the incorrect abstraction?
+
+We seem to have multiple ideas, but its not clear how to combine them:
+* MeetLink streams, until it is done, and then it signals being done by
+  closing.
+* The Uni/Group/Sorts are hoarders.
+* Hoarders work best if the try to drain the upstream, and block/hold
+  off the downstream.
+* Hoarders can be streamers; as long as they are open, they can block if
+  empty.
+* Streaming and BlockingSig do seem incompatbile: both block, but in
+  different places, for different reasnos.
 
 TODO: Implement DrainValue ...
 
