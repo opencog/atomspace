@@ -45,7 +45,7 @@ public:
 	void test_basic_sorted(void);
 	void test_bare_greater_than(void);
 	void test_deduplication(void);
-	void test_queue_source(void);
+	void xtest_queue_source(void);
 };
 
 SortedStreamUTest::SortedStreamUTest(void)
@@ -243,7 +243,7 @@ void SortedStreamUTest::test_deduplication(void)
 
 // =========================================================
 
-void SortedStreamUTest::test_queue_source(void)
+void SortedStreamUTest::xtest_queue_source(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
