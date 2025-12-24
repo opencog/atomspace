@@ -157,7 +157,7 @@ void SortedStream::drain(void) const
 	// If we are here, we've got a container ... It needs to be drained
 	// one at a time.
 	ContainerValuePtr cvp = ContainerValueCast(_source);
-	while (0 < cvp->size() or not cvp->is_closed())
+	while (0 < cvp->size() or cvp->is_closed())
 	{
 #if IS_THIS_NEEDED
 		ValuePtr vp;
