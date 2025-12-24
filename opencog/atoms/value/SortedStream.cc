@@ -131,6 +131,8 @@ void SortedStream::init_src(const ValuePtr& src)
 
 void SortedStream::drain(void) const
 {
+	if (nullptr == _source) return;
+
 	// Plain streams are easy. Just sample and go.
 	if (not _source->is_type(CONTAINER_VALUE))
 	{
@@ -236,7 +238,7 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 void SortedStream::update() const
 {
 	// Get the latest from upstream.
-	if (_source) drain();
+	drain();
 
 	// Try to grabl one item from the set.
 	ValuePtr val;
@@ -269,6 +271,12 @@ void SortedStream::update() const
 	// If we are here, the queue closed, with nothing in it.
 	// So this is end-of-stream, again.
 	_value.clear();
+}
+
+ValuePtr SortedStream::remove(void)
+{
+	drain();
+	return RelationalValue::remove();
 }
 
 // ==============================================================
