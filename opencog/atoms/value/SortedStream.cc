@@ -99,7 +99,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not src->is_type(STREAMING_SIG) and
+	if (not src->is_type(CONTAINER_VALUE) and
+	    not src->is_type(STREAMING_SIG) and
 	    not src->is_type(HOARDING_SIG))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
