@@ -22,9 +22,7 @@
 
 #include <opencog/atoms/value/SortedStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
-#include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/oc_assert.h>
 
 using namespace opencog;
@@ -32,19 +30,15 @@ using namespace opencog;
 // ==============================================================
 
 SortedStream::SortedStream(const Handle& h)
-	: UnisetValue(SORTED_STREAM), _schema(h), _source(nullptr)
+	: RelationalValue(SORTED_STREAM, h), _source(nullptr)
 {
-	init_cmp();
 }
 
 SortedStream::SortedStream(const HandleSeq& hs)
-	: UnisetValue(SORTED_STREAM), _source(nullptr)
+	: RelationalValue(SORTED_STREAM, hs.at(0)), _source(nullptr)
 {
 	if (2 != hs.size())
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
-
-	_schema = hs[0];
-	init_cmp();
 
 	if (hs[1]->is_executable())
 		init_src(hs[1]->execute());
@@ -57,15 +51,12 @@ SortedStream::SortedStream(const HandleSeq& hs)
 // but twiddling this is a hassle, so not doing that right now.
 // XXX FIXME maybe fix the factory, some day.
 SortedStream::SortedStream(const ValueSeq& vsq)
-	: UnisetValue(SORTED_STREAM), _source(nullptr)
+	: RelationalValue(SORTED_STREAM, HandleCast(vsq.at(0))), _source(nullptr)
 {
 	if (2 != vsq.size() or
 	    (not vsq[0]->is_atom()) or
 	    (not vsq[1]->is_atom()))
 		throw SyntaxException(TRACE_INFO, "Expecting two handles!");
-
-	_schema = HandleCast(vsq[0]);
-	init_cmp();
 
 	Handle src = HandleCast(vsq[1]);
 	if (src->is_executable())
@@ -81,40 +72,6 @@ SortedStream::~SortedStream()
 
 	if (_source)
 		_puller.join();
-}
-
-// ==============================================================
-
-// Set up the compare op by wrapping the given relation in
-// an ExecutionOutputLink, fed by a pair of ValueShims that
-// will pass the Values into the relation.
-void SortedStream::init_cmp(void)
-{
-	// ValueShims for left and right comparison arguments
-	_left_shim = createValueShimLink();
-	_right_shim = createValueShimLink();
-
-	// The ExecutionOutputLink provides us with general machinery
-	// that can run the schema on the pair to be compared. The
-	// only gotcha here is that the shims cannot be placed in any
-	// AtomSpace, and thus theExOutLink can't be, either. So far,
-	// That's OK. There's also an annoying meta-issue: the schema
-	// can't be applied without beta-reduction, which is ...
-	// annoying. But that's the best we can do with the current
-	// architecture. For now.
-	_exout =
-		createLink(HandleSeq({
-			_schema,
-			createLink(HandleSeq({
-				HandleCast(_left_shim),
-				HandleCast(_right_shim)}),
-				LIST_LINK)}),
-			EXECUTION_OUTPUT_LINK);
-
-	// Scratch space in which temporaries are evaluated. This
-	// overlays the AtomSpace in which the schema sits, and thus,
-	// the schema can use this for context.
-	_scratch = createAtomSpace(_schema->getAtomSpace());
 }
 
 // ==============================================================
@@ -282,11 +239,7 @@ void SortedStream::add(ValuePtr&& vp)
 // Use the provided schema to perform pair-wise compare.
 bool SortedStream::less(const Value& lhs, const Value& rhs) const
 {
-	// Ugly casts. But so it goes.
-	_left_shim->set_value(ValuePtr(const_cast<Value*>(&lhs), [](Value*){}));
-	_right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
-
-	return _exout->bevaluate(_scratch.get());
+	return compare(lhs, rhs);
 }
 
 // ==============================================================

@@ -244,14 +244,18 @@ QUEUE_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 // Note that 'SET_VALUE' already taken by SET_VALUE_LINK
 UNISET_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
 
+// A thread-safe container supporting a pair-wise relation abstraction,
+// providing a base class for containers where a relation is used to
+// provide grouping (GroupValue) or ordering (SortValue).
+RELATIONAL_VALUE <- UNISET_VALUE, BLOCKING_SIG, HANDLE_ARG
+
 // A thread-safe set of buckets, with each bucket containing an
 // equivalence class of elements. Equivalence is determined by the
 // provided lambda arg. The buckets are themselves UnisetValues.
-GROUP_VALUE <- UNISET_VALUE, BLOCKING_SIG, HANDLE_ARG
+GROUP_VALUE <- RELATIONAL_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
-// Inherits from UnisetValue to minimize c++ duplication.
-SORTED_STREAM <- UNISET_VALUE, STREAMING_SIG, HANDLE_ARG, HANDLE_VEC_ARG
+SORTED_STREAM <- RELATIONAL_VALUE, STREAMING_SIG, HANDLE_VEC_ARG
 
 // Convert calls to `LinkValue::value()` into calls to
 // `Atom::execute()`. Conversion is one-to-one: each touch

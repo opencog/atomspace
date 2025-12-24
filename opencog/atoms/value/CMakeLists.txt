@@ -13,6 +13,7 @@ ADD_LIBRARY (value
 	LinkValue.cc
 	QueueValue.cc
 	RandomStream.cc
+	RelationalValue.cc
 	SectionValue.cc
 	SortedStream.cc
 	StringValue.cc
@@ -45,6 +46,7 @@ INSTALL (FILES
 	LinkValue.h
 	QueueValue.h
 	RandomStream.h
+	RelationalValue.h
 	SectionValue.h
 	SortedStream.h
 	StringValue.h
