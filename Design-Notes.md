@@ -376,6 +376,7 @@ confused:
   It has no reason to hoard. The QueueValue could be (should be) a
   streamer...
 * Perhaps the idea of BlockingSig is the incorrect abstraction?
+  (Solution: rename to HoardingSig)
 
 We seem to have multiple ideas, but its not clear how to combine them:
 * MeetLink streams, until it is done, and then it signals being done by
@@ -385,11 +386,16 @@ We seem to have multiple ideas, but its not clear how to combine them:
   off the downstream.
 * Hoarders can be streamers; as long as they are open, they can block if
   empty.
-* Streaming and BlockingSig do seem incompatbile: both block, but in
+* Streaming and HoardingSig do seem incompatbile: both block, but in
   different places, for different reasnos.
-* It only makes sense to be a BlockerSig if upstream is known to be
+* It only makes sense to be a HoardingSig if upstream is known to be
   finite; otherwise, low/high-watermark management is required (and is
   currently implemented in SortedStream.)
+
+But what problem does the DrainValue actually solve? Certainly, the
+SortedStream does not have to eagerly pull in a distinct thread; it can
+pull lazily. That is, when polled, it can try-get from upstream. If it
+finds something, it pulls that and places it into order.
 
 TODO: Implement DrainValue ...
 
