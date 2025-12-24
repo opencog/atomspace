@@ -58,7 +58,7 @@ protected:
 		}
 	};
 
-	concurrent_set<ValuePtr, ValueComp> _set;
+	mutable concurrent_set<ValuePtr, ValueComp> _set;
 
 	UnisetValue(Type t) : ContainerValue(t), _set(ValueComp(this)) {}
 	virtual void update() const override;

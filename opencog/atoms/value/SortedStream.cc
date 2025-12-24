@@ -69,9 +69,6 @@ SortedStream::~SortedStream()
 {
 	if (not is_closed())
 		close();
-
-	if (_source)
-		_puller.join();
 }
 
 // ==============================================================
@@ -102,7 +99,8 @@ void SortedStream::init_src(const ValuePtr& src)
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not src->is_type(STREAMING_SIG) and
+	if (not src->is_type(CONTAINER_VALUE) and
+	    not src->is_type(STREAMING_SIG) and
 	    not src->is_type(HOARDING_SIG))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
@@ -124,76 +122,69 @@ void SortedStream::init_src(const ValuePtr& src)
 		return;
 	}
 
-	// If we are here, then the data source is either a plain stream,
-	// or a ContainerValue. These are potentially infinite sources,
-	// and they may block during reading, so we cannot handle them
-	// here. Instead, we create a thread that sits on these, and
-	// attempts to drain them, run them dry, buffering the results in
-	// the set. We cannot perform sorting unless we grab as many elts
-	// as possible.
-	//
-	// However, there is a risk of going crazy and pulling in billions
-	// of values, if upstream supplies them faster than downstream
-	// consumes them. So we set a max size here, and hard code it to
-	// something small-ish.  65K seems ... not unreasonable.
-	// The thread won't be able to add more than HIMARK, and will block
-	// until the size drops below LOMARK.
-#define HIMARK 65536
-#define LOMARK 65536 - 4096
-	_set.set_watermarks(HIMARK, LOMARK);
-
+	// If we are here, then the data source is either a StreamingSig
+	// or a HaoardingSig. These are potentially infinite sources,
+	// they typically block during reading; so we cannot handle them
+	// here. Instead, these will be polled later, during update().
 	_source = LinkValueCast(src);
-	_puller = std::thread(&SortedStream::drain, this);
 }
 
-void SortedStream::drainloop(void)
+void SortedStream::drain(void) const
 {
+	if (nullptr == _source) return;
+
 	// Plain streams are easy. Just sample and go.
 	if (not _source->is_type(CONTAINER_VALUE))
 	{
-		// Infinite drain loop. Each reference to the source stream
-		// will pull some more values out of it. Keep doing this,
-		// forever. ... well, until the source goes empty, denoting
-		// end-of-stream, which means we are done.
-		while (true)
+		// Use source size() as a surrogate to tell us if the source
+		// will block. Pull as much as we can, without blocking.
+		while (0 < _source->size())
 		{
 			ValueSeq vsq = _source->value();
-			if (0 == vsq.size()) return;
 
+			// Zero-sized sequences (e.g. VoidValue) indicate end-of-stream.
+			if (0 == vsq.size())
+			{
+				_set.close();
+				return;
+			}
+
+			// !!??? We flatten here. Is this correct?
 			for (const ValuePtr& vp: vsq)
 				_set.insert(vp);
 		}
+		return;
 	}
 
 	// If we are here, we've got a container ... It needs to be drained
 	// one at a time.
 	ContainerValuePtr cvp = ContainerValueCast(_source);
-	while (true)
+	while (0 < cvp->size() or cvp->is_closed())
 	{
+#if IS_THIS_NEEDED
+		ValuePtr vp;
+		try
+		{
+			vp = cvp->remove();
+		}
+		catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
+		{
+			_set.close(); // We are done; close shop.
+			return;
+		}
+#endif
+
 		ValuePtr vp = cvp->remove();
 
-		// Both VoidValue, and empty ListValue have size zero.
-		if (0 == vp->size()) return;
+		// Zero-sized sequences (e.g. VoidValue) indicate end-of-stream.
+		if (0 == vp->size())
+		{
+			_set.close();
+			return;
+		}
 
 		_set.insert(vp);
 	}
-}
-
-void SortedStream::drain(void)
-{
-	// Internal bug, if this asserts.
-	OC_ASSERT(_source->is_type(STREAMING_SIG) or
-	          _source->is_type(HOARDING_SIG));
-
-	// This should "never happen", but still ... if there's some weird
-	// bug, and the set gets closed, we will catch an exception. In this
-	// case, the jig is up.
-	try
-	{
-		drainloop();
-		_set.close(); // We are done; close shop.
-	}
-	catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e) {}
 }
 
 // ==============================================================
@@ -246,7 +237,10 @@ bool SortedStream::less(const Value& lhs, const Value& rhs) const
 /// If stream is closed, return empty LinkValue
 void SortedStream::update() const
 {
-	// Try to pull one item from the set.
+	// Get the latest from upstream.
+	drain();
+
+	// Try to grabl one item from the set.
 	ValuePtr val;
 	if (const_cast<SortedStream*>(this)->_set.try_get(val))
 	{
@@ -277,6 +271,12 @@ void SortedStream::update() const
 	// If we are here, the queue closed, with nothing in it.
 	// So this is end-of-stream, again.
 	_value.clear();
+}
+
+ValuePtr SortedStream::remove(void)
+{
+	drain();
+	return RelationalValue::remove();
 }
 
 // ==============================================================
