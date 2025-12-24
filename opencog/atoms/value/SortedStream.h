@@ -43,12 +43,6 @@ class SortedStream
 	: public RelationalValue
 {
 protected:
-	// Data source.
-	LinkValuePtr _source;
-	void drain(void) const;
-
-	void init_src(const ValuePtr&);
-
 	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
