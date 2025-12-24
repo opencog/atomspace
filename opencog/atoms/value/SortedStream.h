@@ -25,7 +25,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/value/RelationalValue.h>
-#include <thread>
 
 namespace opencog
 {
@@ -44,11 +43,9 @@ class SortedStream
 	: public RelationalValue
 {
 protected:
-	// Data source, and the thread that pulls from it.
+	// Data source.
 	LinkValuePtr _source;
-	std::thread _puller;
-	void drain(void);
-	void drainloop(void);
+	void drain(void) const;
 
 	void init_src(const ValuePtr&);
 
