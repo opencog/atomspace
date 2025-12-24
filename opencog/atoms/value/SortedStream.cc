@@ -103,7 +103,7 @@ void SortedStream::init_src(const ValuePtr& src)
 
 	// One-shot, non-streaming finite LinkValue
 	if (not src->is_type(STREAMING_SIG) and
-	    not src->is_type(BLOCKING_SIG))
+	    not src->is_type(HOARDING_SIG))
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
 		for (const ValuePtr& vp: vsq)
@@ -183,7 +183,7 @@ void SortedStream::drain(void)
 {
 	// Internal bug, if this asserts.
 	OC_ASSERT(_source->is_type(STREAMING_SIG) or
-	          _source->is_type(BLOCKING_SIG));
+	          _source->is_type(HOARDING_SIG));
 
 	// This should "never happen", but still ... if there's some weird
 	// bug, and the set gets closed, we will catch an exception. In this

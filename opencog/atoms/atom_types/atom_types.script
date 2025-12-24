@@ -180,12 +180,12 @@ CONSTRAINT_SIG <- SIG
 // advantageous to distinguish between Values that are more-or-less
 // constant, and Values that are guaranteed to change. Of the later,
 // there see to be two basic types: those that block and those that
-// stream.  The blockers block until they are closed for input; once
+// stream.  The hoarders block until they are closed for input; once
 // closed, they return their contents in one big lump. By contrast,
 // the streamers deliver content until they are empty, and then they
 // block. When closed, the streamers return an empty value, or
 // VoidValue.
-BLOCKING_SIG <- SIG
+HOARDING_SIG <- SIG
 STREAMING_SIG <- SIG
 
 // ==============================================================
@@ -238,16 +238,16 @@ FORMULA_STREAM <- FLOAT_STREAM, HANDLE_VEC_ARG
 CONTAINER_VALUE <- LINK_VALUE
 
 // A thread-safe FIFO queue of Value sequences.
-QUEUE_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
+QUEUE_VALUE <- CONTAINER_VALUE
 
 // A thread-safe set of Values (uniset; deduplicates multiple entries.)
 // Note that 'SET_VALUE' already taken by SET_VALUE_LINK
-UNISET_VALUE <- CONTAINER_VALUE, BLOCKING_SIG
+UNISET_VALUE <- CONTAINER_VALUE, HOARDING_SIG
 
 // A thread-safe container supporting a pair-wise relation abstraction,
 // providing a base class for containers where a relation is used to
 // provide grouping (GroupValue) or ordering (SortValue).
-RELATIONAL_VALUE <- UNISET_VALUE, BLOCKING_SIG, HANDLE_ARG
+RELATIONAL_VALUE <- UNISET_VALUE, HANDLE_ARG
 
 // A thread-safe set of buckets, with each bucket containing an
 // equivalence class of elements. Equivalence is determined by the

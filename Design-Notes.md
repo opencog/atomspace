@@ -322,6 +322,8 @@ FlatStream will accept a ContainerValue and dole out elements from it
 one at a time. So the conversion ContainerValue->Stream is solved by
 FlatStream.
 
+(This is a bit glib; will it actually work for SortedValue?)
+
 Going the other way is unsolved, but easy: similar to DrainLink we
 have DrainValue inherits from ContainerValue, polls forever, blocking
 until it gets a VoidValue, and then it unblocks and returns the big
@@ -405,6 +407,19 @@ it is already generating issues and problems in the present.
 The bullet points above seem to describe a collection of mixins;
 desirable aspects that are naturally combinable; but we have no Atomese
 syntax for mixins.
+
+Lets try some random ideas.
+```
+(DrainValue (SortedValue))
+```
+The drainer pulls from upstream, places results into SortedValue.
+Downstream can work with SortedValue directly, or DrainValue can act as
+a proxy for for whatever it is wrapping.
+
+```
+(FlatStream (SortedValue))
+```
+Provides the streaming semantics for SortedValue. Ummm...
 
 
 ObjectNodes
