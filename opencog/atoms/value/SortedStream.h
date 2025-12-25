@@ -43,12 +43,6 @@ class SortedStream
 	: public RelationalValue
 {
 protected:
-	// Data source.
-	LinkValuePtr _source;
-	void drain(void) const;
-
-	void init_src(const ValuePtr&);
-
 	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
@@ -57,12 +51,6 @@ public:
 	SortedStream(const HandleSeq&);
 	SortedStream(const ValueSeq&);
 	virtual ~SortedStream();
-
-	virtual void add(const ValuePtr&) override;
-	virtual void add(ValuePtr&&) override;
-	virtual ValuePtr remove(void) override;
-
-	virtual std::string to_string(const std::string& indent = "") const;
 };
 
 VALUE_PTR_DECL(SortedStream);

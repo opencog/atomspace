@@ -87,7 +87,7 @@ void GroupValue::close(void)
 	// Close all open buckets before closing the stream.
 	for (const ValuePtr& bucket : _set.snapshot())
 		UnisetValueCast(bucket)->close();
-	UnisetValue::close();
+	RelationalValue::close();
 }
 
 // ==============================================================

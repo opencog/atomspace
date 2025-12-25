@@ -83,3 +83,54 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 }
 
 // ==============================================================
+
+// Clear the transient before each use. That way, the base
+// AtomSpace always provides accurate context for the schema.
+// We need to do this only once per add, and not once per
+// less(), There will be, in general log(N) calls to less for
+// a SortedStream of size N. Or so one would hope. But the impl
+// under the covers is std::set<> and it seems to be calling
+// 2x that, because I guess it has no operator==() to work with.
+
+/// Add one item to the stream. If the item is a VoidValue
+/// or an empty LinkValue, the stream closes.
+void RelationalValue::add(const ValuePtr& vp)
+{
+	if (0 == vp->size())
+	{
+		close();
+		return;
+	}
+
+	_scratch->clear();
+	_set.insert(vp);
+}
+
+void RelationalValue::add(ValuePtr&& vp)
+{
+	if (0 == vp->size())
+	{
+		close();
+		return;
+	}
+
+	_scratch->clear();
+	_set.insert(std::move(vp));
+}
+
+// ==============================================================
+
+std::string RelationalValue::to_string(const std::string& indent) const
+{
+	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	rv += "\n";
+	rv += _schema->to_short_string(indent + "   ");
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	rv += ")\n";
+	rv += indent + "; Currently:\n";
+	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
+	return rv;
+}
+
+// ==============================================================

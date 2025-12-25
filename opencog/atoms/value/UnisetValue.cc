@@ -23,13 +23,14 @@
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
+#include <opencog/atoms/base/Link.h>
 
 using namespace opencog;
 
 // ==============================================================
 
 UnisetValue::UnisetValue(const ValueSeq& vseq)
-	: ContainerValue(UNISET_VALUE), _set(ValueComp(this))
+	: ContainerValue(UNISET_VALUE), _set(ValueComp(this)), _source(nullptr)
 {
 	for (const ValuePtr& v: vseq)
 		_set.insert(v);
@@ -114,10 +115,9 @@ void UnisetValue::add(ValuePtr&& vp)
 
 ValuePtr UnisetValue::remove(void)
 {
-#if 0
-	// XXX FIXME ... I don't know if this is correct. It might be.
-	// At any rate, no unit test expects this.
-	//
+	// Grab whatever we can from upstream.
+	drain();
+
 	// The blocking semantics means that after the set closes,
 	// everything is copied from _set to the local _value.
 	// Thus, removals cannot come from _set any longer, they
@@ -125,7 +125,7 @@ ValuePtr UnisetValue::remove(void)
 	if (is_closed())
 	{
 		update();
-		if (0 == size())
+		if (0 == _value.size())
 			return createVoidValue();
 
 		auto front = _value.begin();
@@ -133,7 +133,6 @@ ValuePtr UnisetValue::remove(void)
 		_value.erase(front);
 		return vp;
 	}
-#endif
 
 	// Use try_get first, in case the set is closed.
 	ValuePtr vp;
@@ -166,11 +165,9 @@ ValuePtr UnisetValue::peek(void) const
 
 size_t UnisetValue::size(void) const
 {
+	drain();
 	if (is_closed())
-	{
-		if (0 != _set.size()) update();
-		return _value.size();
-	}
+		return _value.size() + _set.size();
 	return _set.size();
 }
 
@@ -191,6 +188,124 @@ void UnisetValue::clear()
 	_set.close();
 	_set.wait_and_take_all();
 	_set.open();
+}
+
+// ==============================================================
+
+// Set up all finite streams here. Finite streams get copied into the
+// collection once and once only, and that's it. The copy is done one
+// at a time, so that the set relation can be applied as each item is
+// inserted.
+void UnisetValue::init_src(const ValuePtr& src)
+{
+	// Copy Link contents into the collection.
+	if (src->is_type(LINK))
+	{
+		for (const Handle& h: HandleCast(src)->getOutgoingSet())
+			_set.insert(h);
+		_set.close();
+		return;
+	}
+
+	// Everything else is just a collection of size one.
+	// Possible future extensions:
+	// If _source is an ObjectNode, then send *-read-* message ???
+	// If source is a FloatStream or StringStream ... ???
+	if (not src->is_type(LINK_VALUE))
+	{
+		_set.insert(src);
+		_set.close();
+		return;
+	}
+
+	// One-shot, non-streaming finite LinkValue
+	if (not src->is_type(CONTAINER_VALUE) and
+	    not src->is_type(STREAMING_SIG) and
+	    not src->is_type(HOARDING_SIG))
+	{
+		ValueSeq vsq = LinkValueCast(src)->value();
+		for (const ValuePtr& vp: vsq)
+			_set.insert(vp);
+		_set.close();
+		return;
+	}
+
+	// If it's a container, and its closed, then its a finite,
+	// one-shot deal, just like the above.
+	if (src->is_type(CONTAINER_VALUE) and
+	    ContainerValueCast(src)->is_closed())
+	{
+		ValueSeq vsq = LinkValueCast(src)->value();
+		for (const ValuePtr& vp: vsq)
+			_set.insert(vp);
+		_set.close();
+		return;
+	}
+
+	// If we are here, then the data source is either a StreamingSig
+	// or a HoardingSig. These are potentially infinite sources,
+	// they typically block during reading; so we cannot handle them
+	// here. Instead, these will be polled later, by drain().
+	_source = LinkValueCast(src);
+}
+
+void UnisetValue::drain(void) const
+{
+	if (nullptr == _source) return;
+
+	// Plain streams are easy. Just sample and go.
+	if (not _source->is_type(CONTAINER_VALUE))
+	{
+		// Use source size() as a surrogate to tell us if the source
+		// will block. Pull as much as we can, without blocking.
+		while (0 < _source->size())
+		{
+			ValueSeq vsq = _source->value();
+
+			// Zero-sized sequences (e.g. VoidValue) indicate end-of-stream.
+			if (0 == vsq.size())
+			{
+				_set.close();
+				return;
+			}
+
+			// !!??? We flatten here. Is this correct?
+			for (const ValuePtr& vp: vsq)
+				_set.insert(vp);
+		}
+		return;
+	}
+
+	// If we are here, we've got a container ... It needs to be drained
+	// one at a time.
+	ContainerValuePtr cvp = ContainerValueCast(_source);
+	while (0 < cvp->size() or cvp->is_closed())
+	{
+#if IS_THIS_NEEDED
+		ValuePtr vp;
+		try
+		{
+			vp = cvp->remove();
+		}
+		catch (typename concurrent_set<ValuePtr, ValueComp>::Canceled& e)
+		{
+			_set.close(); // We are done; close shop.
+			return;
+		}
+#endif
+
+		ValuePtr vp = cvp->remove();
+
+		// Zero-sized sequences (e.g. VoidValue) indicate end-of-stream.
+		if (0 == vp->size())
+		{
+			if (not _set.is_closed())
+				_set.close();
+			return;
+		}
+
+		_set.insert(vp);
+	}
 }
 
 // ==============================================================
