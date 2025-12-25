@@ -123,6 +123,15 @@ void QueueValue::add(ValuePtr&& vp)
 
 ValuePtr QueueValue::remove(void)
 {
+	// If its already closed, we dequeue Values from the local vector
+	if (0 < _value.size())
+	{
+		auto front = _value.begin();
+		ValuePtr vp(*front);
+		_value.erase(front);
+		return vp;
+	}
+
 	// Use try_get first, in case the queue is closed.
 	ValuePtr vp;
 	if (conq::try_get(vp))

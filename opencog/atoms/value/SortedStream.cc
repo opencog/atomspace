@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/value/SortedStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/util/oc_assert.h>
 
@@ -179,7 +180,8 @@ void SortedStream::drain(void) const
 		// Zero-sized sequences (e.g. VoidValue) indicate end-of-stream.
 		if (0 == vp->size())
 		{
-			_set.close();
+			if (not _set.is_closed())
+				_set.close();
 			return;
 		}
 
@@ -240,7 +242,7 @@ void SortedStream::update() const
 	// Get the latest from upstream.
 	drain();
 
-	// Try to grabl one item from the set.
+	// Try to remove one item from the set.
 	ValuePtr val;
 	if (const_cast<SortedStream*>(this)->_set.try_get(val))
 	{
@@ -275,7 +277,20 @@ void SortedStream::update() const
 
 ValuePtr SortedStream::remove(void)
 {
+	// Grab whatever we can from upstream.
 	drain();
+
+	// If we are closed, then use update() to get one item at a time.
+	// We don't do this when open, because update() will block in this
+	// case.
+	if (is_closed())
+	{
+		update();
+		if (0 == _value.size())
+			return createVoidValue();
+
+		return _value[0];
+	}
 	return RelationalValue::remove();
 }
 
