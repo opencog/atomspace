@@ -118,10 +118,6 @@ ValuePtr UnisetValue::remove(void)
 	// Grab whatever we can from upstream.
 	drain();
 
-#if 1
-	// XXX FIXME ... I don't know if this is correct. It might be.
-	// At any rate, no unit test expects this.
-	//
 	// The blocking semantics means that after the set closes,
 	// everything is copied from _set to the local _value.
 	// Thus, removals cannot come from _set any longer, they
@@ -129,7 +125,7 @@ ValuePtr UnisetValue::remove(void)
 	if (is_closed())
 	{
 		update();
-		if (0 == size())
+		if (0 == _value.size())
 			return createVoidValue();
 
 		auto front = _value.begin();
@@ -137,7 +133,6 @@ ValuePtr UnisetValue::remove(void)
 		_value.erase(front);
 		return vp;
 	}
-#endif
 
 	// Use try_get first, in case the set is closed.
 	ValuePtr vp;

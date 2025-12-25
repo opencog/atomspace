@@ -120,25 +120,6 @@ void SortedStream::update() const
 	_value.clear();
 }
 
-ValuePtr SortedStream::remove(void)
-{
-	// Grab whatever we can from upstream.
-	drain();
-
-	// If we are closed, then use update() to get one item at a time.
-	// We don't do this when open, because update() will block in this
-	// case.
-	if (is_closed())
-	{
-		update();
-		if (0 == _value.size())
-			return createVoidValue();
-
-		return _value[0];
-	}
-	return RelationalValue::remove();
-}
-
 // ==============================================================
 
 // Adds factory when library is loaded.
