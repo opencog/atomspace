@@ -165,11 +165,9 @@ ValuePtr UnisetValue::peek(void) const
 
 size_t UnisetValue::size(void) const
 {
+	drain();
 	if (is_closed())
-	{
-		if (0 != _set.size()) update();
-		return _value.size();
-	}
+		return _value.size() + _set.size();
 	return _set.size();
 }
 
