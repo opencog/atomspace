@@ -68,44 +68,6 @@ SortedStream::SortedStream(const ValueSeq& vsq)
 
 SortedStream::~SortedStream()
 {
-	if (not is_closed())
-		close();
-}
-
-// ==============================================================
-
-// Clear the transient before each use. That way, the base
-// AtomSpace always provides accurate context for the schema.
-// We need to do this only once per add, and not once per
-// less(), There will be, in general log(N) calls to less for
-// a SortedStream of size N. Or so one would hope. But the impl
-// under the covers is std::set<> and it seems to be calling
-// 2x that, because I guess it has no operator==() to work with.
-
-/// Add one item to the stream. If the item is a VoidValue
-/// or an empty LinkValue, the stream closes.
-void SortedStream::add(const ValuePtr& vp)
-{
-	if (0 == vp->size())
-	{
-		close();
-		return;
-	}
-
-	_scratch->clear();
-	_set.insert(vp);
-}
-
-void SortedStream::add(ValuePtr&& vp)
-{
-	if (0 == vp->size())
-	{
-		close();
-		return;
-	}
-
-	_scratch->clear();
-	_set.insert(std::move(vp));
 }
 
 // ==============================================================

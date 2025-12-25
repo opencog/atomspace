@@ -51,9 +51,6 @@ public:
 	SortedStream(const HandleSeq&);
 	SortedStream(const ValueSeq&);
 	virtual ~SortedStream();
-
-	virtual void add(const ValuePtr&) override;
-	virtual void add(ValuePtr&&) override;
 	virtual ValuePtr remove(void) override;
 };
 

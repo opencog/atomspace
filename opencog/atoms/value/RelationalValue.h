@@ -56,6 +56,8 @@ protected:
 public:
 	virtual ~RelationalValue();
 
+	virtual void add(const ValuePtr&) override;
+	virtual void add(ValuePtr&&) override;
 	virtual std::string to_string(const std::string& indent = "") const;
 };
 
