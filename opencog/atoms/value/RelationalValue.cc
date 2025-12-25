@@ -83,3 +83,18 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 }
 
 // ==============================================================
+
+std::string RelationalValue::to_string(const std::string& indent) const
+{
+	std::string rv = indent + "(" + nameserver().getTypeName(_type);
+	rv += "\n";
+	rv += _schema->to_short_string(indent + "   ");
+	if (_source)
+		rv += _source->to_short_string(indent + "   ");
+	rv += ")\n";
+	rv += indent + "; Currently:\n";
+	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
+	return rv;
+}
+
+// ==============================================================

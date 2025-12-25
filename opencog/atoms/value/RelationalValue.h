@@ -53,9 +53,10 @@ protected:
 	bool compare(const Value& lhs, const Value& rhs) const;
 
 	RelationalValue(Type t, const Handle& schema);
-
 public:
 	virtual ~RelationalValue();
+
+	virtual std::string to_string(const std::string& indent = "") const;
 };
 
 VALUE_PTR_DECL(RelationalValue);
