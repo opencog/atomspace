@@ -115,7 +115,10 @@ void UnisetValue::add(ValuePtr&& vp)
 
 ValuePtr UnisetValue::remove(void)
 {
-#if 0
+	// Grab whatever we can from upstream.
+	drain();
+
+#if 1
 	// XXX FIXME ... I don't know if this is correct. It might be.
 	// At any rate, no unit test expects this.
 	//
