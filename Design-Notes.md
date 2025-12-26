@@ -549,6 +549,74 @@ So lets recap the issues:
    type specification got fancy, got lambda-ish, it would start
    resembling a filter.
 
-Assembling Pipelines
-====================
+
+Assembly Theory
+===============
 Start all over again.
+
+So an old idea is that the assembly of parts should work like jigsaw
+pieces.  Each jigsaw connector should have some type description. This
+is some mashup of type theory, ideas from Link Grammar, and ideas like
+introspection from Java or from D-Bus.  That, at least, is the sexy
+idea. The actual practice is anything but -- just a lot of carefully
+designed, hand-built pipelines. I got enough of the idea across that
+Calude could build some of them, but I had to supervise.  There's no
+general assembly mechanism, and this remains far off and unworkable
+despite repeated attempts.  What's going wrong?
+
+Two or three things seem to be desirable:
+* Something other than the use of anchors as attachement points where
+  SetValue and ValueOf can rendevous.
+* Pipelines need to be descriptively ddefined.
+* It would be OK if there was some constructor that performed the actual
+  wiring, given the description. That is, the description itself does
+  not have to be runnable; it just needs to be compilable/assemblable
+  into something that runs ...
+
+There are two meta-goals I have to decouple:
+* The short-medium term issue of making pipelines defacto easier to
+  write, over the coming months. Ideally using some descriptive
+  framework having some OK properties.
+* The long-term goal os self-assembly and recursive algorithmic
+  self-design.
+
+Pipeline Assembly
+-----------------
+So what happened when I wrote `(FlatStream (SortedValue))`?
+* I designed a c++ class called `FlatStream`, whose ctor takes a
+  single Value. It pulls from that Value, by driving it's `update()`
+  method.
+* There is (currently) no external description, although both
+  `FlatStream` and `SortedValue` have SIG's and ARG's that allow them
+  to be attached via the class factory.
+* These SIGs, ARGs and the general type hierarchy is NOT stored in the
+  AtomSpace.
+* Despite things like TypeInhNode, etc. there is no actual way that
+  an Atomese expression can be written to walk/explore/analyze the
+  type ierarchy.
+* There is no definition, either hand-written or auto-generated, that
+  expresses (re-expresses) the SIG/ARG type constrctors/constraints
+  in terms of `Connector`, `ConnectorSeq`, `Section` that we've been
+  giving lip-service to.
+* There is no way to take a description written in terms of Connectors
+  and converting it into an actual assembly like
+  `(FlatStream (SortedValue))`
+
+FWIW, There's the unexplored alternative of hooking these up with
+the existing anchor-point design.
+```
+(cog-execute! (SetValue (Anchor "foo") (Predicate "key")
+	(LinkSignatue (Type 'SortedValue) ...?))
+
+(cog-execute!
+	(LinkSignature (Type 'FlatStream) ...
+		(ValueOf (Anchor "foo") (Predicate "key"))))
+```
+
+* There's no way to convert the anchor point design into a
+  hierarachical design, or back.
+* Any given anchor-point connection is not validated via the SIG
+  mechanism. Invalid anchor-point connections are easily constructed.
+
+Wow. Those are like six really damning design flaws. That I have not
+had to face yet. How did that happen?
