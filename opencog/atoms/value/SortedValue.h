@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/SortedStream.h
+ * opencog/atoms/value/SortedValue.h
  *
  * Copyright (C) 2025 BrainyBlaze Dynamics, Inc.
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SORTED_STREAM_H
-#define _OPENCOG_SORTED_STREAM_H
+#ifndef _OPENCOG_SORTED_VALUE_H
+#define _OPENCOG_SORTED_VALUE_H
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/value/RelationalValue.h>
@@ -39,24 +39,23 @@ namespace opencog
  * This must be executable, take exactly two arguments,
  * and must return a crisp bool value, indicating the order.
  */
-class SortedStream
+class SortedValue
 	: public RelationalValue
 {
 protected:
-	virtual void update() const override;
 	virtual bool less(const Value& lhs, const Value& rhs) const override;
 
 public:
-	SortedStream(const Handle&);
-	SortedStream(const HandleSeq&);
-	SortedStream(const ValueSeq&);
-	virtual ~SortedStream();
+	SortedValue(const Handle&);
+	SortedValue(const HandleSeq&);
+	SortedValue(const ValueSeq&);
+	virtual ~SortedValue();
 };
 
-VALUE_PTR_DECL(SortedStream);
-CREATE_VALUE_DECL(SortedStream);
+VALUE_PTR_DECL(SortedValue);
+CREATE_VALUE_DECL(SortedValue);
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_SORTED_STREAM_H
+#endif // _OPENCOG_SORTED_VALUE_H

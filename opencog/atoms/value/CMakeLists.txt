@@ -15,7 +15,7 @@ ADD_LIBRARY (value
 	RandomStream.cc
 	RelationalValue.cc
 	SectionValue.cc
-	SortedStream.cc
+	SortedValue.cc
 	StringValue.cc
 	UnisetValue.cc
 	ValueFactory.cc
@@ -48,7 +48,7 @@ INSTALL (FILES
 	RandomStream.h
 	RelationalValue.h
 	SectionValue.h
-	SortedStream.h
+	SortedValue.h
 	StringValue.h
 	UnisetValue.h
 	Value.h
