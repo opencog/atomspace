@@ -1,5 +1,5 @@
 /*
- * tests/atoms/value/SortedStreamUTest.cxxtest
+ * tests/atoms/value/SortedValueUTest.cxxtest
  *
  * Copyright (C) 2025 BrainyBlaze Dynamics, Inc.
  * All Rights Reserved
@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/value/SortedStream.h>
+#include <opencog/atoms/value/SortedValue.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -33,13 +33,13 @@
 
 using namespace opencog;
 
-class SortedStreamUTest : public CxxTest::TestSuite
+class SortedValueUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
 
 public:
-	SortedStreamUTest(void);
+	SortedValueUTest(void);
 
 	void setUp(void);
 	void test_basic_sorted(void);
@@ -48,7 +48,7 @@ public:
 	void test_queue_source(void);
 };
 
-SortedStreamUTest::SortedStreamUTest(void)
+SortedValueUTest::SortedValueUTest(void)
 	: _asp(createAtomSpace())
 {
 	logger().set_level(Logger::DEBUG);
@@ -57,13 +57,13 @@ SortedStreamUTest::SortedStreamUTest(void)
 	logger().set_timestamp_flag(false);
 }
 
-void SortedStreamUTest::setUp(void)
+void SortedValueUTest::setUp(void)
 {
 }
 
 // =========================================================
 
-void SortedStreamUTest::test_basic_sorted(void)
+void SortedValueUTest::test_basic_sorted(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -73,13 +73,13 @@ void SortedStreamUTest::test_basic_sorted(void)
 	// built into Handles will sort this smallest first; so use
 	// GreaterThanLink to swap the order.
 	ValuePtr sorted_val = eval->eval_v(R"(
-		(SortedStream
+		(SortedValue
 			(Lambda
 				(VariableList (Variable "$A") (Variable "$B"))
 				(GreaterThan (Variable "$A") (Variable "$B"))))
 	)");
 
-	SortedStreamPtr svp = SortedStreamCast(sorted_val);
+	SortedValuePtr svp = SortedValueCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
 	// Add numbers in unsorted order: 3, 2, 4
@@ -91,7 +91,7 @@ void SortedStreamUTest::test_basic_sorted(void)
 	svp->add(num2);
 	svp->add(num4);
 
-	// Close the SortedStream
+	// Close the SortedValue
 	svp->close();
 
 	// Remove items one at a time using the new streaming API
@@ -112,7 +112,7 @@ void SortedStreamUTest::test_basic_sorted(void)
 	TS_ASSERT_EQUALS(item3, num2);
 
 	// Print the sorted contents
-	printf("SortedStream contents (3 items):\n");
+	printf("SortedValue contents (3 items):\n");
 	printf("  [0]: %s\n", item1->to_string().c_str());
 	printf("  [1]: %s\n", item2->to_string().c_str());
 	printf("  [2]: %s\n", item3->to_string().c_str());
@@ -122,7 +122,7 @@ void SortedStreamUTest::test_basic_sorted(void)
 
 // =========================================================
 
-void SortedStreamUTest::test_bare_greater_than(void)
+void SortedValueUTest::test_bare_greater_than(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -130,10 +130,10 @@ void SortedStreamUTest::test_bare_greater_than(void)
 
 	// Use bare GreaterThan without Lambda wrapper
 	ValuePtr sorted_val = eval->eval_v(R"(
-		(SortedStream (GreaterThan))
+		(SortedValue (GreaterThan))
 	)");
 
-	SortedStreamPtr svp = SortedStreamCast(sorted_val);
+	SortedValuePtr svp = SortedValueCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
 	// Add numbers in unsorted order: 3, 2, 4
@@ -145,7 +145,7 @@ void SortedStreamUTest::test_bare_greater_than(void)
 	svp->add(num2);
 	svp->add(num4);
 
-	// Close the SortedStream
+	// Close the SortedValue
 	svp->close();
 
 	// Remove items one at a time using the new streaming API
@@ -166,7 +166,7 @@ void SortedStreamUTest::test_bare_greater_than(void)
 	TS_ASSERT_EQUALS(item3, num2);
 
 	// Print the sorted contents
-	printf("SortedStream contents (3 items):\n");
+	printf("SortedValue contents (3 items):\n");
 	printf("  [0]: %s\n", item1->to_string().c_str());
 	printf("  [1]: %s\n", item2->to_string().c_str());
 	printf("  [2]: %s\n", item3->to_string().c_str());
@@ -176,7 +176,7 @@ void SortedStreamUTest::test_bare_greater_than(void)
 
 // =========================================================
 
-void SortedStreamUTest::test_deduplication(void)
+void SortedValueUTest::test_deduplication(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -184,10 +184,10 @@ void SortedStreamUTest::test_deduplication(void)
 
 	// Use bare GreaterThan for descending sort
 	ValuePtr sorted_val = eval->eval_v(R"(
-		(SortedStream (GreaterThan))
+		(SortedValue (GreaterThan))
 	)");
 
-	SortedStreamPtr svp = SortedStreamCast(sorted_val);
+	SortedValuePtr svp = SortedValueCast(sorted_val);
 	TS_ASSERT(svp != nullptr);
 
 	ValuePtr num2 = eval->eval_v("(FloatValue 2 2)");
@@ -234,7 +234,7 @@ void SortedStreamUTest::test_deduplication(void)
 	TS_ASSERT_EQUALS(contents[3], num3);
 	TS_ASSERT_EQUALS(contents[4], num2);
 
-	printf("SortedStream contents (%zu items, should be 5):\n", contents.size());
+	printf("SortedValue contents (%zu items, should be 5):\n", contents.size());
 	for (size_t i = 0; i < contents.size(); i++)
 		printf("  [%zu]: %s\n", i, contents[i]->to_string().c_str());
 
@@ -243,7 +243,7 @@ void SortedStreamUTest::test_deduplication(void)
 
 // =========================================================
 
-void SortedStreamUTest::test_queue_source(void)
+void SortedValueUTest::test_queue_source(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -267,7 +267,7 @@ void SortedStreamUTest::test_queue_source(void)
 	QueueValuePtr queue = createQueueValue();
 	queue->open();
 
-	// Attach the queue to an anchor so we can pass it to SortedStream
+	// Attach the queue to an anchor so we can pass it to SortedValue
 	Handle queue_anchor = eval->eval_h("(Anchor \"queue-source\")");
 	Handle queue_key = eval->eval_h("(Predicate \"queue-data\")");
 	queue_anchor->setValue(queue_key, queue);
@@ -277,10 +277,10 @@ void SortedStreamUTest::test_queue_source(void)
 		(ValueOf (Anchor "queue-source") (Predicate "queue-data"))
 	)");
 
-	// Create the SortedStream with the queue source
+	// Create the SortedValue with the queue source
 	HandleSeq args{greater_or_equal, queue_source};
-	ValuePtr sorter = createSortedStream(args);
-	SortedStreamPtr sorted = SortedStreamCast(sorter);
+	ValuePtr sorter = createSortedValue(args);
+	SortedValuePtr sorted = SortedValueCast(sorter);
 	TS_ASSERT(sorted != nullptr);
 
 	// Create the items to add (same as in sorting-test.scm)
@@ -340,9 +340,9 @@ void SortedStreamUTest::test_queue_source(void)
 	queue->close();
 	printf("Queue closed\n");
 
-	// Now retrieve items from the SortedStream and verify they're in sorted order
+	// Now retrieve items from the SortedValue and verify they're in sorted order
 	// Expected order: size 3, then 2, 2, then 1, 1, 1, 1 (descending)
-	printf("Retrieving items from SortedStream...\n");
+	printf("Retrieving items from SortedValue...\n");
 
 	ValuePtr item1 = sorted->remove();
 	TS_ASSERT(item1 != nullptr);

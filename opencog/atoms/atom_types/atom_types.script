@@ -255,7 +255,7 @@ RELATIONAL_VALUE <- UNISET_VALUE, HANDLE_ARG
 GROUP_VALUE <- RELATIONAL_VALUE
 
 // A thread-safe set of Values that is maintained in sorted order.
-SORTED_STREAM <- RELATIONAL_VALUE, STREAMING_SIG, HANDLE_VEC_ARG
+SORTED_VALUE <- RELATIONAL_VALUE, HANDLE_VEC_ARG
 
 // Convert calls to `LinkValue::value()` into calls to
 // `Atom::execute()`. Conversion is one-to-one: each touch

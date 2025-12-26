@@ -1,11 +1,11 @@
 
 # Tests in order of increasing functional complexity/dependency
 ADD_CXXTEST(ValueUTest)
+ADD_CXXTEST(SortedValueUTest)
+ADD_CXXTEST(GroupValueUTest)
 
 IF (HAVE_GUILE)
 	ADD_CXXTEST(StreamUTest)
-	ADD_CXXTEST(SortedStreamUTest)
-	ADD_CXXTEST(GroupValueUTest)
 
 	ADD_GUILE_TEST(BoolValuePrintTest bool-value-print-test.scm)
 	ADD_GUILE_TEST(CtorArgsTest ctor-args-test.scm)
