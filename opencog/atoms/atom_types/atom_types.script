@@ -20,12 +20,15 @@ NOTYPE
 // https://en.wikipedia.org/wiki/Top_type
 TOP_TYPE
 
-// Helper type, for type factories. These indicate the types of
-// arguments that can be passed to type constructors. The goal is
-// to simplify the structure of dynamic type factories, and
-// specifically the scheme/guile factory. Python does not currently
-// use this, but I guess it could!? C++ does not use this, because
-// it's factories are all static compile-time factories.
+// Helper type, for the scheme->c++ type factories. These indicate
+// the types of the arguments that are passed into the c++ factory,
+// so that the factory can construct the required c++ class instance.
+// This is specifically used by the guile/scheme factory, to convert
+// ad hoc Atomese, written in scheme, into the corresponding c++
+// classes.  Python does not currently use this; I'm not sure why not.
+//
+// Not to be confused with SIGs (signatures) below, which describe the
+// Atomese (logical, "meta-") signature, instead of the c++ signature.
 ARG <- TOP_TYPE
 BOOL_ARG <- ARG
 FLOAT_ARG <- ARG

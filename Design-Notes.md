@@ -620,3 +620,5 @@ the existing anchor-point design.
 
 Wow. Those are like six really damning design flaws. That I have not
 had to face yet. How did that happen?
+
+What's the priority order for fixing any of this?
