@@ -75,7 +75,7 @@ void FlatStream::init(const ValuePtr& vp)
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not vp->is_type(STREAM_VALUE))
+	if (not vp->is_type(CONTAINER_VALUE))
 	{
 		_collection = LinkValueCast(vp);
 		return;
@@ -89,6 +89,7 @@ void FlatStream::init(const ValuePtr& vp)
 
 void FlatStream::update() const
 {
+printf("duuude enter flat update source=%p\n", _source.get());
 	// Are we done yet?
 	if (_collection and 0 < _index and 0 == _value.size()) return;
 
@@ -130,6 +131,10 @@ void FlatStream::update() const
 		return;
 	}
 
+printf("duuude tyed=%d\n", _source->get_type());
+printf("duuude tyenam=%s\n",
+nameserver().getTypeName(_source->get_type()).c_str());
+printf("duuude %s\n", _source->to_string().c_str());
 	// If we are here, then we've got a container to deal with.
 	ContainerValuePtr cvp = ContainerValueCast(_source);
 

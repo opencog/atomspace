@@ -129,7 +129,7 @@ std::string RelationalValue::to_string(const std::string& indent) const
 		rv += _source->to_short_string(indent + "   ");
 	rv += ")\n";
 	rv += indent + "; Currently:\n";
-	rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
+	// rv += LinkValue::to_string(indent + "; ", LINK_VALUE);
 	return rv;
 }
 
