@@ -2,7 +2,7 @@
 -s
 !#
 ;
-; sorting-test.scm -- Test SortedStream sorting by size
+; sorting-test.scm -- Test SortedValue sorting by size
 ;
 (use-modules (opencog))
 (use-modules (opencog test-runner))
@@ -48,7 +48,7 @@
 			(List (Item "g") (Item "h")))
 	))
 
-(define ge-stream (SortedStream greater-or-equal-relation item-list))
+(define ge-stream (FlatStream (SortedValue greater-or-equal-relation item-list)))
 
 (define item1 (car (cog-value->list ge-stream)))
 (format #t "Item 1: ~A (size ~A)\n" item1 (get-size item1))
@@ -98,7 +98,7 @@
 				(SizeOf (Variable "$left"))
 				(SizeOf (Variable "$right"))))))
 
-(define nlt-stream (SortedStream not-less-relation item-list))
+(define nlt-stream (FlatStream (SortedValue not-less-relation item-list)))
 
 (define nlt-item1 (car (cog-value->list nlt-stream)))
 (format #t "NLT Item 1: ~A (size ~A)\n" nlt-item1 (get-size nlt-item1))
@@ -132,7 +132,7 @@
 				(SizeOf (Variable "$left"))
 				(SizeOf (Variable "$right"))))))
 
-(define ngt-stream (SortedStream not-greater-relation item-list))
+(define ngt-stream (FlatStream (SortedValue not-greater-relation item-list)))
 
 (define ngt-item1 (car (cog-value->list ngt-stream)))
 (format #t "NGT Item 1: ~A (size ~A)\n" ngt-item1 (get-size ngt-item1))
@@ -177,7 +177,7 @@
 			(SizeOf (Variable "$left"))
 			(SizeOf (Variable "$right")))))
 
-(define gt-stream (SortedStream greater-relation item-list))
+(define gt-stream (FlatStream (SortedValue greater-relation item-list)))
 
 (define gt-item1 (car (cog-value->list gt-stream)))
 (format #t "GT Item 1: ~A (size ~A)\n" gt-item1 (get-size gt-item1))
@@ -204,9 +204,9 @@
 (test-begin tname-linksig)
 
 (define link-sig
-	(LinkSignature (Type 'SortedStream) not-less-relation item-list))
+	(LinkSignature (Type 'SortedValue) not-less-relation item-list))
 
-(define cnlt (cog-execute! link-sig))
+(define cnlt (FlatStream link-sig))
 
 (define ls-item1 (car (cog-value->list cnlt)))
 (format #t "LinkSig Item 1: ~A (size ~A)\n" ls-item1 (get-size ls-item1))
