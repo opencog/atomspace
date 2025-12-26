@@ -283,31 +283,40 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
-	if (just_one_arg and
-	    nameserver().isA(t, STRING_ARG) and
-	    scm_is_string(first_arg))
+	if (just_one_arg)
 	{
-		std::string name = verify_string(first_arg, "cog-new-value", 2);
-		return valueserver().create(t, std::move(name));
-	}
-
-	if (just_one_arg and
-	    nameserver().isA(t, HANDLE_ARG))
-	{
-		ValuePtr vp(scm_to_protom(first_arg));
-		if (vp and vp->is_atom())
+		if (nameserver().isA(t, STRING_ARG) and
+		    scm_is_string(first_arg))
 		{
-			Handle h(verify_handle(first_arg, "cog-new-value", 2));
-			return valueserver().create(t, h);
+			std::string name = verify_string(first_arg, "cog-new-value", 2);
+			return valueserver().create(t, std::move(name));
 		}
-	}
 
-	if (just_one_arg and
-	    nameserver().isA(t, INT_ARG) and
-	    scm_is_integer(first_arg))
-	{
-		int dim = verify_int(first_arg, "cog-new-value", 2);
-		return valueserver().create(t, dim);
+	   if (nameserver().isA(t, HANDLE_ARG))
+		{
+			ValuePtr vp(scm_to_protom(first_arg));
+			if (vp and vp->is_atom())
+			{
+				Handle h(verify_handle(first_arg, "cog-new-value", 2));
+				return valueserver().create(t, h);
+			}
+		}
+
+		if (nameserver().isA(t, INT_ARG) and
+		    scm_is_integer(first_arg))
+		{
+			int dim = verify_int(first_arg, "cog-new-value", 2);
+			return valueserver().create(t, dim);
+		}
+
+	   if (nameserver().isA(t, VALUE_ARG))
+		{
+			ValuePtr vp(scm_to_protom(first_arg));
+			return valueserver().create(t, vp);
+		}
+
+		// Hmm. We have to fall through, here, to handle the other cases.
+		// scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "single value");
 	}
 
 	// -------------------------
