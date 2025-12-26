@@ -75,7 +75,7 @@ void FlatStream::init(const ValuePtr& vp)
 	}
 
 	// One-shot, non-streaming finite LinkValue
-	if (not vp->is_type(STREAM_VALUE))
+	if (not vp->is_type(CONTAINER_VALUE))
 	{
 		_collection = LinkValueCast(vp);
 		return;
@@ -137,6 +137,14 @@ void FlatStream::update() const
 	// are done. Clear it, so we don't accidentally loop around.
 	if (cvp->is_closed())
 	{
+		// End-of-stream.
+		if  (0 == cvp->size())
+		{
+			_value.clear(); // Set sequence size to zero...
+			_index++;
+			return;
+		}
+
 		_collection = createLinkValue(cvp->value());
 		cvp->clear();
 		update();
