@@ -22,9 +22,6 @@
 
 #include <opencog/atoms/value/SortedValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
-#include <opencog/atoms/value/VoidValue.h>
-#include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
