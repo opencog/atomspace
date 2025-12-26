@@ -1,5 +1,5 @@
 Design Notes
-------------
+============
 The design and implementation of the AtomSpace has been ongoing since
 about 2002, when it was first created as a workspace for controlling
 small animated virtual creatures. In the decades since, it has seen
@@ -434,6 +434,30 @@ awkward, confusing, verbose (as they go through anchor points).
 So it seems what we really want is a better way of describing and
 assembling streams.
 
+### 25 December 2025 Status Update
+Some notes about the current situation:
+* Most of teh grunt-ugly stuff above has now been cleaned up.
+* All of the big issues remain unsolved.
+* `(FlatStream (SortedValue))` works great.
+* `SortedValue` is very minimal.
+* `RelationalValue` provides a fine base class for `SortedValue` and
+  also `GroupValue`.
+* `UnisetValue` drains. A distinct HoardValue could have been designed,
+  but seems like overkill just right now.
+* The draining is "on demand" rather than "continuous". This is worth
+  commenting on. The "on demand drain" is exactly enough to fill up the
+  Value, so that it can be drawn from. i.e. each draw first triggers a
+  drain of upstream, refilling the hoarder, just before drawing on it.
+  So a design maintaining temporal consistency, but lacking the power
+  to be a driving engine, pulling/draining forever, independent of
+  exernal forces.  i.e. unlike DrainLink, there's no thread that pulls.
+* There's no `DrainValue`.
+* `FlatStream` seems to hint at being a general streaming API. With
+  flaws discussed earlier.
+
+I think that's it. The code seems clean, well-organized within the
+boundaries of the current unresolved meta-design flaws.
+
 
 ObjectNodes
 -----------
@@ -525,4 +549,6 @@ So lets recap the issues:
    type specification got fancy, got lambda-ish, it would start
    resembling a filter.
 
- * UnisetValue and QueueValue don't stream; should they?
+Assembling Pipelines
+====================
+Start all over again.
