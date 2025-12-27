@@ -280,7 +280,12 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// XXX FIXME, we need to get rid of this call entirely, and just
 	// return expr->execute(_as, silent) instead, like above.
 	// However, assorted parts are still broken and don't work.
-	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
+	ValuePtr vp(beta_reduce(expr, GroundingMap()));
+
+	// Fire any other executable links, not handled above.
+	Type gt = vp->get_type();
+	if (nameserver().isA(gt, EXECUTABLE_LINK))
+		return HandleCast(vp)->execute(_as, silent);
 
 	// PutLink is incompletely evaluated, above. Finish the job here.
 	if (expr->get_type() == PUT_LINK
