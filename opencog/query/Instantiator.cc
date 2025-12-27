@@ -428,9 +428,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Patterns with DeleteLink in them become nulls.
 	if (nullptr == grounded) return nullptr;
 
-	if (VALUE_SHIM_LINK == grounded->get_type())
-		return grounded->execute();
-
 	// Fire any other function links, not handled above.
 	Type gt = grounded->get_type();
 	if (nameserver().isA(gt, FUNCTION_LINK) or
