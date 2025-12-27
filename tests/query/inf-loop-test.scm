@@ -41,7 +41,7 @@
 		(Type 'Type)
 		(Type 'TypedVariable)
 		(Type 'UnisetValue)))
-(format #t "The expected result: ~A\n" all-types-result)
+; (format #t "The expected result: ~A\n" all-types-result)
 
 (test-assert "query types"
 	(equal? all-types all-types-result))

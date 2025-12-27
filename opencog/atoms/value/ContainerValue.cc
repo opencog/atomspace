@@ -52,9 +52,18 @@ bool ContainerValue::operator==(const Value& other) const
 	if (this == &other) return true;
 
 	if (not is_closed()) return false;
-	if (other.is_type(CONTAINER_VALUE) and
-	    not ((const ContainerValue*) &other)->is_closed()) return false;
+	if (other.is_type(CONTAINER_VALUE))
+	{
+		const ContainerValue* cvp = (const ContainerValue*) &other;
+		if (not cvp->is_closed()) return false;
+		// Why call update()? See comment below.
+		cvp->update();
+	}
 
+	// The LinkValue::operator==() will fail unless data has been moved
+	// from the container to the _value. The update() will do this
+	// movement. Its safe to do now, too, since the container is closed.
+	update();
 	return LinkValue::operator==(other);
 }
 
