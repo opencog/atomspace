@@ -390,16 +390,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return grounded->execute(_as, silent);
 	}
 
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
-		Handle eolh = reduce_exout(expr, ist);
-		if (not eolh->is_executable()) return eolh;
-		return eolh->execute(_as, silent);
-	}
-
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
 	{
@@ -407,6 +397,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return defn->execute(_as, silent);
 	}
 
+#if 1
+	// Needed for AbsentUTest, DotLambdaTest, DotMashupTest.
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
@@ -421,6 +413,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		Handle grounded(HandleCast(reduced));
 		return grounded->execute(_as, silent);
 	}
+#endif
 
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
