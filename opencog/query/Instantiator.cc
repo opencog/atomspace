@@ -340,42 +340,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (0 == varmap.size())
 		ist._consume_quotations = false;
 
-	// Most of the work happens in walk_tree (which returns a Handle
-	// to the instantiated tree). However, special-case the handling
-	// of expr being a FunctionLink - this can return a Value, which
-	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
-	// A proper solution would convert walk_tree to return ValuePtr's
-	// instead of Handles. However, it seems this would require lots
-	// of upcasting, which is horribly slow. So it seems better to
-	// hold off on a "good fix", until the instantiate-to-values
-	// experiment progresses further.  More generally, there are
-	// several blockers:
-	// * The need to instantiate in an atomspace (viz MeetLink)
-	//   impedes lazy evaluations.
 	Type t = expr->get_type();
-	if (nameserver().isA(t, VALUE_OF_LINK) or
-	    nameserver().isA(t, SET_VALUE_LINK) or
-	    nameserver().isA(t, ARITHMETIC_LINK) or
-	    nameserver().isA(t, COLUMN))
-	{
-		HandleSeq oset_results;
-		for (const Handle& h: expr->getOutgoingSet())
-		{
-			Handle hg(walk_tree(h, ist));
-
-			// Globs will return a matching list. Arithmetic
-			// links will choke on lists, so expand them.
-			if (GLOB_NODE == h->get_type())
-			{
-				for (const Handle& gg : hg->getOutgoingSet())
-					oset_results.push_back(gg);
-			}
-			else
-				oset_results.push_back(hg);
-		}
-		Handle flp(createLink(std::move(oset_results), t));
-		return flp->execute(_as, silent);
-	}
 
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
