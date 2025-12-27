@@ -94,6 +94,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(NestedClauseUTest)
 	ADD_CXXTEST(NoExceptionUTest)
 
+	ADD_GUILE_TEST(InfLoopTest inf-loop-test.scm)
 	ADD_GUILE_TEST(DotProductTest dot-product-test.scm)
 	ADD_GUILE_TEST(DotIdenticalTest dot-identical-test.scm)
 	ADD_GUILE_TEST(DotChoiceTest dot-choice-test.scm)

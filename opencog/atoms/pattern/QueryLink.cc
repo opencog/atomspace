@@ -72,7 +72,7 @@ QueryLink::QueryLink(const Handle& body, const Handle& rewrite)
 {}
 
 QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
-	: PatternLink(std::move(hseq), t)
+	: PatternLink(std::move(hseq), t), _recursing(false)
 {
 	init();
 }
@@ -198,7 +198,11 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
 {
-	return do_execute(as, silent);
+	if (_recursing) return get_handle();
+	_recursing = true;
+	ValuePtr vp(do_execute(as, silent));
+	_recursing = false;
+	return vp;
 }
 
 DEFINE_LINK_FACTORY(QueryLink, QUERY_LINK)
