@@ -377,19 +377,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return flp->execute(_as, silent);
 	}
 
-	// If there is a SatisfyingLink, we have to perform it
-	// and return the satisfying set.
-	if (nameserver().isA(t, SATISFYING_LINK) or
-	    nameserver().isA(t, JOIN_LINK))
-	{
-		if (0 == varmap.size())
-			return expr->execute(_as, silent);
-
-		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, ist));
-		return grounded->execute(_as, silent);
-	}
-
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
 	{
