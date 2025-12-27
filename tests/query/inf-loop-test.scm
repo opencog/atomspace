@@ -31,12 +31,15 @@
 		(TypeOf (DontExec (Variable "$atom"))) ; rewrite
 	))
 
+(Plus (Number 2) (Divide (Number 1) (Number 2)))
+
 (define all-types (cog-execute! get-all-types))
 (format #t "The types: ~A\n" all-types)
 
 ; The result is truly weird.
 (define all-types-result
 	(UnisetValue
+		(Type 'Number)
 		(Type 'Predicate)
 		(Type 'Query)
 		(Type 'Type)
