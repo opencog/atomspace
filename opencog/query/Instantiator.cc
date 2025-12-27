@@ -301,9 +301,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// Executing a DeleteLink returns a nullptr
 		if (nullptr == vp)
 			return Handle::UNDEFINED;
+
 		if (vp->is_atom())
 			return HandleCast(vp);
 
+		// Hmm. Convert VoidValue and empty lists to nullptr.
+		if (0 == vp->size()) return Handle::UNDEFINED;
 		return HandleCast(createValueShimLink(vp));
 	}
 

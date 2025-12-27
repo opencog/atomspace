@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "DeleteLink.h"
@@ -51,6 +52,7 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 	// are variables. The goal is to allow DeleteLinks to be used in
 	// query patterns (where they will have ... variables in them!)
 	if (not is_closed(get_handle()))
+		// return createVoidValue();
 		return nullptr;
 
 	// In general, neither this link, nor it's outgoing set will be in
@@ -69,6 +71,10 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 		if (nullptr == oas) oas = as;
 		oas->extract_atom(h, true);
 	}
+
+	// TODO FIXME: It might be cleaner to return VoidValue here,
+	// instead of nullptr... I guess. Doesn't seem to matter, mostly!?
+	// return createVoidValue();
 	return nullptr;
 }
 
