@@ -235,28 +235,4 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	return grounded;
 }
 
-ValuePtr Instantiator::execute(const Handle& expr, bool silent)
-{
-	// Check for crazy cross-atomspace woes
-	AtomSpace* exas = expr->getAtomSpace();
-	if (nullptr != exas and not _as->in_environ(expr))
-		throw RuntimeException(TRACE_INFO,
-			"Can't execute: current AtomSpace is %s but atom is in AtomSpace %s",
-			_as->get_name().c_str(), exas->get_name().c_str());
-
-	// Expand on the spot.
-	if (expr->is_type(DEFINED_SCHEMA_NODE))
-	{
-		Handle dex = DefineLink::get_definition(expr);
-		if (dex->is_type(EXECUTABLE_LINK))
-			return dex->execute(_as, silent);
-	}
-
-	// Try to execute directly, if possible.
-	if (expr->is_executable())
-		return expr->execute(_as, silent);
-
-	return expr;
-}
-
 /* ===================== END OF FILE ===================== */

@@ -97,8 +97,6 @@ public:
 	ValuePtr instantiate(const Handle& expr,
 	                     const GroundingMap& vars,
 	                     bool silent=false) const;
-
-	ValuePtr execute(const Handle& expr, bool silent=false);
 };
 
 } // namespace opencog
