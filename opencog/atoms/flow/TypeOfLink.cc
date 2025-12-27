@@ -53,6 +53,11 @@ ValuePtr TypeOfLink::execute(AtomSpace* as, bool silent)
 		tipes.emplace_back(createTypeNode(t));
 	}
 
+	// Return single element directly, else wrap in LinkValue
+	// Is unwrappng like this wise? Maybe. I dunno.
+	if (1 == tipes.size())
+		return tipes[0];
+
 	return createLinkValue(tipes);
 }
 

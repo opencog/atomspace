@@ -34,6 +34,18 @@
 (define all-types (cog-execute! get-all-types))
 (format #t "The types: ~A\n" all-types)
 
+(define all-types-result
+	(UnisetValue
+		(Type 'Predicate)
+		(Type 'Query)
+		(Type 'Type)
+		(Type 'TypedVariable)
+		(Type 'UnisetValue)))
+(format #t "The expected result: ~A\n" all-types-result)
+
+(test-assert "query types"
+	(equal? all-types all-types-result))
+
 (test-end tname)
 
 (opencog-test-end)
