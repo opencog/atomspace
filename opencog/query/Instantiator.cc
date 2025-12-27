@@ -378,7 +378,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// hold off on a "good fix", until the instantiate-to-values
 	// experiment progresses further.  More generally, there are
 	// several blockers:
-	// * The need to instantiate in an atomspace (viz GetLink)
+	// * The need to instantiate in an atomspace (viz MeetLink)
 	//   impedes lazy evaluations.
 	Type t = expr->get_type();
 	if (nameserver().isA(t, VALUE_OF_LINK) or
@@ -418,7 +418,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 		// There are vars to be beta-reduced. Reduce them.
 		Handle grounded(walk_tree(expr, ist));
-		if (_as) grounded = _as->add_atom(grounded);
 		return grounded->execute(_as, silent);
 	}
 
@@ -429,7 +428,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		// Maybe this is just not tested?
 		Handle eolh = reduce_exout(expr, ist);
 		if (not eolh->is_executable()) return eolh;
-		eolh = _as->add_atom(eolh);
 		return eolh->execute(_as, silent);
 	}
 
