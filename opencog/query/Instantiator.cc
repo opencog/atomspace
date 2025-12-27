@@ -425,16 +425,10 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
 
-	// Patterns with DeleteLink in them become nulls.
-	if (nullptr == grounded) return nullptr;
-
-	// Fire any other function links, not handled above.
+	// Fire any other executable links, not handled above.
 	Type gt = grounded->get_type();
-	if (nameserver().isA(gt, FUNCTION_LINK) or
-	    nameserver().isA(gt, EXECUTABLE_LINK))
-	{
+	if (nameserver().isA(gt, EXECUTABLE_LINK))
 		return grounded->execute(_as, ist._silent);
-	}
 
 	return grounded;
 }
