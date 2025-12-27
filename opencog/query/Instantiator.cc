@@ -281,38 +281,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// Make sure we don't consume a useful quotation
 		if (not_self_match(t))
 			ist._needless_quotation = false;
-		goto mere_recursive_call;
 	}
 
-	// Fire any other function links, not handled above.
-	if (nameserver().isA(t, FUNCTION_LINK) or
-	    nameserver().isA(t, EXECUTABLE_LINK))
-	{
-		Handle flh = beta_reduce(expr, ist._varmap);
-
-		// Some function links are guaranteed to return values.
-		// We cannot/must not execute them here.
-		Type tbr = flh->get_type();
-		if (nameserver().isA(tbr, VALUE_OF_LINK) or
-		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
-
-		ValuePtr vp(flh->execute(_as, ist._silent));
-
-		// Executing a DeleteLink returns a nullptr
-		if (nullptr == vp)
-			return Handle::UNDEFINED;
-
-		if (vp->is_atom())
-			return HandleCast(vp);
-
-		// Hmm. Convert VoidValue and empty lists to nullptr.
-		if (0 == vp->size()) return Handle::UNDEFINED;
-		return HandleCast(createValueShimLink(vp));
-	}
-
-	// None of the above. Create a duplicate link, but with an outgoing
-	// set where the variables have been substituted by their values.
-mere_recursive_call:
+	// Create a duplicate link, but with an outgoing set where the
+	// variables have been substituted by their values.
 	HandleSeq oset_results;
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), ist);
 	if (changed)
@@ -368,65 +340,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (0 == varmap.size())
 		ist._consume_quotations = false;
 
-	// Most of the work happens in walk_tree (which returns a Handle
-	// to the instantiated tree). However, special-case the handling
-	// of expr being a FunctionLink - this can return a Value, which
-	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
-	// A proper solution would convert walk_tree to return ValuePtr's
-	// instead of Handles. However, it seems this would require lots
-	// of upcasting, which is horribly slow. So it seems better to
-	// hold off on a "good fix", until the instantiate-to-values
-	// experiment progresses further.  More generally, there are
-	// several blockers:
-	// * The need to instantiate in an atomspace (viz MeetLink)
-	//   impedes lazy evaluations.
 	Type t = expr->get_type();
-	if (nameserver().isA(t, VALUE_OF_LINK) or
-	    nameserver().isA(t, SET_VALUE_LINK) or
-	    nameserver().isA(t, ARITHMETIC_LINK) or
-	    nameserver().isA(t, COLUMN))
-	{
-		HandleSeq oset_results;
-		for (const Handle& h: expr->getOutgoingSet())
-		{
-			Handle hg(walk_tree(h, ist));
-
-			// Globs will return a matching list. Arithmetic
-			// links will choke on lists, so expand them.
-			if (GLOB_NODE == h->get_type())
-			{
-				for (const Handle& gg : hg->getOutgoingSet())
-					oset_results.push_back(gg);
-			}
-			else
-				oset_results.push_back(hg);
-		}
-		Handle flp(createLink(std::move(oset_results), t));
-		return flp->execute(_as, silent);
-	}
-
-	// If there is a SatisfyingLink, we have to perform it
-	// and return the satisfying set.
-	if (nameserver().isA(t, SATISFYING_LINK) or
-	    nameserver().isA(t, JOIN_LINK))
-	{
-		if (0 == varmap.size())
-			return expr->execute(_as, silent);
-
-		// There are vars to be beta-reduced. Reduce them.
-		Handle grounded(walk_tree(expr, ist));
-		return grounded->execute(_as, silent);
-	}
-
-	// ExecutionOutputLinks
-	if (nameserver().isA(t, EXECUTION_OUTPUT_LINK))
-	{
-		// XXX Don't we need to plug in the vars, first!?
-		// Maybe this is just not tested?
-		Handle eolh = reduce_exout(expr, ist);
-		if (not eolh->is_executable()) return eolh;
-		return eolh->execute(_as, silent);
-	}
 
 	// Execute any DefinedPredicateNodes
 	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
@@ -435,6 +349,8 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		return defn->execute(_as, silent);
 	}
 
+#if 1
+	// Needed for AbsentUTest, DotLambdaTest, DotMashupTest.
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
@@ -449,15 +365,16 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		Handle grounded(HandleCast(reduced));
 		return grounded->execute(_as, silent);
 	}
+#endif
 
 	// Instantiate.
 	Handle grounded(walk_tree(expr, ist));
 
-	// Patterns with DeleteLink in them become nulls.
-	if (nullptr == grounded) return nullptr;
+	// Fire any other executable links, not handled above.
+	Type gt = grounded->get_type();
+	if (nameserver().isA(gt, EXECUTABLE_LINK))
+		return grounded->execute(_as, ist._silent);
 
-	if (VALUE_SHIM_LINK == grounded->get_type())
-		return grounded->execute();
 	return grounded;
 }
 

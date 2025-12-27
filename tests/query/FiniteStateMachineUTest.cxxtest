@@ -68,6 +68,7 @@ void FiniteStateMachineUTest::tearDown(void)
 void FiniteStateMachineUTest::setUp(void)
 {
 	as->clear();
+	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 }
 
 #define getarity(hand) hand->get_arity()
@@ -125,18 +126,13 @@ void FiniteStateMachineUTest::do_test_basic(void)
 void FiniteStateMachineUTest::test_basic_rw(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 	do_test_basic();
-
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 void FiniteStateMachineUTest::test_basic_overlay(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();

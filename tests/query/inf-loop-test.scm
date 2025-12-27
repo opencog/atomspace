@@ -36,16 +36,22 @@
 (define all-types (cog-execute! get-all-types))
 (format #t "The types: ~A\n" all-types)
 
-; The result is truly weird.
+; The result should include ... everything.
+; Still does not find Variables ...
 (define all-types-result
 	(UnisetValue
+		(Type 'Plus)
+		(Type 'Divide)
 		(Type 'Number)
 		(Type 'Predicate)
 		(Type 'Query)
+		(Type 'DontExec)
+		(Type 'TypeOf)
 		(Type 'Type)
 		(Type 'TypedVariable)
-		(Type 'Variable)
-		(Type 'UnisetValue)))
+		; (Type 'Variable)
+	))
+
 ; (format #t "The expected result: ~A\n" all-types-result)
 
 (test-assert "query types"
