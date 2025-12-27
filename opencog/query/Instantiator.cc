@@ -104,44 +104,11 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	return changed;
 }
 
-/// walk_tree() performs a kind-of eager-evaluation of function arguments.
-/// The code in here is a mashup of several different ideas that are not
-/// cleanly separated from each other. (XXX FIXME, these need to be
-/// cleanly separated; its impeding overall clean design/implementation.)
-/// Roughly, it goes like so:
-///
-/// First, walk downwards to the leaves of the tree. As we return back up,
-/// if any free variables are encountered, then replace those variables
-/// with the groundings held in `varmap`. This is basic beta-reduction.
-///
-/// Second, during the above process, if any executable functions are
-/// encountered, then execute them. This is "eager-execution".  The
-/// results of that execution are plugged into the tree, and so we keep
-/// returning upwards, back to the root.
-///
-/// One problem with eager execution is that it disallows recursive
-/// functions: if `f(x)` itself calls `f`, then eager execution results
-/// in the infinite loop `f(f(f(f(....))))` that never terminates, the
-/// problem being that any possible termination condition inside of `f`
-/// is never hit. (c.f. The textbook-classic recursive implementation of
-/// factorial.)
-///
-/// Another problem with eager execution is that many Atoms now return
-/// Values when executed. These Values cannot be stored in a HandleSeq.
-/// This makes passing them "upwards", flowing them through the caller
-/// tree problematic.
-///
-/// There does not seem to be any easy way of refactoring this code.
-///
-/// This can be contrasted with `beta_reduce()` up above, which performs
-/// the substitution only, but does NOT perform an execution at all.
-///
-/// So, here's the funny bit: sometimes, `walk_tree` does do
-/// lazy-execution, sometimes. In the current version, when it
-/// encounters a function to be executed, it mostly just performs the
-/// substitution on the function args, and then executes the function.
-/// Its up to the function itself to get more done, as needed.
-///
+/// walk_tree() performs beta-reduction, respecting the use of
+/// quotations and quotation contexts. This is a hack, because
+/// of a combination of two things: QuoteLink is mis-designed,
+/// and beta-reduction should have respected quote link. So this
+/// is here, for now.
 Handle Instantiator::walk_tree(const Handle& expr,
                                Instate& ist) const
 {
