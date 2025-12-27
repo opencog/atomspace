@@ -57,7 +57,6 @@ private:
 			_varmap(varmap),
 			_context(false),
 			_consume_quotations(true),
-			_needless_quotation(true),
 			_halt(false)
 		{}
 		const GroundingMap& _varmap;
@@ -79,16 +78,6 @@ private:
 		 * the program. This flag is here to properly control that.
 		 */
 		bool _consume_quotations;
-
-		/**
-		 * In case _consume_quotations is set to false, this can be set
-		 * temporarily to false when consuming the quotation would change
-		 * the semantics.
-		 *
-		 * TODO: maybe this can eliminate the need for
-		 * _avoid_discarding_quotes_level
-		 */
-		bool _needless_quotation;
 
 		/** Avoid infinite recursion. */
 		bool _halt;
@@ -114,19 +103,6 @@ private:
 	                 Instate&) const;
 	bool walk_sequence(HandleSeq&, const HandleSeq&,
 	                   Instate&) const;
-
-	/**
-	 * Return true iff the following atom type may not match to
-	 * itself, that is a scope, an evaluatable, used as logic
-	 * connector by the pattern matcher, etc.
-	 *
-	 * TODO: should be refined to make the difference between AndLink
-	 * as pattern matcher connector and AndLink as self-match.
-	 *
-	 * TODO: this should probably be moved to some pattern matcher
-	 * method.
-	 */
-	static bool not_self_match(Type t);
 
 public:
 	Instantiator(AtomSpace* as);

@@ -121,39 +121,20 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if ((ist._consume_quotations or ist._needless_quotation) and
-	    context_cp.consumable(t))
+	if (context_cp.consumable(t))
 	{
 		if (1 != expr->get_arity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
 		Handle child = expr->getOutgoingAtom(0);
-		Handle walked_child = walk_tree(child, ist);
-
-		// Only consume if the quotation is really needless (walking
-		// the children might have changed _needless_quotation).
-		if (ist._consume_quotations or ist._needless_quotation)
-			return walked_child;
-
-		// Otherwise keep the quotation, but set _needless_quotation
-		// back to true for the remaining tree
-		ist._needless_quotation = true;
-		Handle nexp(createLink(t, walked_child));
-		nexp->bulkCopyValues(expr);
-		return nexp;
+		return walk_tree(child, ist);
 	}
 
 	if (expr->is_node())
 	{
 		if (context_cp.is_quoted())
-		{
-			// Make sure we don't consume a useful quotation
-			if (not_self_match(t))
-				ist._needless_quotation = false;
-
 			return expr;
-		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
@@ -189,13 +170,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (context_cp.is_quoted())
-	{
-		// Make sure we don't consume a useful quotation
-		if (not_self_match(t))
-			ist._needless_quotation = false;
-	}
-
 	// Create a duplicate link, but with an outgoing set where the
 	// variables have been substituted by their values.
 	HandleSeq oset_results;
@@ -207,18 +181,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return subl;
 	}
 	return expr;
-}
-
-bool Instantiator::not_self_match(Type t)
-{
-	return nameserver().isA(t, SCOPE_LINK) or
-		nameserver().isA(t, FUNCTION_LINK) or
-		nameserver().isA(t, DELETE_LINK) or
-		nameserver().isA(t, VIRTUAL_LINK) or
-		nameserver().isA(t, DEFINE_LINK) or
-		nameserver().isA(t, DEFINED_SCHEMA_NODE) or
-		nameserver().isA(t, DEFINED_PREDICATE_NODE) or
-		nameserver().isA(t, DONT_EXEC_LINK);
 }
 
 /**
