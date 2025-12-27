@@ -402,10 +402,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 				oset_results.push_back(hg);
 		}
 		Handle flp(createLink(std::move(oset_results), t));
-		ValuePtr pap(flp->execute(_as, silent));
-		if (_as and pap->is_atom())
-			return _as->add_atom(HandleCast(pap));
-		return pap;
+		return flp->execute(_as, silent);
 	}
 
 	// If there is a SatisfyingLink, we have to perform it
@@ -450,11 +447,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		if (not reduced->is_atom()) return reduced;
 
 		Handle grounded(HandleCast(reduced));
-		ValuePtr vp(grounded->execute(_as, silent));
-
-		if (_as and vp and vp->is_atom())
-			return _as->add_atom(HandleCast(vp));
-		return vp;
+		return grounded->execute(_as, silent);
 	}
 
 	// Instantiate.
@@ -465,14 +458,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	if (VALUE_SHIM_LINK == grounded->get_type())
 		return grounded->execute();
-
-	// The returned handle is not yet in the atomspace. Add it now.
-	// We do this here, instead of in walk_tree(), because adding
-	// atoms to the atomspace is an expensive process.  We can save
-	// some time by doing it just once, right here, in one big batch.
-	// XXX FIXME Can we defer the addition to the atomspace to an even
-	// later time??
-	if (_as) return _as->add_atom(grounded);
 	return grounded;
 }
 

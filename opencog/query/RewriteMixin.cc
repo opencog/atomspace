@@ -124,6 +124,8 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 			// AbsentLinks can result in nullptr v's
 			if (nullptr != v)
 			{
+				if (v->is_atom())
+					v = _as->add_atom(HandleCast(v));
 				auto it = _implicand_grnds.find(_implicand[0]);
 				if (_implicand_grnds.end() != it)
 					(*it).second->add(v);
@@ -138,6 +140,8 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
 				if (nullptr != v)
 				{
+					if (v->is_atom())
+						v = _as->add_atom(HandleCast(v));
 					auto it = _implicand_grnds.find(himp);
 					if (_implicand_grnds.end() != it)
 						(*it).second->add(v);
