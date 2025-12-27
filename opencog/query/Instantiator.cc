@@ -252,30 +252,10 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 			return dex->execute(_as, silent);
 	}
 
-#if NOT_YET
-	// This is what we want to do. But unit tests fail if we do this.
-	if (expr->is_type(PUT_LINK))
-		return expr->execute(_as, silent);
-#endif
-
-	// Try to execute directly, if possible. Not everything is
-	// capable of this, yet. The ones that are, we've tagged as
-	// being of type EXECUTABLE_LINK in the type definitions.
-	// This is a quasi-bogus work-around, but it *does* make it
-	// possible for external libraries defining thier own executable
-	// atoms to get executed immediately, here, instead of flowing
-	// through the instantiator.
-	//
-	// if (expr->is_executable())
-	if (expr->is_type(EXECUTABLE_LINK))
-		return expr->execute(_as, silent);
-	if (expr->is_type(EVALUATION_LINK))
-		return expr->execute(_as, silent);
-	if (expr->is_type(EVALUATABLE_LINK))
+	// Try to execute directly, if possible.
+	if (expr->is_executable())
 		return expr->execute(_as, silent);
 
-	if (expr->is_type(NODE) and expr->is_executable())
-		return expr->execute(_as, silent);
 	return expr;
 }
 
