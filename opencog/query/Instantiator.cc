@@ -284,12 +284,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		goto mere_recursive_call;
 	}
 
-	if (PUT_LINK == t)
-	{
-		Handle grounded(HandleCast(beta_reduce(expr, ist._varmap)));
-		return HandleCast(grounded->execute(_as, true));
-	}
-
 #if 1 // Needed for FiniteStateMachineUTest
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
