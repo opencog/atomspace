@@ -284,17 +284,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		goto mere_recursive_call;
 	}
 
-#if 1 // Needed for FiniteStateMachineUTest
-	// Handle DeleteLink's before general FunctionLink's; they
-	// work differently.
-	if (DELETE_LINK == t)
-	{
-		Handle flh = beta_reduce(expr, ist._varmap);
-		flh->execute(_as, ist._silent);
-		return Handle::UNDEFINED;
-	}
-#endif
-
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK) or
 	    nameserver().isA(t, EXECUTABLE_LINK))
@@ -308,6 +297,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
 
 		ValuePtr vp(flh->execute(_as, ist._silent));
+
+		// Executing a DeleteLink returns a nullptr
+		if (nullptr == vp)
+			return Handle::UNDEFINED;
 		if (vp->is_atom())
 			return HandleCast(vp);
 
