@@ -28,23 +28,28 @@
 	(Query
 		(Variable "$atom") ; vardecl
 		(Variable "$atom") ; match anything
-		(TypeOf (Variable "$atom")) ; rewrite
+		(TypeOf (DontExec (Variable "$atom"))) ; rewrite
 	))
 
 (define all-types (cog-execute! get-all-types))
 (format #t "The types: ~A\n" all-types)
 
+; The result is truly weird.
 (define all-types-result
 	(UnisetValue
 		(Type 'Predicate)
 		(Type 'Query)
 		(Type 'Type)
 		(Type 'TypedVariable)
+		(Type 'Variable)
 		(Type 'UnisetValue)))
 ; (format #t "The expected result: ~A\n" all-types-result)
 
 (test-assert "query types"
 	(equal? all-types all-types-result))
+
+(define all-types-again (cog-execute! get-all-types))
+(format #t "The types, again: ~A\n" all-types-again)
 
 (test-end tname)
 
