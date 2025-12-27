@@ -130,10 +130,6 @@ private:
 	bool walk_sequence(HandleSeq&, const HandleSeq&,
 	                   Instate&) const;
 
-	/// Substitute, but do not execute ExecutionOutputLinks
-	Handle reduce_exout(const Handle& exout,
-	                    Instate&) const;
-
 	/**
 	 * Return true iff the following atom type may not match to
 	 * itself, that is a scope, an evaluatable, used as logic

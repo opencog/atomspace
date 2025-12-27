@@ -107,51 +107,6 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	return changed;
 }
 
-/// ExecutionOutputLinks get special treatment.
-///
-/// Even for the case of lazy execution, we still have to do eager
-/// execution of the arguments passed to the ExOutLink.  This is
-/// because the ExOutLink is a black box, and we cannot guess what
-/// it might do.  It would be great if the authors of ExOutLinks
-/// did the lazy execution themselves... but this is too much to
-/// ask for. So we always eager-evaluate those args.
-Handle Instantiator::reduce_exout(const Handle& expr,
-                                  Instate& ist) const
-{
-	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-
-	// At this time, the GSN or the DSN is always in position 0
-	// of the outgoing set, and the ListLink of arguments is always
-	// in position 1.  Someday in the future, there may be a variable
-	// declaration; we punt on that.
-	Handle sn(eolp->get_schema());
-	Handle args(eolp->get_args());
-
-	sn = beta_reduce(sn, ist._varmap);
-
-	// If its an anonymous function link, execute it here.
-	if (LAMBDA_LINK == sn->get_type())
-	{
-		LambdaLinkPtr flp(LambdaLinkCast(sn));
-
-		// Three-step process. First, beta-reduce the args; second,
-		// plug the args into the function. Third, execute (not here,
-		// but by the caller).
-		Handle body(flp->get_body());
-		Variables vars(flp->get_variables());
-
-		// Perform substitution on the args, only.
-		args = beta_reduce(args, ist._varmap);
-		return vars.substitute_nocheck(body, {args});
-	}
-
-	// Perform substitution on the args, only.
-	args = beta_reduce(args, ist._varmap);
-
-	Type t = expr->get_type();
-	return createLink(t, sn, args);
-}
-
 /// walk_tree() performs a kind-of eager-evaluation of function arguments.
 /// The code in here is a mashup of several different ideas that are not
 /// cleanly separated from each other. (XXX FIXME, these need to be
