@@ -289,14 +289,8 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// work differently.
 	if (DELETE_LINK == t)
 	{
-		HandleSeq oset_results;
-		walk_sequence(oset_results, expr->getOutgoingSet(), ist);
-		for (const Handle& h: oset_results)
-		{
-			Type ht = h->get_type();
-			if (VARIABLE_NODE != ht and GLOB_NODE != ht)
-				_as->extract_atom(h, true);
-		}
+		Handle flh = beta_reduce(expr, ist._varmap);
+		flh->execute(_as, ist._silent);
 		return Handle::UNDEFINED;
 	}
 #endif
