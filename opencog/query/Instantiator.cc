@@ -290,59 +290,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		return HandleCast(grounded->execute(_as, true));
 	}
 
-#if 1 // Needed for QuotationUTest
-	// LambdaLink may get special treatment in case it is used for
-	// pattern matching. For instance, if a connector is quoted, we
-	// don't want to consume that quote otherwise the connector will
-	// serve as a logic connector to the pattern matcher instead of
-	// serving as self-match.
-	if (LAMBDA_LINK == t)
-	{
-		LambdaLinkPtr ll = LambdaLinkCast(expr);
-		Handle vardecl = ll->get_vardecl();
-
-		// Recursively walk vardecl
-		if (vardecl)
-			vardecl = walk_tree(vardecl, ist);
-
-		// Recursively walk body, making sure quotation is preserved
-		Handle body = ll->get_body();
-		// If the lambda is ill-formed it might not have a body, throw
-		// an exception then
-		if (not body)
-		{
-			if (ist._silent)
-				throw NotEvaluatableException();
-			throw SyntaxException(TRACE_INFO, "body is ill-formed");
-		}
-
-		Type bt = body->get_type();
-		if (Quotation::is_quotation_type(bt))
-		{
-			ist._context.update(body);
-			ist._needless_quotation = false;
-			body = walk_tree(body->getOutgoingAtom(0), ist);
-			body = createLink(bt, body);
-			ist._needless_quotation = true;
-		}
-		else
-		{
-			body = walk_tree(body, ist);
-		}
-
-		// Reconstruct Lambda, if it has changed
-		if (ll->get_vardecl() != vardecl or ll->get_body() != body)
-		{
-			HandleSeq oset{body};
-			if (vardecl)
-				oset.insert(oset.begin(), vardecl);
-			// TODO: copy values
-			return createLink(std::move(oset), LAMBDA_LINK);
-		}
-		return expr;
-	}
-#endif
-
 #if 1 // Needed for FiniteStateMachineUTest
 	// Handle DeleteLink's before general FunctionLink's; they
 	// work differently.
