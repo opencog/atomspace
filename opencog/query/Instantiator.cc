@@ -191,12 +191,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			return expr;
 		}
 
-#if 1 // Needed for DefinedSchemaUTest
-		// If we are here, we are a Node.
-		if (DEFINED_SCHEMA_NODE == t)
-			return walk_tree(DefineLink::get_definition(expr), ist);
-#endif
-
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
 
@@ -298,9 +292,12 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	Type t = expr->get_type();
 
 	// Execute any DefinedPredicateNodes
-	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
+	if (nameserver().isA(t, DEFINED_PREDICATE_NODE) or
+	    nameserver().isA(t, DEFINED_SCHEMA_NODE))
 	{
 		Handle defn(DefineLink::get_definition(expr));
+		if (not defn->is_executable())
+			return defn;
 		return defn->execute(_as, silent);
 	}
 
