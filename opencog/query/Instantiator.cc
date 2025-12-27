@@ -282,18 +282,10 @@ ValuePtr Instantiator::execute(const Handle& expr, bool silent)
 	// However, assorted parts are still broken and don't work.
 	ValuePtr vp(beta_reduce(expr, GroundingMap()));
 
-	// Fire any other executable links, not handled above.
+	// Fire executable links.
 	Type gt = vp->get_type();
 	if (nameserver().isA(gt, EXECUTABLE_LINK))
 		return HandleCast(vp)->execute(_as, silent);
-
-	// PutLink is incompletely evaluated, above. Finish the job here.
-	if (expr->get_type() == PUT_LINK
-	    and vp and vp->is_atom())
-	{
-		Handle h(HandleCast(vp));
-		if (h->is_executable()) return h->execute();
-	}
 
 	return vp;
 }
