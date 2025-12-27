@@ -24,6 +24,16 @@
 		(cog-execute! get-all-queries)
 		(UnisetValue get-all-queries)))
 
+(define get-all-types
+	(Query
+		(Variable "$atom") ; vardecl
+		(Variable "$atom") ; match anything
+		(TypeOf (Variable "$atom")) ; rewrite
+	))
+
+(define all-types (cog-execute! get-all-types))
+(format #t "The types: ~A\n" all-types)
+
 (test-end tname)
 
 (opencog-test-end)

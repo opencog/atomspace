@@ -1030,31 +1030,6 @@ bool InitiateSearchMixin::setup_variable_search(const PatternTermSeq& clauses)
 	{
 		if (empty) return false;
 
-// #define THROW_HARD_ERROR 1
-#ifdef THROW_HARD_ERROR
-		throw SyntaxException(TRACE_INFO,
-			"Error: There were no type restrictions! That's infinite-recursive!");
-#else
-		logger().warn("No type restrictions! Your code has a bug in it!");
-		for (const Handle& var: _variables->varset)
-			logger().warn("Offending variable=%s\n", var->to_string().c_str());
-		for (const PatternTermPtr& cl : clauses)
-			logger().warn("Offending clauses=%s\n", cl->getHandle()->to_string().c_str());
-
-		// Terrible, terrible hack for detecting infinite loops.
-		// When the world is ready for us, we should instead just
-		// throw the hard error, as ifdef'ed above.
-		static const Pattern* prev = nullptr;
-		static unsigned int count = 0;
-		if (prev != _pattern) { prev = _pattern; count = 0; }
-		else {
-			count++;
-			if (5 < count)
-				throw RuntimeException(TRACE_INFO,
-					"Infinite Loop detected! Recursed %u times!", count);
-		}
-#endif
-
 		// There are no clauses. This is kind-of weird, but it can happen
 		// if all clauses are optional.
 		if (0 == clauses.size())
