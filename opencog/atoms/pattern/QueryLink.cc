@@ -92,16 +92,19 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       AndList
- *          etc ...
+ *          ClauseA
+ *          ClauseB
+ *          ...
+ *       Implicand
+ *          ImpliedThing...
  *
  * The whole point of the QueryLink is to do nothing more than
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
+ * Use the default implicator to find pattern-matches.  If a set of
+ * atoms that can validily bind to the variables can be found in the
+ * AtomSpace, then they are reported as a grounding.
  */
 ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
