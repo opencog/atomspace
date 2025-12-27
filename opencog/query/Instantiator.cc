@@ -360,11 +360,6 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	}
 #endif
 
-#if 1 // tested in ExecutionOutputUTest EvaluationUTest
-	if (nameserver().isA(t, VIRTUAL_LINK))
-		return beta_reduce(expr, ist._varmap);
-#endif
-
 	// Fire any other function links, not handled above.
 	if (nameserver().isA(t, FUNCTION_LINK) or
 	    nameserver().isA(t, EXECUTABLE_LINK))
