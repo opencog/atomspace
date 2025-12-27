@@ -75,9 +75,6 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 	Context cp_context = ist._context;
 	for (const Handle& h : expr)
 	{
-		if (nameserver().isA(h->get_type(), EVALUATABLE_LINK))
-			ist._inside_evaluation = true;
-
 		Handle hg(walk_tree(h, ist));
 		ist._context = cp_context;
 		if (hg != h) changed = true;
@@ -280,7 +277,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	Instate ist(varmap);
-	ist._inside_evaluation = false;
 	ist._silent = silent;
 
 	// Since we do not actually instantiate anything, we should not
