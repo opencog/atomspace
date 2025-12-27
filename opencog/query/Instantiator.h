@@ -64,7 +64,7 @@ private:
 		 * Instatiator removes first level QuoteLinks and in such cases
 		 * returns verbatim atoms. This is incorrect when the QuoteLink
 		 * occurs in any scoped link (anything inheriting from ScopeLink,
-		 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
+		 * (e.g. MeetLink, QueryLink), since these handle QuoteLinks within
 		 * their own scope. We must avoid damaging quotes for these atoms.
 		 */
 		Context _context;
@@ -78,21 +78,17 @@ private:
 
 	/**
 	 * Recursively walk a tree starting with the root, plugging in
-	 * variables from the `_varmap`, and executing the resulting
-	 * expression. Return the result of the execution.
+	 * variables from the `_varmap`, respecting quotations.
 	 *
 	 * That is, perform a beta-reduction (substitution of variables
-	 * by their values) followed by execution of the resulting tree.
+	 * by their values).
 	 *
 	 * See also the related function VariableList::substitute(),
-	 * which will simply perform a substitution, without performing
-	 * any execution. See also PutLink, which does substitution.
-	 * (actually, beta reduction).
+	 * which will simply perform a substitution.
+	 * See also PutLink, which does substitution (beta reduction).
 	 */
 	Handle walk_tree(const Handle& tree,
 	                 Instate&) const;
-	bool walk_sequence(HandleSeq&, const HandleSeq&,
-	                   Instate&) const;
 
 public:
 	Instantiator(AtomSpace* as);

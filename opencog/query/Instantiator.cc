@@ -63,47 +63,6 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 	return crud.substitute_nocheck(expr, vals);
 }
 
-/// Same as walk tree, except that it operates on a handle sequence,
-/// instead of a single handle. The returned result is in oset_results.
-/// Returns `true` if the results differ from the input, i.e. if the
-/// result of execution/evaluation changed something.
-bool Instantiator::walk_sequence(HandleSeq& oset_results,
-                                 const HandleSeq& expr,
-                                 Instate& ist) const
-{
-	bool changed = false;
-	Context cp_context = ist._context;
-	for (const Handle& h : expr)
-	{
-		Handle hg(walk_tree(h, ist));
-		ist._context = cp_context;
-		if (hg != h) changed = true;
-
-		// GlobNodes are grounded by a ListLink of everything that
-		// the GlobNode matches. Unwrap the list, and insert each
-		// of the glob elements in sequence.
-		Type ht = h->get_type();
-		if (changed and
-		    ((ist._context.is_unquoted() and GLOB_NODE == ht) or
-		    ((UNQUOTE_LINK == ht and
-		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
-		{
-			for (const Handle& gloe: hg->getOutgoingSet())
-			{
-				if (NULL != gloe)
-					oset_results.emplace_back(gloe);
-			}
-		}
-		else
-		{
-			// It could be a NULL handle if it's deleted...
-			// Just skip over it.
-			if (hg) oset_results.emplace_back(hg);
-		}
-	}
-	return changed;
-}
-
 /// walk_tree() performs beta-reduction, respecting the use of
 /// quotations and quotation contexts. This is a hack, because
 /// of a combination of two things: QuoteLink is mis-designed,
@@ -170,17 +129,44 @@ Handle Instantiator::walk_tree(const Handle& expr,
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	// Create a duplicate link, but with an outgoing set where the
-	// variables have been substituted by their values.
 	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), ist);
-	if (changed)
+	bool changed = false;
+	Context cp_context = ist._context;
+	for (const Handle& h : expr->getOutgoingSet())
 	{
-		Handle subl(createLink(std::move(oset_results), t));
-		subl->bulkCopyValues(expr);
-		return subl;
+		Handle hg(walk_tree(h, ist));
+		ist._context = cp_context;
+		if (hg != h) changed = true;
+
+		// GlobNodes are grounded by a ListLink of everything that
+		// the GlobNode matches. Unwrap the list, and insert each
+		// of the glob elements in sequence.
+		Type ht = h->get_type();
+		if (changed and
+		    ((ist._context.is_unquoted() and GLOB_NODE == ht) or
+		    ((UNQUOTE_LINK == ht and
+		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
+		{
+			for (const Handle& gloe: hg->getOutgoingSet())
+			{
+				if (NULL != gloe)
+					oset_results.emplace_back(gloe);
+			}
+		}
+		else
+		{
+			// It could be a NULL handle if it's deleted...
+			// Just skip over it.
+			if (hg) oset_results.emplace_back(hg);
+		}
 	}
-	return expr;
+	if (not changed)
+		return expr;
+
+	// Move over any Values hanging on the link.
+	Handle subl(createLink(std::move(oset_results), t));
+	subl->bulkCopyValues(expr);
+	return subl;
 }
 
 /**
