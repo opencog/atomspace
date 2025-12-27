@@ -281,38 +281,10 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// Make sure we don't consume a useful quotation
 		if (not_self_match(t))
 			ist._needless_quotation = false;
-		goto mere_recursive_call;
 	}
 
-	// Fire any other function links, not handled above.
-	if (nameserver().isA(t, FUNCTION_LINK) or
-	    nameserver().isA(t, EXECUTABLE_LINK))
-	{
-		Handle flh = beta_reduce(expr, ist._varmap);
-
-		// Some function links are guaranteed to return values.
-		// We cannot/must not execute them here.
-		Type tbr = flh->get_type();
-		if (nameserver().isA(tbr, VALUE_OF_LINK) or
-		    nameserver().isA(tbr, SET_VALUE_LINK)) return flh;
-
-		ValuePtr vp(flh->execute(_as, ist._silent));
-
-		// Executing a DeleteLink returns a nullptr
-		if (nullptr == vp)
-			return Handle::UNDEFINED;
-
-		if (vp->is_atom())
-			return HandleCast(vp);
-
-		// Hmm. Convert VoidValue and empty lists to nullptr.
-		if (0 == vp->size()) return Handle::UNDEFINED;
-		return HandleCast(createValueShimLink(vp));
-	}
-
-	// None of the above. Create a duplicate link, but with an outgoing
-	// set where the variables have been substituted by their values.
-mere_recursive_call:
+	// Create a duplicate link, but with an outgoing set where the
+	// variables have been substituted by their values.
 	HandleSeq oset_results;
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), ist);
 	if (changed)
@@ -458,6 +430,15 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 
 	if (VALUE_SHIM_LINK == grounded->get_type())
 		return grounded->execute();
+
+	// Fire any other function links, not handled above.
+	Type gt = grounded->get_type();
+	if (nameserver().isA(gt, FUNCTION_LINK) or
+	    nameserver().isA(gt, EXECUTABLE_LINK))
+	{
+		return grounded->execute(_as, ist._silent);
+	}
+
 	return grounded;
 }
 
