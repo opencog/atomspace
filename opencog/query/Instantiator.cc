@@ -208,12 +208,6 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	Instate ist(varmap);
 	ist._silent = silent;
 
-	// Since we do not actually instantiate anything, we should not
-	// consume quotations (as it might change the semantics.)
-	// We are not instantiating anything, because the map is empty.
-	if (0 == varmap.size())
-		ist._consume_quotations = false;
-
 	Type t = expr->get_type();
 
 	// Execute any DefinedPredicateNodes

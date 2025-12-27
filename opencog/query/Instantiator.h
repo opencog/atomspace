@@ -56,7 +56,6 @@ private:
 		Instate(const GroundingMap& varmap) :
 			_varmap(varmap),
 			_context(false),
-			_consume_quotations(true),
 			_halt(false)
 		{}
 		const GroundingMap& _varmap;
@@ -69,15 +68,6 @@ private:
 		 * their own scope. We must avoid damaging quotes for these atoms.
 		 */
 		Context _context;
-
-		/**
-		 * Consuming quotation should only take place when this is called
-		 * by a pattern matcher function, such as BindLink, GetLink and
-		 * PutLink, etc, as part of the substitution mechanics. Otherwise,
-		 * consuming quotes systematically may change the semantics of
-		 * the program. This flag is here to properly control that.
-		 */
-		bool _consume_quotations;
 
 		/** Avoid infinite recursion. */
 		bool _halt;
