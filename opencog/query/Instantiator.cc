@@ -32,10 +32,9 @@
 
 using namespace opencog;
 
-Instantiator::Instantiator(AtomSpace* as) : _as(as)
-{}
-
-Instantiator::Instantiator(const AtomSpacePtr& asp) : _as(asp.get())
+Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
+	_as(as),
+	_varmap(varmap)
 {}
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
@@ -68,15 +67,14 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 /// of a combination of two things: QuoteLink is mis-designed,
 /// and beta-reduction should have respected quote link. So this
 /// is here, for now.
-Handle Instantiator::walk_tree(const Handle& expr,
-                               Instate& ist) const
+Handle Instantiator::walk_tree(const Handle& expr)
 {
 	Type t = expr->get_type();
 
 	// Store the current context so we can update it for subsequent
 	// recursive calls of walk_tree.
-	Context context_cp(ist._context);
-	ist._context.update(expr);
+	Context context_cp(_context);
+	_context.update(expr);
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
@@ -87,7 +85,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
 		Handle child = expr->getOutgoingAtom(0);
-		return walk_tree(child, ist);
+		return walk_tree(child);
 	}
 
 	if (expr->is_node())
@@ -106,20 +104,20 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// If we are here, we found a free variable or glob. Look
 		// it up. Return a grounding if it has one, otherwise return
 		// the variable itself.
-		GroundingMap::const_iterator it = ist._varmap.find(expr);
-		if (ist._varmap.end() == it) return expr;
+		GroundingMap::const_iterator it = _varmap.find(expr);
+		if (_varmap.end() == it) return expr;
 
 		// Not so fast, pardner. VariableNodes can be grounded by
 		// links, and those links may be executable. In that case,
 		// we have to execute them.
 
 		// halt infinite regress
-		if (ist._halt)
+		if (_halt)
 			return expr;
 
-		ist._halt = true;
-		Handle hgnd(walk_tree(it->second, ist));
-		ist._halt = false;
+		_halt = true;
+		Handle hgnd(walk_tree(it->second));
+		_halt = false;
 		return hgnd;
 	}
 
@@ -131,11 +129,11 @@ Handle Instantiator::walk_tree(const Handle& expr,
 
 	HandleSeq oset_results;
 	bool changed = false;
-	Context cp_context = ist._context;
+	Context cp_context = _context;
 	for (const Handle& h : expr->getOutgoingSet())
 	{
-		Handle hg(walk_tree(h, ist));
-		ist._context = cp_context;
+		Handle hg(walk_tree(h));
+		_context = cp_context;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
@@ -143,7 +141,7 @@ Handle Instantiator::walk_tree(const Handle& expr,
 		// of the glob elements in sequence.
 		Type ht = h->get_type();
 		if (changed and
-		    ((ist._context.is_unquoted() and GLOB_NODE == ht) or
+		    ((_context.is_unquoted() and GLOB_NODE == ht) or
 		    ((UNQUOTE_LINK == ht and
 		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
 		{
@@ -183,16 +181,12 @@ Handle Instantiator::walk_tree(const Handle& expr,
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                   const GroundingMap& varmap,
-                                   bool silent) const
+                                   bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
-
-	Instate ist(varmap);
-	ist._silent = silent;
 
 	Type t = expr->get_type();
 
@@ -211,7 +205,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
-		ValuePtr reduced(beta_reduce(expr, ist._varmap));
+		ValuePtr reduced(beta_reduce(expr, _varmap));
 
 		// (PutLink (DeleteLink ...)) returns nullptr
 		if (nullptr == reduced) return nullptr;
@@ -225,12 +219,15 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 #endif
 
 	// Instantiate.
-	Handle grounded(walk_tree(expr, ist));
+	_context = false;
+	_halt = false;
+	_silent = silent;
+	Handle grounded(walk_tree(expr));
 
 	// Fire any other executable links, not handled above.
 	Type gt = grounded->get_type();
 	if (nameserver().isA(gt, EXECUTABLE_LINK))
-		return grounded->execute(_as, ist._silent);
+		return grounded->execute(_as, silent);
 
 	return grounded;
 }

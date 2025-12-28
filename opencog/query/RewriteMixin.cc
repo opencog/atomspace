@@ -121,8 +121,8 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 	try {
 		if (1 == _implicand.size())
 		{
-			Instantiator inst(_as);
-			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
+			Instantiator inst(_as, var_soln);
+			ValuePtr v(inst.instantiate(_implicand[0], true));
 			// AbsentLinks can result in nullptr v's
 			if (nullptr != v)
 			{
@@ -139,8 +139,8 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 			ValueSeq vs;
 			for (const Handle& himp: _implicand)
 			{
-				Instantiator inst(_as);
-				ValuePtr v(inst.instantiate(himp, var_soln, true));
+				Instantiator inst(_as, var_soln);
+				ValuePtr v(inst.instantiate(himp, true));
 				if (nullptr != v)
 				{
 					if (v->is_atom())

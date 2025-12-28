@@ -50,31 +50,22 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
+	const GroundingMap& _varmap;
 
-	struct Instate
-	{
-		Instate(const GroundingMap& varmap) :
-			_varmap(varmap),
-			_context(false),
-			_halt(false)
-		{}
-		const GroundingMap& _varmap;
+	/**
+	 * Instatiator removes first level QuoteLinks and in such cases
+	 * returns verbatim atoms. This is incorrect when the QuoteLink
+	 * occurs in any scoped link (anything inheriting from ScopeLink,
+	 * (e.g. MeetLink, QueryLink), since these handle QuoteLinks within
+	 * their own scope. We must avoid damaging quotes for these atoms.
+	 */
+	Context _context;
 
-		/**
-		 * Instatiator removes first level QuoteLinks and in such cases
-		 * returns verbatim atoms. This is incorrect when the QuoteLink
-		 * occurs in any scoped link (anything inheriting from ScopeLink,
-		 * (e.g. MeetLink, QueryLink), since these handle QuoteLinks within
-		 * their own scope. We must avoid damaging quotes for these atoms.
-		 */
-		Context _context;
+	/** Avoid infinite recursion. */
+	bool _halt;
 
-		/** Avoid infinite recursion. */
-		bool _halt;
-
-		/** Non-printing throws */
-		bool _silent;
-	};
+	/** Non-printing throws */
+	bool _silent;
 
 	/**
 	 * Recursively walk a tree starting with the root, plugging in
@@ -87,16 +78,13 @@ private:
 	 * which will simply perform a substitution.
 	 * See also PutLink, which does substitution (beta reduction).
 	 */
-	Handle walk_tree(const Handle& tree,
-	                 Instate&) const;
+	Handle walk_tree(const Handle& tree);
 
 public:
-	Instantiator(AtomSpace* as);
-	Instantiator(const AtomSpacePtr&);
+	Instantiator(AtomSpace*, const GroundingMap&);
 
 	ValuePtr instantiate(const Handle& expr,
-	                     const GroundingMap& vars,
-	                     bool silent=false) const;
+	                     bool silent=false);
 };
 
 } // namespace opencog
