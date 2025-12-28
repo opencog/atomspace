@@ -173,21 +173,7 @@ Handle Replacement::substitute_scoped(Handle term,
 				    not term->is_executable() and
 				    sub->is_executable())
 				{
-#if 0
-					// OK, there's a bit of strangeness, here.
-					// Usually, execution MUST happen in some AtomSpace.
-					// However, when running FilterLink streams, the
-					// structure to execute might contain ValueShims,
-					// which cannot be placed in an AtomSpace. So, in
-					// this case, we execute the free-floating Atom
-					// that got created. The final result will be clean
-					// but the intermediate case is not.
-					if (nullptr == sub->getAtomSpace())
-					{
-						AtomSpace* as = term->getAtomSpace();
-						sub = as->add_atom(sub);
-					}
-#endif
+					// AtomSpace* as = term->getAtomSpace();
 					ValuePtr evp = sub->execute();
 					if (evp->is_atom())
 						sub = HandleCast(evp);
