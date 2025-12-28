@@ -72,9 +72,8 @@ protected:
 	                                const IndexMap&,
 	                                bool do_exec,
 	                                Quotation quotation=Quotation());
+
 	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
-	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
-	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
 };
 
 /** @}*/
