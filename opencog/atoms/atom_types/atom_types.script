@@ -711,7 +711,7 @@ LAMBDA_LINK <- PRENEX_LINK
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
 // beta-redexes.
-PUT_LINK <- PRENEX_LINK
+PUT_LINK <- PRENEX_LINK, EXECUTABLE_LINK
 
 // The JoinLink searches for containing links that satsify the specified
 // predicates. This is the AtomSpace version of "join and meet" in a
