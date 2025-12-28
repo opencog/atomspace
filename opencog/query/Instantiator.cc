@@ -24,31 +24,6 @@
 
 using namespace opencog;
 
-/// Perform beta-reduction on the expression `expr`, using the `vmap`
-/// to fish out values for variables.  The map holds pairs: the first
-/// member of the pair is the variable; the second is the value that
-/// should be used as its replacement.  (Note that "variables" do not
-/// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
-{
-	if (vmap.empty()) return expr;
-
-	// Format conversion. FreeVariables::substitute_nocheck() performs
-	// beta-reduction correctly, so we just use that. But we have to
-	// jam the map into the format it expects.
-	HandleSeq vals;
-	FreeVariables crud;
-	unsigned int idx = 0;
-	for (const auto& pr : vmap)
-	{
-		crud.varseq.push_back(pr.first);
-		crud.index.insert({pr.first, idx});
-		vals.push_back(pr.second);
-		idx++;
-	}
-	return crud.substitute_nocheck(expr, vals);
-}
-
 /**
  * instantiate -- create a grounded expression from an ungrounded one,
  * and then execute it.  That is, beta-reduce, then execute.
@@ -84,24 +59,6 @@ ValuePtr opencog::instantiate(AtomSpace* as,
 			return defn;
 		return defn->execute(as, silent);
 	}
-
-#if 1
-	// Needed for AbsentUTest, DotLambdaTest, DotMashupTest.
-	if (PUT_LINK == t)
-	{
-		// There are vars to be beta-reduced. Reduce them.
-		ValuePtr reduced(beta_reduce(expr, varmap));
-
-		// (PutLink (DeleteLink ...)) returns nullptr
-		if (nullptr == reduced) return nullptr;
-
-		// Nothing more to do, if not an atom.
-		if (not reduced->is_atom()) return reduced;
-
-		Handle grounded(HandleCast(reduced));
-		return grounded->execute(as, silent);
-	}
-#endif
 
 	// Beta-reduce, respecting quotes
 	QuoteReduce qreduce(varmap);
