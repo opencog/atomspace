@@ -23,20 +23,117 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/scope/LambdaLink.h>
-#include <opencog/atoms/scope/PutLink.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/flow/ValueShimLink.h>
 
 #include "Instantiator.h"
 
 using namespace opencog;
 
-Instantiator::Instantiator(AtomSpace* as) : _as(as)
+Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
+	_as(as),
+	_varmap(varmap)
 {}
 
-Instantiator::Instantiator(const AtomSpacePtr& asp) : _as(asp.get())
-{}
+/// walk_tree() performs beta-reduction, respecting the use of
+/// quotations and quotation contexts. This is a hack, because
+/// of a combination of two things: QuoteLink is mis-designed,
+/// and beta-reduction should have respected quote link. So this
+/// is here, for now.
+Handle Instantiator::walk_tree(const Handle& expr)
+{
+	Type t = expr->get_type();
+
+	// Store the current context so we can update it for subsequent
+	// recursive calls of walk_tree.
+	Context context_cp(_context);
+	_context.update(expr);
+
+	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
+	// as it is serving its quoting or unquoting function.
+	if (context_cp.consumable(t))
+	{
+		if (1 != expr->get_arity())
+			throw InvalidParamException(TRACE_INFO,
+			                            "QuoteLink/UnquoteLink has "
+			                            "unexpected arity!");
+		Handle child = expr->getOutgoingAtom(0);
+		return walk_tree(child);
+	}
+
+	if (expr->is_node())
+	{
+		if (context_cp.is_quoted())
+			return expr;
+
+		if (VARIABLE_NODE != t and GLOB_NODE != t)
+			return expr;
+
+		// If it is a quoted or shadowed variable don't substitute.
+		// TODO: what about globs?
+		if (VARIABLE_NODE == t and not context_cp.is_free_variable(expr))
+			return expr;
+
+		// If we are here, we found a free variable or glob. Look
+		// it up. Return a grounding if it has one, otherwise return
+		// the variable itself.
+		GroundingMap::const_iterator it = _varmap.find(expr);
+		if (_varmap.end() == it) return expr;
+
+		// Halt infinite regress. This can happen when the Variable
+		// has a grounding that contains Variables ... etc.
+		if (_halt)
+			return expr;
+
+		_halt = true;
+		Handle hgnd(walk_tree(it->second));
+		_halt = false;
+		return hgnd;
+	}
+
+	// -----------------------------------------------------------
+	// If we are here, then we have a link. Walk it. In general,
+	// links may contain both bound variables, and also free variables.
+	// We must be careful to substitute only for free variables, and
+	// never for bound ones.
+
+	HandleSeq oset_results;
+	bool changed = false;
+	Context save_context = _context;
+	for (const Handle& h : expr->getOutgoingSet())
+	{
+		Handle hg(walk_tree(h));
+		_context = save_context;
+		if (hg != h) changed = true;
+
+		// GlobNodes are grounded by a ListLink of everything that
+		// the GlobNode matches. Unwrap the list, and insert each
+		// of the glob elements in sequence.
+		Type ht = h->get_type();
+		if (changed and
+		    ((_context.is_unquoted() and GLOB_NODE == ht) or
+		    ((UNQUOTE_LINK == ht and
+		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
+		{
+			for (const Handle& gloe: hg->getOutgoingSet())
+			{
+				if (NULL != gloe)
+					oset_results.emplace_back(gloe);
+			}
+		}
+		else
+		{
+			// It could be a NULL handle if it's deleted...
+			// Just skip over it.
+			if (hg) oset_results.emplace_back(hg);
+		}
+	}
+	if (not changed)
+		return expr;
+
+	// Move over any Values hanging on the link.
+	Handle subl(createLink(std::move(oset_results), t));
+	subl->bulkCopyValues(expr);
+	return subl;
+}
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
@@ -63,251 +160,6 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 	return crud.substitute_nocheck(expr, vals);
 }
 
-/// Same as walk tree, except that it operates on a handle sequence,
-/// instead of a single handle. The returned result is in oset_results.
-/// Returns `true` if the results differ from the input, i.e. if the
-/// result of execution/evaluation changed something.
-bool Instantiator::walk_sequence(HandleSeq& oset_results,
-                                 const HandleSeq& expr,
-                                 Instate& ist) const
-{
-	bool changed = false;
-	Context cp_context = ist._context;
-	for (const Handle& h : expr)
-	{
-		if (nameserver().isA(h->get_type(), EVALUATABLE_LINK))
-			ist._inside_evaluation = true;
-
-		Handle hg(walk_tree(h, ist));
-		ist._context = cp_context;
-		if (hg != h) changed = true;
-
-		// GlobNodes are grounded by a ListLink of everything that
-		// the GlobNode matches. Unwrap the list, and insert each
-		// of the glob elements in sequence.
-		Type ht = h->get_type();
-		if (changed and
-		    ((ist._context.is_unquoted() and GLOB_NODE == ht) or
-		    ((UNQUOTE_LINK == ht and
-		      GLOB_NODE == h->getOutgoingAtom(0)->get_type()))))
-		{
-			for (const Handle& gloe: hg->getOutgoingSet())
-			{
-				if (NULL != gloe)
-					oset_results.emplace_back(gloe);
-			}
-		}
-		else
-		{
-			// It could be a NULL handle if it's deleted...
-			// Just skip over it.
-			if (hg) oset_results.emplace_back(hg);
-		}
-	}
-	return changed;
-}
-
-/// ExecutionOutputLinks get special treatment.
-///
-/// Even for the case of lazy execution, we still have to do eager
-/// execution of the arguments passed to the ExOutLink.  This is
-/// because the ExOutLink is a black box, and we cannot guess what
-/// it might do.  It would be great if the authors of ExOutLinks
-/// did the lazy execution themselves... but this is too much to
-/// ask for. So we always eager-evaluate those args.
-Handle Instantiator::reduce_exout(const Handle& expr,
-                                  Instate& ist) const
-{
-	ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-
-	// At this time, the GSN or the DSN is always in position 0
-	// of the outgoing set, and the ListLink of arguments is always
-	// in position 1.  Someday in the future, there may be a variable
-	// declaration; we punt on that.
-	Handle sn(eolp->get_schema());
-	Handle args(eolp->get_args());
-
-	sn = beta_reduce(sn, ist._varmap);
-
-	// If its an anonymous function link, execute it here.
-	if (LAMBDA_LINK == sn->get_type())
-	{
-		LambdaLinkPtr flp(LambdaLinkCast(sn));
-
-		// Three-step process. First, beta-reduce the args; second,
-		// plug the args into the function. Third, execute (not here,
-		// but by the caller).
-		Handle body(flp->get_body());
-		Variables vars(flp->get_variables());
-
-		// Perform substitution on the args, only.
-		args = beta_reduce(args, ist._varmap);
-		return vars.substitute_nocheck(body, {args});
-	}
-
-	// Perform substitution on the args, only.
-	args = beta_reduce(args, ist._varmap);
-
-	Type t = expr->get_type();
-	return createLink(t, sn, args);
-}
-
-/// walk_tree() performs a kind-of eager-evaluation of function arguments.
-/// The code in here is a mashup of several different ideas that are not
-/// cleanly separated from each other. (XXX FIXME, these need to be
-/// cleanly separated; its impeding overall clean design/implementation.)
-/// Roughly, it goes like so:
-///
-/// First, walk downwards to the leaves of the tree. As we return back up,
-/// if any free variables are encountered, then replace those variables
-/// with the groundings held in `varmap`. This is basic beta-reduction.
-///
-/// Second, during the above process, if any executable functions are
-/// encountered, then execute them. This is "eager-execution".  The
-/// results of that execution are plugged into the tree, and so we keep
-/// returning upwards, back to the root.
-///
-/// One problem with eager execution is that it disallows recursive
-/// functions: if `f(x)` itself calls `f`, then eager execution results
-/// in the infinite loop `f(f(f(f(....))))` that never terminates, the
-/// problem being that any possible termination condition inside of `f`
-/// is never hit. (c.f. The textbook-classic recursive implementation of
-/// factorial.)
-///
-/// Another problem with eager execution is that many Atoms now return
-/// Values when executed. These Values cannot be stored in a HandleSeq.
-/// This makes passing them "upwards", flowing them through the caller
-/// tree problematic.
-///
-/// There does not seem to be any easy way of refactoring this code.
-///
-/// This can be contrasted with `beta_reduce()` up above, which performs
-/// the substitution only, but does NOT perform an execution at all.
-///
-/// So, here's the funny bit: sometimes, `walk_tree` does do
-/// lazy-execution, sometimes. In the current version, when it
-/// encounters a function to be executed, it mostly just performs the
-/// substitution on the function args, and then executes the function.
-/// Its up to the function itself to get more done, as needed.
-///
-Handle Instantiator::walk_tree(const Handle& expr,
-                               Instate& ist) const
-{
-	Type t = expr->get_type();
-
-	// Store the current context so we can update it for subsequent
-	// recursive calls of walk_tree.
-	Context context_cp(ist._context);
-	ist._context.update(expr);
-
-	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
-	// as it is serving its quoting or unquoting function.
-	if ((ist._consume_quotations or ist._needless_quotation) and
-	    context_cp.consumable(t))
-	{
-		if (1 != expr->get_arity())
-			throw InvalidParamException(TRACE_INFO,
-			                            "QuoteLink/UnquoteLink has "
-			                            "unexpected arity!");
-		Handle child = expr->getOutgoingAtom(0);
-		Handle walked_child = walk_tree(child, ist);
-
-		// Only consume if the quotation is really needless (walking
-		// the children might have changed _needless_quotation).
-		if (ist._consume_quotations or ist._needless_quotation)
-			return walked_child;
-
-		// Otherwise keep the quotation, but set _needless_quotation
-		// back to true for the remaining tree
-		ist._needless_quotation = true;
-		Handle nexp(createLink(t, walked_child));
-		nexp->bulkCopyValues(expr);
-		return nexp;
-	}
-
-	if (expr->is_node())
-	{
-		if (context_cp.is_quoted())
-		{
-			// Make sure we don't consume a useful quotation
-			if (not_self_match(t))
-				ist._needless_quotation = false;
-
-			return expr;
-		}
-
-#if 1 // Needed for DefinedSchemaUTest
-		// If we are here, we are a Node.
-		if (DEFINED_SCHEMA_NODE == t)
-			return walk_tree(DefineLink::get_definition(expr), ist);
-#endif
-
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
-			return expr;
-
-		// If it is a quoted or shadowed variable don't substitute.
-		// TODO: what about globs?
-		if (VARIABLE_NODE == t and not context_cp.is_free_variable(expr))
-			return expr;
-
-		// If we are here, we found a free variable or glob. Look
-		// it up. Return a grounding if it has one, otherwise return
-		// the variable itself.
-		GroundingMap::const_iterator it = ist._varmap.find(expr);
-		if (ist._varmap.end() == it) return expr;
-
-		// Not so fast, pardner. VariableNodes can be grounded by
-		// links, and those links may be executable. In that case,
-		// we have to execute them.
-
-		// halt infinite regress
-		if (ist._halt)
-			return expr;
-
-		ist._halt = true;
-		Handle hgnd(walk_tree(it->second, ist));
-		ist._halt = false;
-		return hgnd;
-	}
-
-	// -----------------------------------------------------------
-	// If we are here, then we have a link. Walk it. In general,
-	// links may contain both bound variables, and also free variables.
-	// We must be careful to substitute only for free variables, and
-	// never for bound ones.
-
-	if (context_cp.is_quoted())
-	{
-		// Make sure we don't consume a useful quotation
-		if (not_self_match(t))
-			ist._needless_quotation = false;
-	}
-
-	// Create a duplicate link, but with an outgoing set where the
-	// variables have been substituted by their values.
-	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), ist);
-	if (changed)
-	{
-		Handle subl(createLink(std::move(oset_results), t));
-		subl->bulkCopyValues(expr);
-		return subl;
-	}
-	return expr;
-}
-
-bool Instantiator::not_self_match(Type t)
-{
-	return nameserver().isA(t, SCOPE_LINK) or
-		nameserver().isA(t, FUNCTION_LINK) or
-		nameserver().isA(t, DELETE_LINK) or
-		nameserver().isA(t, VIRTUAL_LINK) or
-		nameserver().isA(t, DEFINE_LINK) or
-		nameserver().isA(t, DEFINED_SCHEMA_NODE) or
-		nameserver().isA(t, DEFINED_PREDICATE_NODE) or
-		nameserver().isA(t, DONT_EXEC_LINK);
-}
-
 /**
  * instantiate -- create a grounded expression from an ungrounded one.
  *
@@ -322,30 +174,22 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ValuePtr Instantiator::instantiate(const Handle& expr,
-                                   const GroundingMap& varmap,
-                                   bool silent) const
+                                   bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	Instate ist(varmap);
-	ist._inside_evaluation = false;
-	ist._silent = silent;
-
-	// Since we do not actually instantiate anything, we should not
-	// consume quotations (as it might change the semantics.)
-	// We are not instantiating anything, because the map is empty.
-	if (0 == varmap.size())
-		ist._consume_quotations = false;
-
 	Type t = expr->get_type();
 
 	// Execute any DefinedPredicateNodes
-	if (nameserver().isA(t, DEFINED_PREDICATE_NODE))
+	if (nameserver().isA(t, DEFINED_PREDICATE_NODE) or
+	    nameserver().isA(t, DEFINED_SCHEMA_NODE))
 	{
 		Handle defn(DefineLink::get_definition(expr));
+		if (not defn->is_executable())
+			return defn;
 		return defn->execute(_as, silent);
 	}
 
@@ -354,7 +198,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
-		ValuePtr reduced(beta_reduce(expr, ist._varmap));
+		ValuePtr reduced(beta_reduce(expr, _varmap));
 
 		// (PutLink (DeleteLink ...)) returns nullptr
 		if (nullptr == reduced) return nullptr;
@@ -368,72 +212,17 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 #endif
 
 	// Instantiate.
-	Handle grounded(walk_tree(expr, ist));
+	_context = false;
+	_halt = false;
+	_silent = silent;
+	Handle grounded(walk_tree(expr));
 
 	// Fire any other executable links, not handled above.
 	Type gt = grounded->get_type();
 	if (nameserver().isA(gt, EXECUTABLE_LINK))
-		return grounded->execute(_as, ist._silent);
+		return grounded->execute(_as, silent);
 
 	return grounded;
-}
-
-ValuePtr Instantiator::execute(const Handle& expr, bool silent)
-{
-	// Check for crazy cross-atomspace woes
-	AtomSpace* exas = expr->getAtomSpace();
-	if (nullptr != exas and not _as->in_environ(expr))
-		throw RuntimeException(TRACE_INFO,
-			"Can't execute: current AtomSpace is %s but atom is in AtomSpace %s",
-			_as->get_name().c_str(), exas->get_name().c_str());
-
-	// Expand on the spot.
-	if (expr->is_type(DEFINED_SCHEMA_NODE))
-	{
-		Handle dex = DefineLink::get_definition(expr);
-		if (dex->is_type(EXECUTABLE_LINK))
-			return dex->execute(_as, silent);
-	}
-
-#if NOT_YET
-	// This is what we want to do. But unit tests fail if we do this.
-	if (expr->is_type(PUT_LINK))
-		return expr->execute(_as, silent);
-#endif
-
-	// Try to execute directly, if possible. Not everything is
-	// capable of this, yet. The ones that are, we've tagged as
-	// being of type EXECUTABLE_LINK in the type definitions.
-	// This is a quasi-bogus work-around, but it *does* make it
-	// possible for external libraries defining thier own executable
-	// atoms to get executed immediately, here, instead of flowing
-	// through the instantiator.
-	//
-	// if (expr->is_executable())
-	if (expr->is_type(EXECUTABLE_LINK))
-		return expr->execute(_as, silent);
-	if (expr->is_type(EVALUATION_LINK))
-		return expr->execute(_as, silent);
-	if (expr->is_type(EVALUATABLE_LINK))
-		return expr->execute(_as, silent);
-
-	if (expr->is_type(NODE) and expr->is_executable())
-		return expr->execute(_as, silent);
-
-	// XXX FIXME, we need to get rid of this call entirely, and just
-	// return expr->execute(_as, silent) instead, like above.
-	// However, assorted parts are still broken and don't work.
-	ValuePtr vp(instantiate(expr, GroundingMap(), silent));
-
-	// PutLink is incompletely evaluated, above. Finish the job here.
-	if (expr->get_type() == PUT_LINK
-	    and vp and vp->is_atom())
-	{
-		Handle h(HandleCast(vp));
-		if (h->is_executable()) return h->execute();
-	}
-
-	return vp;
 }
 
 /* ===================== END OF FILE ===================== */
