@@ -28,8 +28,7 @@
 
 using namespace opencog;
 
-Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
-	_as(as),
+QuoteReduce::QuoteReduce(const GroundingMap& varmap) :
 	_varmap(varmap),
 	_context(false),
 	_halt(false),
@@ -41,7 +40,7 @@ Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
 /// of a combination of two things: QuoteLink is mis-designed,
 /// and beta-reduction should have respected quote link. So this
 /// is here, for now.
-Handle Instantiator::walk_tree(const Handle& expr)
+Handle QuoteReduce::walk_tree(const Handle& expr)
 {
 	Type t = expr->get_type();
 
@@ -217,8 +216,8 @@ ValuePtr opencog::instantiate(AtomSpace* as,
 #endif
 
 	// Instantiate.
-	Instantiator inst(as, varmap);
-	Handle grounded(inst.walk_tree(expr));
+	QuoteReduce qreduce(varmap);
+	Handle grounded(qreduce.walk_tree(expr));
 
 	// Fire any other executable links, not handled above.
 	Type gt = grounded->get_type();
