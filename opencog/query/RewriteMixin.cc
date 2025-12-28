@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/Instantiator.h>
 
 #include "RewriteMixin.h"
 
@@ -29,7 +30,7 @@ using namespace opencog;
 
 RewriteMixin::RewriteMixin(AtomSpace* as, ContainerValuePtr& qvp)
 	: _as(as), _result_queue(qvp),
-	_num_results(0), inst(as), max_results(SIZE_MAX)
+	_num_results(0), max_results(SIZE_MAX)
 {
 }
 
@@ -120,6 +121,7 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 	try {
 		if (1 == _implicand.size())
 		{
+			Instantiator inst(_as);
 			ValuePtr v(inst.instantiate(_implicand[0], var_soln, true));
 			// AbsentLinks can result in nullptr v's
 			if (nullptr != v)
@@ -137,6 +139,7 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 			ValueSeq vs;
 			for (const Handle& himp: _implicand)
 			{
+				Instantiator inst(_as);
 				ValuePtr v(inst.instantiate(himp, var_soln, true));
 				if (nullptr != v)
 				{
