@@ -372,6 +372,8 @@ void QuoteUTest::xtest_quote_glob(void)
     TS_ASSERT_EQUALS(1, hs.size());
 
     Handle ex = eval->eval_h("expect");
+    logger().debug("Expected: %s", ex->to_string().c_str());
+    logger().debug("Got: %s", hs[0]->to_string().c_str());
     TS_ASSERT_EQUALS(ex, hs[0]);
 
     logger().debug("END TEST: %s", __FUNCTION__);
