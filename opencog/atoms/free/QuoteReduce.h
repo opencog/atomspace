@@ -43,21 +43,7 @@ class QuoteReduce
 {
 private:
 	const GroundingMap& _varmap;
-
-	/**
-	 * Reduction removes first level QuoteLinks and in such cases
-	 * returns verbatim atoms. This is incorrect when the QuoteLink
-	 * occurs in any scoped link (anything inheriting from ScopeLink,
-	 * (e.g. MeetLink, QueryLink), since these handle QuoteLinks within
-	 * their own scope. We must avoid damaging quotes for these atoms.
-	 * (??? What ???)
-	 */
-	Context _context;
-
-	/** Avoid infinite recursion. */
 	bool _halt;
-
-	/** Non-printing throws */
 	bool _silent;
 
 public:
@@ -67,7 +53,7 @@ public:
 	 * Recursively walk a tree starting with the root, plugging in
 	 * variables from the `_varmap`, respecting quotations.
 	 */
-	Handle walk_tree(const Handle& tree);
+	Handle walk_tree(const Handle& tree, const Context& = false);
 };
 
 } // namespace opencog
