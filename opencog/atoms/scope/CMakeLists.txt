@@ -8,6 +8,7 @@ ADD_LIBRARY (scope
 	LambdaLink.cc
 	PrenexLink.cc
 	PutLink.cc
+	QuoteReduce.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	TypedVariableLink.cc
@@ -37,6 +38,7 @@ INSTALL (FILES
 	LambdaLink.h
 	PrenexLink.h
 	PutLink.h
+	QuoteReduce.h
 	RewriteLink.h
 	ScopeLink.h
 	TypedVariableLink.h
