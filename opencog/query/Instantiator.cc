@@ -30,7 +30,10 @@ using namespace opencog;
 
 Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
 	_as(as),
-	_varmap(varmap)
+	_varmap(varmap),
+	_context(false),
+	_halt(false),
+	_silent(false)
 {}
 
 /// walk_tree() performs beta-reduction, respecting the use of
@@ -173,8 +176,10 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-ValuePtr Instantiator::instantiate(const Handle& expr,
-                                   bool silent)
+ValuePtr opencog::instantiate(AtomSpace* as,
+                              const GroundingMap& varmap,
+                              const Handle& expr,
+                              bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
@@ -190,7 +195,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		Handle defn(DefineLink::get_definition(expr));
 		if (not defn->is_executable())
 			return defn;
-		return defn->execute(_as, silent);
+		return defn->execute(as, silent);
 	}
 
 #if 1
@@ -198,7 +203,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	if (PUT_LINK == t)
 	{
 		// There are vars to be beta-reduced. Reduce them.
-		ValuePtr reduced(beta_reduce(expr, _varmap));
+		ValuePtr reduced(beta_reduce(expr, varmap));
 
 		// (PutLink (DeleteLink ...)) returns nullptr
 		if (nullptr == reduced) return nullptr;
@@ -207,20 +212,18 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 		if (not reduced->is_atom()) return reduced;
 
 		Handle grounded(HandleCast(reduced));
-		return grounded->execute(_as, silent);
+		return grounded->execute(as, silent);
 	}
 #endif
 
 	// Instantiate.
-	_context = false;
-	_halt = false;
-	_silent = silent;
-	Handle grounded(walk_tree(expr));
+	Instantiator inst(as, varmap);
+	Handle grounded(inst.walk_tree(expr));
 
 	// Fire any other executable links, not handled above.
 	Type gt = grounded->get_type();
 	if (nameserver().isA(gt, EXECUTABLE_LINK))
-		return grounded->execute(_as, silent);
+		return grounded->execute(as, silent);
 
 	return grounded;
 }

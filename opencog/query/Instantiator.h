@@ -67,6 +67,9 @@ private:
 	/** Non-printing throws */
 	bool _silent;
 
+public:
+	Instantiator(AtomSpace*, const GroundingMap&);
+
 	/**
 	 * Recursively walk a tree starting with the root, plugging in
 	 * variables from the `_varmap`, respecting quotations.
@@ -79,13 +82,12 @@ private:
 	 * See also PutLink, which does substitution (beta reduction).
 	 */
 	Handle walk_tree(const Handle& tree);
-
-public:
-	Instantiator(AtomSpace*, const GroundingMap&);
-
-	ValuePtr instantiate(const Handle& expr,
-	                     bool silent=false);
 };
+
+ValuePtr instantiate(AtomSpace*,
+                     const GroundingMap&,
+                     const Handle& expr,
+                     bool silent=false);
 
 } // namespace opencog
 
