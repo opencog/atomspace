@@ -23,10 +23,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/scope/LambdaLink.h>
-#include <opencog/atoms/scope/PutLink.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/flow/ValueShimLink.h>
 
 #include "Instantiator.h"
 
@@ -107,11 +103,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		GroundingMap::const_iterator it = _varmap.find(expr);
 		if (_varmap.end() == it) return expr;
 
-		// Not so fast, pardner. VariableNodes can be grounded by
-		// links, and those links may be executable. In that case,
-		// we have to execute them.
-
-		// halt infinite regress
+		// Halt infinite regress. This can happen when the Variable
+		// has a grounding that contains Variables ... etc.
 		if (_halt)
 			return expr;
 
