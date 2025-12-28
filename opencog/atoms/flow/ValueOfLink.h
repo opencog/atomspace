@@ -51,6 +51,10 @@ public:
 	// Return a pointer to the value at the specified key.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
+	// Experimental crazy hack...
+	bool is_evaluatable(void) const { return BOOL_VALUE_OF_LINK == _type; }
+	bool bevaluate(AtomSpace*, bool);
+
 	static Handle factory(const Handle&);
 };
 

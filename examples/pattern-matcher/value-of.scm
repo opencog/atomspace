@@ -7,7 +7,7 @@
 ; to select the desired value, and then using GreaterThan to compare.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))

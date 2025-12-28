@@ -5,7 +5,7 @@
 ; of random floating-point values.
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; First, define a key and an atom, and attach an ordinary value
 ; to the atom, for the given key.

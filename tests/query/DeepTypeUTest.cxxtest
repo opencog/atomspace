@@ -43,8 +43,8 @@ public:
 		logger().set_sync_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
-		eval->eval("(use-modules (opencog exec) (opencog type-utils))");
+		eval = SchemeEval::get_scheme_evaluator(as);
+		eval->eval("(use-modules (opencog type-utils))");
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 

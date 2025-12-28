@@ -211,19 +211,27 @@ bool AtomSpace::operator==(const Atom& other) const
     return get_name() == other.get_name();
 }
 
+// Imlementation is the same as Node::operator<()
 bool AtomSpace::operator<(const Atom& other) const
 {
     // If other points to this, then have equality.
     if (this == &other) return false;
 
-    if (ATOM_SPACE != other.get_type()) return false;
-    AtomSpace* asp = (AtomSpace*) &other;
-    return _uuid  < (asp->_uuid);
+    ContentHash cht = get_hash();
+    ContentHash cho = other.get_hash();
+    if (cht != cho) return cht < cho;
+
+    // We get to here only if the hashes are equal. This is
+    // extremely unlikely; it requires a 64-bit hash collision.
+    // Compare the contents directly, for this case.
+    if (get_type() != other.get_type())
+        return get_type() < other.get_type();
+
+    return get_name() < other.get_name();
 }
 
 ContentHash AtomSpace::compute_hash() const
 {
-	if (_name.empty()) return _uuid;
 	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// Nodes will never have the MSB set.
@@ -253,35 +261,6 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 {
 	if (_outgoing.size() <= n) return Handle::UNDEFINED;
 	return _outgoing[n];
-}
-
-void AtomSpace::setAtomSpace(AtomSpace* as)
-{
-	if (as == _atom_space) return;
-
-	// This is identical to the code in Atom::setAtomSpace() except that
-	// we print a different error message. I see nothing wrong with
-	// having one AtomSpace be placed as a member into many others,
-	// except that we don't have any viable mechanisms for such multiple
-	// membership, and so I don't know how to treat this right now.
-	// Fixme maybe later someday, if/when this is needed.
-	//
-	// Note, however, weird stuff can happen. Just now, Claude tried to
-	// do this:
-	//     (define main-as (cog-atomspace))
-	//     (define child-as (cog-new-atomspace main-as))
-	//     (cog-set-atomspace! main-as)
-	//     (cog-execute! (AtomSpaceOf child-as))
-	// This would have caused the chiled to be placed in a Link being held
-	// in the main AS, which is not exactly circular, but fringes onto it.
-	// The wisdom of allowing something like this is unclear.
-	if (not (nullptr == _atom_space or as == nullptr))
-		throw RuntimeException(TRACE_INFO,
-			"At this time, an AtomSpace can only be placed in one other\n"
-			"AtomSpace. If you are reading this error message and you don't\n"
-			"like it, please open a bug report\n");
-
-	_atom_space = as;
 }
 
 // ====================================================================
@@ -447,7 +426,14 @@ Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
                             const ValuePtr& value)
 {
-   #define SETV(atm) atm->setValue(key, value);
+	// Skip R/O and COW checking if key is a message.
+	if (h->usesMessage(key))
+	{
+		h->setValue(key, value);
+		return h;
+	}
+
+	#define SETV(atm) atm->setValue(key, value);
 	COWBOY_CODE(SETV);
 }
 

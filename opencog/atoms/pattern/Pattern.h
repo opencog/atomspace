@@ -73,7 +73,7 @@ struct Pattern
 	typedef std::pair<Handle, PatternTermPtr> AtomInClausePair;
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
-	Pattern() : group_min_size(0), group_max_size(-1), have_evaluatables(false) {}
+	Pattern() : have_evaluatables(false) {}
 
 	// -------------------------------------------
 	/// The current set of clauses (beta redex context) being grounded.
@@ -95,12 +95,23 @@ struct Pattern
 	/// way. Any grounding failure at all invalidates all other groundings.
 	PatternTermSeq always;
 
-	/// The group-by (for-all-in-this-group) clauses have to always be
-	/// grounded the same way, in the grouping. All groundings in a
-	/// grouping will have *identical* groundings for the grouping.
-	PatternTermSeq grouping;
-	long group_min_size;
-	long group_max_size;
+	/// ExclusiveLink terms that operate within a single component.
+	/// Variables in an ExclusiveLink must have distinct groundings.
+	/// These can use constraint propagation during permutation search.
+	PatternTermSeq exclusives;
+
+	/// ExclusiveLink terms that bridge multiple components.
+	/// These must be treated as virtual links (filter Cartesian product).
+	PatternTermSeq exclusive_virtuals;
+
+	/// Map from variable to ExclusiveLinks it participates in.
+	/// Used at runtime for quick lookup during constraint propagation.
+	std::map<Handle, PatternTermSeq> var_exclusives;
+
+	/// For each ExclusiveLink, the list of variables it contains.
+	/// Variables in the same group must have distinct groundings.
+	/// Computed once during pattern analysis.
+	HandleSeqSeq exclusive_var_groups;
 
 	/// Evaluatable terms are those that need to be evaluated to
 	/// find out if they hold true. For example, GreaterThanLink,
@@ -137,6 +148,16 @@ struct Pattern
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Pattern& pattern,
                          const std::string& indent=empty_string);
+
+/// A connected component of a pattern. Patterns may consist of multiple
+/// disconnected subgraphs; each is placed into its own `PatternParts` struct.
+struct PatternParts
+{
+	Handle _part_pattern;      // compiled PatternLink for this component
+	HandleSet _part_vars;      // variables in this component
+	HandleSeq _part_clauses;   // clauses in this component
+};
+typedef std::vector<PatternParts> PartsSeq;
 
 /** @}*/
 } // namespace opencog

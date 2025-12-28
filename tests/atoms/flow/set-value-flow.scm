@@ -2,12 +2,14 @@
 ; value-flows.scm -- Flowing Values unit test.
 ; Copy of /examples/atomspace/flows.scm
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define foo (Concept "foo"))
 (define bar (Concept "bar"))
+(define baz (Concept "baz"))
 (define key (Predicate "some key"))
 (define kee (Predicate "other key"))
+(define kay (Predicate "third key"))
 
 ; Expected results
 (define seq (FloatValue 1 2 3 4 5))
@@ -33,6 +35,23 @@
 
 (define triangle
 	(SetValue bar kee
+		(DefinedProcedure "triangle numbers")
+		(FloatValueOf foo key)))
+
+; ============================================================
+; Test SetValueOn - returns Atom instead of Value
+; ============================================================
+
+; SetValueOn copy test - should return the Atom (baz), not the Value
+(define set-value-on (SetValueOn baz kee (FloatValueOf foo key)))
+
+; SetValueOn with math - should return the Atom (baz), not the Value
+(define square-on (SetValueOn baz kay
+	(Times (FloatValueOf foo key) (FloatValueOf foo key))))
+
+; SetValueOn with formula - should return the Atom (baz), not the Value
+(define triangle-on
+	(SetValueOn baz kay
 		(DefinedProcedure "triangle numbers")
 		(FloatValueOf foo key)))
 ;

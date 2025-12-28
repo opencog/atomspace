@@ -37,7 +37,7 @@ OPENCOG_GEN_CXX_ATOMTYPES(chem_types.script
 # As above, but the guile scheme bindings are generated.
 OPENCOG_GEN_SCM_ATOMTYPES(chem_types.script chem_types.scm)
 
-IF (HAVE_PYTHON)
+IF (HAVE_CYTHON)
 	# Same, for Python.
 	OPENCOG_GEN_PYTHON_ATOMTYPES(chem_types.script chem_types.pyx)
 ENDIF ()
@@ -46,9 +46,9 @@ ENDIF ()
 # that the bindings are built before any code that uses the bindings.
 # For example, this is used in the `apps` CMakefile, to make sure that
 # the types are built before the apps.
-IF (HAVE_PYTHON)
+IF (HAVE_CYTHON)
 	SET(CHEM_TYPES_PYX chem_types.pyx)
-ENDIF (HAVE_PYTHON)
+ENDIF (HAVE_CYTHON)
 
 ADD_CUSTOM_TARGET(chem_demo_atom_types
 	DEPENDS chem_types.h chem_types.scm ${CHEM_TYPES_PYX}
@@ -129,10 +129,10 @@ ADD_GUILE_MODULE (FILES
 # --------------------------------------------------------------
 # Part Four: Build the Python module
 
-if (HAVE_PYTHON)
+IF (HAVE_CYTHON)
 # Specify the location of the Python.h header file
 INCLUDE_DIRECTORIES(
-	${PYTHON_INCLUDE_DIRS}
+	${Python3_INCLUDE_DIRS}
 )
 
 # The main python module is defined in chempydemo.pyx
@@ -147,10 +147,21 @@ ADD_LIBRARY(chempydemo SHARED
 	chempydemo.cpp
 )
 
+# Tell Cython-generated code to use C linkage for extern declarations
+# since chem_types_init is declared with extern "C" in the source.
+TARGET_COMPILE_DEFINITIONS(chempydemo PRIVATE
+	CYTHON_EXTERN_C=extern\ \"C\"
+)
+
+# Use --no-as-needed to force linking chem-demo-types even though the
+# chem_types_init symbol is only referenced via cython extern, not
+# direct C++ code.
 TARGET_LINK_LIBRARIES(chempydemo
+	-Wl,--no-as-needed
 	chem-demo-types
+	-Wl,--as-needed
 	${ATOMSPACE_LIBRARIES}
-	${PYTHON_LIBRARIES}
+	${Python3_LIBRARIES}
 )
 
 # ... except python doesn't like modules called `libfoo.so` It wants
@@ -160,14 +171,14 @@ SET_TARGET_PROPERTIES(chempydemo PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME chempydemo)
 
-ENDIF (HAVE_PYTHON)
+ENDIF (HAVE_CYTHON)
 # --------------------------------------------------------------
 # Part Five: Install the demo system into the root file system.
 #
 # Install the C++ shared library.
 INSTALL (TARGETS
 	chem-demo-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
@@ -191,12 +202,12 @@ INSTALL(
 	RENAME chemodemo-config.scm
 )
 
-IF (HAVE_PYTHON)
+IF (HAVE_CYTHON)
 INSTALL(TARGETS
 	chempydemo
 	DESTINATION "${PYTHON_DEST}"
 )
-ENDIF (HAVE_PYTHON)
+ENDIF (HAVE_CYTHON)
 
 # The below allows you to install the above by saying
 # `sudo make install-demotypes`

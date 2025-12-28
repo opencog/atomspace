@@ -6,18 +6,11 @@
 #
 # --------------------------------------------------------------
 
-# Import the AtomSpace, and the basic AtomSpace types
-from opencog.atomspace import AtomSpace
-from opencog.type_constructors import *
+# Import the basic AtomSpace types
+from opencog.atomspace import *
 
 # Import all of the chemical element types, and bond types too.
 from opencog.chempydemo import *
-
-# Nothing works without a default AtomSpace, so create that first.
-spa = AtomSpace()
-set_default_atomspace(spa)
-
-print(f'Hello! The AtomSpace is {str(spa)}')
 
 # Lets create a Magnesium atom named 'foo'
 Mg('foo')
@@ -44,7 +37,8 @@ c14 = Carbon14Node('found in wood')
 
 print(f'The carbon-14 atom is {str(c14)}')
 decay_products = c14.execute()
-print(f'The carbon-14 decay products are {str(decay_products)}')
+print(f'The carbon-14 decay products are {str(decay_products)}\n')
 
+print('Very funny! That\'s the end of the demo!')
 # The end.
 # That's all, folks!

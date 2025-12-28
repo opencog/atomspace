@@ -1,6 +1,8 @@
+#! /usr/bin/env guile
+-s
+!#
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog python))
 (use-modules (opencog test-runner))
 
@@ -16,17 +18,15 @@
 
 ; Define a python func returning a FloatValue
 (python-eval "
-from opencog.atomspace import AtomSpace, types, tvkey, createFloatValue
-from opencog.type_constructors import get_default_atomspace
-
+from opencog.atomspace import *
+from opencog.atomspace import tvkey, createFloatValue
 
 # Twiddle some atoms in the atomspace
 def foo(atom_a, atom_b):
-    atomspace = get_default_atomspace()
-    apple = atomspace.add_node(types.ConceptNode, 'Apple')
+    apple = Concept('Apple')
     TV = createFloatValue([0.2, 0.69])
-    apple.set_value(tvkey, TV)
-    atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
+    get_thread_atomspace().set_value(apple, tvkey, TV)
+    Inheritance(atom_a, atom_b)
     return createFloatValue([0.42, 0.24])
 ")
 

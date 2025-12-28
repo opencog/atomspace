@@ -3,7 +3,7 @@
 ;
 ; Reported in issue #1825
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define partition
 

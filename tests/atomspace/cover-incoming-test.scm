@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; cover-incoming-test.scm
 ; Verify that incoming sets are correctly computed in nested
@@ -16,13 +19,13 @@
 ; Common setup, used by all tests.
 
 (define base-space (cog-atomspace))
-(define mid1-space (cog-new-atomspace base-space))
-(define mid2-space (cog-new-atomspace mid1-space))
-(define mid3-space (cog-new-atomspace mid2-space))
-(define mid4-space (cog-new-atomspace mid3-space))
-(define mid5-space (cog-new-atomspace mid4-space))
-(define mid6-space (cog-new-atomspace mid5-space))
-(define top-space (cog-new-atomspace mid6-space))
+(define mid1-space (AtomSpace base-space))
+(define mid2-space (AtomSpace mid1-space))
+(define mid3-space (AtomSpace mid2-space))
+(define mid4-space (AtomSpace mid3-space))
+(define mid5-space (AtomSpace mid4-space))
+(define mid6-space (AtomSpace mid5-space))
+(define top-space (AtomSpace mid6-space))
 
 ; Splatter some atoms into the various spaces.
 (cog-set-atomspace! base-space)

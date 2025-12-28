@@ -10,6 +10,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/util/oc_assert.h>
 
@@ -53,41 +54,20 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
-	AtomSpacePtr as = createAtomSpace(spaces);
+	// Create new AtomSpace with the indicated descendants.
+	AtomSpacePtr asp = createAtomSpace(spaces);
 
+	// If a name was provided, set that name.
 	if (0 < name.size())
-		as->set_name(name);
+		asp->set_name(name);
 
-	return protom_to_scm(as);
-}
+	Handle hasp(HandleCast(asp));
 
-/* ============================================================== */
-/**
- * Add an AtomSpace to the current AtomSpace. Unlike ss_new_node,
- * the ss_new_as() call above does NOT add the new AtomSpace to any
- * existing AtomSpace. It just ... hangs there in the void. This is
- * usually just fine, and is the historic behavior. But in order to
- * get naming uniqueness guarantees, it has to be actually inserted
- * somewhere, where naming uniqueness is provided. So that's what this
- * method does.
- *
- * Note that this might be crazy-making for a naive user: if two
- * atomspaces are created with exactly the same name, and both are
- * inserted, the second insert will return the first atomspace.
- * Which is exactly the whole point of this function; but it also
- * means that the second atomspace might be garbage-collected, which
- * might come as a surprise to the user, esp. if it isn't empty.
- */
-SCM SchemeSmob::ss_add_as (SCM sas)
-{
-	Handle hasp(verify_handle(sas, "cog-add-atomspace"));
+	// Insert it nto the current AtomSpace
+	const AtomSpacePtr& env = ss_get_env_as("cog-new-atomspace");
+	if (env) hasp = env->add_atom(hasp);
 
-	if (hasp->get_type() != ATOM_SPACE)
-		scm_wrong_type_arg_msg("cog-add-atomspace", 1, sas, "opencog atomspace");
-
-	const AtomSpacePtr& asp = ss_get_env_as("cog-add-atomspace");
-	Handle h(asp->add_atom(hasp));
-	return handle_to_scm(h);
+	return protom_to_scm(hasp);
 }
 
 /* ============================================================== */
@@ -135,22 +115,6 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
 
 	return asp.get();
-}
-
-/* ============================================================== */
-/**
- * Return UUID of the atomspace
- */
-SCM SchemeSmob::ss_as_uuid(SCM sas)
-{
-	const AtomSpacePtr& asg = ss_to_atomspace(sas);
-	const AtomSpacePtr& asp = asg ? asg :
-		ss_get_env_as("cog-atomspace-uuid");
-
-	UUID uuid = asp->get_uuid();
-	scm_remember_upto_here_1(sas);
-
-	return scm_from_ulong(uuid);
 }
 
 /* ============================================================== */
@@ -274,12 +238,46 @@ SCM SchemeSmob::ss_as(SCM satom)
 	}
 
 	AtomSpace* as = h->getAtomSpace();
-	return as ? make_as(AtomSpaceCast(as->shared_from_this())) : SCM_EOL;
+	return as ? make_as(AtomSpaceCast(as)) : SCM_EOL;
 }
 
 /* ============================================================== */
 /**
- * Return current atomspace for this dynamic state.
+ * Holds the current AtomSpace for this dynamic state. Mostly.
+ * There is some non-obvious hackery going on here, due to the need
+ * to satisfy multiple requirements and over-come C++ TLS weakness
+ * and python integration.
+ *
+ * The first requirement is that new scheme threads get the same
+ * AtomSpace as the one that created the new thread. Scheme fluids are
+ * ideal for this: new threads get a copy of the creator's fluid state.
+ *
+ * The second requirement is that the AtomSpace be shared between scheme
+ * and python, so that cross-language calls through GroundedPredicate and
+ * GroundedSchema both use the same AtomSpace. This necessitates the use
+ * of `opencog/eval/FrameStack.h` to share the AtomSpace across languages.
+ * This works, and we are mostly happy. But ...
+ *
+ * FrameStack uses TLS, and TLS state is NOT copied when a new thread is
+ * created. TLS does not behave like a fluid. This causes major issues:
+ * A new scheme thread is created. We try to find the atomspace in TLS,
+ * but its a null pointer! Aiee! So we fall back to getting it from the
+ * fluid, and then tell the FrameStack what it is, so that python can
+ * find it later.
+ *
+ * Otherwise, if get_frame() returns non-null, we assume that this is
+ * some AtomSpace that python set up for us, and we just go ahead, and
+ * use it. And that's all good. But we also better cache it in our fluid,
+ * just in case some scheme code creates some threads.
+ *
+ * So, in a sense, the get_frame() is always the master authority for
+ * what the AtomSpace is for this thread. Unless its nullptr, in which
+ * case the fluid offers the ground-truth. Which we then immediately
+ * hand over with set_frame() so that get_frame() can remain the master
+ * authority. The scheme fluid just shadows what is in the frame, and
+ * should always be in sync.
+ *
+ * Phew. It works, and there's lots of unit tests for this.
  */
 SCM SchemeSmob::atomspace_fluid;
 
@@ -293,8 +291,14 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 	if (!nas)
 		return SCM_BOOL_F;
 
-	SCM old_as = scm_fluid_ref(atomspace_fluid);
+	// Get previous atomspace from the unified frame stack
+	AtomSpacePtr old_asp = get_frame();
+	SCM old_as = old_asp ? make_as(old_asp) : SCM_BOOL_F;
 
+	// Set the new atomspace in the unified frame stack
+	set_frame(nas);
+
+	// Also set the fluid for thread inheritance
 	scm_fluid_set_x(atomspace_fluid, new_as);
 
 	return old_as;
@@ -302,21 +306,42 @@ SCM SchemeSmob::ss_set_as (SCM new_as)
 
 /* ============================================================== */
 /**
- * Set the atomspace into the top-level interaction environment
- * Since its held in a fluid, it can have a different value in each
+ * Set the atomspace into the unified frame stack.
+ * Since its thread-local, it can have a different value in each
  * thread, so that different threads can use different atomspaces,
  * all at the same time.
  */
 void SchemeSmob::ss_set_env_as(const AtomSpacePtr& nas)
 {
+	// nas will be nullptr during thread-exit and calling
+	// set_frame() will cause TLS heartache and heap corruption.
+	if (nullptr == nas) return;
+
+	set_frame(nas);
 	scm_fluid_set_x(atomspace_fluid, make_as(nas));
+}
+
+/**
+ * Get current atomspace from frame stack, falling back to the
+ * Guile fluid if the frame stack is empty. This provides thread
+ * inheritance semantics - new threads inherit via the fluid.
+ */
+const AtomSpacePtr& SchemeSmob::get_current_as(void)
+{
+	const AtomSpacePtr& asp = get_frame();
+	if (asp) return asp;
+
+	// Frame stack is empty - inherit from the Guile fluid
+	// (which propagates across thread creation)
+	SCM ref = scm_fluid_ref(atomspace_fluid);
+	const AtomSpacePtr& fluid_asp = ss_to_atomspace(ref);
+	set_frame(fluid_asp);
+	return get_frame();
 }
 
 const AtomSpacePtr& SchemeSmob::ss_get_env_as(const char* subr)
 {
-	SCM ref = scm_fluid_ref(atomspace_fluid);
-	const AtomSpacePtr& asp = ss_to_atomspace(ref);
-	return asp;
+	return get_current_as();
 }
 
 /* ============================================================== */
@@ -338,6 +363,55 @@ const AtomSpacePtr& SchemeSmob::get_as_from_list(SCM slist)
 
 	static AtomSpacePtr nullasp;
 	return nullasp;
+}
+
+/* ============================================================== */
+/**
+ * Push a new temporary atomspace onto the unified frame stack.
+ * Creates a new atomspace with the current as parent.
+ * Return the previous (base) atomspace.
+ */
+SCM SchemeSmob::ss_push_atomspace (void)
+{
+	// Get current atomspace (from frame stack or fluid)
+	AtomSpacePtr base_as = get_current_as();
+
+	// Create and push a new atomspace (child of current)
+	push_frame();
+
+	// Also set the fluid for thread inheritance
+	const AtomSpacePtr& new_as = get_frame();
+	scm_fluid_set_x(atomspace_fluid, make_as(new_as));
+
+	// Return the previous (base) atomspace
+	return base_as ? make_as(base_as) : SCM_EOL;
+}
+
+/* ============================================================== */
+/**
+ * Pop a temporary atomspace from the unified frame stack.
+ * The pushed atomspace is cleared and removed from its parent.
+ * Return unspecified.
+ */
+SCM SchemeSmob::ss_pop_atomspace (void)
+{
+	// Excplicitly decrement the use count on the old AtomSpacePtr
+	// inside the old SMOB.
+	SCM old_fluid = scm_fluid_ref(atomspace_fluid);
+	SCM_SMOB_VALUE_PTR_LOC(old_fluid)->reset();
+	scm_remember_upto_here_1(old_fluid);
+
+	pop_frame();
+
+	const AtomSpacePtr& current = get_frame();
+	scm_fluid_set_x(atomspace_fluid, make_as(current));
+
+	// Force GC to collect any remaining smobs that may hold references.
+	// Without this, we get smobs pointing at zombie Atomspaces whose
+	// dtors never run. The rocks ThreadCountUTest hits this hard.
+	scm_gc();
+
+	return SCM_UNSPECIFIED;
 }
 
 /* ===================== END OF FILE ============================ */

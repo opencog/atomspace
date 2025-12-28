@@ -1,6 +1,6 @@
 
 #include <opencog/util/oc_assert.h>
-#include <opencog/atoms/core/FindUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/QueueValue.h>
 #include <opencog/atomspace/AtomSpace.h>

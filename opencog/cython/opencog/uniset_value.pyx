@@ -5,30 +5,43 @@ from libcpp cimport bool
 def createUnisetValue(arg=None):
     cdef shared_ptr[cUnisetValue] c_ptr
     if arg is None:
-        c_ptr.reset(new cUnisetValue())
+        c_ptr = c_createUnisetValue_empty()
     elif isinstance(arg, list):
-        c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector(arg)))
+        c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector(arg))
     else:
-        c_ptr.reset(new cUnisetValue(UnisetValue.list_of_values_to_vector([arg])))
-    return UnisetValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+        c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector([arg]))
+    cdef UnisetValue instance = UnisetValue.__new__(UnisetValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class UnisetValue(Value):
 
+    def __init__(self, arg=None):
+        # Allow construction: UnisetValue(), UnisetValue([val1, val2]), UnisetValue(val)
+        cdef shared_ptr[cUnisetValue] c_ptr
+        if arg is None:
+            c_ptr = c_createUnisetValue_empty()
+        elif isinstance(arg, list):
+            c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector(arg))
+        else:
+            c_ptr = c_createUnisetValue_vector(UnisetValue.list_of_values_to_vector([arg]))
+        self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def open(self):
         """Open the set for adding/removing values."""
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
         with nogil:
             set_ptr.open()
 
     def close(self):
         """Close the set. No more values can be added after closing."""
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
         with nogil:
             set_ptr.close()
 
     def is_closed(self):
         """Check if the set is closed."""
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
         cdef bool result
         with nogil:
             result = set_ptr.is_closed()
@@ -36,14 +49,14 @@ cdef class UnisetValue(Value):
 
     def clear(self):
         """Remove all values from the set."""
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
         with nogil:
             set_ptr.clear()
 
     def add(self, Value value):
         """Add a value to the set (duplicates are ignored)."""
         cdef cValuePtr val_ptr = value.get_c_value_ptr()
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
 
         # Release the GIL since the C++ method is thread-safe
         with nogil:
@@ -68,9 +81,8 @@ cdef class UnisetValue(Value):
             RuntimeError: If the set is closed and empty.
         """
         cdef cValuePtr c_value
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
 
-        # Release the GIL while waiting for values, so other Python threads can run
         try:
             with nogil:
                 c_value = set_ptr.remove()
@@ -88,7 +100,7 @@ cdef class UnisetValue(Value):
 
     def __len__(self):
         """Return the number of values in the set."""
-        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_value_ptr().get()
+        cdef cUnisetValue* set_ptr = <cUnisetValue*>self.get_c_raw_ptr()
         cdef size_t result
         with nogil:
             result = set_ptr.size()
@@ -97,7 +109,7 @@ cdef class UnisetValue(Value):
     def to_list(self):
         """Convert the set contents to a Python list."""
         return UnisetValue.vector_of_values_to_list(
-            &((<cUnisetValue*>self.get_c_value_ptr().get()).value()))
+            &((<cUnisetValue*>self.get_c_raw_ptr()).value()))
 
     @staticmethod
     cdef vector[cValuePtr] list_of_values_to_vector(list python_list):

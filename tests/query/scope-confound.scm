@@ -3,7 +3,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; -------------------------------------------------------------
 ; From "opencog/pln/rules/evaluation-to-member-rule.scm"
@@ -19,7 +18,7 @@
                 (TypeNode "PredicateNode")))
 
         ; pattern
-        (EvaluationLink
+        (EdgeLink
             (VariableNode "$D")
             (ListLink
                 (VariableNode "$A")
@@ -29,26 +28,26 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
                                     (VariableNode "$B")))))
 
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
                                     (VariableNode "$Y")))))
-                    (EvaluationLink
+                    (EdgeLink
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")
@@ -73,7 +72,7 @@
                 (TypeNode "PredicateNode")))
 
         ; pattern
-        (EvaluationLink
+        (EdgeLink
             (VariableNode "$D")
             (ListLink
                 (VariableNode "$A")
@@ -83,26 +82,26 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$A")
                         (ScopeLink
                             (VariableNode "$X")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
                                     (VariableNode "$B")))))
 
-                    (MemberLink
+                    (TagLink
                         (VariableNode "$B")
                         (ScopeLink
                             (VariableNode "$Y")
-                            (EvaluationLink
+                            (EdgeLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
                                     (VariableNode "$Y")))))
-                    (EvaluationLink
+                    (EdgeLink
                         (VariableNode "$D")
                         (ListLink
                             (VariableNode "$A")

@@ -6,7 +6,7 @@
 ; Invented after discussions at opencog/atomspace#2203
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Three baskets holding balls
 (Inheritance (Concept "reds basket") (Concept "basket"))
@@ -26,14 +26,14 @@
 (Member (Concept "ochre ball")  (Concept "yellows basket"))
 
 ; Colors of the balls
-(Evaluation (Predicate "is red") (Concept "red ball"))
-(Evaluation (Predicate "is red") (Concept "red ball too"))
-(Evaluation (Predicate "is red") (Concept "red ball also"))
+(Edge (Predicate "is red") (Concept "red ball"))
+(Edge (Predicate "is red") (Concept "red ball too"))
+(Edge (Predicate "is red") (Concept "red ball also"))
 
-(Evaluation (Predicate "is green")  (Concept "green ball"))
+(Edge (Predicate "is green")  (Concept "green ball"))
 
-(Evaluation (Predicate "is yellow") (Concept "yellow ball"))
-(Evaluation (Predicate "is yellow") (Concept "ochre ball"))
+(Edge (Predicate "is yellow") (Concept "yellow ball"))
+(Edge (Predicate "is yellow") (Concept "ochre ball"))
 
 (define baskets-with-red-balls-only
 	(Query
@@ -48,7 +48,7 @@
 			; Always means that *every* ball in the basket MUST
 			; be red! Failure to satisfy this invalidates the
 			; search.
-			(Always (Evaluation (Predicate "is red")  (Variable "ball")))
+			(Always (Edge (Predicate "is red")  (Variable "ball")))
 		)
 
 		; Report the basket which has only red balls in it.
@@ -70,8 +70,8 @@
 		(Inheritance (Variable "basket")       (Concept "basket"))
 		(Member (Variable "some ball")         (Variable "basket"))
 		(Member (Variable "other ball")        (Variable "basket"))
-		(Evaluation (Variable "some color")    (Variable "some ball"))
-		(Evaluation (Variable "other color")   (Variable "other ball"))
+		(Edge (Variable "some color")          (Variable "some ball"))
+		(Edge (Variable "other color")         (Variable "other ball"))
 		(Always (Equal (Variable "some color") (Variable "other color")))
 	)
 	(Variable "basket"))

@@ -26,7 +26,7 @@
 #define _OPENCOG_TERM_MATCH_MIXIN_H
 
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -108,7 +108,7 @@ class TermMatchMixin : public virtual PatternMatchCallback
 		const Variables* _gnd_bound_vars;
 
 		// Temp atomspace used for test-groundings of virtual links.
-		AtomSpace* _temp_aspace;
+		AtomSpacePtr _temp_aspace;
 
 		// Crisp-logic evaluation of evaluatable terms
 		TypeSet _connectives;

@@ -10,13 +10,14 @@ ADD_LIBRARY (join
 ADD_DEPENDENCIES(join opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(join
+	signature
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
 INSTALL (TARGETS join EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES

@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; keys-of-test.scm -- Verify that KeysOfLink works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

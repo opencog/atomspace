@@ -7,7 +7,7 @@
 ; match: by default, types are checked during a search, and variable
 ; groundings must respect the variable type.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog type-utils))
 
 ; Populate the atomspace with some nonsense atoms.
@@ -49,15 +49,15 @@
 ; A more complex example
 
 ; More data:
-(Evaluation
+(Edge
 	(PredicateNode "foo")
 	(List (ConceptNode "bingo") (ConceptNode "yes!")))
 
-(Evaluation
+(Edge
 	(AnchorNode "bar")
 	(List (ConceptNode "hurrah") (ConceptNode "yay!")))
 
-(Evaluation
+(Edge
 	(ConceptNode "baz")
 	(List (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
 
@@ -67,7 +67,7 @@
 		(TypedVariable
 			(Variable "$x")
 			(Signature
-				(Evaluation
+				(Edge
 					(TypeChoice
 						(Type "PredicateNode")
 						(Type "AnchorNode"))

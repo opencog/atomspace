@@ -22,9 +22,8 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Force.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atoms/grounded/GroundedPredicateNode.h>
@@ -111,11 +110,11 @@ void GroundedPredicateNode::init()
 /// substituted into the predicate. Then the predicate as a whole
 /// will be evaluated.
 ///
-ValuePtr GroundedPredicateNode::execute_args(AtomSpace* as,
+ValuePtr GroundedPredicateNode::execute_args(AtomSpace* scratch,
                                              const ValuePtr& cargs,
                                              bool silent)
 {
-	if (_runner) return _runner->evaluate(as, cargs, silent);
+	if (_runner) return _runner->execute(_atom_space, scratch, cargs, silent);
 
 	// Unknown procedure type.
 	throw RuntimeException(TRACE_INFO,

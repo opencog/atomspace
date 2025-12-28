@@ -15,11 +15,6 @@ SET(CMAKE_INSTALL_RPATH
    "${CMAKE_INSTALL_PREFIX}/lib/opencog"
    "${PYTHON_DEST}")
 
-# Search path for module load paths in load_scm_file_relative()
-ADD_DEFINITIONS(
-	-DCMAKE_INSTALL_PREFIX="\\"${CMAKE_INSTALL_PREFIX}\\""
-)
-
 INCLUDE_DIRECTORIES(
 	${Python3_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -27,6 +22,9 @@ INCLUDE_DIRECTORIES(
 )
 
 # SET(CYTHON_FLAGS "-3" "-f" "-Wextra" "-Werror")
+# Modern version of cython spew a warning about nogil vs except ordering,
+# but this warning is insane. If fixed, it breaks older versions of python!
+# We want to suppress this message; its stunningly annoying and useless.
 SET(CYTHON_FLAGS "-3" "-f" "-Wextra")
 
 ###################### logger ##########################################
@@ -50,7 +48,7 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 ###################### atomspace ####################################
 
 CYTHON_ADD_MODULE_PYX(atomspace
-	"atom.pyx" "nameserver.pyx"
+	"atom.pyx" "nameserver.pyx" "type_ctors.pyx"
 	"atomspace_details.pyx" "value.pyx" "float_value.pyx" "string_value.pyx"
 	"link_value.pyx" "queue_value.pyx" "uniset_value.pyx" "bool_value.pyx" opencog_atom_types
 	"../../atoms/atom_types/NameServer.h" "../../atoms/base/Handle.h"
@@ -62,6 +60,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
 	ExecuteStub.cc
+	TypeCtors.cc
 	atomspace.cpp
 )
 
@@ -78,6 +77,7 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace_cython
 	${NO_AS_NEEDED}
 	atomspace
+	framestack
 	${Python3_LIBRARIES}
 )
 
@@ -99,69 +99,12 @@ INSTALL (FILES
 	DESTINATION "include/opencog/cython/opencog"
 )
 
-############################## type constructors #####################
-# FYI The second and remaining args to CYTHON_ADD_MODULE_PYX are
-# dependencies, telling cmake what order to build things in,
-# and when a rebuild is needed.
-
-CYTHON_ADD_MODULE_PYX(type_constructors
-	"atomspace.pxd" opencog_atom_types
-)
-
-ADD_LIBRARY(type_constructors
-	type_constructors.cpp
-)
-
-TARGET_LINK_LIBRARIES(type_constructors
-	${NO_AS_NEEDED}
-	atomspace
-	${Python3_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(type_constructors PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME type_constructors)
-
-
-############################## utilities #####################
-
-CYTHON_ADD_MODULE_PYX(utilities
-	"atomspace.pxd" "utilities.pxd" opencog_atom_types
-)
-
-ADD_LIBRARY(utilities_cython
-	Utilities.cc
-	utilities.cpp
-)
-
-TARGET_LINK_LIBRARIES(utilities_cython
-	PythonEval
-	atomspace
-	executioncontext
-	${Python3_LIBRARIES}
-)
-
-SET_TARGET_PROPERTIES(utilities_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME utilities)
-
-INSTALL (TARGETS utilities_cython EXPORT AtomSpaceTargets
-   DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	Utilities.h
-	DESTINATION "include/opencog/cython/opencog"
-)
-
 ############################## execute module #####################
 
 ### Install the modules ###
 INSTALL(TARGETS
 	atomspace_cython
 	logger_cython
-	type_constructors
-	utilities_cython
 	DESTINATION "${PYTHON_DEST}")
 
 # This custom target allows *only* the Python bindings to be installed;
@@ -172,22 +115,18 @@ INSTALL(TARGETS
 # $ENV{VIRTUAL_ENV}, which is what python wants. Argh. Its a mess.
 ADD_CUSTOM_TARGET(PythonBindings DEPENDS
 	atomspace_cython
-	logger_cython
-	type_constructors
-	utilities_cython)
+	logger_cython)
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 
 	CYTHON_ADD_MODULE_PYX(scheme
-		"load-file.h"
 		"PyScheme.h"
 		"atomspace.pxd"
 		opencog_atom_types
 	)
 
 	ADD_LIBRARY(scheme
-		load-file.cc
 		PyScheme.cc
 		scheme.cpp
 	)
@@ -213,4 +152,6 @@ ENDIF (HAVE_GUILE)
 
 INSTALL (FILES
 	__init__.py
+	type_constructors.py
+	utilities.py
 	DESTINATION "${PYTHON_DEST}")

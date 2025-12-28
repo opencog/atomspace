@@ -26,7 +26,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 
 using namespace opencog;
@@ -78,14 +77,11 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 void SCMExecutionOutputUTest::setUp(void)
 {
 	as = createAtomSpace();
-	eval = new SchemeEval(as);
-	eval->eval("(use-modules (opencog exec))");
+	eval = SchemeEval::get_scheme_evaluator(as);
 }
 
 void SCMExecutionOutputUTest::tearDown(void)
 {
-	delete eval;
-	eval = NULL;
 }
 
 #define CHKEV(ev) \
@@ -130,7 +126,7 @@ void SCMExecutionOutputUTest::test_execute(void)
 // Use a unique evaluator for this thread.
 void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 {
-	SchemeEval* ev = SchemeEval::get_evaluator(as);
+	SchemeEval* ev = SchemeEval::get_scheme_evaluator(as);
 	int counter = 0;
 
 	// Define a Scheme procedure that will be used in the
@@ -147,9 +143,8 @@ void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 		counter ++;
 
 		std::ostringstream oss;
-		oss << "(begin "
-		    << "(define inh (InheritanceLink (ConceptNode "
-		    << jules.str() << ") (ConceptNode \"prince\"))) "
+		oss << "(let ((inh (InheritanceLink (ConceptNode "
+		    << jules.str() << ") (ConceptNode \"prince\")))) "
 		    << "(cog-set-value! inh (Predicate \"*-TruthValueKey-*\") (FloatValue " << strength << " " << confidence << ")) "
 		    << "inh)";
 
@@ -165,7 +160,7 @@ void SCMExecutionOutputUTest::threadedAdd(int thread_id, int N)
 		       "(GroundedSchemaNode \"scm: make-king\") "
              "(ListLink (ConceptNode " << jules.str() << "))))";
 		ev->eval(ess.str());
-		CHKEV(eval);
+		CHKEV(ev);
 	}
 }
 
@@ -197,13 +192,14 @@ void SCMExecutionOutputUTest::test_multi_threads(void)
 	// 1 grounded schema
 	// 1 king
 	// 1 Predicate "*-TruthValueKey-*"
+	// 1 Predicate "*-IsKeyFlag-*"
 	// num_atoms * n_threads  Concept    julians
 	// num_atoms * n_threads  Inheritance  julian prince
 	// num_atoms * n_threads  ListLink  julian
 	// num_atoms * n_threads  ExecutionOutputLink
 	// num_atoms * n_threads  Inheritance  julian king
-	// for a total of 4 + 5 * num_atoms * n_threads atoms created, total.
-	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 4);
+	// for a total of 5 + 5 * num_atoms * n_threads atoms created, total.
+	TS_ASSERT_EQUALS(size, 5 * num_atoms * n_threads + 5);
 
 	// Everyone gets to be a king!  Yayyyy!
 	Handle king = as->add_node(CONCEPT_NODE, "king");
@@ -294,19 +290,19 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 
-	// Initially, atomspace has two atoms: julian + tvkey predicate
+	// Initially, atomspace has three atoms: julian + tvkey + iskeyflag predicates
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 2);
+	TS_ASSERT_EQUALS(size, 3);
 
 	eval->eval(
 		"(royalize julian)"
 	);
 	CHKEV(eval);
 
-	// Now, the atomspace has three atoms (Inheritance julian king)
-	// Plus also (Predicate "*-TruthValueKey-*")
+	// Now, the atomspace has these atoms: (Inheritance julian king)
+	// Plus also (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 4);
+	TS_ASSERT_EQUALS(size, 5);
 
 	// Start out with Anneliese a newborn princess.
 	eval->eval(
@@ -317,20 +313,20 @@ void SCMExecutionOutputUTest::test_recursive(void)
 	);
 	CHKEV(eval);
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 5);
+	TS_ASSERT_EQUALS(size, 6);
 
 	eval->eval(
 		"(exe-royalize anne)"
 	);
 	CHKEV(eval);
 
-	// Now, the atomspace has nine atoms
+	// Now, the atomspace has these atoms:
 	// 3:  (Inheritance julian king)
 	// 3:  (Inheritance anne queen)
 	// 3:  (ExecutionLink (GroundedSchemaNode) (ListLink anne))
-	// Plus also (Predicate "*-TruthValueKey-*")
+	// Plus also (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
 	size = as->get_size();
-	TS_ASSERT_EQUALS(size, 10);
+	TS_ASSERT_EQUALS(size, 11);
 
 	size = as->get_size();
 
@@ -395,7 +391,7 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	CHKEV(eval);
 
 	// When evaluated, this one should be false.
-	bool result = EvaluationLink::crisp_eval_scratch(as.get(), boolex, as.get());
+	bool result = boolex->bevaluate(as.get());
 	TS_ASSERT(not result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -473,7 +469,7 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 
 	eval->eval(
 	   "(define (single-arg-fun x)"
-	   "   (And (Concept \"A\") x))"
+	   "   (List (Concept \"A\") x))"
 	);
 	CHKEV(eval);
 
@@ -486,7 +482,7 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 	CHKEV(eval);
 
 	Handle expect =
-		eval->eval_h("(And (Concept \"A\") (Concept \"B\"))");
+		eval->eval_h("(List (Concept \"A\") (Concept \"B\"))");
 	std::cout << "Expression is " << result->to_string() << std::endl;
 	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);

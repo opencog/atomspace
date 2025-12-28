@@ -1,0 +1,467 @@
+/*
+ * tests/atoms/AlphaConvertUTest.cxxtest
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
+
+using namespace opencog;
+
+// Test the AlphaConvert.
+//
+class AlphaConvertUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _asa;
+	AtomSpace _asb;
+
+public:
+	AlphaConvertUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_untyped_variable();
+	void test_variable();
+	void test_body();
+	void test_atomspace();
+	void test_bindlink();
+	void test_bindlink_ordered();
+	void test_vardecl_free_scope();
+	void test_variable_set_scope();
+	void test_inner_scope();
+	void test_getlink();
+};
+
+#define NA _asa.add_node
+#define LA _asa.add_link
+
+#define NB _asb.add_node
+#define LB _asb.add_link
+
+// Test AlphaConvert over an untyped variable.
+void AlphaConvertUTest::test_untyped_variable()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$Y"),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Y")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_SET, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
+
+	// Constraining something to be "type Atom" is not a constraint.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "Atom")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert over an variable types as ConceptNode.
+void AlphaConvertUTest::test_variable()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$X"), NA(TYPE_NODE, "ConceptNode")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$Y"),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Y")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be not equal
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(SCOPE_LINK,
+		LB(VARIABLE_LIST, NB(VARIABLE_NODE, "$Z")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$Z")));
+
+	// x and z should be not equal
+	TS_ASSERT(not scox->is_equal(hscoz));
+
+	// Constraining should work.
+	_asb.clear();
+	Handle hscow =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$W"), NB(TYPE_NODE, "ConceptNode")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LB(SCOPE_LINK,
+		LB(TYPED_VARIABLE_LINK,
+			NB(VARIABLE_NODE, "$T"),
+			LB(TYPE_CHOICE, NB(TYPE_NODE, "Atom"), NB(TYPE_NODE, "ConceptNode"))),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test AlphaConvert for differing bodies.
+void AlphaConvertUTest::test_body()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	Handle hscoy =
+	LB(SCOPE_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scoy(ScopeLinkCast(hscoy));
+
+	// x and y should be NOT equal
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test alpha conversion in the atomspace.
+void AlphaConvertUTest::test_atomspace()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create ScopeLinks.
+	Handle hscox =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	Handle hscoy =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$Y"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$Y")));
+
+	// x and y should be equal
+	TS_ASSERT(hscox == hscoy);
+
+	printf("Expecting same atom: x=%s vs y=%s\n",
+		hscox->to_string().c_str(), hscoy->to_string().c_str());
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+
+	Handle hscoz =
+	LA(SCOPE_LINK,
+		LA(VARIABLE_SET, NA(VARIABLE_NODE, "$Z")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$Z")));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
+
+	// Constraining something to be "type Atom" is not a constraint.
+	_asb.clear();
+	Handle hscow =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$W"), NA(TYPE_NODE, "Atom")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$W")));
+
+	// x and w should be equal
+	TS_ASSERT(scox->is_equal(hscow));
+
+	_asb.clear();
+	Handle hscot =
+	LA(SCOPE_LINK,
+		LA(TYPED_VARIABLE_LINK,
+			NA(VARIABLE_NODE, "$T"),
+			LA(TYPE_CHOICE, NA(TYPE_NODE, "Atom"))),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$T")));
+
+	// x and t should be equal
+	TS_ASSERT(scox->is_equal(hscot));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for QueryLink.
+void AlphaConvertUTest::test_bindlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create QueryLink
+	Handle hscox =
+	LA(QUERY_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	_asb.clear();
+	Handle hscoy =
+	LB(QUERY_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(QUERY_LINK,
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(QUERY_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be NOT equal because their implicants are not
+	// alpha-equivalent.
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for QueryLink where the implicand is ordered
+void AlphaConvertUTest::test_bindlink_ordered()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+#ifdef RUN_DISABLED_TEST
+// This test is disabled, because it was previously passing due to a
+// bug in the RuleLink code. The correct fix is not obvious; clearly,
+// the PresentLink should be treated as an unorderred link, and therefore
+// pass on this lack-of-ordering property to the output ListLink. But
+// fixing this is a lot of work, and the primary consumer of this
+// algebraic equivalence is PLN, ... which is now obsolete.
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	// Create QueryLink
+	Handle hscox =
+	LA(QUERY_LINK,
+	   LA(PRESENT_LINK, X, Y),
+	   LA(LIST_LINK, X, Y));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	_asb.clear();
+	Handle hscoy =
+	LB(QUERY_LINK,
+	   LB(PRESENT_LINK, X, Y),
+	   LB(LIST_LINK, Y, X));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	Handle hscoz =
+	LB(QUERY_LINK,
+	   LB(VARIABLE_SET, X, Y),
+	   LB(PRESENT_LINK, X, Y),
+	   LB(LIST_LINK, Y, X));
+
+	// x and z should be equal
+	TS_ASSERT(scox->is_equal(hscoz));
+#endif // RUN_DISABLED_TEST
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for alpha-equivalent scopes with no variable
+// declarations.
+void AlphaConvertUTest::test_vardecl_free_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	// Create Scopes with no variable declaration and X and Y swapped.
+	Handle hsco1 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(LIST_LINK, X, Y), Y));
+	Handle hsco2 = LA(SCOPE_LINK, LA(INHERITANCE_LINK, LA(LIST_LINK, Y, X), X));
+
+	ScopeLinkPtr sco1(ScopeLinkCast(hsco1));
+	TS_ASSERT(sco1 != nullptr);
+
+	// hsco1 and hsco2 should be equal as they are alpha-equivalent.
+	TS_ASSERT(sco1->is_equal(hsco2));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for scopes with mixture of VariableList, VariableSet
+// and no variable declarations.
+void AlphaConvertUTest::test_variable_set_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+
+	Handle sh1 = LA(SCOPE_LINK,
+	                LA(VARIABLE_SET, X, Y),
+	                LA(LIST_LINK, X, Y));
+	Handle sh2 = LA(SCOPE_LINK,
+	                LA(VARIABLE_LIST, X, Y),
+	                LA(LIST_LINK, X, Y));
+	Handle sh3 = LA(SCOPE_LINK,
+	                LA(VARIABLE_LIST, Y, X),
+	                LA(LIST_LINK, X, Y));
+	Handle sh4 = LA(SCOPE_LINK,
+	                LA(LIST_LINK, X, Y));
+
+	ScopeLinkPtr sc1 = ScopeLinkCast(sh1);
+	ScopeLinkPtr sc2 = ScopeLinkCast(sh2);
+	ScopeLinkPtr sc3 = ScopeLinkCast(sh3);
+	ScopeLinkPtr sc4 = ScopeLinkCast(sh4);
+
+	TS_ASSERT(not sc1->is_equal(sh2));
+	TS_ASSERT(not sc1->is_equal(sh3));
+	TS_ASSERT(sc1->is_equal(sh4));
+	TS_ASSERT(not sc2->is_equal(sh3));
+	TS_ASSERT(not sc2->is_equal(sh4));
+	TS_ASSERT(not sc3->is_equal(sh4));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test alpha equivalence between 2 scopes containing inner scopes
+// where variable names are changed both on the outer and inner scopes.
+void AlphaConvertUTest::test_inner_scope()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+	Handle Z = NA(VARIABLE_NODE, "$Z");
+	Handle W = NA(VARIABLE_NODE, "$W");
+
+	// h1 and h2 are alpha-equivalent, indeed renaming X->Z and Y->W in
+	// h1 yields h2.
+	Handle h1 = LA(SCOPE_LINK, X, LA(SCOPE_LINK, Y, LA(INHERITANCE_LINK, X, Y)));
+	Handle h2 = LA(SCOPE_LINK, Z, LA(SCOPE_LINK, W, LA(INHERITANCE_LINK, Z, W)));
+
+	ScopeLinkPtr sc1 = ScopeLinkCast(h1);
+	ScopeLinkPtr sc2 = ScopeLinkCast(h2);
+
+	TS_ASSERT(sc1->is_equal(h2));
+}
+
+// Test alpha equivalence between 2 meet links.
+void AlphaConvertUTest::test_getlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = NA(VARIABLE_NODE, "$X");
+	Handle Y = NA(VARIABLE_NODE, "$Y");
+	Handle A = NA(CONCEPT_NODE, "A");
+	Handle B = NA(CONCEPT_NODE, "B");
+
+	// h1 and h2 are alpha-equivalent, indeed renaming X->Y and Y->X in
+	// h1 yields h2.
+	Handle h1 = LA(MEET_LINK, LA(PRESENT_LINK,
+	                            LA(INHERITANCE_LINK, X, A),
+	                            LA(INHERITANCE_LINK, Y, B)));
+	Handle h2 = LA(MEET_LINK, LA(PRESENT_LINK,
+	                            LA(INHERITANCE_LINK, Y, A),
+	                            LA(INHERITANCE_LINK, X, B)));
+
+	ScopeLinkPtr sc1 = ScopeLinkCast(h1);
+	ScopeLinkPtr sc2 = ScopeLinkCast(h2);
+
+	TS_ASSERT(sc1->is_equal(h2));
+}
+

@@ -3,7 +3,7 @@
 ; GPNJoinUTest
 ; Make sure named containers work.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "cherry pie") (List (Concept "A")))
 (Evaluation (Predicate "hello daddy") (List (Concept "B")))
@@ -49,11 +49,15 @@
 		(format #t "No its not!\n\n"))
 	(if (string-contains label "pie") #t #f))
 
+; Exclude internal marker atoms from matching
+(define marker (Predicate "*-IsKeyFlag-*"))
+
 (define min-gpn
 	(MinimalJoin
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Evaluation (GroundedPredicate "scm:min-like-pie")
 			(List (Variable "$top")))))
 
@@ -62,6 +66,7 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Evaluation (GroundedPredicate "scm:max-like-pie")
 			(List (Variable "$top")))))
 
@@ -70,6 +75,7 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Evaluation (GroundedPredicate "scm:like-both-pie")
 			(List (Variable "P") (Variable "$top")))))
 
@@ -79,6 +85,7 @@
 			(TypedVariable (Variable "A") (Type 'ConceptNode))
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Present (Evaluation (Variable "P") (List (Variable "A"))))
 		(Evaluation (GroundedPredicate "scm:like-triple-pie")
 			(List (Variable "P") (Variable "A") (Variable "$top")))))
@@ -88,6 +95,7 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:min-like-pie")
 			(List (Variable "$top")))))
@@ -97,6 +105,7 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:max-like-pie")
 			(List (Variable "$top")))))
@@ -106,6 +115,7 @@
 		(VariableList
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Evaluation (GroundedPredicate "scm:like-both-pie")
 			(List (Variable "P") (Variable "$top")))))
@@ -116,6 +126,7 @@
 			(TypedVariable (Variable "A") (Type 'ConceptNode))
 			(TypedVariable (Variable "P") (Type 'PredicateNode))
 			(TypedVariable (Variable "$top") (Type 'JoinLink)))
+		(Not (Equal (Variable "P") marker))
 		(Present (Evaluation (Variable "P") (List (Variable "A"))))
 		(Replacement (Variable "P") (Concept "I Like Pie!"))
 		(Replacement (Variable "A") (Concept "Loser"))

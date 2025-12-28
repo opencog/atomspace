@@ -145,16 +145,6 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
 
-		case COG_LOGGER:
-		{
-			Logger* al = (Logger *) SCM_SMOB_DATA(a);
-			Logger* bl = (Logger *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			/* Just a simple pointer comparison */
-			if (al == bl) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
 		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
@@ -279,7 +269,6 @@ void SchemeSmob::module_init(void*)
 	
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
@@ -321,6 +310,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-link",              1, 0, 1, C(ss_link));
 	register_proc("cog-extract!",          1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
+	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
 	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
 	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
@@ -366,11 +356,11 @@ void SchemeSmob::register_procs()
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 0, 1, C(ss_new_as));
-	register_proc("cog-add-atomspace",     1, 0, 0, C(ss_add_as));
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
+	register_proc("cog-push-atomspace",    0, 0, 0, C(ss_push_atomspace));
+	register_proc("cog-pop-atomspace",     0, 0, 0, C(ss_pop_atomspace));
 	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));
-	register_proc("cog-atomspace-uuid",    0, 1, 0, C(ss_as_uuid));
 	register_proc("cog-atomspace-clear",   0, 1, 0, C(ss_as_clear));
 	register_proc("cog-atomspace-readonly?", 0, 1, 0, C(ss_as_readonly_p));
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));

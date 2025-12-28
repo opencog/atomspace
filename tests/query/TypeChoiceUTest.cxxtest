@@ -91,10 +91,15 @@ void TypeChoiceUTest::setUp(void)
 		   type_choice_decl,
 		   al(IMPLICATION_LINK, X, Y))});
 
+	// Exclude internal marker atoms from matching
+	Handle marker = an(PREDICATE_NODE, "*-IsKeyFlag-*");
 	disconnected_pattern =
 		al(COLLECTION_OF_LINK, {al(MEET_LINK,
 		   type_choice_decl,
-		   al(AND_LINK, X, Y))});
+		   al(AND_LINK,
+		      X, Y,
+		      al(NOT_LINK, al(EQUAL_LINK, X, marker)),
+		      al(NOT_LINK, al(EQUAL_LINK, Y, marker))))});
 
 	predicate = an(PREDICATE_NODE, "P");
 

@@ -26,8 +26,8 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "PatternMatchEngine.h"
@@ -168,6 +168,17 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 		logmsg("Found grounding of variable:");
 		logmsg("$$ variable:", hp);
 		logmsg("$$ ground term:", hg);
+
+		// Propagate ExclusiveLink constraints. If this binding causes
+		// another variable's domain to become empty, we have a conflict.
+		if (not propagate_exclusive(hp, hg))
+		{
+			DO_LOG({LAZY_LOG_FINE << "Constraint conflict: "
+			        << hp->to_short_string() << " = "
+			        << hg->to_short_string();})
+			return false;
+		}
+
 		var_grounding[hp] = hg;
 	}
 	return true;
@@ -1601,13 +1612,32 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 {
 	const PatternTermPtr& parent(ptm->getParent());
 
-	if (clause == parent and clause->hasEvaluatable())
+	// ExclusiveLinks have hasEvaluatable() set but should be matched,
+	// not evaluated, so exclude them from this assertion.
+	if (clause == parent and clause->hasEvaluatable() and
+	    not clause->isExclusive())
 		OC_ASSERT(false, "Error: Unexpected situation!\n");
 
 	// We may have walked up to the top of an evaluatable term.
 	// At this time, we only handle IdenticalLinks.
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
+
+	// Handle constraint-only ExclusiveLinks (those in _pat->exclusives):
+	// auto-accept them - constraint propagation handles distinctness.
+	// Filter ExclusiveLinks (with constants) need to be evaluated.
+	if (parent->isExclusive() and clause == parent)
+	{
+		// Check if this is a constraint-only ExclusiveLink
+		bool is_constraint_excl = false;
+		for (const PatternTermPtr& excl : _pat->exclusives)
+		{
+			if (excl == clause) { is_constraint_excl = true; break; }
+		}
+		if (is_constraint_excl)
+			return clause_accept(clause, hg);
+		// Otherwise, evaluate it below
+	}
 
 	// Check if its molecular chemistry.
 	if (parent->isUnorderedLink() and parent->hasGlobbyVar())
@@ -2402,9 +2432,25 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	if (parent->isIdentical())
 		return explore_clause_identical(ptm, hg, clause);
 
+	// Handle constraint-only ExclusiveLinks (those in _pat->exclusives).
+	// These use constraint propagation and don't need evaluation.
+	// Filter ExclusiveLinks (with constants) fall through to be evaluated.
+	if (parent->isExclusive())
+	{
+		bool is_constraint_excl = false;
+		for (const PatternTermPtr& excl : _pat->exclusives)
+		{
+			if (excl == clause) { is_constraint_excl = true; break; }
+		}
+		if (is_constraint_excl)
+			return explore_up_branches(ptm, hg, clause);
+		// Otherwise, fall through to evaluatable handling
+	}
+
 	if (parent->hasAnyEvaluatable())
 	{
-		OC_ASSERT(false, "Hit some dead code!");
+		// This handles filter ExclusiveLinks (with constants) that need
+		// to be evaluated as true/false constraints.
 		// XXX TODO make sure that all variables in the clause have
 		// been grounded!  If they're not, something is badly wrong!
 		logmsg("Term inside evaluatable, move up to it's top:",
@@ -2733,18 +2779,30 @@ void PatternMatchEngine::solution_push(void)
 {
 	var_solutn_stack.push(var_grounding);
 	_clause_solutn_stack.push(clause_grounding);
+
+	// Save constraint propagation state for backtracking
+	if (_use_constraint_domain)
+		_constraint_domain.push_state();
 }
 
 void PatternMatchEngine::solution_pop(void)
 {
 	POPSTK(var_solutn_stack, var_grounding);
 	POPSTK(_clause_solutn_stack, clause_grounding);
+
+	// Restore constraint propagation state
+	if (_use_constraint_domain)
+		_constraint_domain.pop_state();
 }
 
 void PatternMatchEngine::solution_drop(void)
 {
 	var_solutn_stack.pop();
 	_clause_solutn_stack.pop();
+
+	// Discard saved constraint state without restoring
+	if (_use_constraint_domain)
+		_constraint_domain.pop_discard();
 }
 
 /* ======================================================== */
@@ -2755,11 +2813,6 @@ void PatternMatchEngine::solution_drop(void)
 bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
                                           const GroundingMap &term_soln)
 {
-	// If the groundings need to be grouped together, pass that off to
-	// some out-of-line code.
-	if (_pat->grouping.size() > 0)
-		return assign_grouping(var_soln, term_soln);
-
 	// If there is no for-all clause (no AlwaysLink clause)
 	// then report groundings as they are found.
 	if (_pat->always.size() == 0)
@@ -2776,42 +2829,6 @@ bool PatternMatchEngine::report_grounding(const GroundingMap &var_soln,
 
 	// Keep going.
 	return false;
-}
-
-/// Assign the proposed grounding to a group. It will look exactly like
-/// some previously-seen group, or a new grouping will be created.
-bool PatternMatchEngine::assign_grouping(const GroundingMap &var_soln,
-                                         const GroundingMap &term_soln)
-{
-	GroundingMap grp;
-
-	// First, construct a group grounding.
-	for (const PatternTermPtr& ptm : _pat->grouping)
-	{
-		const Handle& grpt = ptm->getHandle();
-
-		const auto& vit = var_soln.find(grpt);
-		if (vit != var_soln.end())
-			grp[grpt] = vit->second;
-		else
-		{
-			const auto& tit = term_soln.find(grpt);
-			// The grouping term must be grounded. It must have appeared
-			// in some Present clause. (Perhaps Pattern.c should have
-			// copied it there, to a 'mandatory' clause?)
-			OC_ASSERT (tit != term_soln.end(), "Internal Error!");
-			grp[grpt] = tit->second;
-		}
-	}
-
-	// Next, see if we already have this grouping.
-	const auto& git = _grouping.find(grp);
-	if (git != _grouping.end())
-		return _pmc.propose_grouping(var_soln, term_soln, *git);
-
-	// Start a new group.
-	_grouping.insert(grp);
-	return _pmc.propose_grouping(var_soln, term_soln, grp);
 }
 
 bool PatternMatchEngine::report_forall(void)
@@ -3005,11 +3022,14 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 		return explore_term_branches(term, grnd, clause);
 
 	logmsg("Clause is identity:", clause);
+	perm_push();
+	_perm_state.clear();
 
 	if (not tree_compare(term, grnd, CALL_SOLN))
 	{
 		logmsg("iiii NO solution for term:", term);
 		logmsg("iiii NOT solved by:", grnd);
+		perm_pop();
 		return false;
 	}
 
@@ -3034,14 +3054,23 @@ bool PatternMatchEngine::explore_clause_identical(const PatternTermPtr& term,
 			break;
 		}
 	}
-	if (nullptr == gterm) return false;
+	if (nullptr == gterm)
+	{
+		perm_pop();
+		return false;
+	}
 
 	logmsg("Identity grounding to validate:", gterm);
 	for (const PatternTermPtr& side : clause->getOutgoingSet())
 	{
 		if (side->getHandle() == vterm) continue;
-		if (not tree_compare(side, gterm, CALL_SOLN)) return false;
+		if (not tree_compare(side, gterm, CALL_SOLN))
+		{
+			perm_pop();
+			return false;
+		}
 	}
+	perm_pop();
 
 	// IdenticalLinks are necessarily evaluatable, and thus are
 	// necessarily embedded in an evaluatable clause, which we can
@@ -3113,6 +3142,13 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (pclause->isIdentical())
 		return explore_clause_identical(term, grnd, pclause);
 
+	// ExclusiveLinks should be matched against ground ExclusiveLinks in the
+	// AtomSpace, not evaluated. The distinctness constraint is enforced
+	// through constraint propagation during matching. Check this BEFORE
+	// hasAnyEvaluatable() since ExclusiveLink also triggers that flag.
+	if (pclause->isExclusive())
+		return explore_clause_direct(term, grnd, pclause);
+
 	// Evaluatable clauses are not cacheable.
 	if (pclause->hasAnyEvaluatable())
 		return explore_clause_evaluatable(term, grnd, pclause);
@@ -3123,6 +3159,13 @@ bool PatternMatchEngine::explore_clause(const PatternTermPtr& term,
 	if (pclause->isChoice())
 		return explore_clause_direct(term, grnd, pclause);
 
+	return explore_clause_cacheable(term, grnd, pclause);
+}
+
+bool PatternMatchEngine::explore_clause_cacheable(const PatternTermPtr& term,
+                                        const Handle& grnd,
+                                        const PatternTermPtr& pclause)
+{
 	// If its not cacheable, then we must search directly.
 	const Handle& clause = pclause->getHandle();
 	if (_pat->cacheable_clauses.find(clause) == _pat->cacheable_clauses.end())
@@ -3246,6 +3289,10 @@ void PatternMatchEngine::clear_current_state(void)
 
 	// GlobNode state
 	_glob_state.clear();
+
+	// Reset constraint domains for ExclusiveLinks to initial state.
+	if (_use_constraint_domain)
+		_constraint_domain.reset();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const PatternTermSeq& clauses)
@@ -3292,6 +3339,9 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	_perm_odo.clear();
 	_perm_podo.clear();
 	_perm_odo_state.clear();
+
+	// constraint propagation state
+	_use_constraint_domain = false;
 }
 
 void PatternMatchEngine::set_pattern(const Variables& v,
@@ -3299,6 +3349,189 @@ void PatternMatchEngine::set_pattern(const Variables& v,
 {
 	_variables = &v;
 	_pat = &p;
+	init_constraint_domains();
+}
+
+/* ======================================================== */
+/**
+ * Initialize constraint domains for all variables in ExclusiveLinks.
+ *
+ * This is called ONCE at the start of pattern matching (not per-clause).
+ * It determines the domain (set of possible values) for each variable
+ * by looking at OTHER clauses in the pattern that constrain those variables.
+ *
+ * For example, in Sudoku:
+ * - Pattern has: (Edge (Predicate "IsNumber") $cell_11) and (ExclusiveLink $cell_11 ...)
+ * - AtomSpace has: (Edge (Predicate "IsNumber") (Concept "one")), etc.
+ * - By finding what $cell_11 could be bound to via the IsNumber clause,
+ *   we determine the domain is {one, two, ..., nine}
+ */
+void PatternMatchEngine::init_constraint_domains(void)
+{
+	_use_constraint_domain = false;
+	if (_pat->exclusives.empty()) return;
+
+	_constraint_domain.clear();
+
+	// For each variable in an ExclusiveLink, determine its domain by looking
+	// at OTHER terms in the pattern that constrain it.
+	for (const PatternTermPtr& excl : _pat->exclusives)
+	{
+		const Handle& excl_h = excl->getHandle();
+		for (const Handle& var : excl_h->getOutgoingSet())
+		{
+			if (not _variables->varset_contains(var)) continue;
+			if (_constraint_domain.has_domain(var)) continue;
+
+			// Find terms that contain this variable (via connectivity_map).
+			// The domain is the INTERSECTION of possible values across
+			// all terms. A variable must satisfy ALL its constraints.
+			HandleSet var_domain;
+			bool first_term = true;
+			auto range = _pat->connectivity_map.equal_range(var);
+			for (auto it = range.first; it != range.second; ++it)
+			{
+				const PatternTermPtr& term = it->second;
+				const Handle& term_h = term->getHandle();
+
+				// Skip ExclusiveLinks - we want OTHER terms
+				Type term_type = term_h->get_type();
+				if (term_type == EXCLUSIVE_LINK) continue;
+
+				// Find a constant subterm in this term to use as a pivot.
+				Handle const_term;
+				for (const Handle& child: term_h->getOutgoingSet())
+				{
+					Type ct = child->get_type();
+					if (ct != VARIABLE_NODE and ct != GLOB_NODE)
+					{
+						const_term = child;
+						break;
+					}
+				}
+				if (not const_term) continue;
+
+				// Use the const subterm's incoming set to find Atoms
+				// that are plausibly in the domain for this term.
+				IncomingSet incoming = const_term->getIncomingSetByType(term_type);
+				Arity term_arity = term_h->get_arity();
+				HandleSet term_domain;
+
+				if (nameserver().isA(term_type, UNORDERED_LINK))
+				{
+					// For unordered links, const_term can be anywhere.
+					// Any element (except const_term) could be a binding.
+					for (const Handle& candidate : incoming)
+					{
+						if (candidate->get_arity() != term_arity) continue;
+
+						for (const Handle& elt : candidate->getOutgoingSet())
+						{
+							if (elt == const_term) continue;
+							Type bt = elt->get_type();
+							if (bt != VARIABLE_NODE and bt != GLOB_NODE)
+								term_domain.insert(elt);
+						}
+					}
+				}
+				else
+				{
+					// For ordered links, the location of the var is fixed,
+					// and so only the Atom at the same fixed location will
+					// be in the domain.
+					Arity const_pos = (Arity)-1;
+					Arity var_pos = (Arity)-1;
+					for (Arity i = 0; i < term_arity; i++)
+					{
+						const Handle& child = term_h->getOutgoingAtom(i);
+						if (child == var) var_pos = i;
+						else if (child == const_term) const_pos = i;
+						if (var_pos != (Arity)-1 and const_pos != (Arity)-1) break;
+					}
+					if (var_pos == (Arity)-1) continue;
+
+					// Extract binding from the same position as var.
+					for (const Handle& candidate : incoming)
+					{
+						if (candidate->get_arity() != term_arity) continue;
+						if (candidate->getOutgoingAtom(const_pos) != const_term) continue;
+
+						const Handle& binding = candidate->getOutgoingAtom(var_pos);
+						Type bt = binding->get_type();
+						if (bt != VARIABLE_NODE and bt != GLOB_NODE)
+							term_domain.insert(binding);
+					}
+				}
+
+				// Intersect term_domain with var_domain.
+				// For first term, just copy; for subsequent terms, intersect.
+				if (term_domain.empty()) continue;
+
+				if (first_term)
+				{
+					var_domain = term_domain;
+					first_term = false;
+				}
+				else
+				{
+					// Keep only values that appear in both sets.
+					for (auto vit = var_domain.begin(); vit != var_domain.end(); )
+					{
+						if (term_domain.find(*vit) == term_domain.end())
+							vit = var_domain.erase(vit);
+						else
+							++vit;
+					}
+					// If intersection is empty, no valid groundings exist.
+					if (var_domain.empty()) break;
+				}
+			}
+
+			if (not var_domain.empty())
+				_constraint_domain.init_domain(var, var_domain);
+		}
+	}
+
+	// If no domain found for any variable, then we bail.
+	// It might be possible to discover domains in the middle
+	// of the search, but we don't do that here.
+	if (_constraint_domain.empty())
+		return;
+
+	_use_constraint_domain = true;
+
+	// Add constraints from pattern ExclusiveLinks.
+	// Variables in the same ExclusiveLink must have distinct values.
+	// The variable groups were precomputed during pattern analysis.
+	for (const HandleSeq& vars_in_excl : _pat->exclusive_var_groups)
+		_constraint_domain.add_constraint(vars_in_excl);
+
+	// Save initial state so it can be reset for each new search.
+	_constraint_domain.save_initial();
+
+	DO_LOG({LAZY_LOG_FINE << "Initialized constraint domain:\n"
+	        << _constraint_domain.to_string();});
+}
+
+/**
+ * Propagate constraint when a variable is bound.
+ *
+ * When a variable is bound to a value, this removes that value
+ * from the domains of all variables that share an ExclusiveLink
+ * constraint with it.
+ *
+ * @param var The variable being bound
+ * @param value The value it's being bound to
+ * @return false if propagation detects a conflict (empty domain)
+ */
+bool PatternMatchEngine::propagate_exclusive(
+	const Handle& var,
+	const Handle& value)
+{
+	if (not _use_constraint_domain) return true;
+	if (not _constraint_domain.has_domain(var)) return true;
+
+	return _constraint_domain.bind(var, value);
 }
 
 /* ======================================================== */

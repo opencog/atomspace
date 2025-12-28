@@ -1,7 +1,7 @@
 ;
 ; condlink.scm
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define single
 	; In this flattened CondLink every item in even places is a condition

@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define (foo arg)
     #t

@@ -24,7 +24,7 @@
 ; as a closure. If you really want closures and continuations, then
 ; treat Atom types as C++ classes or as Python objects. In brief:
 ; a type is a type is a type: Atom types can be C++ classes, and
-; that is exactly how BindLink, GetLink and PutLink are implemented.
+; that is exactly how QueryLink and MeetLink are implemented.
 ; Don't be afraid of creating more types and classes to do your work.
 ;
 ; What else is wrong with ExecutionOutputLink? Well, one of the big
@@ -50,7 +50,7 @@
 ; something fancy, and reason on it, create new Atom types, and
 ; write C++ classes to bring them alive.
 ;
-(use-modules (opencog) (opencog exec) (opencog python))
+(use-modules (opencog) (opencog python))
 
 ; The below demonstrates the use of python code in an ExecutionOutputLink.
 ; Begin by loading the python code. (See `python.scm` for more details).
@@ -105,17 +105,6 @@
 		(List
 			(Number "2")
 			(Number "4"))))
-
-; One can also do this, although it is a bit more subtle: the
-; PutLink substitutes arguments for variables. The result of the
-; beta-reduction is executable, so cog-execute! executes it.
-
-(cog-execute!
-   (Put
-      (DefinedProcedure "x+y*10")
-      (List
-         (Number "2")
-         (Number "4"))))
 
 ; -------------------------------------------------------------
 ; Similar to the above, except that it skips using the DefineLink

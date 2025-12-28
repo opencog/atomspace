@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; concatenate-test.scm -- Verify that ConcatenateLink works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

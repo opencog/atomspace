@@ -1,0 +1,338 @@
+/*
+ * TypeUtils.cc
+ *
+ * Copyright (C) 2015 Linas Vepstas
+ *
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  December 2015
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the
+ * exceptions at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/atom_types/NameServer.h>
+
+#include "TypeChoice.h"
+#include "TypeNode.h"
+#include <opencog/atoms/grant/DefineLink.h>
+#include <opencog/atoms/value/LinkValue.h>
+
+#include "TypeUtils.h"
+
+namespace opencog {
+
+/* ================================================================= */
+/**
+ * Type checker.  Returns true if `val` is of type `spec`.
+ */
+bool value_is_type(const Handle& spec, const ValuePtr& val)
+{
+	Handle deep(spec);
+
+	Type valtype = val->get_type();
+	Type dpt = deep->get_type();
+
+	// If it's a user-defined type, replace by it's definition.
+	if (DEFINED_TYPE_NODE == dpt)
+	{
+		deep = DefineLink::get_definition(deep);
+		dpt = deep->get_type();
+	}
+
+	// If it's a signature, unpack it now.
+	if (SIGNATURE_LINK == dpt)
+	{
+		deep = deep->getOutgoingAtom(0);
+		dpt = deep->get_type();
+	}
+
+	if (TYPE_NODE == dpt or SIGN_NODE == dpt)
+	{
+		Type deeptype = TypeNodeCast(deep)->get_kind();
+		return (valtype == deeptype);
+	}
+	else if (TYPE_INH_NODE == dpt)
+	{
+		// Just like above, but allows derived types.
+		Type deeptype = TypeNodeCast(deep)->get_kind();
+		return nameserver().isA(valtype, deeptype);
+	}
+	else if (TYPE_CO_INH_NODE == dpt)
+	{
+		// Just like above, but in the other direction.
+		// That is, it allows base types.
+		Type deeptype = TypeNodeCast(deep)->get_kind();
+		return nameserver().isA(deeptype, valtype);
+	}
+	else if (nameserver().isA(dpt, TYPE_CHOICE))
+	{
+		return TypeChoiceCast(deep)->is_type(val);
+	}
+
+	// From here on, we prepare to compare Links. The next if-block
+	// deals with what's left of nodes, and preps for link compare.
+	size_t sz;
+	size_t off;
+	if (LINK_SIGNATURE_LINK != dpt)
+	{
+		// If it is not a link, then it is a type-constant,
+		// (Node or Value) and thus must match perfectly.
+		if (not deep->is_link())
+			return (deep == val);
+
+		// If it is a link, then both must be same link type.
+		if (valtype != dpt) return false;
+
+		// Unordered links are harder to handle...
+		if (deep->is_unordered_link())
+			throw RuntimeException(TRACE_INFO,
+				"Not implemented! TODO XXX FIXME");
+
+		// Fall-thru and do link compares, below. Setup first.
+		sz = deep->get_arity();
+		off = 0;
+	}
+	else
+	{
+		// If we are here, its a LINK_SIGNATURE
+		// Expecting a Link or a LinkValue of the named type.
+		const Handle& lsig = deep->getOutgoingAtom(0);
+		Type deeptype = TypeNodeCast(lsig)->get_kind();
+
+		bool islink = nameserver().isA(deeptype, LINK);
+		bool islnkv = nameserver().isA(deeptype, LINK_VALUE);
+		bool istych = (TYPE_CHOICE == deeptype);
+		// First atom must name a type of Link or LinkValue
+		if ((not islink) and (not islnkv) and (not istych))
+			throw SyntaxException(TRACE_INFO,
+				"Expecting a Link or LinkValue type!");
+
+		if (istych and not TypeChoiceCast(deep)->is_type(val))
+			return false;
+		if ((islink or islnkv) and not nameserver().isA(valtype, deeptype))
+			return false;
+
+		// Fall-thru and do link compares, below. Setup first.
+		sz = deep->get_arity() - 1;
+		off = 1;
+	}
+
+	// Arities must match, for now. I guess we could someday do
+	// globbing here, if someone ever needs this.
+	if (sz != val->size()) return false;
+
+	// Loop over the rest, doing a side-by-side compare.
+	const HandleSeq& dpo = deep->getOutgoingSet();
+
+	if (val->is_atom())
+	{
+		const HandleSeq& vlo = HandleCast(val)->getOutgoingSet();
+		for (uint i=0; i<sz; i++)
+		{
+			if (not value_is_type(dpo[i+off], vlo[i])) return false;
+		}
+	}
+	else
+	{
+		const std::vector<ValuePtr>& vlo = LinkValueCast(val)->value();
+		for (uint i=0; i<sz; i++)
+		{
+			if (not value_is_type(dpo[i+off], vlo[i])) return false;
+		}
+	}
+
+	// If we are here, all checks must hav passed.
+	return true;
+}
+
+/* ================================================================= */
+
+/*
+ * The implementation below feels awfully hacky and bug-prone,
+ * but I don't see a better way.  Since below is essentially
+ * a whizzy set-subset operation, one could go all formal operator
+ * and etc. but more abstraction seems unlikely to make it better.
+ */
+static bool type_match_rec(const Handle& left_,
+                           const ValuePtr& right_,
+                           bool toplevel)
+{
+	if (left_ == right_) return true;
+
+	Handle left(left_);
+	Type ltype = left->get_type();
+
+	// If it's a user-defined type, replace by it's definition.
+	if (DEFINED_TYPE_NODE == ltype)
+	{
+		left = DefineLink::get_definition(left);
+		ltype = left->get_type();
+	}
+
+	// Unpack the arrow; right must match left's input.
+	if (ARROW_LINK == ltype)
+	{
+		left = left->getOutgoingAtom(0); // 0 == input
+		ltype = left->get_type();
+	}
+
+	// If right is not a type, then just use argument-check.
+	// We can only do this at the top level; lower levels
+	// can have argument-like links (i.e. duck-types which
+	// we have to type-interence).
+	Type rtype = right_->get_type();
+	if (toplevel and
+	    TYPE_NODE != rtype and
+	    TYPE_INH_NODE != rtype and
+	    TYPE_CO_INH_NODE != rtype and
+	    TYPE_CHOICE != rtype and
+	    SIGNATURE_LINK != rtype and
+	    DEFINED_TYPE_NODE != rtype and
+	    ARROW_LINK != rtype)
+	{
+		return value_is_type(left, right_);
+	}
+
+	// Everything below here deals with atoms.
+	if (not right_->is_atom()) return false;
+
+	Handle right(HandleCast(right_));
+
+	// If it's a user-defined type, replace by it's definition.
+	if (DEFINED_TYPE_NODE == rtype)
+	{
+		right = DefineLink::get_definition(right);
+		rtype = right->get_type();
+	}
+
+	// Unpack the arrow; right's output must match left.
+	if (ARROW_LINK == rtype)
+	{
+		right = right->getOutgoingAtom(1); // 1 == output
+		rtype = right->get_type();
+	}
+
+	// Should be safe to unpack signatures now.
+	// We must not do this earlier, it will mess up.
+	if (SIGNATURE_LINK == ltype)
+	{
+		left = left->getOutgoingAtom(0);
+		ltype = left->get_type();
+	}
+
+	if (SIGNATURE_LINK == rtype)
+	{
+		right = right->getOutgoingAtom(0);
+		rtype = right->get_type();
+	}
+
+	// Exact matches are always good.
+	if (left == right) return true;
+
+	// If left is a core type, right must be that type
+	// (or a value, partly handled that above already, for
+	// the top-level; here we do lower levels.
+	if (TYPE_NODE == ltype)
+	{
+		return TypeNodeCast(left)->get_kind() == rtype;
+	}
+
+	// Like above but allows derived types.
+	if (TYPE_INH_NODE == ltype)
+	{
+		return nameserver().isA(rtype, TypeNodeCast(left)->get_kind());
+	}
+
+	// Like above, but in the opposite direction: allows base types.
+	if (TYPE_CO_INH_NODE == ltype)
+	{
+		return nameserver().isA(TypeNodeCast(left)->get_kind(), rtype);
+	}
+
+	// If left is a type choice, right must match a choice.
+	if (TYPE_CHOICE == ltype)
+	{
+		if (TYPE_CHOICE == rtype)
+		{
+			// Can everything in the right be found in the left?
+			// If so, then we are OK.
+			for (const Handle& rh : HandleCast(right)->getOutgoingSet())
+			{
+				if (not type_match_rec(left, rh, false)) return false;
+			}
+			return true;
+		}
+
+		// Does one of the left choices match a right? Is so then good.
+		for (const Handle& lh : left->getOutgoingSet())
+		{
+			if (type_match_rec(lh, right, false)) return true;
+		}
+		return false;
+	}
+
+	// At this point we expect both left an right to be links
+	// that are not type-links, i.e. should be ordinary links,
+	// e.g. ListLink or EvaluationLink.  Compare these side-by-side.
+	if (ltype != rtype) return false;
+
+	if (not left->is_link() or not right->is_link()) return false;
+
+	// Unordered links are a pain in the butt.
+	if (left->is_unordered_link())
+		throw RuntimeException(TRACE_INFO,
+			"Not implemented! TODO XXX FIXME");
+
+	const HandleSeq& lout(left->getOutgoingSet());
+	const HandleSeq& rout(right->getOutgoingSet());
+
+	if (lout.size() != rout.size()) return false;
+
+	for (size_t i=0; i< lout.size(); i++)
+	{
+		if (not type_match_rec(lout[i], rout[i], false)) return false;
+	}
+
+	return true;
+}
+
+bool type_match(const Handle& left_, const ValuePtr& right_)
+{
+	return type_match_rec(left_, right_, true);
+}
+
+ValuePtr type_compose(const Handle& left, const ValuePtr& right)
+{
+	// Interesting. XXX FIXME. This is not yet implemented!
+	throw RuntimeException(TRACE_INFO, "Not implemented!");
+	return nullptr;
+}
+
+bool is_well_typed(Type t)
+{
+	return t != NOTYPE;
+}
+
+bool is_well_typed(const TypeSet& ts)
+{
+	for (Type t : ts)
+		if (not is_well_typed(t))
+			return false;
+	return true;
+}
+
+} // ~namespace opencog
+
+/* ===================== END OF FILE ===================== */

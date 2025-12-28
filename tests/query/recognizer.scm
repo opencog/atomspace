@@ -1,7 +1,7 @@
 
 ; Pattern recognition is the dual of pattern matching.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Two different pseudo-AIML rules:
 ;    I * you   --> I * you too

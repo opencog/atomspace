@@ -18,7 +18,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 
 namespace opencog {
 
@@ -130,6 +130,11 @@ protected:
 	// IdenticalLink). This can be used as a transitive assignment.
 	bool _is_identical;
 
+	// This term is an ExclusiveLink. Variables in an ExclusiveLink
+	// must all have distinct groundings. Used for constraint propagation
+	// during UnorderedLink permutation enumeration.
+	bool _is_exclusive;
+
 	// True if this tree node is unordered, or if any pattern
 	// subtree rooted in this tree node contains an unordered link.
 	// Trees without any unordered links can be searched in a
@@ -172,11 +177,6 @@ protected:
 	// term is in each and every one of them. This corresponds to
 	// the ALWAYS_LINK in the default interpretation.
 	bool _is_always;
-
-	// True if this is a term that must have exactly the same value in
-	// grouping of groundings. This behaves like a local "always" in the
-	// group. It corresponds to the GROUP_LINK in the default implementation.
-	bool _is_grouping;
 
 	void addAnyBoundVar();
 	void addAnyGlobbyVar();
@@ -228,9 +228,6 @@ public:
 	void markAlways();
 	bool isAlways() const noexcept { return _is_always; }
 
-	void markGrouping();
-	bool isGrouping() const noexcept { return _is_grouping; }
-
 	void addBoundVariable();
 	bool hasAnyBoundVariable() const noexcept { return _has_any_bound_var; }
 	bool hasBoundVariable() const noexcept { return _has_bound_var; }
@@ -256,6 +253,9 @@ public:
 	void markIdentical();
 	bool isIdentical() const noexcept { return _is_identical; }
 
+	void markExclusive();
+	bool isExclusive() const noexcept { return _is_exclusive; }
+
 	void addUnorderedLink();
 	bool hasUnorderedLink() const noexcept { return _has_any_unordered_link; }
 	bool hasUnorderedBelow() const noexcept { return _has_unordered_below; }
@@ -268,7 +268,7 @@ public:
 		return false;
 	}
 
-	bool operator==(const PatternTerm&);
+	bool operator==(const PatternTerm&) const;
 
 	// Work around gdb's inability to build a string on the fly;
 	// See http://stackoverflow.com/questions/16734783 for explanation.

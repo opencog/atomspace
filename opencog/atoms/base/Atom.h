@@ -292,6 +292,7 @@ class Atom
     friend class Frame;           // Needs to call install_atom()
     friend class StateLink;       // Needs to call swap_atom()
     friend class StorageNode;     // Needs to call isAbsent()
+    friend class CogServerNode;   // Needs to call markIsMessage()
 
 protected:
 
@@ -319,17 +320,14 @@ protected:
     };
     static MutexPool _mutex_pool;
 
-    #define _MTX (_mutex_pool.get_mutex(_content_hash))
+    #define _MTX (_mutex_pool.get_mutex(get_hash()))
+#else
+    #define _MTX _mtx
+#endif
     #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
     #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_MTX);
     #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_MTX);
-#else
-    #define INCOMING_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-    #define INCOMING_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-    #define KVP_UNIQUE_LOCK std::unique_lock<std::shared_mutex> lck(_mtx);
-    #define KVP_SHARED_LOCK std::shared_lock<std::shared_mutex> lck(_mtx);
-#endif
 
     // Packed flas. Single byte per atom.
     enum AtomFlags : uint8_t {
@@ -361,6 +359,11 @@ protected:
     // we are using a lock-per-atom, even though this makes the atom
     // fatter.
     mutable std::shared_mutex _mtx;
+
+    // copyValues() assumes it can use the same mutex to lock both the
+    // source and destination atoms with the same mutex. That would need
+    // to be fixed to use this. And I'm lazy so lets halt compilation.
+    #error "Current implementation of copyValues() assumes mutex pool!"
 #endif // NOT USE_MUEX_POOL
 
     /**
@@ -441,7 +444,11 @@ protected:
     virtual void install();
     virtual void remove();
 
+protected:
     virtual ContentHash compute_hash() const = 0;
+
+    /** Indicate this Atom is used as a message */
+    void markIsMessage();
 
 private:
     //! Returns whether this atom is marked for removal.
@@ -465,9 +472,6 @@ private:
 
     /** Indicate this Atom is used as a key */
     void markIsKey();
-
-    /** Indicate this Atom is used as a message */
-    void markIsMessage();
 
     void getLocalInc(const AtomSpace*, HandleSet&, Type) const;
     void getCoveredInc(const AtomSpace*, HandleSet&, Type) const;
@@ -532,6 +536,7 @@ public:
     virtual bool bevaluate(AtomSpace*, bool silent=false) {
         throw RuntimeException(TRACE_INFO, "Not evaluatable!");
     }
+    virtual bool bevaluate(void) { return bevaluate(_atom_space, false); }
 
     // Non-crisp evaluation is deprecated. Changed to return BoolValue.
     virtual ValuePtr evaluate(AtomSpace* as, bool silent=false) {
@@ -577,12 +582,27 @@ public:
     /// Get the set of all object messages supported by this Atom.
     virtual HandleSeq getMessages() const { return HandleSeq(); }
 
+    /// Return true if handle appears in the list of getMessages().
+    virtual bool usesMessage(const Handle&) const { return false; }
+
     /// Copy all the values from the other atom to this one.
+    /// It is thread-safe but racey. Values are copied one at a time.
+    /// Multiple updaters in multiple threads can race with one another,
+    /// and alter Values here, or on the other Atom, even as the copy
+    /// is proceeding. The only thread-safety guarantee here is to not
+    /// crash and to not corrupt internal data structures.
     void copyValues(const Handle&);
+
+    /// Lock-free, thread-unsafe copy of all the values from the
+    /// other atom to this one, assuming this Atom if fresh, empty,
+    /// and not visible from any other threads.
+    void bulkCopyValues(const Handle&);
 
     /// Return true if the set of values on this atom isn't empty.
     bool haveValues() const {
         // I think its safe to call empty() without holding a lock...!?
+        // But I'm paranoid. So... grab a lock.
+        KVP_SHARED_LOCK
         return not _values.empty();
     }
 

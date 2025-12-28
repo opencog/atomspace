@@ -44,3 +44,7 @@ cdef class UnisetValue(Value):
 
     @staticmethod
     cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector)
+
+
+cdef class VoidValue(Value):
+    pass

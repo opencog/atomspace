@@ -71,14 +71,13 @@ public:
 void MultiAtomSpace::setUp(void)
 {
 	main_as = createAtomSpace();
-	evaluator = new SchemeEval(main_as);
+	evaluator = SchemeEval::get_scheme_evaluator(main_as);
 	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
 }
 
 void MultiAtomSpace::tearDown(void)
 {
-	delete evaluator;
 	evaluator = nullptr;
 	main_as = nullptr;
 }
@@ -94,7 +93,7 @@ void MultiAtomSpace::test_two_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define an alternate atomspace
-	evaluator->eval("(define alt-as (cog-new-atomspace))");
+	evaluator->eval("(define alt-as (AtomSpace))");
 	std::string msg = evaluator->eval("alt-as");
 	printf("New atomspace is: %s\n", msg.c_str());
 
@@ -148,9 +147,9 @@ void MultiAtomSpace::test_three(void)
 	AtomSpacePtr as1 = createAtomSpace();
 	AtomSpacePtr as2 = createAtomSpace();
 	AtomSpacePtr as3 = createAtomSpace();
-	SchemeEval* ev1 = new SchemeEval(as1);
-	SchemeEval* ev2 = new SchemeEval(as2);
-	SchemeEval* ev3 = new SchemeEval(as3);
+	SchemeEval* ev1 = SchemeEval::get_scheme_evaluator(as1);
+	SchemeEval* ev2 = SchemeEval::get_scheme_evaluator(as2);
+	SchemeEval* ev3 = SchemeEval::get_scheme_evaluator(as3);
 
 	Handle h1 = ev1->eval_h("(cog-new-node 'ConceptNode \"stuff\")");
 	CHKEV(ev1);
@@ -197,9 +196,6 @@ void MultiAtomSpace::test_three(void)
 	CHKEV(ev2);
 	TSM_ASSERT("Expect to find atom", h5 == h9);
 
-	delete ev3;
-	delete ev2;
-	delete ev1;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -210,13 +206,13 @@ void MultiAtomSpace::test_load(void)
 	AtomSpacePtr as1 = createAtomSpace();
 	AtomSpacePtr as2 = createAtomSpace();
 
-	SchemeEval* ev1 = new SchemeEval(as1);
-	SchemeEval* ev2 = new SchemeEval(as2);
+	SchemeEval* ev1 = SchemeEval::get_scheme_evaluator(as1);
+	SchemeEval* ev2 = SchemeEval::get_scheme_evaluator(as2);
 	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
 
-	printf("as1 is uuid=%lu %s\n", as1->get_uuid(), as1->get_name().c_str());
-	printf("as2 is uuid=%lu %s\n", as2->get_uuid(), as2->get_name().c_str());
+	printf("as1 is %s\n", as1->get_name().c_str());
+	printf("as2 is %s\n", as2->get_name().c_str());
 
 	// The below is a complicated multi-atom-space version of part of
 	// the SCMUtilsUTest suite.  Different atoms in different spaces...
@@ -280,8 +276,6 @@ void MultiAtomSpace::test_load(void)
 	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, tv3->get_type());
 	TSM_ASSERT_EQUALS("wrong count found", 2, (int)(fvp3->value()[2]));
 
-	delete ev1;
-	delete ev2;
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -290,7 +284,7 @@ void MultiAtomSpace::test_nest(void)
 {
 	main_as->clear();
 	AtomSpacePtr locas = createAtomSpace(main_as);
-	SchemeEval* lev = new SchemeEval(locas);
+	SchemeEval* lev = SchemeEval::get_scheme_evaluator(locas);
 
 	// Push some atoms into the main space
 	Handle ha = evaluator->eval_h("(ConceptNode \"aaa\")");
@@ -321,7 +315,6 @@ void MultiAtomSpace::test_nest(void)
 	TSM_ASSERT("Expect atom a in position 0", ha == hl->getOutgoingAtom(0));
 	TSM_ASSERT("Expect atom b in position 1", hb == hl->getOutgoingAtom(1));
 
-	delete lev;
 
 	// Above deletion should not affect the main atomspace
 	TSM_ASSERT("Still two atoms in main atomspace",
@@ -342,7 +335,7 @@ void MultiAtomSpace::test_nest_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define an alternate atomspace
-	evaluator->eval("(define nest-as (cog-new-atomspace (cog-atomspace)))");
+	evaluator->eval("(define nest-as (AtomSpace (cog-atomspace)))");
 	std::string msg = evaluator->eval("nest-as");
 	printf("Nested atomspace is: %s\n", msg.c_str());
 
@@ -438,9 +431,8 @@ void MultiAtomSpace::test_pm_scm(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	evaluator->eval("(use-modules (opencog))");
-	evaluator->eval("(use-modules (opencog exec))");
 
-	std::string rs = evaluator->eval("(load-from-path \"tests/scm/pm.scm\")");
+	std::string rs = evaluator->eval("(load-from-path \"tests/scm/multi-atom-space-gc-bug.scm\")");
 	rs.erase(rs.find_last_not_of(" \n\r\t") + 1);
 	std::cout << "rs = >>" << rs << "<<" << std::endl;
 
@@ -459,7 +451,7 @@ void MultiAtomSpace::test_as_of_atom_scm(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = evaluator->eval("(load-from-path \"tests/scm/as-of-atom.scm\")");
+	std::string rs = evaluator->eval("(load-from-path \"tests/scm/multi-atom-space-as-of-atom.scm\")");
 	logger().debug() << "rs = " << rs;
 	Handle A = evaluator->eval_h("A");
 	AtomSpacePtr A_as = evaluator->eval_as("A-as");

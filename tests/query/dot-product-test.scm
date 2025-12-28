@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; dot-product.scm -- take dot products of vectors for query
 ; This is the unit-test version of one of the demos.
@@ -8,7 +11,7 @@
 ; a query that returns two vectors of numbers, which are multiplied
 ; and accumulated, resulting in a dot-product of the two.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
@@ -23,17 +26,17 @@
 ; "has nose" and so on. The numeric value for that basis element is
 ; stored in a FloatValue attached to each.
 ;
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
 
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
 
 ; Define a Query that looks for the basis elements on the "dog" and
 ; "cat" vectors. Once these are found, obtain the counts, and multiply
@@ -45,13 +48,13 @@
 
 		; What to look for.
 		(Present
-			(Evaluation (Variable "$prop") (Concept "dog"))
-			(Evaluation (Variable "$prop") (Concept "cat")))
+			(Edge (Variable "$prop") (Concept "dog"))
+			(Edge (Variable "$prop") (Concept "cat")))
 
 		; Multiply the counts on the search results.
 		(Times
-			(count-of (Evaluation (Variable "$prop") (Concept "dog")))
-			(count-of (Evaluation (Variable "$prop") (Concept "cat"))))))
+			(count-of (Edge (Variable "$prop") (Concept "dog")))
+			(count-of (Edge (Variable "$prop") (Concept "cat"))))))
 
 ; Dry run -- this should return a list of numbers 1,4,9,16,25
 ; (cog-execute! qdot-math)

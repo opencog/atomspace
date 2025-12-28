@@ -7,30 +7,29 @@
 ; proof.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Clause to match during query - are Agents Mulder and Scully around?
 (define mulder
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "Agent Mulder")
 		(ListLink (VariableNode "$x"))))
 
 (define scully
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "Agent Scully")
 		(ListLink (VariableNode "$y"))))
 
 ; Call in the agents
 (define call-mulder
 	(PutLink
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "Agent Mulder")
 			(VariableNode "$x"))
 		(ListLink (ConceptNode "Exploring Area 51"))))
 
 (define call-scully
 	(PutLink
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "Agent Scully")
 			(VariableNode "$x"))
 		(ListLink (ConceptNode "Late night in the morgue"))))

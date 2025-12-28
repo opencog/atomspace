@@ -5,7 +5,7 @@
 ; ConceptNode A or ConceptNode B, with a probability of 70-30.  It then
 ; counts how often each of these choices occurred.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Pick A with 70% probability, pick B with 30% probability.
 (Define (DefinedProcedure "randy")
@@ -27,12 +27,12 @@
 			(True (Put
 				(State (Anchor "sum-A") (Variable "$x"))
 				(Plus (Number 1)
-					(Get (State (Anchor "sum-A") (Variable "$y")))))))
+					(Meet (State (Anchor "sum-A") (Variable "$y")))))))
 		; ... else increment the count of B.
 		(True (Put
 			(State (Anchor "sum-B") (Variable "$x"))
 			(Plus (Number 1)
-				(Get (State (Anchor "sum-B") (Variable "$y"))))))))
+				(Meet (State (Anchor "sum-B") (Variable "$y"))))))))
 
 ; Run this several times.
 (cog-execute! (DefinedPredicate "counter"))
@@ -47,8 +47,8 @@
 (cog-execute! (DefinedPredicate "counter"))
 
 ; Print the counts.
-(cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
-(cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
+(cog-execute! (Meet (State (Anchor "sum-A") (Variable "$x"))))
+(cog-execute! (Meet (State (Anchor "sum-B") (Variable "$x"))))
 
 ; Run it a thousand times.
 (State (Anchor "loop-count") (Number 0))
@@ -60,24 +60,24 @@
 		(DefinedPredicate "counter")
 		(TrueLink (PutLink
 			(State (Anchor "loop-count") (Variable "$x"))
-			(Plus (Number 1) (Get (State (Anchor "loop-count") (Variable "$x"))))))
+			(Plus (Number 1) (Meet (State (Anchor "loop-count") (Variable "$x"))))))
 		(GreaterThan
 			(Number 1000)
-			(Get (State (Anchor "loop-count") (Variable "$x"))))
+			(Meet (State (Anchor "loop-count") (Variable "$x"))))
 		(DefinedPredicate "loop a lot of times")))
 
 ; Actually execute the loop.
 (cog-execute! (DefinedPredicate "loop a lot of times"))
 
 ; Print the counts again.
-(cog-execute! (Get (State (Anchor "sum-A") (Variable "$x"))))
-(cog-execute! (Get (State (Anchor "sum-B") (Variable "$x"))))
+(cog-execute! (Meet (State (Anchor "sum-A") (Variable "$x"))))
+(cog-execute! (Meet (State (Anchor "sum-B") (Variable "$x"))))
 
 ; Print the ratio.
 (Define (DefinedProcedure "ratio")
 	(Divide
-		(Get (State (Anchor "sum-A") (Variable "$x")))
-		(Get (State (Anchor "sum-B") (Variable "$x")))))
+		(Meet (State (Anchor "sum-A") (Variable "$x")))
+		(Meet (State (Anchor "sum-B") (Variable "$x")))))
 
 (cog-execute! (DefinedProcedure "ratio"))
 

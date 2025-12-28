@@ -4,7 +4,7 @@
 ; Make sure that formulas work in search patterns.
 ; This tests the second bug reported in opencog/atomspace#2650
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))

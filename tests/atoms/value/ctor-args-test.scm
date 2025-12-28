@@ -1,7 +1,10 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; ctor-args-test.scm -- Test that scheme Value constructors work properly
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

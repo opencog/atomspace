@@ -1,5 +1,4 @@
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;; Facts
 (Evaluation

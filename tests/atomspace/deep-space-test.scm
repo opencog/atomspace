@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; deep-space-test.scm
 ; Assorted tests of change-sets in the atomspace.
@@ -16,7 +19,7 @@
 ; Create a list of atomspaces, each a child of the last.
 (define (make-space-list LST NUM)
 	(if (<= NUM 0) LST
-		(let ((newspace (cog-new-atomspace (cog-atomspace))))
+		(let ((newspace (AtomSpace (cog-atomspace))))
 			(cog-set-atomspace! newspace)
 			(make-space-list (cons newspace LST) (- NUM 1)))))
 
@@ -80,10 +83,12 @@
 		(test-equal "count-tv" cnt
 			(inexact->exact (cog-value-ref (cog-value (cog-node 'Concept "hello") (Predicate "*-TruthValueKey-*")) 2)))
 
-		; Each atomspace should contain just two atoms.
-		; One, plus (Predicate "*-TruthValueKey-*")
-		(test-equal "atomspace-size" 2 (count-all))
-		(set! cnt (+ 1 cnt)))
+		; Each atomspace should contain just three atoms.
+		; One, plus (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
+		; It also contains the atomspaces there were created,
+		; which we count.
+		(if (not (eq? cnt num-spaces)) (set! cnt (+ 1 cnt)))
+		(test-equal "atomspace-size" (+ 3 cnt) (count-all)))
 	space-list)
 
 (test-end vstack)
@@ -98,6 +103,7 @@
 (cog-set-atomspace! base-space)
 (Concept "foo")
 
+(set! cnt 0)
 (for-each (lambda (space)
 		(cog-set-atomspace! space)
 
@@ -105,8 +111,11 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
-		; Two atoms, plus (Predicate "*-TruthValueKey-*")
-		(test-equal "atomspace-size" 3 (count-all))
+		(if (not (eq? cnt num-spaces)) (set! cnt (+ 1 cnt)))
+		; Two atoms, plus (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
+		; It also contains the atomspaces there were created,
+		; which we count.
+		(test-equal "atomspace-size" (+ 4 cnt) (count-all))
 	)
 	space-list)
 
@@ -182,8 +191,9 @@
 		(test-equal "membership" space
 			(cog-atomspace (cog-node 'Concept "hello")))
 
-		; Two atoms, plus (Concept "foo") visible from parent
-		(test-equal "atomspace-size" 3 (count-all))
+		; Two atoms, plus (Concept "foo") visible from parent,
+		; plus (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
+		(test-equal "atomspace-size" 4 (count-all))
 	)
 	space-list)
 
@@ -206,9 +216,9 @@
 		(test-equal "count-tv" cnt
 			(inexact->exact (cog-value-ref (cog-value (Concept "hello") (Predicate "*-TruthValueKey-*")) 2)))
 
-		; Each atomspace should contain just four atoms.
-		; Three, plus (Predicate "*-TruthValueKey-*")
-		(test-equal "atomspace-size" 4 (count-all))
+		; Each atomspace should contain just five atoms.
+		; Three, plus (Predicate "*-TruthValueKey-*") and (Predicate "*-IsKeyFlag-*")
+		(test-equal "atomspace-size" 5 (count-all))
 
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "foo")))
 		(test-equal "incoming-size" 1 (cog-incoming-size (Concept "hello")))

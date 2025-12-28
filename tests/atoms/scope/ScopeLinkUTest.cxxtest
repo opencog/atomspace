@@ -1,0 +1,477 @@
+/*
+ * tests/atoms/ScopeLinkUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/pattern/QueryLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _asp->add_link
+#define an _asp->add_node
+
+// Test ScopeLink.
+//
+class ScopeLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr _asp;
+	SchemeEval* _eval;
+	Handle X, Y, Z, S, T, P, Q, CT;
+
+public:
+	ScopeLinkUTest() : _asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::DEBUG);
+
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		Z = an(VARIABLE_NODE, "$Z");
+		S = an(VARIABLE_NODE, "$S");
+		T = an(VARIABLE_NODE, "$T");
+		P = an(PREDICATE_NODE, "P");
+		Q = an(PREDICATE_NODE, "Q");
+		CT = an(TYPE_NODE, "ConceptNode");
+
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_content_less();
+	void test_content_less_ev();
+	void test_content_less_un();
+	void test_content_less_uno();
+	void test_content_less_st();
+	void test_content_less_cpt();
+
+	void test_get_variables_1();
+	void test_get_variables_2();
+	void test_get_variables_4();
+	void test_get_variables_5();
+	void test_get_variables_6();
+	void test_get_variables_7();
+
+	void test_rand_alpha_conversion();
+	void test_names_alpha_conversion();
+	void test_vardecl_bindlink_alpha_conversion();
+};
+
+void ScopeLinkUTest::test_content_less()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK, X, X));
+	Handle scY(createLink(SCOPE_LINK, Y, Y));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_ev()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK, X,
+	                   al(EVALUATION_LINK, P, X)));
+	Handle scY(createLink(SCOPE_LINK, Y,
+	                   al(EVALUATION_LINK, P, Y)));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_un()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, Q, Y))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, Y, X),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, Q, X))));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_uno()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y, S, T),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, P, T))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, S, T, Y, X),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, P, T))));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_st()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, Q, Y))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, S, T),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, Q, T))));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_cpt()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A(an(CONCEPT_NODE, "foo"));
+	Handle B(an(CONCEPT_NODE, "bar"));
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y, S, T),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, Q, Y),
+	                      al(EVALUATION_LINK, P, al(LIST_LINK, A, S)),
+	                      al(EVALUATION_LINK, Q, al(LIST_LINK, B, T))
+	                   )));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, T, S, Y, X),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, T),
+	                      al(EVALUATION_LINK, Q, S),
+	                      al(EVALUATION_LINK, P, al(LIST_LINK, A, Y)),
+	                      al(EVALUATION_LINK, Q, al(LIST_LINK, B, X))
+	                   )));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(SCOPE_LINK,
+	                X,
+	                al(AND_LINK,
+	                   al(EVALUATION_LINK, P, X),
+	                   al(EVALUATION_LINK, Q, Y)));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = HandleSet{X};
+
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(SCOPE_LINK,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                an(VARIABLE_NODE, "$P-55ebe96e"),
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "take"),
+	                   an(CONCEPT_NODE, "compound-A")));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = HandleSet{X};
+
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that default variables in scope link are sorted according
+	// to canonical order defined in VarScraper
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varseq;
+	Variables expvar;
+	expvar.find_variables(body);
+
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(expvar.varseq).c_str());
+
+	TS_ASSERT_EQUALS(got, expvar.varseq);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that variables in scope link provided with VariableSet are
+	// sorted according to canonical order defined in VarScraper. We
+	// provide a mixture of typed and untyped variables to make sure it
+	// covers these cases.
+	Handle vardecl = al(VARIABLE_SET,
+	                    al(TYPED_VARIABLE_LINK, X, CT),
+	                    Y,
+	                    al(TYPED_VARIABLE_LINK, Z, CT));
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	// Test that variables are in canonical order
+	const Variables& result = sc->get_variables();
+	Variables expect;
+	expect.find_variables(body);
+
+	printf("Got %s\n", oc_to_string(result.varseq).c_str());
+	printf("Excepted %s\n", oc_to_string(expect.varseq).c_str());
+
+	TS_ASSERT_EQUALS(result.varseq, expect.varseq);
+
+	// Test that the inferred variable declaration corresponds to the
+	// scope one
+	Handle re_vardecl = result.get_vardecl();
+	Handle sc_vardecl = sc->get_vardecl();
+
+	printf("Got vardecl %s\n", oc_to_string(re_vardecl).c_str());
+	printf("Excepted vardecl %s\n", oc_to_string(sc_vardecl).c_str());
+
+	TS_ASSERT(content_eq(re_vardecl, sc_vardecl));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_6()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Like above but Z is not in the variable declaration thus treated
+	// as constant.
+	Handle vardecl = al(VARIABLE_SET,
+	                    al(TYPED_VARIABLE_LINK, X, CT),
+	                    al(TYPED_VARIABLE_LINK, Y, CT));
+	Handle body = al(INHERITANCE_LINK, X, al(AND_LINK, Y, Z));
+	Handle sch = al(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	HandleSeq result = sc->get_variables().varseq;
+	HandleSeq expect{X, Y};
+
+	printf("Got %s\n", oc_to_string(result).c_str());
+	printf("Excepted %s\n", oc_to_string(expect).c_str());
+
+	// Test that variables are in canonical order
+	TS_ASSERT_EQUALS(result, expect);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_7()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Given a body with variables from different atomspaces check that
+	// the variable list is non redundant.
+	AtomSpacePtr alt_as(_asp);
+#define alt_al alt_as->add_link
+#define alt_an alt_as->add_node
+	Handle altU = alt_an(VARIABLE_NODE, "$U");
+	Handle altV = alt_an(VARIABLE_NODE, "$V");
+	Handle U = an(VARIABLE_NODE, "$U");
+	Handle V = an(VARIABLE_NODE, "$V");
+	Handle vardecl = al(VARIABLE_SET, U, V);
+	Handle ante = al(SIMILARITY_LINK, U, V);
+	Handle cnse = alt_al(INHERITANCE_LINK, altU, altV);
+	Handle sch = alt_al(RULE_LINK, vardecl, ante, cnse);
+#undef alt_al
+#undef alt_an
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	HandleSeq result = sc->get_variables().varseq;
+	logger().debug() << "Got " << oc_to_string(result);
+
+	// Test that there are no redundant variables (only U and V)
+	TS_ASSERT_EQUALS(result.size(), 2);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with no arguments
+void ScopeLinkUTest::test_rand_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc =
+	al(SCOPE_LINK,
+		an(VARIABLE_NODE, "$X"),
+		al(AND_LINK, an(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle scac = sc->alpha_convert();
+
+	std::cout << "sc = " << oc_to_string(Handle(sc));
+	std::cout << "scac = " << oc_to_string(scac);
+
+	TS_ASSERT(sc->is_equal(scac));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with provided variable names
+void ScopeLinkUTest::test_names_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		hsc = al(SCOPE_LINK, X, al(AND_LINK, X));
+	Handle expected = createLink(SCOPE_LINK, Y, al(AND_LINK, Y));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result = sc->alpha_convert(HandleMap{{X, Y}});
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_names_alpha_conversion() but using a QueryLink instead of
+// a ScopeLink
+void ScopeLinkUTest::test_vardecl_bindlink_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple QueryLink
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		CT = an(TYPE_NODE, "ConceptNode"),
+		Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT),
+		hbl = al(QUERY_LINK, al(AND_LINK, X), al(OR_LINK, X)),
+		expected_wo_vardecl = al(QUERY_LINK,
+		                         al(AND_LINK, Y), al(OR_LINK, Y)),
+		expected = al(QUERY_LINK, Y_vardecl,
+		              al(AND_LINK, Y), al(OR_LINK, Y));
+
+	QueryLinkPtr bl(QueryLinkCast(hbl));
+	Handle result_wo_vardecl = _asp->add_atom(bl->alpha_convert({Y}));
+
+	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
+	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
+
+	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

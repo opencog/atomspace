@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; unify-test.scm -- Port of UnifyTest.cxxtest
 ;
@@ -30,10 +33,10 @@
 ; way to handle this case in any kind of easy or natural way using
 ; MeetLink. And that is how Unify is different from (Meet (Identical ..))
 ;
-; Ignroing this critical difference, this is a port of UnifyTest.cxxtest
+; Ignoring this critical difference, this is a port of UnifyTest.cxxtest
 ; that "does the same thing", ignoring the subtleties above.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 ; Populate AtomSpace with test data.
@@ -184,13 +187,12 @@
 		(CollectionOf (Meet
 			(Variable "$Y")
 			(Identical
-				(And (Concept "A") (Concept "B"))
-				(And (Concept "A") (Variable "$Y")))))))
+				(Unordered (Concept "A") (Concept "B"))
+				(Unordered (Concept "A") (Variable "$Y")))))))
 
 (format #t "Got ~A\n" tun2)
 (test-assert "UnifyTest::test_unify_unordered_2"
-	(equal? tun2
-		(Set (Concept "B"))))
+	(equal? tun2 (Set (Concept "B"))))
 
 (test-end "UnifyTest::test_unify_unordered_2")
 ; --------------------------------------
@@ -203,8 +205,8 @@
 		(CollectionOf (Meet
 			(VariableList (Variable "$X") (Variable "$Y"))
 			(Identical
-				(And (Concept "A") (Concept "A") (Concept "B") (Concept "B"))
-				(And (Concept "A") (Concept "B") (Variable "$X") (Variable "$Y")))))))
+				(Unordered (Concept "A") (Concept "A") (Concept "B") (Concept "B"))
+				(Unordered (Concept "A") (Concept "B") (Variable "$X") (Variable "$Y")))))))
 
 (define tune5
 	(Set

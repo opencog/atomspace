@@ -3,14 +3,13 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;; The Lambda link is a ScopeLink, and so (VariableNode "$X")
 ;; is a bound var.
 (define forall
 	(LambdaLink
 		(VariableNode "$X")
-		(EvaluationLink (Predicate "P") (VariableNode "$X"))))
+		(EdgeLink (Predicate "P") (VariableNode "$X"))))
 
 ;; This has the same variable name as the above -- and so,
 ;; during pattern matching, this should not be considered to be
@@ -35,11 +34,11 @@
 ;;       (TypeNode "PredicateNode")
 ;;     )
 ;;   )
-;;   (MemberLink
+;;   (TagLink
 ;;     (ConceptNode "ChurchOfEngland")
 ;;     (ConceptNode "AnglicanChurch")
 ;;   )
-;;   (EvaluationLink
+;;   (EdgeLink
 ;;     (PredicateNode "subOrganization")
 ;;     (ListLink
 ;;       (ConceptNode "ChurchOfEngland")
@@ -48,7 +47,7 @@
 ;;   )
 ;; )
 
-(MemberLink
+(TagLink
   (ConceptNode "ChurchOfEngland")
   (ConceptNode "AnglicanChurch")
 )
@@ -64,7 +63,7 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "?C")
          (ConceptNode "AnglicanChurch")
       )
@@ -77,11 +76,11 @@
                (TypeNode "PredicateNode")
             )
          )
-         (MemberLink
+         (TagLink
             (VariableNode "?C")
             (ConceptNode "AnglicanChurch")
          )
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "subOrganization")
             (ListLink
                (VariableNode "?C")

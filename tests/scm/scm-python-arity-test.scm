@@ -1,6 +1,8 @@
+#! /usr/bin/env guile
+-s
+!#
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog python))
 (use-modules (opencog test-runner))
 
@@ -15,7 +17,7 @@
 ; Define a python func returning a boolean
 (python-eval "
 from opencog.atomspace import AtomSpace, types
-from opencog.type_constructors import FloatValue, PredicateNode
+from opencog.atomspace import FloatValue, PredicateNode
 
 
 # Twiddle some atoms in the atomspace
@@ -23,7 +25,8 @@ def foo(atom_a, atom_b) :
     atomspace = atom_a.atomspace
     key = PredicateNode('my-key')
     fv = FloatValue([0.2, 0.69])
-    atomspace.add_node(types.ConceptNode, 'Apple').set_value(key, fv)
+    apple = atomspace.add_node(types.ConceptNode, 'Apple')
+    appl = atomspace.set_value(apple, key, fv)
     atomspace.add_link(types.InheritanceLink, [atom_a, atom_b])
     return True
 ")
@@ -37,7 +40,7 @@ def foo(atom_a, atom_b) :
 
 ; Make sure that Apple was created.
 (test-assert "Apple atom was created"
-	(not (eq? '() (cog-node 'ConceptNode "Apple"))))
+	(cog-node 'ConceptNode "Apple"))
 
 ; Make sure the scheme version of Apple has the same FloatValue on it that
 ; the python code placed on it.

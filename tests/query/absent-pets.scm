@@ -1,5 +1,5 @@
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Unit test for Issue #1596
 ;
@@ -9,7 +9,7 @@
 (Inheritance (Concept "cat") (Concept "pet"))
 (Inheritance (Concept "dog") (Concept "pet"))
 
-(Evaluation (Predicate "keep-pet")
+(Edge (Predicate "keep-pet")
    (List (Concept "German") (Concept "dog")))
 
 ; Find potential, hypothetical pet-keepers.
@@ -27,7 +27,7 @@
         (Inheritance vX (Concept "pet"))
 
         ;; Reject those we know about
-        (Absent (Evaluation kp (List vA vX)))
+        (Absent (Edge kp (List vA vX)))
      )     
      (List kp vA vX))))
 

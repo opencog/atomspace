@@ -4,7 +4,6 @@
 ; Demonstrate the use of DefineLink to give names to things.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;; Some data to populate the atomspace.
 (InheritanceLink
@@ -15,19 +14,19 @@
 	(ConceptNode "transistor")
 	(ConceptNode "electrical device"))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "battery")
 		(VariableNode "car")))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "transistor")
 		(VariableNode "phone")))
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "PartOf")
 	(ListLink
 		(ConceptNode "windsheild")
@@ -40,7 +39,7 @@
 		(InheritanceLink
 			(VariableNode "$x")
 			(ConceptNode "electrical device"))
-		(EvaluationLink
+		(EdgeLink
 			(PredicateNode "PartOf")
 			(ListLink
 				(VariableNode "$x")
@@ -55,7 +54,7 @@
 			(InheritanceLink
 				(VariableNode "$x")
 				(ConceptNode "electrical device"))
-			(EvaluationLink
+			(EdgeLink
 				(PredicateNode "PartOf")
 				(ListLink
 					(VariableNode "$x")
@@ -70,7 +69,7 @@
 
 (DefineLink
    (DefinedPredicateNode "Part-whole Relation")
-   (EvaluationLink
+   (EdgeLink
       (PredicateNode "PartOf")
       (ListLink
          (VariableNode "$x")

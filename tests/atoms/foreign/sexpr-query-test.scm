@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; sexpr-query-test.scm - Store and query s-expressions.
 ; Test for the matching `sexpr-query.scm` example demo.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

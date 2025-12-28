@@ -3,7 +3,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; (use-modules (opencog logger))
 ; (cog-logger-set-level! "fine")
@@ -14,11 +13,11 @@
 ;; Helper functions
 
 (define (content-1)
-   (MemberLink
+   (TagLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (ScopeLink
          (VariableNode "$X")
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "breathe@ea723bda-70bb-47c0-8930-b344fb47a4d1")
             (ListLink
                (VariableNode "$X")
@@ -31,12 +30,12 @@
 
 
 (define (content-2)
-; MemberLink having the same Variable name as rule
-   (MemberLink
+; TagLink having the same Variable name as rule
+   (TagLink
       (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (ScopeLink
          (VariableNode "$X-M2E")
-         (EvaluationLink
+         (EdgeLink
             (PredicateNode "breathe@ea723bda-70bb-47c0-8930-b344fb47a4d1")
             (ListLink
                (VariableNode "$X-M2E")
@@ -59,11 +58,11 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "$B")
          (ScopeLink
             (VariableNode "$X-M2E")
-            (EvaluationLink
+            (EdgeLink
                (VariableNode "$D")
                (ListLink
                   (VariableNode "$X-M2E")
@@ -75,18 +74,18 @@
       (ExecutionOutputLink
          (GroundedSchemaNode "scm: member-to-evaluation-formula")
          (ListLink
-            (EvaluationLink
+            (EdgeLink
                (VariableNode "$D")
                (ListLink
                   (VariableNode "$B")
                   (VariableNode "$C")
                )
             )
-            (MemberLink
+            (TagLink
                (VariableNode "$B")
                (ScopeLink
                   (VariableNode "$X-M2E")
-                  (EvaluationLink
+                  (EdgeLink
                      (VariableNode "$D")
                      (ListLink
                         (VariableNode "$X-M2E")
@@ -114,11 +113,11 @@
             (TypeNode "PredicateNode")
          )
       )
-      (MemberLink
+      (TagLink
          (VariableNode "$B")
          (ScopeLink
             (VariableNode "$X-M2E")
-            (EvaluationLink
+            (EdgeLink
                (VariableNode "$D")
                (ListLink
                   (VariableNode "$X-M2E")
@@ -130,18 +129,18 @@
       (ExecutionOutputLink
          (GroundedSchemaNode "scm: member-to-evaluation-formula")
          (ListLink
-            (EvaluationLink
+            (EdgeLink
                (VariableNode "$D")
                (ListLink
                   (VariableNode "$B")
                   (VariableNode "$C")
                )
             )
-            (MemberLink
+            (TagLink
                (VariableNode "$B")
                (ScopeLink
                   (VariableNode "$some-bound-var")
-                  (EvaluationLink
+                  (EdgeLink
                      (VariableNode "$D")
                      (ListLink
                         (VariableNode "$some-bound-var")

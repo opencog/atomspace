@@ -46,33 +46,45 @@ Frame::~Frame()
 	// shared_from_this() in the dtor.
 	// remove();
 
-	// Because we cannot remove ourselves directly, via above,
-	// we can at least remove other dead weak pointers.
+	// We cannot remove ourselves directly, via above.
+	// However, we can "help", and at least remove other
+	// dead weak pointers. This seems ... helpful ...
 	for (Handle& h : _outgoing)
 		FrameCast(h)->scrub_incoming_set();
+}
+
+void Frame::setAtomSpace(AtomSpace* as)
+{
+	// Under a lock, because ThreadedUTest races in the
+	// creation of scratch spaces, which causes issues,'
+	// if not protected.
+	std::unique_lock<std::shared_mutex> lck(_MTX);
+	if (nullptr == _atom_space)
+		_atom_space = as;
+
+	else if (nullptr == as)
+		_atom_space = nullptr;
+
+	else if (as != _atom_space)
+		throw RuntimeException(TRACE_INFO,
+			"AtomSpace is already set!\n");
 }
 
 /// Place `this` into the incoming set of each outgoing frame.
 void Frame::install()
 {
+	OC_ASSERT(is_type(ATOM_SPACE),
+		"Can't deal with anything else right now");
+
 	Handle llc(get_handle());
-	OC_ASSERT(llc->is_type(ATOM_SPACE), "Can't deal with anything else right now");
-	AtomSpace* self = AtomSpaceCast(llc).get();
 	for (Handle& h : _outgoing)
-	{
-		if (nullptr == h->getAtomSpace())
-		{
-			h->setAtomSpace(self);
-			h->insert_atom(llc);
-		}
-		else
-			h->insert_atom(llc);
-	}
+		h->insert_atom(llc);
 }
 
 void Frame::remove()
 {
 	Handle lll(get_handle());
+
 	for (Handle& h : _outgoing)
 		h->remove_atom(lll);
 }

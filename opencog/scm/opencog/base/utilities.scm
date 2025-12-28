@@ -9,7 +9,6 @@
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- extract-hypergraph -- extract a hypergraph and everything "under" it.
 ; -- extract-type -- extract all atoms of type 'atom-type'.
-; -- clear -- extract all atoms in the atomspace.
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- count-all -- Return the total number of atoms in the atomspace.
 ; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
@@ -17,13 +16,6 @@
 ; -- cog-prt-atomspace -- Prints all atoms in the atomspace
 ; -- cog-get-root -- Return all hypergraph roots containing 'atom'
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
-; -- max-element-by-key -- Get maximum element in a list
-; -- min-element-by-key -- Get maximum element in a list
-; -- cog-push-atomspace -- Create a temporary atomspace.
-; -- cog-pop-atomspace -- Delete a temporary atomspace.
-; -- random-string -- Generate a random string of given length.
-; -- random-node-name  -- Generate a random name for a node of given type.
-; -- random-node  -- Generate a random node of given type.
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
 ;;; Code:
@@ -32,7 +24,6 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs))  ; Needed for define*-public
-(use-modules (ice-9 threads))  ; Needed for par-map par-for-each
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
@@ -69,10 +60,6 @@
 (define-public (gdadr x) (gdr (gar (gdr x))) )
 (define-public (gddar x) (gdr (gdr (gar x))) )
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
-
-; A more aggressive way of doing the above:
-; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
-; But this would probably lead to various painful debugging situations.
 
 ; --------------------------------------------------------------------
 (define-public (extract-hypergraph atom)
@@ -120,15 +107,6 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (clear)
-"
-  clear -- extract all atoms in the atomspace. Deprecated; use
-      cog-atomspace-clear instead.
-"
-	(cog-atomspace-clear)
-)
-
-; -----------------------------------------------------------------------
 (define*-public (cog-report-counts #:optional (ATOMSPACE (cog-atomspace)))
 "
   cog-report-counts [ATOMSPACE]-- Return an association list of counts
@@ -298,195 +276,6 @@
 		(concatenate (list iset
 			(append-map cog-get-trunk iset))))
 )
-
-; ---------------------------------------------------------------------
-
-(define-public (min-element-by-key lyst fun)
-"
- min-element-by-key LIST FUN
-    Given LIST and function FUN (from element to number), return the
-    element of LIST for which FUN(e) is the least. That is, implements
-    the argmin function.
-"
-	;;; No not this.
-	;;; (fold (lambda (x y) (if (< x y) x y)) 1e300 (map fun lyst)))
-	(fold (lambda (x y)
-		(if (eq? '() x) y
-		(if (eq? '() y) x
-		(if (< (fun x) (fun y)) x y)))) '() lyst))
-
-; ---------------------------------------------------------------------
-
-(define-public (max-element-by-key lyst fun)
-"
- max-element-by-key LIST FUN
-    Given LIST and function FUN (from element to number), return
-    the element of LIST for which FUN(e) is the highest.  That is,
-    implements the argmax function.
-"
-	;;; No not this.
-	;;; (fold (lambda (x y) (if (> x y) x y)) -1e300 (map fun lyst)))
-	(fold (lambda (x y)
-		(if (eq? '() x) y
-		(if (eq? '() y) x
-		(if (> (fun x) (fun y)) x y)))) '() lyst))
-
-; ---------------------------------------------------------------------
-
-(define-public cog-atomspace-stack (make-fluid '()))
-(define-public cog-atomspace-stack-top (make-fluid #f))
-(define-public (cog-push-atomspace)
-"
- cog-push-atomspace -- Create a temporary AtomSpace.
-
-    This creates a new AtomSpace, derived from the current AtomSpace,
-    and makes it current.  Thus, all subsequent atom operations will
-    create Atoms in this new AtomSpace. To delete it, simply pop it;
-    after popping, all of the Atoms placed into it will also be
-    deleted (unless they are referred to in some way).
-
-    The stack of AtomSpaces is per-thread; a push in one thread does
-    not affect the current AtomSpace in other threads.  There is only
-    one stack per thread; changing the current AtomSpace after a push
-    does not alter the stack.
-"
-	(define base-as (fluid-ref cog-atomspace-stack-top))
-	(if (not base-as) (set! base-as (cog-atomspace)))
-
-	(fluid-set! cog-atomspace-stack
-		(cons base-as (fluid-ref cog-atomspace-stack)))
-	(cog-set-atomspace! (cog-new-atomspace base-as))
-	(fluid-set! cog-atomspace-stack-top (cog-atomspace))
-
-	; Return the original (old) atomspace.
-	base-as
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cog-pop-atomspace)
-"
- cog-pop-atomspace -- Delete a temporary AtomSpace.
-
-    See cog-push-atomspace for an explanation.
-"
-	(let* ((stk-top (fluid-ref cog-atomspace-stack-top))
-			 (stk-nxt (fluid-ref cog-atomspace-stack)))
-		(if (null-list? stk-nxt)
-			(throw 'badpop "More pops than pushes!"))
-
-		; User might have done intervening cog-set-atomspace! to
-		; who-knows-where, so go back to the stack to now.
-		(cog-set-atomspace! stk-top)
-
-		; Guile gc should eventually garbage-collect this atomspace,
-		; which will clear it. But ... even when brute-forcing the
-		; gc to run (as done below), the atomspace seems to hang
-		; around anyway, undeleted. So we brute-force clear it now,
-		; so that at least the atoms do not chew up RAM.
-		(cog-atomspace-clear)
-		(cog-set-atomspace! (car stk-nxt))
-		(fluid-set! cog-atomspace-stack-top (car stk-nxt))
-		(fluid-set! cog-atomspace-stack (cdr stk-nxt))
-
-		; Try to force garbage-collection of the atomspace.
-		(set-car! stk-nxt '())
-		(set-cdr! stk-nxt '())
-		(gc))
-
-	*unspecified*
-)
-
-; ---------------------------------------------------------------------
-
-(define rand-state-fluid (make-fluid))
-(define-public (random-string str-length)
-"
-  random-string -- Returns a random string of length 'str-length'.
-
-  This is now thread-safe.  I think. Its missing a unit test,
-  and tends to not actually be random when hit hard from multiple
-  threads. Ick.  This and everything that touches this needs
-  review/redesign.
-"
-	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	(define alphlen (string-length alphanumeric))
-	(define str (format #f "~A-" (get-internal-real-time)))
-
-	; Attempt to make this thread-safe by giving each thread it's own
-	; random state.
-	(if (not (fluid-ref rand-state-fluid))
-		(fluid-set! rand-state-fluid
-			(seed->random-state (get-internal-real-time))))
-
-	; XXX FIXME -- this is a stunningly slow and sloppy random-string
-	; generator. But whatever.  I don't have the hours in the day to fix
-	; everything.
-	(while (> str-length 0)
-		(set! str (string-append str (string (string-ref alphanumeric
-			(random alphlen (fluid-ref rand-state-fluid))))))
-		(set! str-length (- str-length 1))
-	)
-	str
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (random-node-name node-type random-length prefix)
-"
-  random-node-name TYPE LENGTH PREFIX - create a unique node.
-
-  Create a random string, consisting of `PREFIX` followed by
-  a random string of length `LENGTH`.  The string is checked, so
-  that no node of type `TYPE` exists in the atomspace at the time
-  of this call. Thus, the name is almost unique -- there still is
-  a tiny window in which a race can occur.
-"
-	(define (check-name? node-name node-type)
-	"
-	  Return #t if there is a node of type node-type with name
-      node-name in the current atomspace.
-	"
-		(not (null? (cog-node node-type node-name))))
-
-	(define node-name (random-string random-length))
-	(define prefix-length (string-length prefix))
-	(if (> prefix-length 0)
-		(set! node-name (string-append prefix node-name))
-	)
-	(while (check-name? node-name node-type)
-		(if (> prefix-length 0)
-			(set! node-name (string-append prefix (random-string random-length)))
-			(set! node-name (random-string random-length))
-		)
-	)
-	node-name
-)
-
-(define-public (uniquely-named-variable)
-"
- uniquely-named-variable -- Creates a new uniquely-named VariableNode.
-"
-    (Variable (random-node-name 'VariableNode 24 "$"))
-)
-
-; -----------------------------------------------------------------------
-
-(define-public (random-node node-type random-length prefix)
-"
-  Creates a random node of type `node-type`, with name `prefix` followed by
-  a random string of length `random-length`. It Makes sure the resulting node
-  did not previously exist in the current atomspace.
-
-  For instance:
-
-  (random-node 'ConceptNode 8 \"texts-\")
-
-  returns
-
-  (ConceptNode \"texts-218951126396-as737yFW\")
-"
-	(cog-new-node node-type (random-node-name node-type random-length prefix)))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-get-all-subtypes atom-type)

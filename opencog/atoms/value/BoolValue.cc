@@ -100,9 +100,19 @@ BoolValue::BoolValue(const std::vector<bool>& v) : Value(BOOL_VALUE)
 	pack_vector(v);
 }
 
+BoolValue::BoolValue(std::vector<uint64_t>&& v) : Value(BOOL_VALUE)
+{
+	_packed_bits.swap(v);
+}
+
 BoolValue::BoolValue(Type t, const std::vector<bool>& v) : Value(t)
 {
 	pack_vector(v);
+}
+
+BoolValue::BoolValue(Type t, std::vector<uint64_t>&& v) : Value(t)
+{
+	_packed_bits.swap(v);
 }
 
 std::vector<bool> BoolValue::value() const

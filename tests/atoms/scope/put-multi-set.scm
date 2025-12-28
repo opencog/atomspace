@@ -1,0 +1,17 @@
+(use-modules (opencog))
+
+; A lot like put-get-multi.scm, but the Gets have been previously run.
+
+(define put-multi-set
+	(PutLink
+		(LambdaLink
+			(VariableList (Variable "x") (Variable "y"))
+			(EdgeLink
+				(PredicateNode "relatives")
+				(ListLink
+					(Variable "x")
+					(Variable "y")
+					(Concept "mom and pop"))))
+		(ListLink
+			(SetLink (Concept "Jim"))
+			(SetLink (Concept "Jane")))))

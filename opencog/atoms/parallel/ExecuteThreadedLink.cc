@@ -28,11 +28,10 @@
 #include <opencog/util/concurrent_queue.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ExecuteThreadedLink.h>
 #include <opencog/atoms/value/QueueValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 
 using namespace opencog;
 
@@ -69,7 +68,7 @@ using namespace opencog;
 ///    (cog-execute! (WaitForCloseLink (ExecuteThreadedLink ...)))
 /// and the WaitForCloseLink just ... waits for the queue to close,
 /// and returns only then. This would be generic, for all QueueValue
-/// users... XXX should port BindLink etc. to this, too!?
+/// users... XXX should port QueryLink etc. to this, too!?
 
 ExecuteThreadedLink::ExecuteThreadedLink(const HandleSeq&& oset, Type t)
     : Link(std::move(oset), t), _nthreads(-1)
@@ -115,17 +114,16 @@ static void thread_exec(AtomSpace* as, bool silent,
                         std::exception_ptr* returned_ex)
 {
 	set_thread_name("atoms:execlink");
+	set_frame(AtomSpaceCast(as));
 	while (true)
 	{
 		Handle h;
 		if (not todo->try_get(h)) return;
+		if (not h->is_executable()) return;
 
-		// This is (supposed to be) identical to what cog-execute!
-		// would do...
-		Instantiator inst(as);
 		try
 		{
-			ValuePtr pap(inst.execute(h));
+			ValuePtr pap(h->execute(as, silent));
 			if (pap and pap->is_atom())
 				pap = as->add_atom(HandleCast(pap));
 			qvp->add(std::move(pap));

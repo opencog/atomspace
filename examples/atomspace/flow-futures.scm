@@ -16,7 +16,7 @@
 ; See https://en.wikipedia.org/wiki/Futures_and_promises for the general
 ; idea.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------------------------------------------------------
 ; Below is a toy pair-counting framework.  It increments counts
@@ -62,16 +62,16 @@
 					(FloatValueOf (List (Any "left wildcard") (Variable "$R")) tvp))))))
 
 ; A utility to install the above formula on a pair.
-; The PromiseLink is used to promise that the formula will be executed,
-; whenever the (Predicate "MI Key") is accessed. This implements dyanmic
-; update of the MI, so that looking at it always returns the correct
-; value at that given time..
+; The CollectionOfLink is used to wrap the formula with a FormulaStream.
+; The stream is accessed whenever the (Predicate "MI Key") is accessed.
+; This implements dynamic update of the MI, so that looking at it always
+; returns the correct value at that given time.
 (define (install-formula THING-A THING-B)
 	(define pair (List THING-A THING-B))
 	(cog-execute!
 		(SetValue pair (Predicate "MI Key")
-			(Promise
-				(ExecutionOutput (DefinedProcedure "dynamic MI") pair)))))
+			(CollectionOf (Type 'FormulaStream) (OrderedLink
+				(ExecutionOutput (DefinedProcedure "dynamic MI") pair))))))
 
 ; Convenience wrapper, works with strings.
 (define (install-mi STRING-A STRING-B)
@@ -165,8 +165,8 @@
 	(define pair (List THING-A THING-B))
 	(cog-execute!
 		(SetValue pair (Predicate "Alt MI Key")
-			(Promise
-				(ExecutionOutput (DefinedProcedure "scalar MI") pair)))))
+			(CollectionOf (Tpe 'FormulaStream) (OrderedLink
+				(ExecutionOutput (DefinedProcedure "scalar MI") pair))))))
 
 ; Convenience wrapper, works with strings.
 (define (install-scalar-mi STRING-A STRING-B)

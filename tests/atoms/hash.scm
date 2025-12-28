@@ -2,11 +2,11 @@
 
 ;; Scope links
 
-;; These 2 bind links are not alpha-equivalent and should ideally have
+;; These 2 query links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
 (define bl-1
-(BindLink
+(QueryLink
   (VariableList
     (TypedVariableLink
       (VariableNode "$B-a083600")
@@ -46,7 +46,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -101,25 +101,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -243,7 +225,7 @@
 )
 
 (define bl-2
-(BindLink
+(QueryLink
   (VariableList
     (TypedVariableLink
       (VariableNode "$B-a083600")
@@ -283,7 +265,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -318,24 +300,6 @@
         (VariableNode "$Q-1d91711a")
       )
     )
-    (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
     (EquivalenceLink
       (VariableNode "$B-a083600")
       (VariableNode "$B-79625a3")
@@ -360,7 +324,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )
@@ -480,7 +444,7 @@
 )
 
 (define bl-3
-(BindLink
+(QueryLink
   (TypedVariableLink
     (GlobNode "$star")
     (IntervalLink
@@ -504,7 +468,7 @@
 )
 
 (define bl-4
-(BindLink
+(QueryLink
   (ListLink
     (ConceptNode "I")
     (ConceptNode "love")
@@ -521,7 +485,7 @@
 )
 
 (define bl-5
-(BindLink
+(QueryLink
   (TypedVariableLink
     (VariableNode "$x")
     (TypeNode "ConceptNode")
@@ -542,7 +506,7 @@
 )
 
 (define bl-6
-(BindLink
+(QueryLink
   (ListLink
     (ConceptNode "I")
     (ConceptNode "love")
@@ -558,11 +522,11 @@
 )
 )
 
-;; These 2 get links are not alpha-equivalent and should ideally have
+;; These 2 meet links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
 (define gl-1
-(GetLink
+(MeetLink
   (VariableList
     (TypedVariableLink
       (VariableNode "$B-a083600")
@@ -602,7 +566,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -657,25 +621,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
-    (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-5560bed3")
         (VariableNode "$B-a083600")
       )
@@ -689,7 +635,7 @@
 )
 
 (define gl-2
-(GetLink
+(MeetLink
   (VariableList
     (TypedVariableLink
       (VariableNode "$B-a083600")
@@ -729,7 +675,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (VariableNode "$B-a083600")
         (LambdaLink
           (TypedVariableLink
@@ -764,24 +710,6 @@
         (VariableNode "$Q-1d91711a")
       )
     )
-    (NotLink
-      (IdenticalLink
-        (PredicateNode "take-treatment-1")
-        (LambdaLink
-          (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-          )
-          (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-              (VariableNode "$X")
-              (ConceptNode "compound-A")
-            )
-          )
-        )
-      )
-    )
     (EquivalenceLink
       (VariableNode "$B-a083600")
       (VariableNode "$B-79625a3")
@@ -806,7 +734,7 @@
       )
     )
     (NotLink
-      (IdenticalLink
+      (EqualLink
         (PredicateNode "take-treatment-1")
         (VariableNode "$B-a083600")
       )

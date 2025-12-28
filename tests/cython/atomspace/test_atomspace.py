@@ -2,10 +2,10 @@ from unittest import TestCase
 
 import opencog.atomspace
 from opencog.atomspace import Atom, tvkey
-from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
+from opencog.atomspace import types, is_a, get_type, get_type_name
 
-from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, finalize_opencog, tmp_atomspace
+from opencog.atomspace import *
+from opencog.atomspace import get_thread_atomspace, set_thread_atomspace
 
 from time import sleep
 
@@ -13,10 +13,9 @@ class AtomSpaceTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
+        set_thread_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_bare(self):
@@ -63,7 +62,8 @@ class AtomSpaceTest(TestCase):
         self.assertEqual(caught, True)
 
         # Test adding with a truthvalue
-        a3 = Node("test_w_tv").set_value(tvkey, FloatValue([0.5, 0.8]))
+        a3 = Node("test_w_tv")
+        a3 = self.space.set_value(a3, tvkey, FloatValue([0.5, 0.8]))
         self.assertEqual(self.space.size(), 3)
 
     def test_add_link(self):
@@ -78,7 +78,7 @@ class AtomSpaceTest(TestCase):
         n3 = Node("test3")
         l3 = Link(n1, n3)
         self.assertTrue(l3 is not None)
-        l3.set_value(tvkey, FloatValue([0.5, 0.8]))
+        l3 = self.space.set_value(l3, tvkey, FloatValue([0.5, 0.8]))
 
         # Should fail when adding an intentionally bad type
         caught = False
@@ -178,26 +178,35 @@ class AtomSpaceTest(TestCase):
 
         self.assertEqual(len(self.space), 3)
 
-    def test_context_mgr_tmp(self):
+    def test_push_pop(self):
         a = ConceptNode('a')
-        with tmp_atomspace() as tmp_as:
-             b = ConceptNode('b')
-             self.assertTrue(a in self.space)
-             # verify that current default atomspace is tmp_as
-             self.assertFalse(b in self.space)
+
+        # Create temporary workspace
+        current_as = push_thread_atomspace()
+        self.assertFalse(get_thread_atomspace() == self.space)
+        b = ConceptNode('b')
+        # verify that 'b' is only in the current space.
+        self.assertTrue(a in current_as)
+        self.assertTrue(b in current_as)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
+        pop_thread_atomspace()
+
+        self.assertTrue(get_thread_atomspace() == self.space)
         c = ConceptNode('c')
         # verify that current default atomspace is self.space
         self.assertTrue(c in self.space)
+        self.assertTrue(a in self.space)
+        self.assertFalse(b in self.space)
 
 
 class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        set_default_atomspace(self.space)
+        set_thread_atomspace(self.space)
 
     def tearDown(self):
-        finalize_opencog()
         del self.space
 
     def test_create_child_atomspace(self):
@@ -205,7 +214,7 @@ class AtomTest(TestCase):
         Test that parent atomspace will not be deleted before child
         """
         a = opencog.atomspace.AtomSpace()
-        b = opencog.atomspace.create_child_atomspace(a)
+        b = opencog.atomspace.AtomSpace(a)
         del a
 
     def test_creation(self):
@@ -216,7 +225,7 @@ class AtomTest(TestCase):
     def test_w_truthvalue(self):
         a = Node("test2")
         tv = FloatValue([0.5, 100])
-        a.set_value(tvkey, tv)
+        a = self.space.set_value(a, tvkey, tv)
         self.assertEqual(a.get_value(tvkey), tv)
 
     def test_out(self):
@@ -227,7 +236,7 @@ class AtomTest(TestCase):
 
         a2 = Node("test3")
         tv = FloatValue([0.5, 100])
-        a2.set_value(tvkey, tv)
+        a2 = self.space.set_value(a2, tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.out, [a1, a2])
@@ -242,7 +251,7 @@ class AtomTest(TestCase):
 
         a2 = Node("test3")
         tv = FloatValue([0.5, 100])
-        a2.set_value(tvkey, tv)
+        a2 = self.space.set_value(a2, tvkey, tv)
 
         l = Link(a1, a2)
         self.assertEqual(l.arity, 2)
@@ -265,7 +274,7 @@ class AtomTest(TestCase):
 
     def test_create_child_atomspace(self):
         test = ConceptNode("test")
-        b = create_child_atomspace(self.space)
+        b = AtomSpace(self.space)
         test2 = b.add_node(types.ConceptNode, 'test2')
         self.assertTrue(test in b.get_atoms_by_type(types.ConceptNode))
         self.assertTrue(test2 in b.get_atoms_by_type(types.ConceptNode))

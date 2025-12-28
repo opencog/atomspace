@@ -66,17 +66,17 @@ void SubsetLinkUTest::test_subset()
 	Handle DS = L(SUBSET_LINK, L(SET_LINK, D), S);
 	Handle ADS = L(SUBSET_LINK, L(SET_LINK, A, D), S);
 
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, AS, &_as);
+	bool result = AS->bevaluate();
 	printf("Got result=%s\n", result ? "true" : "false");
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, ABS, &_as);
+	result = ABS->bevaluate();
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, DS, &_as);
+	result = DS->bevaluate();
 	TS_ASSERT(not result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, ADS, &_as);
+	result = ADS->bevaluate();
 	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);

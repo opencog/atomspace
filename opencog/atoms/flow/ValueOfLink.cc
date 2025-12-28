@@ -24,7 +24,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/VoidValue.h>
 #include "ValueOfLink.h"
@@ -173,6 +172,22 @@ ValuePtr ValueOfLink::execute(AtomSpace* as, bool silent)
 	}
 
 	return do_execute(as, silent);
+}
+
+// Crazy experimental interface. This breaks the rules, but the rules
+// were made to be broken. Amirite?
+bool ValueOfLink::bevaluate(AtomSpace* as, bool silent)
+{
+	if (BOOL_VALUE_OF_LINK != _type)
+		throw RuntimeException(TRACE_INFO,
+			"Must use a BoolValueOfLink for this to work: got %s\n",
+			to_string().c_str());
+
+	ValuePtr boo(execute(as, silent));
+	OC_ASSERT(BOOL_VALUE == boo->get_type(), "Unexpected bug!");
+	BoolValuePtr bvp(BoolValueCast(boo));
+	OC_ASSERT(0 < bvp->size(), "Unexpected size bug!");
+	return bvp->value()[0];
 }
 
 DEFINE_LINK_FACTORY(ValueOfLink, VALUE_OF_LINK)

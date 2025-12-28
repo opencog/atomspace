@@ -21,11 +21,14 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 	SET(TYPE ${CMAKE_MATCH_1})
 	SET(PARENT_TYPES ${CMAKE_MATCH_3})
 	SET(TYPE_NAME "")
+	SET(CAMEL_TYPE_NAME "")
+	SET(HAS_CUSTOM_NAME FALSE)
 	IF (CMAKE_MATCH_4)
 		# MESSAGE(STATUS "Custom atom type name specified: ${CMAKE_MATCH_4}")
 		MESSAGE(DEBUG "Custom atom type name specified: ${CMAKE_MATCH_4}")
+		SET(HAS_CUSTOM_NAME TRUE)
 
-		# Convert ... uhh ..something...
+		# Extract the custom name (strip quotes)
 		STRING(REGEX MATCHALL "." CHARS ${CMAKE_MATCH_4})
 		LIST(LENGTH CHARS LIST_LENGTH)
 		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
@@ -37,34 +40,43 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 		ENDFOREACH(I RANGE ${LIST_LENGTH})
 	ENDIF (CMAKE_MATCH_4)
 
-	# Convert upper-case snake-case names like FOO_BAR_LINK
-	# to CamelCase names like FooBarLink
+	# Always convert upper-case snake-case names like FOO_BAR_LINK
+	# to CamelCase names like FooBarLink. Store in CAMEL_TYPE_NAME.
+	STRING(REGEX MATCHALL "." CHARS ${TYPE})
+	LIST(LENGTH CHARS LIST_LENGTH)
+	MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
+	FOREACH(I RANGE ${LAST_INDEX})
+		LIST(GET CHARS ${I} C)
+		IF (NOT ${C} STREQUAL "_")
+			MATH(EXPR IP "${I} - 1")
+			LIST(GET CHARS ${IP} CP)
+			IF (${I} EQUAL 0)
+				SET(CAMEL_TYPE_NAME "${CAMEL_TYPE_NAME}${C}")
+			ELSE (${I} EQUAL 0)
+				IF (${CP} STREQUAL "_")
+					SET(CAMEL_TYPE_NAME "${CAMEL_TYPE_NAME}${C}")
+				ELSE (${CP} STREQUAL "_")
+					STRING(TOLOWER "${C}" CL)
+					SET(CAMEL_TYPE_NAME "${CAMEL_TYPE_NAME}${CL}")
+				ENDIF (${CP} STREQUAL "_")
+			ENDIF (${I} EQUAL 0)
+		ENDIF (NOT ${C} STREQUAL "_")
+	ENDFOREACH(I RANGE ${LIST_LENGTH})
+
+	# If no custom name, TYPE_NAME is the CamelCase version
 	IF (TYPE_NAME STREQUAL "")
-		# Set type name using camel casing
-		STRING(REGEX MATCHALL "." CHARS ${TYPE})
-		LIST(LENGTH CHARS LIST_LENGTH)
-		MATH(EXPR LAST_INDEX "${LIST_LENGTH} - 1")
-		FOREACH(I RANGE ${LAST_INDEX})
-			LIST(GET CHARS ${I} C)
-			IF (NOT ${C} STREQUAL "_")
-				MATH(EXPR IP "${I} - 1")
-				LIST(GET CHARS ${IP} CP)
-				IF (${I} EQUAL 0)
-					SET(TYPE_NAME "${TYPE_NAME}${C}")
-				ELSE (${I} EQUAL 0)
-					IF (${CP} STREQUAL "_")
-						SET(TYPE_NAME "${TYPE_NAME}${C}")
-					ELSE (${CP} STREQUAL "_")
-						STRING(TOLOWER "${C}" CL)
-						SET(TYPE_NAME "${TYPE_NAME}${CL}")
-					ENDIF (${CP} STREQUAL "_")
-				ENDIF (${I} EQUAL 0)
-			ENDIF (NOT ${C} STREQUAL "_")
-		ENDFOREACH(I RANGE ${LIST_LENGTH})
+		SET(TYPE_NAME "${CAMEL_TYPE_NAME}")
 	ENDIF (TYPE_NAME STREQUAL "")
 
 	# Create short CamelCase names
-	STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${TYPE_NAME})
+	# Only meaningful for types ending in Link or Node.
+	# For custom-named types, SHORT_NAME is the custom name
+	# For regular types, SHORT_NAME is derived by stripping Link/Node suffix
+	IF (HAS_CUSTOM_NAME)
+		SET(SHORT_NAME "${TYPE_NAME}")
+	ELSE ()
+		STRING(REGEX REPLACE "([a-zA-Z]*)(Link|Node)$" "\\1" SHORT_NAME ${CAMEL_TYPE_NAME})
+	ENDIF ()
 	# MESSAGE(STATUS "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 	MESSAGE(DEBUG "Atom type name: ${TYPE_NAME} ${SHORT_NAME}")
 
@@ -76,6 +88,7 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 	# -----------------------------------------------------------
 	# Try to guess if the thing is a node or link based on its name
 	STRING(REGEX MATCH "ARG$" ISARG ${TYPE})
+	STRING(REGEX MATCH "SIG$" ISSIG ${TYPE})
 	STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
 	STRING(REGEX MATCH "STREAM$" ISSTREAM ${TYPE})
 	STRING(REGEX MATCH "ATOM_SPACE$" ISATOMSPACE ${TYPE})
@@ -85,19 +98,22 @@ MACRO(OPENCOG_TYPEINFO_SETUP)
 
 	# If not explicitly named, assume its a link. This is kind of
 	# hacky, but is needed for e.g. "VariableList" ...
+	# ARG and SIG types are abstract helpers, not actual atom types.
 	IF (NOT ISNODE STREQUAL "NODE"
 		AND NOT ISVALUE STREQUAL "VALUE"
 		AND NOT ISSTREAM STREQUAL "STREAM"
 		AND NOT ISATOMSPACE STREQUAL "ATOM_SPACE"
 		AND NOT ISAST STREQUAL "AST"
-		AND NOT ISARG STREQUAL "ARG")
+		AND NOT ISARG STREQUAL "ARG"
+		AND NOT ISSIG STREQUAL "SIG")
 		SET(ISLINK "LINK")
 	ENDIF (NOT ISNODE STREQUAL "NODE"
 		AND NOT ISVALUE STREQUAL "VALUE"
 		AND NOT ISSTREAM STREQUAL "STREAM"
 		AND NOT ISATOMSPACE STREQUAL "ATOM_SPACE"
 		AND NOT ISAST STREQUAL "AST"
-		AND NOT ISARG STREQUAL "ARG")
+		AND NOT ISARG STREQUAL "ARG"
+		AND NOT ISSIG STREQUAL "SIG")
 
 	IF (${TYPE} STREQUAL "VALUATION")
 		SET(ISLINK "")

@@ -8,7 +8,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog as-config))
-(load-extension (string-append opencog-ext-path-exec "librandgen") "opencog_randgen_init")
+(load-extension (string-append opencog-ext-path-randgen "librandgen") "opencog_randgen_init")
 
 (export
 	cog-randgen-set-seed!

@@ -1,16 +1,13 @@
 # Assorted scheme modules
 # --------------------------------
 
-ADD_LIBRARY (exec ExecSCM.cc)
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-TARGET_LINK_LIBRARIES(exec execution smob)
-
-ADD_GUILE_EXTENSION(SCM_CONFIG exec "opencog-ext-path-exec")
-
+# The exec module is now a pure-scheme stub; cog-execute! is provided
+# by the core (opencog) module. This stub exists for backward compat.
 ADD_GUILE_MODULE (FILES
-   opencog/exec.scm
-   DEPENDS exec
-#  COMPILE
+	opencog/exec.scm
 )
 
 # --------------------------------
@@ -19,15 +16,19 @@ ADD_LIBRARY (logger LoggerSCM.cc)
 
 TARGET_LINK_LIBRARIES(logger
 	smob
+	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 ADD_GUILE_EXTENSION(SCM_CONFIG logger "opencog-ext-path-logger")
 
 ADD_GUILE_MODULE (FILES
-   opencog/logger.scm
-   DEPENDS logger
-#  COMPILE
+	opencog/logger.scm
+	DEPENDS logger
+	COMPILE
 )
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(logger opencog_atom_types)
 
 # --------------------------------
 
@@ -40,9 +41,9 @@ TARGET_LINK_LIBRARIES(randgen
 ADD_GUILE_EXTENSION(SCM_CONFIG randgen "opencog-ext-path-randgen")
 
 ADD_GUILE_MODULE (FILES
-   opencog/randgen.scm
-   DEPENDS randgen
-#  COMPILE
+	opencog/randgen.scm
+	DEPENDS randgen
+	COMPILE
 )
 
 # --------------------------------
@@ -56,14 +57,14 @@ TARGET_LINK_LIBRARIES(type-utils
 ADD_GUILE_EXTENSION(SCM_CONFIG type-utils "opencog-ext-path-type-utils")
 
 ADD_GUILE_MODULE (FILES
-   opencog/type-utils.scm
-   DEPENDS type-utils
-#  COMPILE
+	opencog/type-utils.scm
+	DEPENDS type-utils
+	COMPILE
 )
 
 # --------------------------------
 
-INSTALL (TARGETS exec logger randgen type-utils
+INSTALL (TARGETS logger randgen type-utils
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )

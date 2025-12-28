@@ -6,7 +6,6 @@
 ; (where a connection is defined in terms of shared variables)
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;;; Populate the atomspace with three small trees.
 (MemberLink

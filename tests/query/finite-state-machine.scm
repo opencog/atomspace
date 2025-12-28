@@ -2,7 +2,6 @@
 ; Basic unit test of the DeleteLink
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ;; Set of possible states of the state machine
 (SetLink

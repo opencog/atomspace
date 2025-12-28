@@ -56,7 +56,7 @@ int main ()
 	AtomSpacePtr as = createAtomSpace();
 
 	// Do this early, so that guile is initialized.
-	SchemeEval* eval = new SchemeEval(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 
 	printf("\nInfo: Start creating a scheme call into C++\n");
 
@@ -90,7 +90,6 @@ int main ()
 	// Print the result of calling MyTestClass::my_func
 	printf("Info: Intentional throw gave the following output:\n%s", rslt.c_str());
 
-	delete eval;
 	printf("\nInfo: The big stack trace above is intentional!\n");
 	printf("\nInfo: We are done, bye!\n");
 	return  0;

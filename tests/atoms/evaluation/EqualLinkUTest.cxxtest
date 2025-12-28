@@ -22,7 +22,6 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
 
 using namespace opencog;
 
@@ -64,44 +63,58 @@ void EqualLinkUTest::test_equality()
 	Handle semantic_b =
 		L(PUT_LINK, N(VARIABLE_NODE, "$x"), thing_b);
 
+	// These can be added to AtomSpace (identical or has executable)
 	Handle ident_aa = L(IDENTICAL_LINK, thing_a, thing_a);
-	Handle ident_asa = L(IDENTICAL_LINK, thing_a, semantic_a);
 
-	Handle ident_ab = L(IDENTICAL_LINK, thing_a, thing_b);
-	Handle ident_asb = L(IDENTICAL_LINK, thing_a, semantic_b);
+	// Cannot be added
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, thing_b));
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, semantic_a));
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, semantic_b));
+
+	// Create some naked IdenticalLinks
+	Handle ident_ab = createLink(IDENTICAL_LINK, thing_a, thing_b);
+	Handle ident_asa = createLink(IDENTICAL_LINK, thing_a, semantic_a);
+	Handle ident_asb = createLink(IDENTICAL_LINK, thing_a, semantic_b);
 
 	// -------
+	// These can be added to AtomSpace (equal or has executable)
 	Handle equal_aa = L(EQUAL_LINK, thing_a, thing_a);
 	Handle equal_asa = L(EQUAL_LINK, thing_a, semantic_a);
-
-	Handle equal_ab = L(EQUAL_LINK, thing_a, thing_b);
 	Handle equal_asb = L(EQUAL_LINK, thing_a, semantic_b);
 
-	// -------
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, ident_aa, &_as);
-	TS_ASSERT(result);  // true
-
-	result = EvaluationLink::crisp_eval_scratch(&_as, ident_asa, &_as);
-	TS_ASSERT(!result); // false
-
-	result = EvaluationLink::crisp_eval_scratch(&_as, ident_ab, &_as);
-	TS_ASSERT(!result); // false
-
-	result = EvaluationLink::crisp_eval_scratch(&_as, ident_asb, &_as);
-	TS_ASSERT(!result); // false
+	// These must use createLink (non-equal, non-executable)
+	Handle equal_ab = createLink(EQUAL_LINK, thing_a, thing_b);
 
 	// -------
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aa, &_as);
+	bool result = ident_aa->bevaluate(&_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_asa, &_as);
+	result = ident_asa->bevaluate(&_as);
+	TS_ASSERT(!result); // false
+
+	result = ident_ab->bevaluate(&_as);
+	TS_ASSERT(!result); // false
+
+	result = ident_asb->bevaluate(&_as);
+	TS_ASSERT(!result); // false
+
+	// -------
+	result = equal_aa->bevaluate(&_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_ab, &_as);
+	result = equal_asa->bevaluate(&_as);
+	TS_ASSERT(result);  // true
+
+	result = equal_ab->bevaluate(&_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_asb, &_as);
+	result = equal_asb->bevaluate(&_as);
 	TS_ASSERT(!result); // false
+
+	// Adding non-identical/non-equal atoms should throw
+	TS_ASSERT_THROWS_ANYTHING(L(IDENTICAL_LINK, thing_a, thing_b));
+
+	TS_ASSERT_THROWS_ANYTHING(L(EQUAL_LINK, thing_a, thing_b));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -128,22 +141,22 @@ void EqualLinkUTest::test_alpha()
 	Handle alpha_xy = L(ALPHA_EQUAL_LINK, x_plus_3, y_plus_3);
 
 	// -------
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, equal_23, &_as);
+	bool result = equal_23->bevaluate(&_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_23, &_as);
+	result = alpha_23->bevaluate(&_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_xx, &_as);
+	result = equal_xx->bevaluate(&_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_xx, &_as);
+	result = alpha_xx->bevaluate(&_as);
 	TS_ASSERT(result);  // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_xy, &_as);
+	result = equal_xy->bevaluate(&_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, alpha_xy, &_as);
+	result = alpha_xy->bevaluate(&_as);
 	TS_ASSERT(result);  // true
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -157,24 +170,29 @@ void EqualLinkUTest::test_nway()
 	Handle thing_a = N(CONCEPT_NODE, "thing A");
 	Handle thing_b = N(CONCEPT_NODE, "thing B");
 
+	// These can be added to AtomSpace (all equal)
 	Handle equal_aaa = L(EQUAL_LINK, thing_a, thing_a, thing_a);
-	Handle equal_aba = L(EQUAL_LINK, thing_a, thing_b, thing_a);
-
 	Handle equal_aaaa = L(EQUAL_LINK, thing_a, thing_a, thing_a, thing_a);
-	Handle equal_abaa = L(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
+
+	// These must use createLink (non-equal atoms)
+	Handle equal_aba = createLink(EQUAL_LINK, thing_a, thing_b, thing_a);
+	Handle equal_abaa = createLink(EQUAL_LINK, thing_a, thing_b, thing_a, thing_a);
 
 	// -------
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, equal_aaa, &_as);
+	bool result = equal_aaa->bevaluate(&_as);
 	TS_ASSERT(result); // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aaaa, &_as);
+	result = equal_aaaa->bevaluate(&_as);
 	TS_ASSERT(result); // true
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_aba, &_as);
+	result = equal_aba->bevaluate(&_as);
 	TS_ASSERT(!result); // false
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, equal_abaa, &_as);
+	result = equal_abaa->bevaluate(&_as);
 	TS_ASSERT(!result); // false
+
+	// Adding non-equal atoms should throw
+	TS_ASSERT_THROWS_ANYTHING(L(EQUAL_LINK, thing_a, thing_b, thing_a););
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

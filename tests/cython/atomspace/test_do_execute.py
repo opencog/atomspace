@@ -1,26 +1,22 @@
 import unittest
 import threading
 
-from opencog.atomspace import create_child_atomspace
-from opencog.type_constructors import *
-from opencog.utilities import set_default_atomspace, finalize_opencog
-from opencog.utilities import push_default_atomspace, get_default_atomspace
+from opencog.atomspace import *
+from opencog.atomspace import set_thread_atomspace, get_thread_atomspace
 
 
 class DoExecuteTest(unittest.TestCase):
 
     def setUp(self):
-        self.atomspace = AtomSpace()
-        set_default_atomspace(self.atomspace)
+        pass
 
     def tearDown(self):
-        finalize_opencog()
-        del self.atomspace
+        pass
 
     def test_do_execute_value(self):
         key = PredicateNode("key")
         atom = ConceptNode("atom")
-        atom.set_value(key, FloatValue([1, 2, 3]))
+        atom = atom.atomspace.set_value(atom, key, FloatValue([1, 2, 3]))
 
         value_of_link = ValueOfLink(atom, key)
 
@@ -47,7 +43,8 @@ class DoExecuteTest(unittest.TestCase):
         self.assertEqual(NumberNode("7"), res)
 
     def test_add_atom_from_grounded_schema_node(self):
-        test_as = create_child_atomspace(self.atomspace)
+        parent_as = get_thread_atomspace()
+        test_as = AtomSpace(parent_as)
         test_as.execute(
                 ExecutionOutputLink(
                     GroundedSchemaNode("py:add_new_link"),
@@ -59,10 +56,10 @@ class DoExecuteTest(unittest.TestCase):
             test_as.add_node(types.ConceptNode, "animal")]))
 
     def test_threaded(self):
-        """push default atomspace in different thread and check the behaviour"""
+        """set default atomspace in different thread and check the behaviour"""
         test_as = AtomSpace()
         different_as = AtomSpace()
-        push_default_atomspace(test_as)
+        set_thread_atomspace(test_as)
         th = threading.Thread(target=push_default, args=(different_as,))
         th.start()
         th.join()
@@ -75,7 +72,7 @@ class DoExecuteTest(unittest.TestCase):
 
 
 def push_default(atomspace):
-    push_default_atomspace(atomspace)
+    set_thread_atomspace(atomspace)
     ConceptNode("test-1")
 
 

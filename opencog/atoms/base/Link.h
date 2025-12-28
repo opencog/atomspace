@@ -147,19 +147,6 @@ public:
         return _outgoing.at(pos);
     }
 
-    //! Invoke the callback on each atom in the outgoing set of
-    //! handle h, until till one of them returns true, in which case,
-    //! the loop stops and returns true. Otherwise the callback is
-    //! called on all outgoings and false is returned.
-    template<class T>
-    inline bool foreach_outgoing(bool (T::*cb)(const Handle&), T *data)
-    {
-        for (const Handle& out_h : _outgoing) {
-            if ((data->*cb)(out_h)) return true;
-        }
-        return false;
-    }
-
     /**
      * Returns a string representation of the link.
      *

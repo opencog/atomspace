@@ -5,13 +5,17 @@ ADD_LIBRARY (value
 	BoolValue.cc
 	ContainerValue.cc
 	Float32Value.cc
+	FlatStream.cc
 	FloatValue.cc
 	FormulaStream.cc
 	FutureStream.cc
+	GroupValue.cc
 	LinkValue.cc
 	QueueValue.cc
 	RandomStream.cc
+	RelationalValue.cc
 	SectionValue.cc
+	SortedValue.cc
 	StringValue.cc
 	UnisetValue.cc
 	ValueFactory.cc
@@ -27,20 +31,24 @@ TARGET_LINK_LIBRARIES(value
 )
 
 INSTALL (TARGETS value EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
 	BoolValue.h
 	ContainerValue.h
+	FlatStream.h
 	Float32Value.h
 	FloatValue.h
 	FormulaStream.h
 	FutureStream.h
+	GroupValue.h
 	LinkValue.h
 	QueueValue.h
 	RandomStream.h
+	RelationalValue.h
 	SectionValue.h
+	SortedValue.h
 	StringValue.h
 	UnisetValue.h
 	Value.h

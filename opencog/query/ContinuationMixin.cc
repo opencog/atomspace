@@ -22,8 +22,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/core/Replacement.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/free/Replacement.h>
 
 #include "ContinuationMixin.h"
 
@@ -131,9 +130,9 @@ bool ContinuationMixin::satisfy(const PatternLinkPtr& form)
 		{
 			in_continuation = true;
 			Handle plk = _continuation->getOutgoingAtom(0);
-			AtomSpace* tas = TermMatchMixin::_temp_aspace;
+			AtomSpace* tas = TermMatchMixin::_temp_aspace.get();
 			tas->clear();
-			bool crispy = EvaluationLink::crisp_eval_scratch(tas, plk, tas);
+			bool crispy = plk->bevaluate(tas);
 
 			DO_LOG({LAZY_LOG_FINE << "Finish continuing, cnt=" << cnt
 				<< " result=" << crispy; })

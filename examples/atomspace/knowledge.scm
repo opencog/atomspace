@@ -1,5 +1,5 @@
 ;
-; knowledge.scm - Representing data with Predicates and Evaluations
+; knowledge.scm - Representing data with Predicates and Edges
 ;
 ; The AtomSpace can be thought of as a database for (hyper-)graphs.
 ; The reason for using graphs, and, more specifically, hypergraphs,
@@ -78,7 +78,7 @@
 ; hypergraphs.  There is a huge freedom in doing this, and it is up
 ; to you, the user, as to how to do that mapping. The AtomSpace does
 ; come with a large variety of conventional mappings, but none of these
-; are manditory; you can do them in other ways.
+; are mandatory; you can do them in other ways.
 ;
 ; The below takes a simple example, taken from natural language
 ; processing.
@@ -91,7 +91,7 @@
 ; verb, and "pottery" is the object of the verb. Thus, the dependency
 ; is "_obj(make, pottery)". This can be represented as
 ;
-(Evaluation
+(Edge
 	(Predicate "_obj")
 	(ListLink
 		(Concept "make")
@@ -100,14 +100,14 @@
 ; There is no need to write this on five lines, nor to indent:
 ; you can write it on just one:
 ;
-(Evaluation (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
+(Edge (Predicate "_obj") (List (Concept "make") (Concept "pottery")))
 
-; "Evaluation" is the same type as "EvaluationLink",
+; "Edge" is the same type as "EdgeLink",
 ; "Predicate" is the same type as "PredicateNode",
 ; "Concept" is the same type as "ConceptNode".
 ; Thus you can also write:
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "_obj")
 	(ListLink
 		(ConceptNode "make")
@@ -150,7 +150,7 @@
 ; be ConceptNodes. You can declare this by writing the following:
 
 (Signature
-	(Evaluation
+	(Edge
 		(Predicate "_obj")
 		(ListLink
 			(Type "ConceptNode")
@@ -167,7 +167,7 @@
 (TypedAtom
 	(DefinedType "my obj dependency relation")
 	(Signature
-		(Evaluation
+		(Edge
 			(Predicate "_obj")
 			(ListLink
 				(Type "ConceptNode")

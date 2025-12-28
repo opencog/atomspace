@@ -43,8 +43,7 @@ public:
 	PythonRunner(const PythonRunner&) = delete;
 	PythonRunner& operator=(const PythonRunner&) = delete;
 
-	virtual ValuePtr execute(AtomSpace*, const ValuePtr&, bool=false);
-	virtual ValuePtr evaluate(AtomSpace*, const ValuePtr&, bool=false);
+	virtual ValuePtr execute(AtomSpace*, AtomSpace*, const ValuePtr&, bool=false);
 };
 
 /** @}*/

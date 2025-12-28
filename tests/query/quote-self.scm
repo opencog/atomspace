@@ -2,7 +2,7 @@
 ; quote-self.scm
 ; Unit test for issue #2583
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The Glob is undeclared .. and untyped... thus its free to
 ; match anything, including the implicand.

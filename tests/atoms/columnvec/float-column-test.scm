@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; float-column-test.scm -- Verify that FloatColumn works.
 ; Also depends on both SexprColumn and ListColumn in the final
@@ -5,7 +8,7 @@
 ;
 ; Portions of this appear in the example `vector-column.scm`
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

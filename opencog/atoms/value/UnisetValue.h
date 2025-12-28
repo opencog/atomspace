@@ -35,21 +35,60 @@ namespace opencog
  */
 
 /**
- * UnisetValues provide a thread-safe uniset of Values. They are
- * meant to be used for producer-consumer APIs, where the produced
- * values are added, possibly in different threads from which they
- * are removed.  This is a uniset, in that elements are deduplicated
- * so that the set contains only one copy of a given element.
+ * UnisetValues provide a thread-safe hoarding container for Values.
+ * It is currently a mashup of several distinct ideas that could be
+ * pulled apart; but for now, its easier to live with the mashup.
+ * These are:
+ *
+ * Thread safety -- inherited from ContainerValue.
+ *
+ * Hoarding -- the ctor for the uniset allows the specification of
+ *   an upstream source. This source is drained/emptied whenever
+ *   the Uniset is accessed, moving values from upstream, to here.
+ *   This allows the Uniset to apply operations for the entire set
+ *   contents.
+ *
+ * Deduplication -- If the same Value is added twice to the Uniset,
+ *   the second Value is ignored. The set can only contain one copy
+ *   of a Value; that's what makes it "uni".
+ *
+ * Base class for RelationalValue -- The depduplication is done by
+ *   using std::set; but atthis can provide the foundation for more
+ *   general relational values.
  */
 class UnisetValue
-	: public ContainerValue, protected concurrent_set<ValuePtr>
+	: public ContainerValue
 {
 protected:
-	UnisetValue(Type t) : ContainerValue(t) {}
-	virtual void update() const;
+	// Provide thunk for ordering the Values in the set.
+	struct ValueComp
+	{
+		UnisetValue* uv;
+		ValueComp(UnisetValue* p) : uv(p) {}
+		bool operator()(const ValuePtr& lhs, const ValuePtr& rhs) const
+		{
+			if (!lhs) return bool(rhs);  // null < non-null
+			if (!rhs) return false;       // non-null >= null
+			return uv->less(*lhs, *rhs);
+		}
+	};
+
+	mutable concurrent_set<ValuePtr, ValueComp> _set;
+
+	// Data source for hoarding.
+	LinkValuePtr _source;
+	void drain(void) const;
+	void init_src(const ValuePtr&);
+
+	UnisetValue(Type t) : ContainerValue(t), _set(ValueComp(this)), _source(nullptr) {}
+	virtual void update() const override;
+
+	// Default ordering inherited from Value::operator<()
+	virtual bool less(const Value& lhs, const Value& rhs) const
+	{ return lhs < rhs; }
 
 public:
-	UnisetValue(void) : ContainerValue(UNISET_VALUE) {}
+	UnisetValue(void) : ContainerValue(UNISET_VALUE), _set(ValueComp(this)), _source(nullptr) {}
 	UnisetValue(const ValueSeq&);
 	virtual ~UnisetValue() {}
 	virtual void open(void);
@@ -59,10 +98,9 @@ public:
 	virtual void add(const ValuePtr&);
 	virtual void add(ValuePtr&&);
 	virtual ValuePtr remove(void);
+	virtual ValuePtr peek(void) const;
 	virtual size_t size(void) const;
 	virtual void clear(void);
-
-	virtual bool operator==(const Value&) const;
 };
 
 VALUE_PTR_DECL(UnisetValue);

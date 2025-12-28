@@ -7,8 +7,6 @@
  */
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/flow/ValueOfLink.h>
 #include <opencog/atoms/reduct/PlusLink.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -82,8 +80,7 @@ void ValueOfUTest::test_basic()
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
-	Instantiator inst(&_as);
-   Handle result = HandleCast(inst.execute(valof));
+	Handle result = HandleCast(valof->execute(&_as));
 
 	printf("expect: %s\n", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());

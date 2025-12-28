@@ -184,7 +184,7 @@
 (fetch-atom (Concept "asdf"))
 
 ; Let's clobber the value; we do this so that we can prove that the
-; pervious value, stored to disk, is retreived.
+; previous value, stored to disk, is retrieved.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue -1 0 -2 0))
 
 ; Reopen the database.

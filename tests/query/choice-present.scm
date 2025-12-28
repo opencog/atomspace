@@ -4,7 +4,7 @@
 ; Validate PresentLinks appearing in ChoiceLinks
 ; Per issue #2644
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (State (List (Concept "alice") (Predicate "hungry")) (Concept "TRUE"))
 (State (Concept "alice") (Concept "at home"))

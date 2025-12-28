@@ -1,7 +1,7 @@
 ;
 ; futures.scm -- unit test corresponding to the demo flow-futures.scm
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------------------------------------------------------
 ; Below is a toy pair-counting framework.  It increments counts

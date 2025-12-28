@@ -13,7 +13,7 @@
 ;
 ; A more complex demo is in the `flow-futures.scm` file.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Atomese is verbose, and this demo is easier to understand if some
 ; of that is hidden a bit. So, define two scheme functions that get
@@ -91,7 +91,7 @@
 		(DefinedProcedure "has a reddish color")
 		(List (Concept "A") (Concept "B"))))
 
-; As in earlier examples, the TV on the EvaluationLink is recomputed
+; As in earlier examples, the TV on the EdgeLink is recomputed
 ; every time that it is evaluated. We repeat this experiment here.
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.3 0.7))
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.4 0.6))
@@ -121,10 +121,12 @@
 ; that A implied B, and the formula above models the truth of
 ; this implication.
 ;
-; An automatic update can be accomplished with the PromiseLink.
-; The PromiseLink can wrap any executable Atom, anything that can
-;  produce a Value, and provides a promise that it will be executed
-; in the future.
+; An automatic update can be accomplished by attaching the formula
+; to a specific Atom at some specific key. This can be done by using
+; the cog-set-value! function. Unfortunately, this requires writing
+; scheme code, and we would rather not do that. Limiting ourselves
+; to using cog-execute! only, this can be done by re-writing with
+; the CollectionOfLink.
 ;
 ; In this example, when the SetValueLink is executed, whatever was
 ; wrapped is unwrapped and placed into a FormulaStream, which will
@@ -134,10 +136,10 @@
 
 (cog-execute!
 	(SetValue a-implies-b tvkey
-		(Promise
+		(CollectionOf (Type 'FormulaStream) (OrderedLink
 			(ExecutionOutput
 				(DefinedProcedure "has a reddish color")
-				(List (Concept "A") (Concept "B"))))))
+				(List (Concept "A") (Concept "B")))))))
 
 ; Lets take a look at the TV, now.
 (cog-value a-implies-b tvkey)
@@ -147,8 +149,10 @@
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.1 0.9))
 
 ; And take another look.
+(define (get-mean ATM) (cog-value-ref ATM tvkey 0))
+(define (get-confidence ATM) (cog-value-ref ATM tvkey 1))
 (format #t "A implies B has strength ~6F and confidence ~6F\n"
-	(cog-mean a-implies-b) (cog-confidence a-implies-b))
+	(get-mean a-implies-b) (get-confidence a-implies-b))
 
 ; And again, for good luck.
 (cog-set-value! (Concept "A") tvkey (FloatValue 0.2 0.8))

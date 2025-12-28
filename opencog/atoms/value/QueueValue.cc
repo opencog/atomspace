@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/value/QueueValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
@@ -76,16 +77,17 @@ void QueueValue::update() const
 	catch (typename conq::Canceled& e)
 	{}
 
-	// If we are here, the queue closed up. Reopen it
-	// just long enough to drain any remaining values.
-	const_cast<QueueValue*>(this) -> cancel_reset();
-	while (not is_empty())
+	// If we are here, the queue closed up.
+	// Drain any remaining values.
+	std::queue<ValuePtr> rem =
+		const_cast<QueueValue*>(this)->wait_and_take_all();
+
+	_value.reserve(_value.size() + rem.size());
+	while (not rem.empty())
 	{
-		ValuePtr val;
-		const_cast<QueueValue*>(this) -> pop(val);
-		_value.emplace_back(val);
+		_value.emplace_back(std::move(rem.front()));
+		rem.pop();
 	}
-	const_cast<QueueValue*>(this) -> cancel();
 }
 
 // ==============================================================
@@ -121,7 +123,32 @@ void QueueValue::add(ValuePtr&& vp)
 
 ValuePtr QueueValue::remove(void)
 {
-	return conq::value_pop();
+	// If its already closed, we dequeue Values from the local vector
+	if (0 < _value.size())
+	{
+		auto front = _value.begin();
+		ValuePtr vp(*front);
+		_value.erase(front);
+		return vp;
+	}
+
+	// Use try_get first, in case the queue is closed.
+	ValuePtr vp;
+	if (conq::try_get(vp))
+		return vp;
+
+	// If we are here, then the queue is empty.
+	// If it is closed, then it's end-of-stream.
+	// Else, we block and wait.
+	// If the queue closes while we are blocked, we will catch an exception.
+	// Return VoidValue as the end-of-stream marker.
+	try
+	{
+		return conq::value_pop();
+	}
+	catch (typename conq::Canceled& e)
+	{}
+	return createVoidValue();
 }
 
 size_t QueueValue::size(void) const
@@ -151,35 +178,6 @@ void QueueValue::clear()
 	conq::close();
 	conq::wait_and_take_all();
 	conq::open();
-}
-
-// ==============================================================
-
-bool QueueValue::operator==(const Value& other) const
-{
-	// Derived classes use this, so use get_type()
-	if (get_type() != other.get_type()) return false;
-
-	if (this == &other) return true;
-
-	if (not is_closed()) return false;
-	if (not ((const QueueValue*) &other)->is_closed()) return false;
-
-	return LinkValue::operator==(other);
-}
-
-std::string QueueValue::to_string(const std::string& indent) const
-{
-	// The default printer for QueueValue is LinkValue ...
-	// with only one small problem: it will hang if the queue
-	// is open. So we use it only if it is closed. Otherwise
-	// we must punt. I mean, we could maybe print the contents
-	// of an active queue, but this would be ... misleading,
-	// as those contents would be changing even as the printer is
-	// running. And would certanily be stale by the time the
-	// print string is returned to the user.
-	if (is_closed()) return LinkValue::to_string(indent);
-	return indent + "(QueueValue) ;; currently open for writing";
 }
 
 // ==============================================================

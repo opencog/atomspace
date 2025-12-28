@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 
 (use-modules (opencog) (opencog test-runner))
 (use-modules (opencog python))

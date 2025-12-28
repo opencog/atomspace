@@ -31,9 +31,12 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/pattern/Pattern.h>
+#include <opencog/query/ConstraintDomain.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
+
+class AtomSpace;
 
 class PatternMatchEngine
 {
@@ -179,6 +182,14 @@ private:
 	bool record_sparse(const PatternTermPtr&, const Handle&);
 
 	// --------------------------------------------
+	// Constraint propagation for ExclusiveLink
+	// Used to prune permutation search in unordered links.
+	ConstraintDomain _constraint_domain;
+	bool _use_constraint_domain;
+	void init_constraint_domains(void);
+	bool propagate_exclusive(const Handle& var, const Handle& value);
+
+	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
 	bool do_next_clause(void);
 	bool clause_accepted;
@@ -240,11 +251,6 @@ private:
 	                      const GroundingMap &term_soln);
 	bool report_forall(void);
 
-	// The second argument is an ID number. For now, an int seems OK.
-	std::set<GroundingMap> _grouping;
-	bool assign_grouping(const GroundingMap &var_soln,
-	                     const GroundingMap &term_soln);
-
 	// -------------------------------------------
 	// Recursive tree comparison algorithm.
 	unsigned int depth; // Recursion depth for tree_compare.
@@ -282,6 +288,8 @@ private:
 	bool explore_clause_evaluatable(const PatternTermPtr&, const Handle&,
 	                                const PatternTermPtr&);
 	bool explore_clause_identical(const PatternTermPtr&, const Handle&,
+	                              const PatternTermPtr&);
+	bool explore_clause_cacheable(const PatternTermPtr&, const Handle&,
 	                              const PatternTermPtr&);
 	bool explore_term_branches(const PatternTermPtr&, const Handle&,
 	                           const PatternTermPtr&);

@@ -17,7 +17,6 @@ ADD_LIBRARY (smob
 	SchemeSmobNew.cc
 	SchemeSmobPrint.cc
 	SchemeSmobValue.cc
-	SchemeSmobLogger.cc
 )
 
 TARGET_LINK_LIBRARIES(smob
@@ -32,6 +31,7 @@ TARGET_LINK_LIBRARIES(smob
 	clearbox
 	join
 	pattern
+	grounded
 	execution
 	columnvec
 	atomflow
@@ -39,6 +39,7 @@ TARGET_LINK_LIBRARIES(smob
 	foreign
 	atombase
 	atomspace
+	framestack
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
@@ -47,7 +48,7 @@ ADD_GUILE_EXTENSION(SCM_CONFIG smob "opencog-ext-path-smob")
 
 INSTALL (TARGETS smob
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES

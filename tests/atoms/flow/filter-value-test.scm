@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; filter-value-test.scm -- Verify that the demo filter-value.scm works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

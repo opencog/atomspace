@@ -2,16 +2,27 @@
 def createBoolValue(arg):
     cdef shared_ptr[cBoolValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cBoolValue(BoolValue.list_of_bool_to_vector(arg)))
+        c_ptr = c_createBoolValue_vector(BoolValue.list_of_bool_to_vector(arg))
     else:
-        c_ptr.reset(new cBoolValue(<bool>arg))
-    return BoolValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+        c_ptr = c_createBoolValue_single(<bool>arg)
+    cdef BoolValue instance = BoolValue.__new__(BoolValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class BoolValue(Value):
 
+    def __init__(self, arg=None):
+        cdef shared_ptr[cBoolValue] c_ptr
+        if arg is not None:
+            if isinstance(arg, list):
+                c_ptr = c_createBoolValue_vector(BoolValue.list_of_bool_to_vector(arg))
+            else:
+                c_ptr = c_createBoolValue_single(<bool>arg)
+            self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def to_list(self):
         return BoolValue.vector_of_bool_to_list(
-            (<cBoolValue*>self.get_c_value_ptr().get()).value())
+            (<cBoolValue*>self.get_c_raw_ptr()).value())
 
     @staticmethod
     cdef vector[bool] list_of_bool_to_vector(list python_list):

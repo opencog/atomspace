@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; quote-start-test.scm -- Verify a Quote appearing at the top level works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

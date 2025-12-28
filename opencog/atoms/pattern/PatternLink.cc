@@ -26,13 +26,12 @@
 
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/free/FreeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/UnisetValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "BindLink.h"
 #include "DualLink.h"
 #include "PatternLink.h"
 #include "PatternUtils.h"
@@ -46,7 +45,6 @@ void PatternLink::common_init(void)
 	locate_defines(_pat.pmandatory);
 	locate_defines(_pat.absents);
 	locate_defines(_pat.always);
-	locate_defines(_pat.grouping);
 
 	// If there are any defines in the pattern, then all bets are off
 	// as to whether it is connected or not, what's virtual, what isn't.
@@ -64,9 +62,15 @@ void PatternLink::common_init(void)
 	// Compute the intersection of literal clauses, and mandatory
 	// clauses. This is the set of mandatory clauses that must be
 	// present in their literal form.
+	// Also include ExclusiveLinks for connectivity analysis - even though
+	// they're evaluatable (virtual), they connect variables and should
+	// not cause the pattern to be split into multiple components.
 	for (const PatternTermPtr& ptm : _pat.pmandatory)
 	{
 		if (ptm->isLiteral() or ptm->isPresent() or ptm->isChoice())
+			_fixed.push_back(ptm);
+		else if (ptm->getHandle() != nullptr and
+		         ptm->getHandle()->get_type() == EXCLUSIVE_LINK)
 			_fixed.push_back(ptm);
 	}
 
@@ -83,8 +87,7 @@ void PatternLink::common_init(void)
 	validate_variables(_variables.varset, concrete_clauses);
 
 	// Split into connected components by splitting virtual clauses.
-	get_bridged_components(_variables.varset, _fixed, _pat.absents,
-	                       _components, _component_vars);
+	get_bridged_components(_variables.varset, _fixed, _pat.absents, _parts);
 
 	// We created the list of fixed clauses for only one reason:
 	// to determine pattern connectivity (get_bridged_components)
@@ -92,9 +95,9 @@ void PatternLink::common_init(void)
 	_fixed.clear();
 
 	// Make sure every variable is in some component.
-	check_satisfiability(_variables.varset, _component_vars);
+	check_satisfiability(_variables.varset, _parts);
 
-	_num_comps = _components.size();
+	_num_comps = _parts.size();
 
 	// If there is only one connected component, then this can be
 	// handled during search by a single PatternLink. The multi-clause
@@ -105,13 +108,104 @@ void PatternLink::common_init(void)
 	clauses_get_variables(_pat.pmandatory);
 	clauses_get_variables(_pat.absents);
 	clauses_get_variables(_pat.always);
-	clauses_get_variables(_pat.grouping);
 
 	// Find prunable terms.
 	locate_cacheable(_pat.pmandatory);
 	locate_cacheable(_pat.absents);
 	locate_cacheable(_pat.always);
-	locate_cacheable(_pat.grouping);
+
+	// Collect and categorize ExclusiveLink constraints for
+	// constraint propagation during pattern matching.
+	categorize_exclusives();
+}
+
+/// Recursively walk the PatternTerm tree to find ExclusiveLinks.
+void PatternLink::collect_exclusives_recursive(const PatternTermPtr& ptm)
+{
+	const Handle& h = ptm->getHandle();
+
+	// Check for ExclusiveLink by type since isExclusive() is only set
+	// for top-level evaluatable ExclusiveLinks, not nested ones.
+	bool is_exclusive = (h != nullptr and h->get_type() == EXCLUSIVE_LINK);
+
+	// If this term is an ExclusiveLink, collect it
+	if (is_exclusive)
+	{
+		// Extract the variables from this ExclusiveLink
+		HandleSet vars_in_excl;
+		for (const Handle& elt : h->getOutgoingSet())
+		{
+			if (_variables.varset_contains(elt))
+				vars_in_excl.insert(elt);
+		}
+
+		// Only process if there are at least 2 variables
+		// (otherwise there's no constraint to propagate)
+		if (vars_in_excl.size() >= 2)
+		{
+			// Check which components these variables belong to
+			std::set<size_t> components_touched;
+			for (const Handle& var : vars_in_excl)
+			{
+				for (size_t i = 0; i < _num_comps; i++)
+				{
+					if (_parts[i]._part_vars.count(var))
+						components_touched.insert(i);
+				}
+			}
+
+			if (components_touched.size() == 1)
+			{
+				// Single component - can use for constraint propagation
+				_pat.exclusives.push_back(ptm);
+			}
+			else
+			{
+				// Bridges components - must treat as virtual
+				_pat.exclusive_virtuals.push_back(ptm);
+			}
+
+			// Build var_exclusives map for runtime lookup
+			for (const Handle& var : vars_in_excl)
+				_pat.var_exclusives[var].push_back(ptm);
+		}
+	}
+
+	// Recurse into children
+	for (const PatternTermPtr& child : ptm->getOutgoingSet())
+		collect_exclusives_recursive(child);
+}
+
+/// Categorize ExclusiveLink terms for constraint propagation.
+/// This identifies which ExclusiveLinks operate within a single
+/// connected component (usable for constraint propagation) vs
+/// those that bridge components (must be virtual).
+void PatternLink::categorize_exclusives(void)
+{
+	// Walk through all mandatory clauses looking for ExclusiveLinks
+	for (const PatternTermPtr& ptm : _pat.pmandatory)
+		collect_exclusives_recursive(ptm);
+
+	// Also check absents, always
+	for (const PatternTermPtr& ptm : _pat.absents)
+		collect_exclusives_recursive(ptm);
+	for (const PatternTermPtr& ptm : _pat.always)
+		collect_exclusives_recursive(ptm);
+
+	// Precompute the list of variables in each ExclusiveLink.
+	// This is used by constraint propagation.
+	for (const PatternTermPtr& excl : _pat.exclusives)
+	{
+		HandleSeq vars_in_excl;
+		const Handle& h = excl->getHandle();
+		for (const Handle& elt : h->getOutgoingSet())
+		{
+			if (_variables.varset_contains(elt))
+				vars_in_excl.push_back(elt);
+		}
+		if (vars_in_excl.size() > 1)
+			_pat.exclusive_var_groups.push_back(vars_in_excl);
+	}
 }
 
 
@@ -122,14 +216,13 @@ void PatternLink::setup_components(void)
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
-	_component_patterns.reserve(_num_comps);
 	for (size_t i = 0; i < _num_comps; i++)
 	{
-		Handle h(createPatternLink(_component_vars[i],
+		Handle h(createPatternLink(_parts[i]._part_vars,
 		                           _variables,
-		                           _components[i],
+		                           _parts[i]._part_clauses,
 		                           _pat.absents));
-		_component_patterns.emplace_back(h);
+		_parts[i]._part_pattern = h;
 	}
 }
 
@@ -143,6 +236,8 @@ void PatternLink::disjointed_init(void)
 
 	for (const Handle& h: _body->getOutgoingSet())
 	{
+		PatternParts pp;
+
 		// The variables for that component are just the variables
 		// that can be found in that component.
 		// XXX FIXME, more correct would be to loop over
@@ -150,7 +245,7 @@ void PatternLink::disjointed_init(void)
 		// no difference in most cases.
 		FindAtoms fv(_variables.varset);
 		fv.search_set(h);
-		_component_vars.emplace_back(fv.varset);
+		pp._part_vars = fv.varset;
 
 		// This one weird little trick will unpack the components
 		// that we need. We cannot just push_back `h` into it's own
@@ -159,18 +254,16 @@ void PatternLink::disjointed_init(void)
 		// Unfortunately, unbundle_clauses sets all sorts of other
 		// stuff that we don't need/want, so we have to clobber that
 		// every time through the loop.
-		// BTW, any `absents`, `always` and `grouping` are probably
+		// BTW, any `absents` and `always` are probably
 		// handled incorrectly, so that's a bug that needs fixing.
 		unbundle_clauses(h);
 
 		// Each component consists of the assorted parts.
-		// XXX FIXME, this handles `absents`, `always` and `grouping`
-		// incorrectly.
-		HandleSeq clseq;
+		// XXX FIXME, this handles `absents` and `always` incorrectly.
 		for (const PatternTermPtr& ptm: _pat.pmandatory)
-			clseq.push_back(ptm->getHandle());
+			pp._part_clauses.push_back(ptm->getHandle());
 
-		_components.emplace_back(clseq);
+		_parts.emplace_back(pp);
 
 		// Clear things we don't need.
 		// Cannot clear _pat.connected_terms_map;
@@ -185,7 +278,7 @@ void PatternLink::disjointed_init(void)
 	// We do want to keep a record of the real body.
 	_pat.body = _body;
 
-	_num_comps = _components.size();
+	_num_comps = _parts.size();
 	setup_components();
 }
 
@@ -390,7 +483,9 @@ PatternLink::PatternLink(const HandleSet& vars,
 	_num_virts = _virtual.size();
 	OC_ASSERT (0 == _num_virts, "Must not have any virtuals!");
 
-	_components.emplace_back(compo);
+	PatternParts pp;
+	pp._part_clauses = compo;
+	_parts.emplace_back(pp);
 	_num_comps = 1;
 
 	make_connectivity_map();
@@ -544,49 +639,6 @@ bool PatternLink::record_literal(const PatternTermPtr& clause, bool reverse)
 			pin_term(term);
 			term->markAlways();
 			_pat.always.push_back(term);
-		}
-		return true;
-	}
-
-	// Pull clauses out of a GroupLink
-	// GroupLinks will have terms that are the groundings that should be
-	// grouped together, and also an optional IntervalLink to specify
-	// min/max grouping sizes.
-	if (not reverse and GROUP_LINK == typ)
-	{
-		for (PatternTermPtr term: clause->getOutgoingSet())
-		{
-			const Handle& ah = term->getQuote();
-
-			// In the current code base, there shouldn't be any constants
-			// so this check should not be needed.
-			if (is_constant(_variables.varset, ah)) continue;
-			pin_term(term);
-			term->markGrouping();
-			_pat.grouping.push_back(term);
-		}
-
-		// Look for IntervalLinks. They've been scrubbed from the
-		// Pattern term because they're constants; we have to look
-		// at the GrouplLink itself to find them.
-		long glo = LONG_MAX;
-		long ghi = 0;
-		for (const Handle& ah: h->getOutgoingSet())
-		{
-			if (INTERVAL_LINK != ah->get_type())
-				continue;
-			NumberNodePtr nlo(NumberNodeCast(ah->getOutgoingAtom(0)));
-			NumberNodePtr nhi(NumberNodeCast(ah->getOutgoingAtom(1)));
-			long ilo = (long) std::round(nlo->get_value());
-			long ihi = (long) std::round(nhi->get_value());
-			if (glo > ilo) glo = ilo;
-			if (ghi < ihi) ghi = ihi;
-			if (ihi < 0) ghi = LONG_MAX;
-		}
-		if (0 != ghi)
-		{
-			_pat.group_min_size = glo;
-			_pat.group_max_size = ghi;
 		}
 		return true;
 	}
@@ -773,8 +825,9 @@ void PatternLink::locate_cacheable(const PatternTermSeq& clauses)
 		// knee in the curve is at 4 or fewer UnorderedLinks in a clause.
 		// Note that UnorderedUTest has some very unusual patterns,
 		// exploring many tens of thousands of combinations, something
-		// that most ussers will surely almost never do :-)
-		if (4 < contains_atomtype_count(claw, UNORDERED_LINK)) continue;
+		// that most users will surely almost never do :-)
+		if (4 < (contains_atomtype_count(claw, UNORDERED_LINK) +
+		         contains_atomtype_count(claw, UNORDERED_SIG))) continue;
 
 		_pat.cacheable_clauses.insert(claw);
 	}
@@ -863,6 +916,11 @@ bool PatternLink::is_virtual(const Handle& clause)
 	// So we treat them as an unusual but not really virtual link.
 	if (IDENTICAL_LINK == clause->get_type()) return false;
 
+	// ExclusiveLinks can bridge over all their members.
+	// They should be matched against ground ExclusiveLinks in the
+	// AtomSpace, not evaluated as virtual clauses.
+	if (EXCLUSIVE_LINK == clause->get_type()) return false;
+
 	size_t nsub = 0;
 	size_t nsolv = 0;
 	size_t nvar = 0;
@@ -943,7 +1001,6 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	// not even called for any of these cases.
 	Type t = h->get_type();
 	if (CHOICE_LINK == t or ALWAYS_LINK == t) return false;
-	if (GROUP_LINK == t) return false;
 	if (ABSENT_LINK == t or PRESENT_LINK == t) return false;
 	if (SEQUENTIAL_AND_LINK == t or SEQUENTIAL_OR_LINK == t) return false;
 
@@ -1006,7 +1063,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 /// Add dummy clauses for patterns that would otherwise not have any
 /// non-evaluatable clauses.  One example of such is
 ///
-///    (GetLink (GreaterThan (Number 42) (Variable $x)))
+///    (MeetLink (GreaterThan (Number 42) (Variable $x)))
 ///
 /// The only clause here is the GreaterThan, and it is virtual
 /// (evaluatable) so we know that in general it cannot be found in
@@ -1021,7 +1078,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 ///
 /// Another example is
 ///
-///    (GetLink (Identical (Variable "$whole") (Implication ...)))
+///    (MeetLink (Identical (Variable "$whole") (Implication ...)))
 ///
 /// where the ImplicationLink may itself contain more variables.
 /// If the ImplicationLink is suitably simple, it can be added
@@ -1105,12 +1162,12 @@ void PatternLink::make_map_recursive(const Handle& var,
 /// containing them can be evaluated. Throw an error if some variable
 /// wasn't explicitly specified in a groundable clause.
 void PatternLink::check_satisfiability(const HandleSet& vars,
-                                       const HandleSetSeq& compvars)
+                                       const PartsSeq& parts)
 {
 	// Compute the set-union of all component vars.
 	HandleSet vunion;
-	for (const HandleSet& vset : compvars)
-		vunion.insert(vset.begin(), vset.end());
+	for (const PatternParts& pp : parts)
+		vunion.insert(pp._part_vars.begin(), pp._part_vars.end());
 
 	// Is every variable in some component? The user can give
 	// us mal-formed things like this:
@@ -1195,7 +1252,8 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 	}
 
 	// If the term is unordered, all parents must know about it.
-	if (nameserver().isA(t, UNORDERED_LINK))
+	if (nameserver().isA(t, UNORDERED_LINK) or
+	    nameserver().isA(t, UNORDERED_SIG))
 	{
 		// If there's a GlobNode in here, make sure there's only one.
 		// Unordered links with globs hit the "sparse" pattern match.
@@ -1259,6 +1317,8 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 				}
 				else if (IDENTICAL_LINK == t)
 					ptm->markIdentical();
+				else if (EXCLUSIVE_LINK == t)
+					ptm->markExclusive();
 			}
 		}
 	}
@@ -1273,7 +1333,7 @@ void PatternLink::make_ttree_recursive(const PatternTermPtr& root,
 		// scope up above. Those are NOT actually const. This is not
 		// particularly well-thought out. Might be buggy...
 		bool chk_const = (PRESENT_LINK == t or ABSENT_LINK == t);
-		chk_const = chk_const or ALWAYS_LINK == t or GROUP_LINK == t;
+		chk_const = chk_const or ALWAYS_LINK == t;
 		chk_const = chk_const and not parent->hasAnyEvaluatable();
 		chk_const = chk_const and not ptm->isQuoted();
 
@@ -1392,7 +1452,6 @@ void PatternLink::debug_log(std::string msg) const
 	logger().fine("%lu mandatory terms", _pat.pmandatory.size());
 	logger().fine("%lu absent clauses", _pat.absents.size());
 	logger().fine("%lu always clauses", _pat.always.size());
-	logger().fine("%lu grouping clauses", _pat.grouping.size());
 	logger().fine("%lu fixed clauses", _fixed.size());
 	logger().fine("%lu virtual clauses", _num_virts);
 	logger().fine("%lu components", _num_comps);
@@ -1419,15 +1478,6 @@ void PatternLink::debug_log(std::string msg) const
 	for (const PatternTermPtr& ptm : _pat.always)
 	{
 		str += "================ Always clause " + std::to_string(num) + ":";
-		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
-		str += "\n";
-		str += ptm->to_full_string() + "\n\n";
-		num++;
-	}
-
-	for (const PatternTermPtr& ptm : _pat.grouping)
-	{
-		str += "================ Grouping clause " + std::to_string(num) + ":";
 		if (ptm->hasAnyEvaluatable()) str += " (evaluatable)";
 		str += "\n";
 		str += ptm->to_full_string() + "\n\n";
@@ -1467,12 +1517,17 @@ std::string PatternLink::to_long_string(const std::string& indent) const
 	ss << indent << "_virtual:" << std::endl
 	   << oc_to_string(_virtual, indent_p) << std::endl;
 	ss << indent << "_num_comps = " << _num_comps << std::endl;
-	ss << indent << "_components:" << std::endl
-	   << oc_to_string(_components, indent_p) << std::endl;
-	ss << indent << "_component_vars:" << std::endl
-	   << oc_to_string(_component_vars, indent_p) << std::endl;
-	ss << indent << "_component_patterns:" << std::endl
-	   << oc_to_string(_component_patterns, indent_p);
+	ss << indent << "_parts:" << std::endl;
+	for (size_t i = 0; i < _parts.size(); i++)
+	{
+		ss << indent_p << "part[" << i << "]:" << std::endl;
+		ss << indent_p << "  _part_clauses: "
+		   << oc_to_string(_parts[i]._part_clauses, indent_p + "  ") << std::endl;
+		ss << indent_p << "  _part_vars: "
+		   << oc_to_string(_parts[i]._part_vars, indent_p + "  ") << std::endl;
+		ss << indent_p << "  _part_pattern: "
+		   << oc_to_string(_parts[i]._part_pattern, indent_p + "  ") << std::endl;
+	}
 	return ss.str();
 }
 

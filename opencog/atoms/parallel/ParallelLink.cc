@@ -24,11 +24,10 @@
 #include <thread>
 
 #include <opencog/util/platform.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/parallel/ParallelLink.h>
 #include <opencog/atoms/value/VoidValue.h>
-
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/eval/FrameStack.h>
 
 using namespace opencog;
 
@@ -42,13 +41,12 @@ static void thread_eval(AtomSpace* as,
                         bool silent)
 {
 	set_thread_name("atoms:parallel");
+	if (not evelnk->is_executable()) return;
 
-	// This is (supposed to be) identical to what cog-execute!
-	// would do...
-	Instantiator inst(as);
+	set_frame(AtomSpaceCast(as));
 	try
 	{
-		ValuePtr pap(inst.execute(evelnk));
+		ValuePtr pap(evelnk->execute(as, silent));
 		if (pap and pap->is_atom())
 			as->add_atom(HandleCast(pap));
 	}

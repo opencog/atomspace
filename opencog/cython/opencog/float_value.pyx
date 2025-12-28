@@ -2,16 +2,29 @@
 def createFloatValue(arg):
     cdef shared_ptr[cFloatValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cFloatValue(FloatValue.list_of_doubles_to_vector(arg)))
+        c_ptr = c_createFloatValue_vector(FloatValue.list_of_doubles_to_vector(arg))
     else:
-        c_ptr.reset(new cFloatValue(<double>arg))
-    return FloatValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+        c_ptr = c_createFloatValue_single(<double>arg)
+    cdef FloatValue instance = FloatValue.__new__(FloatValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class FloatValue(Value):
 
+    def __init__(self, arg=None):
+        # Allow construction with argument: FloatValue([1.0, 2.0]) or FloatValue(1.0)
+        # If arg is None, assume we're being created via __new__ from createFloatValue
+        cdef shared_ptr[cFloatValue] c_ptr
+        if arg is not None:
+            if isinstance(arg, list):
+                c_ptr = c_createFloatValue_vector(FloatValue.list_of_doubles_to_vector(arg))
+            else:
+                c_ptr = c_createFloatValue_single(<double>arg)
+            self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def to_list(self):
         return FloatValue.vector_of_doubles_to_list(
-            &((<cFloatValue*>self.get_c_value_ptr().get()).value()))
+            &((<cFloatValue*>self.get_c_raw_ptr()).value()))
 
     @staticmethod
     cdef vector[double] list_of_doubles_to_vector(list python_list):
@@ -29,4 +42,3 @@ cdef class FloatValue(Value):
             list.append(deref(it))
             inc(it)
         return list
-

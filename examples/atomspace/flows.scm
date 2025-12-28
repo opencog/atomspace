@@ -26,7 +26,7 @@
 ; See the `flow-formulas.scm` example for how to work with dynamically
 ; updating flows.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The Value is located at key (Predicate "*-TruthValueKey-*")
 (define tvkey (Predicate "*-TruthValueKey-*"))
@@ -78,7 +78,7 @@
 (cog-set-value! (Concept "B") tvkey (FloatValue 0.9 0.98))
 
 ; Use the formula to compute a new TV, and attach that TV to some Atom.
-; This is little more than the copy above, except that the Evaluation
+; This is little more than the copy above, except that the evaluation
 ; is actually performed, so that the new TV is computed, before being
 ; copied. In general, if the third Atom passed to SetValue is executable,
 ; then it will be executed to obtain the TV.

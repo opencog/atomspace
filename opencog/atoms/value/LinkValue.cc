@@ -105,10 +105,10 @@ bool LinkValue::operator<(const Value& other) const
 
 // ==============================================================
 
-std::string LinkValue::to_string(const std::string& indent) const
+std::string LinkValue::to_string(const std::string& indent, Type t) const
 {
 	std::string more_indent = indent + "  "; // two spaces, same as Link
-	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
+	std::string rv = indent + "(" + nameserver().getTypeName(t) + "\n";
 
 	SAFE_UPDATE(rv,
 	{
@@ -140,12 +140,27 @@ std::string LinkValue::to_short_string(const std::string& indent) const
 	update();
 	std::string rv = "(" + nameserver().getTypeName(_type) + " ";
 	for (const ValuePtr& v :_value)
-		rv += v->to_short_string("");
+	{
+		// Well .. this is kind of insane and mildly unpleasant, but...
+		// It can happen that Values get created that have null pointers
+		// in them. Yes, that's ugly and bad. We should not throw here,
+		// because this is long after the creation of the Value; we
+		// are here because atomspace-storage is trying to serialize us.
+		// We hae two remaining choices: do nothing and print nothing,
+		// or print (VoidValue) to indicate end-of-stream, end-of-file,
+		// no-data, whatever. See that just right now, this is a better
+		// idea than printing nothing at all. We'll see. The correct
+		// long-term fix is to avoid null pointers in ValueSeq's.
+		if (v)
+			rv += v->to_short_string("");
+		else
+			rv += "(VoidValue)";
+	}
 
 	rv += ")";
 	return rv;
 }
 
 // Adds factory when library is loaded.
-DEFINE_VALUE_FACTORY(LINK_VALUE,
-                     createLinkValue, std::vector<ValuePtr>)
+DEFINE_VALUE_FACTORY(LINK_VALUE, createLinkValue, ValueSeq&&)
+DEFINE_VALUE_FACTORY(LINK_VALUE, createLinkValue, const HandleSeq&)

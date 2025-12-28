@@ -2,7 +2,7 @@
 ; quote-glob.scm
 ; Unit test for issue #2583
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (PlusLink (Number 1) (Number 2) (Number 10))
 

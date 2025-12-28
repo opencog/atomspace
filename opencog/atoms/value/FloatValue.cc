@@ -40,7 +40,7 @@ ValuePtr FloatValue::incrementCount(const std::vector<double>& v) const
 		new_vect[idx] += v[idx];
 
 	// Return a brand new value of the same type.
-	return createFloatValue(_type, std::move(new_vect));
+	return valueserver().create(_type, std::move(new_vect));
 }
 
 ValuePtr FloatValue::incrementCount(size_t idx, double count) const
@@ -56,7 +56,7 @@ ValuePtr FloatValue::incrementCount(size_t idx, double count) const
 	new_vect[idx] += count;
 
 	// Return a brand new value of the same type.
-	return createFloatValue(_type, std::move(new_vect));
+	return valueserver().create(_type, std::move(new_vect));
 }
 
 bool FloatValue::operator==(const Value& other) const

@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; element-of-test.scm -- Test the ElementOfLink.
 ;
@@ -5,7 +8,7 @@
 ;
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

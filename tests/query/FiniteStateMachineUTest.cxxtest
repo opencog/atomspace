@@ -39,15 +39,13 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
-		eval->eval("(use-modules (opencog exec))");
+		eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	}
 
 	~FiniteStateMachineUTest()
 	{
-		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -70,6 +68,7 @@ void FiniteStateMachineUTest::tearDown(void)
 void FiniteStateMachineUTest::setUp(void)
 {
 	as->clear();
+	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 }
 
 #define getarity(hand) hand->get_arity()
@@ -127,10 +126,7 @@ void FiniteStateMachineUTest::do_test_basic(void)
 void FiniteStateMachineUTest::test_basic_rw(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 	do_test_basic();
-
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -138,21 +134,18 @@ void FiniteStateMachineUTest::test_basic_overlay(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
-
 	// Mark base-space as readonly; create a read-write overlay.
 	as->set_read_only();
 	AtomSpacePtr save = as;
 	as = createAtomSpace(as);
 	SchemeEval* seval = eval;
-	eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 
 	// Testing is performed in a write-through mode.
 	as->clear_copy_on_write();
 
 	do_test_basic();
 
-	delete eval;
 	eval = seval;
 	as = save;
 	as->set_read_write();

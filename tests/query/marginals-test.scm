@@ -1,10 +1,13 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; marginals-test.scm
 ;
 ; Unit test for storing results and marginals with the query itself.
 ; This is the future replacement for the old matrix API. Much cleaner.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

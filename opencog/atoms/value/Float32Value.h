@@ -46,8 +46,8 @@ protected:
 	virtual void update() const {}
 
 	Float32Value(Type t) : Value(t) {}
-public:
 	Float32Value(Type t, const std::vector<float>& v) : Value(t), _value(v) {}
+public:
 	Float32Value(const std::vector<float>& v)
 		: Value(FLOAT32_VALUE), _value(v) {}
 	Float32Value(std::vector<float>&& v)

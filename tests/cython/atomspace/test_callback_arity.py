@@ -1,7 +1,6 @@
 import unittest
 
-from opencog.utilities import set_default_atomspace, finalize_opencog
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 import __main__
 
@@ -16,12 +15,10 @@ __main__.return_concept = return_concept
 class TestExecutionOutputLink(unittest.TestCase):
 
     def setUp(self):
-        self.space = AtomSpace()
-        set_default_atomspace(self.space)
+        pass
 
     def tearDown(self):
-        finalize_opencog()
-        del self.space
+        pass
 
     def test_correct_argcount(self):
         atom1 = ConceptNode("atom1")
@@ -35,9 +32,9 @@ class TestExecutionOutputLink(unittest.TestCase):
         exec_link = ExecutionOutputLink(GroundedSchemaNode("py:return_concept"),
                                         ListLink(atom1, atom1))
         try:
-           result = self.space.execute(exec_link)
+           result = exec_link.execute()
            self.assertFalse("call should fail")
-        except RuntimeError as e:
+        except TypeError as e:
            self.assertTrue("but 2 were given" in str(e))
 
     def test_too_few_args(self):
@@ -45,8 +42,8 @@ class TestExecutionOutputLink(unittest.TestCase):
         exec_link = ExecutionOutputLink(GroundedSchemaNode("py:return_concept"),
                                         ListLink())
         try:
-           result = self.space.execute(exec_link)
+           result = exec_link.execute()
            self.assertFalse("call should fail")
-        except RuntimeError as e:
+        except TypeError as e:
            self.assertTrue("missing 1 required positional argument" in str(e))
 

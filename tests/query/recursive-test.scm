@@ -1,7 +1,10 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; recursive-test.scm -- unit test for the recursive.scm demo.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
@@ -194,14 +197,6 @@
 (test-assert "cont-inf-loop" throwd)
 
 ; ----------
-(test-assert "exout" (equal? (BoolValue #t)
-	(cog-execute!
-		(ExecutionOutput
-			(Lambda
-				(VariableList (Variable "this") (Variable "that"))
-				(Present (Inheritance (Variable "this") (Variable "that"))))
-			(List	(Concept "mammal") (Concept "vertebrate"))))))
-
 (test-end tname)
 
 (opencog-test-end)

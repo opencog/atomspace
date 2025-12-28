@@ -27,7 +27,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/atoms/atom_types/types.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/free/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 

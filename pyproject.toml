@@ -38,9 +38,10 @@ requires = [
 ]
 build-backend = "py_build_cmake.build"
 
+# Match version number with opencog/atomspace/version.h
 [project]
 name = "atomspace"
-version = "5.0.5"
+version = "5.2.0"
 description = "The AtomSpace Hypergraph Database"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -81,13 +82,13 @@ classifiers = [
 requires-python = ">=3.8"
 
 dependencies = [
-    "nose3",  # For testing
+    "pytest",  # For testing
 ]
 
 [project.optional-dependencies]
 dev = [
     "cxxtest",
-    "nose3",
+    "pytest",
     "build",
 ]
 
@@ -154,5 +155,15 @@ before-all = [
 ]
 
 # Test the wheel
-test-requires = ["nose3"]
+test-requires = ["pytest"]
 test-command = "python -c 'import opencog.atomspace; print(\"AtomSpace import successful\")'"
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests/cython"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+# Don't create __pycache__ directories
+cache_dir = ".pytest_cache"

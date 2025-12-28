@@ -68,17 +68,13 @@
     Example:
         ; Check to see if a node exists:
         guile> (cog-node 'Concept \"asdf\")
-        ()
-
-        ; Verify that the return value is actually a true null:
-        guile> (null? (cog-node 'Concept \"asdf\"))
-        #t
+        #f
 
         ; Now, create the node, and see if it exists:
         guile> (cog-new-node 'Concept \"asdf\")
         (ConceptNode \"asdf\")
-        guile> (null? (cog-node 'Concept \"asdf\"))
-        #f
+        guile> (cog-node 'Concept \"asdf\")
+        (ConceptNode \"asdf\")
 ")
 
 (set-procedure-property! cog-new-link 'documentation
@@ -1025,93 +1021,30 @@
 
     AtomSpaces are automatically deleted when no more references to
     them remain. To prevent this, either keep a guile variable pointing
-    to it, or insert it into a Link, or insert it directly into another
-    AtomSpace (using `cog-add-atomspace`).
+    to it, or insert it into a Link.
 
     Note that this does NOT set the current atomspace to the new one;
     to do that, you need to use cog-set-atomspace!
 
     The name of the AtomSpace can be obtained with `cog-name`.
 
-    Most users will want to call `cog-add-atomspace` on the returned
-    space. The function `AtomSpace` is a wrapper for these two combined;
-    so `(AtomSpace x)` is equivalent to (is defined as)
-    `(cog-add-atomspace (cog-new-atomspace x))`
-
     See also:
        AtomSpace -- create an AtomSpace and insert it into this one.
        cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-add-atomspace -- Insert an AtomSpace reference into this one.
        cog-atomspace-env -- Get the subspaces.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
        cog-atomspace-ro! -- Mark the AtomSpace as read-only.
        cog-atomspace-cow! -- Mark the AtomSpace as copy-on-write.
-")
-
-(set-procedure-property! cog-add-atomspace 'documentation
-"
- cog-add-atomspace ATOMSPACE
-    Insert ATOMSPACE into the current AtomSpace. This inserts a
-    reference (a pointer) to ATOMSPACE into the current AtomSpace.
-    The behavior is similar to creating a Node, except that Nodes
-    are always automatically inserted. The string name of ATOMSPACE
-    will be used to index the reference; thus, AtomSpaces can be found
-    by name.
-
-    This is not the same thing as subframes (subspaces). The inserted
-    ATOMSPACE is neither a superspace, subspace or copy (although it
-    could be, that's up to you.) The contents of ATOMSPACE are NOT
-    merged into the current AtomSpace, nor are they otherwise shared or
-    unified. The only goal of this function is to add a reference, and
-    have it be kept.
-
-    If the current AtomSpace does not contain some AtomSpace having the
-    same string name as ATOMSPACE, then ATOMSPACE is inserted, and
-    ATOMPSACE is returned. Otherwise, the existing AtomSpace having the
-    same name is returned.
-
-    The name of the AtomSpace can be obtained with `cog-name`.
-    The uuid the AtomSpace can be obtained with `cog-atomspace-uuid`.
-
-    Example:
-        guile> (define x (cog-new-atomspace \"foo\"))
-        guile> (cog-atomspace-uuid x)
-        13
-        guile> (define y (cog-add-atomspace x))
-        guile> (cog-atomspace-uuid y)
-        13
-        guile> (equal? x y)
-        #t
-        guile> (define z (cog-new-atomspace \"foo\"))
-        guile> (cog-atomspace-uuid z)
-        14
-        guile> (equal? z x)
-        #f
-        guile> (define w (cog-add-atomspace z))
-        guile> (cog-atomspace-uuid w)
-        13
-        guile> (equal? w x)
-        #t
-
-    See also:
-       AtomSpace -- create an AtomSpace and insert it into this one.
-       cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-new-atomspace -- Create a new AtomSpace.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! AtomSpace 'documentation
 "
  AtomSpace [NAME]
     Create a new AtomSpace; optionally give it the name NAME, and
-    insert it into the current AtomSpace. This is shorthand for
-    `(cog-add-atomspace (cog-new-atomspace NAME))`
+    insert it into the current AtomSpace.
 
     See also:
        cog-new-atomspace -- Create a new AtomSpace.
-       cog-add-atomspace -- Insert an AtomSpace reference into this one.
        cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-env 'documentation
@@ -1122,18 +1055,43 @@
 
     See also:
        cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-uuid -- Get the UUID of the AtomSpace.
 ")
 
-(set-procedure-property! cog-atomspace-uuid 'documentation
+(set-procedure-property! cog-push-atomspace 'documentation
 "
- cog-atomspace-uuid [ATOMSPACE]
-    Return the UUID of ATOMSPACE. The ATOMSPACE argument is
-    optional; if not specified, the current atomspace is assumed.
+ cog-push-atomspace -- Create a temporary AtomSpace.
+
+    This creates a new AtomSpace, derived from the current AtomSpace,
+    and makes it current. Thus, all subsequent atom operations will
+    create Atoms in this new AtomSpace. To delete it, simply pop it;
+    after popping, all of the Atoms placed into it will also be
+    deleted (unless they are referred to in some way).
+
+    The stack of AtomSpaces is per-thread; a push in one thread does
+    not affect the current AtomSpace in other threads. The stack is
+    shared with Python, so cross-language push/pop operations work
+    correctly.
+
+    Returns the previous (base) AtomSpace.
 
     See also:
-       cog-atomspace -- Get the current AtomSpace in this thread.
-       cog-atomspace-env -- Get the subspaces.
+       cog-pop-atomspace -- Delete a temporary AtomSpace.
+       cog-set-atomspace! -- Set the current AtomSpace.
+")
+
+(set-procedure-property! cog-pop-atomspace 'documentation
+"
+ cog-pop-atomspace -- Delete a temporary AtomSpace.
+
+    This pops the current AtomSpace from the stack, clears it, and
+    removes it from the parent AtomSpace. The previous AtomSpace
+    becomes the current one.
+
+    The stack is shared with Python, so cross-language push/pop
+    operations work correctly.
+
+    See also:
+       cog-push-atomspace -- Create a temporary AtomSpace.
 ")
 
 (set-procedure-property! cog-atomspace-clear 'documentation

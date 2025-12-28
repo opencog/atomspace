@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; atomspace-of-test.scm -- Verify that AtomSpaceOfLink works.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
@@ -32,7 +35,7 @@
 	(equal? as-result main-as))
 
 ; Create a child AtomSpace
-(define child-as (cog-new-atomspace main-as))
+(define child-as (AtomSpace main-as))
 
 ; Switch to child AtomSpace and create an atom there
 (cog-set-atomspace! child-as)

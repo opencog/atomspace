@@ -21,11 +21,11 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/DefineLink.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/TypeNode.h>
-#include <opencog/atoms/core/TypeUtils.h>
-#include <opencog/atoms/core/VariableSet.h>
+#include <opencog/atoms/grant/DefineLink.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/signature/TypeNode.h>
+#include <opencog/atoms/signature/TypeUtils.h>
+#include <opencog/atoms/scope/VariableSet.h>
 #include <opencog/atoms/rule/RuleLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ContainerValue.h>
@@ -125,134 +125,6 @@ FilterLink::FilterLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
-/// Direct side-by-side compare, for VECT being either
-/// std::vector<Handle> or std::vector<Value>
-template<typename VECT>
-bool FilterLink::glob_compare(const HandleSeq& tlo, const VECT& glo,
-                              ValueMap& valmap,
-                              AtomSpace* scratch, bool silent,
-                              Quotation quotation,
-                              ValuePtr (*makeval)(const VECT&&),
-                              size_t tsz, size_t off) const
-{
-	size_t gsz = glo.size();
-
-	// The vector to match has to be at least as long as the template.
-	if (gsz < tsz) return false;
-
-	_recursive_glob = true;
-	// If we are here, there is a glob node in the pattern.  A glob can
-	// match one or more atoms in a row. Thus, we have a more
-	// complicated search ...
-	size_t ip=off, jg=0;
-	for (ip=off, jg=0; ip<tsz+off and jg<gsz; ip++, jg++)
-	{
-		Type ptype = tlo[ip]->get_type();
-		if (GLOB_NODE == ptype)
-		{
-			VECT glob_seq;
-			Handle glob(tlo[ip]);
-			// Globs at the end are handled differently than globs
-			// which are followed by other stuff. So, is there
-			// anything after the glob?
-			Handle post_glob;
-			bool have_post = false;
-			if (ip+1 < tsz+off)
-			{
-				have_post = true;
-				post_glob = tlo[ip+1];
-			}
-
-			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-			if (not tc) return false;
-
-			glob_seq.push_back(glo[jg]);
-			jg++;
-
-			// Can we match more?
-			while (tc and jg<gsz)
-			{
-				if (have_post)
-				{
-					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, scratch, silent, quotation);
-					if (tc) break;
-				}
-				tc = extract(glob, glo[jg], valmap, scratch, silent, quotation);
-				if (tc) glob_seq.push_back(glo[jg]);
-				jg ++;
-			}
-			jg --;
-			if (not tc)
-			{
-				return false;
-			}
-
-			// If we already have a value, the value must be identical.
-			auto val = valmap.find(glob);
-			if (valmap.end() != val)
-			{
-				// Have to have same arity and contents.
-				if (val->second->is_atom())
-				{
-					const Handle& already = HandleCast(val->second);
-					const HandleSeq& alo = already->getOutgoingSet();
-					size_t asz = alo.size();
-					if (asz != glob_seq.size()) return false;
-					for (size_t i=0; i< asz; i++)
-					{
-						if (glob_seq[i] != alo[i]) return false;
-					}
-					return true;
-				}
-				else
-				{
-					throw RuntimeException(TRACE_INFO,
-						"Globbing for Values not implemented! FIXME!");
-				}
-			}
-
-//			Handle glp(createLink(std::move(glob_seq), LIST_LINK));
-			ValuePtr glp(makeval(std::move(glob_seq)));
-			valmap.emplace(std::make_pair(glob, glp));
-		}
-		else
-		{
-			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, scratch, silent, quotation))
-				return false;
-		}
-	}
-	return (ip == tsz+off) and (jg == gsz);
-}
-
-template
-bool FilterLink::glob_compare<HandleSeq>
-                    (const HandleSeq&, const HandleSeq&,
-                     ValueMap&, AtomSpace*, bool, Quotation,
-                     ValuePtr (*)(const HandleSeq&&),
-                     size_t, size_t) const;
-
-template
-bool FilterLink::glob_compare<ValueSeq>
-                    (const HandleSeq&, const ValueSeq&,
-                     ValueMap&, AtomSpace*, bool, Quotation,
-                     ValuePtr (*)(const ValueSeq&&),
-                     size_t, size_t) const;
-
-static ValuePtr make_list(const HandleSeq&& v)
-{
-	return createLink(std::move(v), LIST_LINK);
-}
-
-static ValuePtr make_lnkv(const ValueSeq&& v)
-{
-	return createLinkValue(std::move(v));
-}
-
-// ===============================================================
-
 /// Recursive tree-compare-and-extract grounding values.
 ///
 /// Compare the pattern tree `termpat` with the grounding tree `ground`.
@@ -298,7 +170,7 @@ bool FilterLink::extract(const Handle& termpat,
 	// Let the conventional type-checker deal with complicated types.
 	// LinkSignatureLinks might contain vars; deal with these below.
 	if (termpat->is_type(TYPE_NODE) or
-	    (termpat->is_type(TYPE_OUTPUT_LINK) and
+	    (termpat->is_type(TYPE_OUTPUT_SIG) and
 	       (not termpat->is_type(LINK_SIGNATURE_LINK))))
 		return value_is_type(termpat, vgnd);
 
@@ -373,28 +245,43 @@ bool FilterLink::extract(const Handle& termpat,
 		return false;
 	}
 
-	// Search for a specific StringValue. There's not way to
-	// place StringValues directly into the pattern, but it
-	// can be encoded with StringOfLink. Note this is a content
-	// compare, not a pointer compare, because values are not
-	// de-duped.
-	if (STRING_OF_LINK == t)
-	{
-		ValuePtr patval = termpat->execute();
-		return (*patval == *vgnd);
-	}
-
 	// If they are (non-variable) nodes, they must be identical.
 	if (not termpat->is_link())
 		return (termpat == vgnd);
 
-	// Type of LinkSig is encoded in the first atom.
-	Type lit = t;
+	// Pattern is a LinkSig. LinkSigs have a typespec. These are handled
+	// in multiple steps.
+	// Step 1) Does the type of the proposed grounding agree with the
+	//         LinkSig typespec? If so, proceed, else bounce out.
+	//
+	//         Note that the LinkSig typespec might be TypeNode,
+	//         TypeInhNode or TypeCoInhNode.  The TypeNode::is_kind()
+	//         handles all three cases.
+	// Step 2) The LinkSig might be rewriting into a StringValue, or
+	//         to a Node, or to a FloatValue or to a NumberNode. None
+	//         of these will contain Variables or Globs, and so they
+	//         can be directly compared. They either compare, or they
+	//         don't. Fail here, and bounce out.
+	//
+	// If Step 1) matches, and Step 2) suggests variables may be
+	// involved, then the variables have to be matched/reduced.
+	//
 	if (LINK_SIGNATURE_LINK == t)
-		lit = LinkSignatureLinkCast(termpat)->get_kind();
+	{
+		// Step 1) Type of LinkSig is encoded in the first atom.
+		Handle ts = LinkSignatureLinkCast(termpat)->get_typespec();
+		if (not TypeNodeCast(ts)->is_kind(vgnd->get_type()))
+			return false;
 
-	// Whatever they are, the type must agree.
-	if (lit != vgnd->get_type()) return false;
+		// Step 2) Is it concrete?
+		ValuePtr patval = termpat->execute();
+		if ((not vgnd->is_type(LINK_VALUE)) and
+		    (not vgnd->is_type(LINK)))
+			return (*patval == *vgnd);
+	}
+
+	// Else straight-up see if pattern and grounding types agree.
+	else if (t != vgnd->get_type()) return false;
 
 	// From here on out, we prepare to compare Links.
 	const HandleSeq& tlo = termpat->getOutgoingSet();
@@ -451,21 +338,43 @@ bool FilterLink::extract(const Handle& termpat,
 
 	// If we are here, then there's a glob to be matched. As just above,
 	// the HandleSeq and ValueSeq variants are effectively identical.
-	if (vgnd->is_link())
-	{
-		const HandleSeq& glo = HandleCast(vgnd)->getOutgoingSet();
-		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
-		                    make_list, tsz, off);
-	}
-	if (vgnd->is_type(LINK_VALUE))
-	{
-		const ValueSeq& glo = LinkValueCast(vgnd)->value();
-		return glob_compare(tlo, glo, valmap, scratch, silent, quotation,
-		                    make_lnkv, tsz, off);
-	}
+	_recursive_glob = true;
 
-	return glob_compare(tlo, ValueSeq({vgnd}), valmap, scratch, silent, quotation,
-	                    make_lnkv, tsz, off);
+	// Helper lambda to perform glob matching for a given ground sequence type
+	auto do_glob_match = [&]<typename GroundSeq>(const GroundSeq& glo) -> bool
+	{
+		// Validation callback - delegates to extract()
+		GlobValidateCallback<GroundSeq> validate =
+			[&](const Handle& pattern_elem,
+			    const typename GroundSeq::value_type& ground_elem,
+			    ValueMap& bindings) -> bool {
+				return this->extract(pattern_elem, ground_elem, bindings,
+				                     scratch, silent, quotation);
+			};
+
+		// Value creation callback - creates appropriate container type
+		GlobMakeValueCallback<GroundSeq> make_value;
+		if constexpr (std::is_same_v<GroundSeq, HandleSeq>)
+			make_value = [](const HandleSeq& matched_seq) -> ValuePtr {
+				return createLink(HandleSeq(matched_seq), LIST_LINK);
+			};
+		else
+			make_value = [](const ValueSeq& matched_seq) -> ValuePtr {
+				return createLinkValue(ValueSeq(matched_seq));
+			};
+
+		return glob_match(tlo, glo, valmap, _mvars, validate, make_value, off, tsz);
+	};
+
+	// Handle different ground value types
+	if (vgnd->is_link())
+		return do_glob_match(HandleCast(vgnd)->getOutgoingSet());
+
+	if (vgnd->is_type(LINK_VALUE))
+		return do_glob_match(LinkValueCast(vgnd)->value());
+
+	// Single value case
+	return do_glob_match(ValueSeq({vgnd}));
 }
 
 // ====================================================================
@@ -473,9 +382,6 @@ bool FilterLink::extract(const Handle& termpat,
 ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
                                  AtomSpace* scratch, bool silent) const
 {
-	// temp hack
-	Handle cterm(HandleCast(vterm));
-
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	ValueMap valmap;
@@ -487,7 +393,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// mis-matches, if any. Thus, we are done, here.
 	const Handle& body(_pattern->get_body());
 	if (body->is_type(TYPE_NODE) or
-	    (body->is_type(TYPE_OUTPUT_LINK) and
+	    (body->is_type(TYPE_OUTPUT_SIG) and
 	       (not body->is_type(LINK_SIGNATURE_LINK))))
 		return vterm;
 
@@ -507,7 +413,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 				const auto& valpair = valmap.find(var);
 				valseq.emplace_back(valpair->second);
 			}
-			return LinkSignatureLinkCast(body)->construct(std::move(valseq));
+			return LinkSignatureLinkCast(body)->construct(scratch, std::move(valseq));
 		}
 
 		// A list of Handles.

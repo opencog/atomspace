@@ -23,7 +23,7 @@ class SetValueUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 	
 public:
 	SetValueUTest(void);
@@ -34,15 +34,18 @@ public:
 	void test_copy();
 	void test_square();
 	void test_triangle();
+	void test_copy_on();
+	void test_square_on();
+	void test_triangle_on();
 };
 
-SetValueUTest::SetValueUTest(void) : _asp(createAtomSpace()), _eval(_asp)
+SetValueUTest::SetValueUTest(void) : _asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
-	_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-	_eval.eval("(load-from-path \"tests/atoms/flow/set-value-flow.scm\")");
+	_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	_eval->eval("(load-from-path \"tests/atoms/flow/set-value-flow.scm\")");
 }
 
 void SetValueUTest::setUp(void)
@@ -55,25 +58,25 @@ void SetValueUTest::test_copy()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr tvp = _eval.eval_v("(cog-value foo key)");
+	ValuePtr tvp = _eval->eval_v("(cog-value foo key)");
 
-	ValuePtr result = _eval.eval_v("seq");
+	ValuePtr result = _eval->eval_v("seq");
 	printf("expect: %s\n", tvp->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
 
-	tvp = _eval.eval_v("(cog-execute! set-value)");
+	tvp = _eval->eval_v("(cog-execute! set-value)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
 
-	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	result = _eval->eval_v("(cog-execute! (ValueOf bar kee))");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
 
-	result = _eval.eval_v("(cog-value bar kee)");
+	result = _eval->eval_v("(cog-value bar kee)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(tvp, result);
@@ -87,20 +90,20 @@ void SetValueUTest::test_square()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr tvp = _eval.eval_v("(cog-execute! square)");
+	ValuePtr tvp = _eval->eval_v("(cog-execute! square)");
 
-	ValuePtr result = _eval.eval_v("squ");
+	ValuePtr result = _eval->eval_v("squ");
 	printf("expect: %s\n", tvp->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	result = _eval->eval_v("(cog-execute! (ValueOf bar kee))");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_v("(cog-value bar kee)");
+	result = _eval->eval_v("(cog-value bar kee)");
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
@@ -114,23 +117,96 @@ void SetValueUTest::test_triangle()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ValuePtr tvp = _eval.eval_v("tri");
+	ValuePtr tvp = _eval->eval_v("tri");
 	printf("expect: %s\n", tvp->to_string().c_str());
 
-	ValuePtr result = _eval.eval_v("(cog-execute! triangle)");
+	ValuePtr result = _eval->eval_v("(cog-execute! triangle)");
 	printf("result ex-tri: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_v("(cog-execute! (ValueOf bar kee))");
+	result = _eval->eval_v("(cog-execute! (ValueOf bar kee))");
 	printf("result val-of: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
 
-	result = _eval.eval_v("(cog-value bar kee)");
+	result = _eval->eval_v("(cog-value bar kee)");
 	printf("result cog-val: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*tvp == *result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Test SetValueOn - returns Atom instead of Value
+// ====================================================================
+
+// SetValueOn basic copy - should return baz Atom
+void SetValueUTest::test_copy_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn - should return the Atom (baz), not the Value
+	ValuePtr result = _eval->eval_v("(cog-execute! set-value-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval->eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the value was actually set on baz
+	ValuePtr stored_value = _eval->eval_v("(cog-value baz kee)");
+	ValuePtr expected = _eval->eval_v("seq");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT_EQUALS(stored_value, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// SetValueOn with math - should return baz Atom
+void SetValueUTest::test_square_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn with math - should return the Atom (baz)
+	ValuePtr result = _eval->eval_v("(cog-execute! square-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval->eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the squared value was set
+	ValuePtr stored_value = _eval->eval_v("(cog-value baz kay)");
+	ValuePtr expected = _eval->eval_v("squ");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT(*stored_value == *expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// SetValueOn with formula - should return baz Atom
+void SetValueUTest::test_triangle_on()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Execute SetValueOn with formula - should return the Atom (baz)
+	ValuePtr result = _eval->eval_v("(cog-execute! triangle-on)");
+	printf("result: %s\n", result->to_string().c_str());
+
+	// Result should be the baz Atom
+	Handle baz = _eval->eval_h("baz");
+	TS_ASSERT_EQUALS(HandleCast(result), baz);
+
+	// Verify the triangle numbers were set
+	ValuePtr stored_value = _eval->eval_v("(cog-value baz kay)");
+	ValuePtr expected = _eval->eval_v("tri");
+	printf("stored: %s\n", stored_value->to_string().c_str());
+	printf("expect: %s\n", expected->to_string().c_str());
+	TS_ASSERT(*stored_value == *expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

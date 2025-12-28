@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VARDECL_OF_LINK_H
 #define _OPENCOG_VARDECL_OF_LINK_H
 
-#include <opencog/atoms/core/PrenexLink.h>
+#include <opencog/atoms/scope/PrenexLink.h>
 
 namespace opencog
 {
@@ -49,6 +49,7 @@ public:
 	VardeclOfLink(const VardeclOfLink&) = delete;
 	VardeclOfLink& operator=(const VardeclOfLink&) = delete;
 
+	virtual bool is_executable(void) const { return true; }
 	// Return the variable decls.
 	virtual ValuePtr execute(AtomSpace*, bool);
 

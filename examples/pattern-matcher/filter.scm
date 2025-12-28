@@ -10,10 +10,8 @@
 ; it only examines the given input list/set, and applies the map to
 ; that.
 ;
-; In many ways, FilterLink is the opposite of PutLink, in that it un-does
-; a beta reduction, by extracting values from a matching pattern. Thus,
-; FilterLink could have been named UnPutLink, CoPutLink or ExtractLink or
-; UnBetaReduceLink. That is, FilterLink is an adjoint functor to PutLink.
+; FilterLink extracts values from a matching pattern. It could also have
+; been named ExtractLink or UnBetaReduceLink.
 ;
 ; These ideas are illustrated below. The first 4 examples illustrate
 ; the extraction of values for a single variable; this is, of un-beta-
@@ -24,7 +22,7 @@
 ; illustrate actual "mapping", that is, graph re-writing or graph
 ; transformation as a result of applying a mapping function.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define single
 	(Filter
@@ -33,12 +31,12 @@
 		; the place-holder variable $x.
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		; The graph from which a value is to be extracted.  Clearly,
 		; the variable $x corresponds to Concept "baz"
-		(Evaluation
+		(Edge
 			(Predicate "foo")
 			(List (Concept "bar") (Concept "baz"))))
 )
@@ -52,19 +50,19 @@
 		; The same pattern as above.  Extracts values for variable $x.
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(Set
 			; A set of graphs to which the above pattern should
 			; be matched.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
 		))
@@ -86,17 +84,17 @@
 	(Filter
 		(Lambda
 			(Variable "$x")
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(List
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
 		))
@@ -116,20 +114,20 @@
 		(Lambda
 			; The type of the variable MUST be ConceptNode!!
 			(TypedVariable (Variable "$x") (Type "ConceptNode"))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Variable "$x"))))
 		(Set
 			; A set of graphs to which the above pattern should be
 			; applied.  Note that, due to the type constraint, only
 			; two of the three can match. (Numbers not being Concepts)
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -150,8 +148,7 @@
 ;
 ; This implements a kind of filtering, by returning a subset of
 ; the original input set, and discarding those values that don't
-; match the desired type.  A similar kind of filtering can be done
-; using PutLink; see the `filter.scm` example for more.
+; match the desired type.
 ;
 (define single-signature
 	(Filter
@@ -159,20 +156,20 @@
          ; The variable $x must be an evaluation of a certain form!
 			(TypedVariable (Variable "$x")
 				(Signature
-					(Evaluation
+					(Edge
 						(Predicate "foo")
 						(List (Concept "bar") (Type "ConceptNode")))))
 			(Variable "$x"))
 		(Set
 			; Of the three elements in this set, only two have the type
 			; that is specified above.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -181,10 +178,10 @@
 ; Executing this will filter the input set down to just two members.
 ; The return value should be this:
 ;    (SetLink
-;       (EvaluationLink
+;       (EdgeLink
 ;          (Predicate "foo")
 ;          (ListLink (Concept "bar") (Concept "ah one")))
-;       (EvaluationLink
+;       (EdgeLink
 ;          (Predicate "foo")
 ;          (ListLink (Concept "bar") (Concept "ah two")))
 ;    )
@@ -201,18 +198,18 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y"))))
 		(Set
 			; Same input as always.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -243,17 +240,17 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y"))))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -279,11 +276,6 @@
 ; link is in the form of P(x,y)->Q(x,y) and inputs P(a,b) are
 ; re-written to Q(a,b).
 ;
-; Observe that the re-writing could also be achieved by combining
-; the results of the FilterLink with a PutLink.  The form below is
-; slightly less verbose, and thus, maybe more convenient than
-; using Filter and Put together.
-;
 (define imply-map
 	(Filter
 		; The Rule is the "map" that will be applied.
@@ -293,21 +285,21 @@
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
 				(TypedVariable (Variable "$y") (Type "ConceptNode")))
 			; The P(x,y) part of the implication.
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y")))
 			; The Q(x,y) part of the implication.
-			(Evaluation
+			(Edge
 				(Predicate "reverse-foo")
 				(List (Variable "$y") (Variable "$x"))))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah two")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Number 3)))
 		))
@@ -318,10 +310,10 @@
 ; i.e. the order of the arguments is switched. The expected result is:
 ;
 ;    (SetLink
-;       (EvaluationLink
+;       (EdgeLink
 ;          (PredicateNode "reverse-foo")
 ;          (ListLink (ConceptNode "ah one") (ConceptNode "bar")))
-;       (EvaluationLink
+;       (EdgeLink
 ;          (PredicateNode "reverse-foo")
 ;          (ListLink (ConceptNode "ah two") (ConceptNode "bar")))
 ;    )
@@ -334,18 +326,18 @@
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Variable "$x") (Variable "$y")))
 			(Plus (Variable "$y") (Variable "$x")))
 		(Set
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Concept "bar") (Concept "ah one")))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Number 2) (Number 3)))
-			(Evaluation
+			(Edge
 				(Predicate "foo")
 				(List (Number 10) (Times (Number 3) (Number 2))))
 		))

@@ -50,8 +50,10 @@ namespace opencog
 ///
 class LinkSignatureLink : public Link
 {
-private:
+protected:
 	Type _kind;
+
+	ValuePtr do_construct(const ValueSeq&&) const;
 
 public:
 	LinkSignatureLink(const HandleSeq&&, Type = LINK_SIGNATURE_LINK);
@@ -59,14 +61,14 @@ public:
 	LinkSignatureLink& operator=(const LinkSignatureLink&) = delete;
 
 	Type get_kind(void) const { return _kind; }
+	Handle get_typespec(void) const { return _outgoing[0]; }
 	virtual bool is_executable(void) const { return true; }
 
 	// Construct new Value or Link of the given kind.
 	virtual ValuePtr execute(AtomSpace*, bool);
 
 	// Construct new Value from arguments
-	ValuePtr construct(const ValueSeq&&);
-	ValuePtr construct(const HandleSeq&&);
+	ValuePtr construct(AtomSpace*, const ValueSeq&&) const;
 
 	static Handle factory(const Handle&);
 };

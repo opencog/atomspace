@@ -39,6 +39,11 @@ namespace opencog
 /// wrapped. Thus, if a pipeline produces a LinkValue, and you
 /// wanted a SetLink instead, just wrap it with this.
 ///
+/// This is little more than a simplified, dumed-down API for a one-shot
+/// FilterLink, which recognizes one kind of input, and creates another.
+/// The FilterLink that does this si sufficiently complicated, and this
+/// is sufficiently easy, that it seems worth it.
+///
 class CollectionOfLink : public FunctionLink
 {
 protected:

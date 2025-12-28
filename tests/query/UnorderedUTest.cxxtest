@@ -16,6 +16,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpacePtr as;
+		SchemeEval* eval;
 		Handle pair;
 		Handle disorder;
 		Handle disordered;
@@ -85,7 +86,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 void UnorderedUTest::setUp(void)
 {
 	as = createAtomSpace();
-	SchemeEval* eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
@@ -105,7 +106,6 @@ void UnorderedUTest::setUp(void)
 	exhaust5 = eval->apply("exhaust-5", Handle::UNDEFINED);
 	exhaust_eq_12 = eval->apply("exhaust-eq-12", Handle::UNDEFINED);
 	exhaust_eq_6 = eval->apply("exhaust-eq-6", Handle::UNDEFINED);
-	delete eval;
 }
 
 /*
@@ -177,7 +177,6 @@ void UnorderedUTest::test_jswiergo(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
 
 	Handle result, expected;
@@ -206,7 +205,6 @@ void UnorderedUTest::test_big_jswiergo(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-jswiergo.scm\")");
 
 	Handle result, expected;
@@ -301,7 +299,6 @@ void UnorderedUTest::test_embed(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-embed.scm\")");
 	Handle expected = eval->eval_h("expect-embedded-set");
 
@@ -325,7 +322,6 @@ void UnorderedUTest::test_cube(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-embed.scm\")");
 	Handle expected = eval->eval_h("expect-two-x-two");
 
@@ -372,14 +368,13 @@ void UnorderedUTest::test_quote(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-quote.scm\")");
 
-	// Result should be a SetLink w/ one solutions
+	// Result should be a SetLink w/ one solution
 	Handle result = eval->eval_h("(cog-execute! (CollectionOf query))");
 
 	logger().debug("embedded result is %s\n", result->to_string().c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(result));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -390,7 +385,6 @@ void UnorderedUTest::test_odometer(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odometer.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
@@ -430,7 +424,6 @@ void UnorderedUTest::test_odo_below(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-below.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
@@ -470,7 +463,6 @@ void UnorderedUTest::test_odo_distinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-distinct.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
@@ -510,7 +502,6 @@ void UnorderedUTest::test_odo_indistinct(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-indistinct.scm\")");
 
 	// Result should be a SetLink w/ 3!=six solutions
@@ -552,7 +543,6 @@ void UnorderedUTest::test_odo_layer(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-layer.scm\")");
 
 	// --------------------------------------------
@@ -593,7 +583,6 @@ void UnorderedUTest::test_odo_couple(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-couple.scm\")");
 	Handle result;
 
@@ -628,7 +617,6 @@ void UnorderedUTest::test_odo_equ_pred(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-equpr.scm\")");
 	Handle result;
 
@@ -663,7 +651,6 @@ void UnorderedUTest::test_odo_equal(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-equal.scm\")");
 	Handle result;
 
@@ -698,7 +685,6 @@ void UnorderedUTest::test_odo_couplayer(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/unordered-odo-couplayer.scm\")");
 	Handle result;
 

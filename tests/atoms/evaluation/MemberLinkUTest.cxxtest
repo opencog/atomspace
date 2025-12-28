@@ -64,11 +64,11 @@ void MemberLinkUTest::test_membership()
 	Handle AS = L(MEMBER_LINK, {A, S});
 	Handle DS = L(MEMBER_LINK, {D, S});
 
-	bool result = EvaluationLink::crisp_eval_scratch(&_as, AS, &_as);
+	bool result = AS->bevaluate();
 	printf("Got result=%s\n", result ? "true" : "false");
 	TS_ASSERT(result);
 
-	result = EvaluationLink::crisp_eval_scratch(&_as, DS, &_as);
+	result = DS->bevaluate();
 	TS_ASSERT(not result);
 
 	logger().info("END TEST: %s", __FUNCTION__);

@@ -186,7 +186,7 @@ The algorithm splits naturally into two steps: an analysis/compilation
 step, and a runtime step. The analysis step is quite complex, extracting
 structure from the pattern in such a way as to make the actual run-time
 match run quickly. The idea is that a pattern might be specified once,
-but then re-used (re-run) many times. Thus, it is important for it to
+but then reused (re-run) many times. Thus, it is important for it to
 run quickly, at the expense of longer compile times. Analysis includes:
 
 * Extraction of variable locations.
@@ -837,7 +837,7 @@ TODO
 
 Resources
 ---------
-A reading list of inspirational systems, which desribe alternative
+A reading list of inspirational systems, which describe alternative
 ways of looking at the world, and might contain ideas worth stealing.
 
 * John N. Shutt, [The Kernel Programming Language](http://web.cs.wpi.edu/~jshutt/kernel.html)

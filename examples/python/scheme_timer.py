@@ -9,8 +9,8 @@ total execution time
 
 __author__ = 'Cosmo Harrigan'
 
-from opencog.atomspace import AtomSpace, TruthValue
-from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
+from opencog.atomspace import AtomSpace
+from opencog.scheme import *
 atomspace = AtomSpace()
 
 NUMBER_OF_ITERATIONS = 50000
@@ -18,8 +18,8 @@ NUMBER_OF_ITERATIONS = 50000
 def test_operation():
     for _ in range(NUMBER_OF_ITERATIONS):
         # scheme_eval(atomspace, '(+ 2 2)')
-        scheme_eval_h(atomspace, '(Concept "foo")')
-        # scheme_eval_h(atomspace, '(Number ' + str(i) + ')')
+        scheme_eval_v(atomspace, '(Concept "foo")')
+        # scheme_eval_v(atomspace, '(Number ' + str(i) + ')')
 
 import timeit
 elapsed = timeit.timeit("test_operation()",

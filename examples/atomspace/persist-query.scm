@@ -30,15 +30,17 @@
 ;
 (use-modules (opencog) (opencog persist))
 
-; If you are using the PosgreSQL backend, do this:
-(use-modules (opencog persist-sql))
-(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
-(cog-open psn)
-
 ; If you are using the RocksDB backend, do this:
 (use-modules (opencog persist-rocks))
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
 (cog-open rsn)
+
+; If you are using the PostgreSql backend, do this:
+; XXX At this time, the PostgreSql backend is obsolete and unmaintained.
+; It could be brought back to life, for for now, don't use it. XXX
+(use-modules (opencog persist-sql))
+(define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
+(cog-open psn)
 
 ; -----------------------
 ; Populate the Atomspace.
@@ -48,7 +50,7 @@
 (List (Concept "A") (Concept "B"))
 (Set (Concept "A") (Concept "B"))
 (Set (Concept "A") (Concept "B") (Concept "C"))
-(Evaluation (Predicate "foo")
+(Edge (Predicate "foo")
 	(List (Concept "B") (Concept "C") (Concept "oh boy!")))
 
 ; Push the entire atomspace out to disk.

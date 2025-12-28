@@ -44,12 +44,12 @@
 ;;
 ;; To demonstrate this, we need to populate the AtomSpace with some data.
 ;; In this case, some assertions about who is human.
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "Linas") (Concept "human"))
 )
 
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "Ben") (Concept "human"))
 )
@@ -61,7 +61,7 @@
 		;; Declare the variable to be grounded.
 		(Variable "$person")
 		;; The pattern to be searched for.
-		(Evaluation
+		(Edge
 			(Predicate "is-a")
 			(List (Variable "$person") (Concept "human")))
 

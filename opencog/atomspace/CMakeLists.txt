@@ -12,7 +12,6 @@ ADD_LIBRARY (atomspace
 	AtomTable.cc
 	Frame.cc
 	# IncomeIndex.cc Disabled. See notes in header file.
-	Transient.cc
 	TypeIndex.cc
 )
 
@@ -28,6 +27,8 @@ TARGET_LINK_LIBRARIES(atomspace
 	# screwball failures.
 	${NO_AS_NEEDED}
 	clearbox
+	constrain
+	grant
 	join
 	pattern
 	grounded
@@ -43,14 +44,13 @@ IF (HAVE_FOLLY)
 ENDIF (HAVE_FOLLY)
 
 INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
 	AtomSpace.h
 	Frame.h
 	# IncomeIndex.h
-	Transient.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

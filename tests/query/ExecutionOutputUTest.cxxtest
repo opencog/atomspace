@@ -23,7 +23,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/QueryLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/QueueValue.h>
@@ -41,16 +40,16 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr as;
-	SchemeEval eval;
+	SchemeEval* eval;
 
 public:
 
-	ExecutionOutputUTest(void) : as(createAtomSpace()), eval(as)
+	ExecutionOutputUTest(void) : as(createAtomSpace()), eval(SchemeEval::get_scheme_evaluator(as))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	}
 
@@ -115,14 +114,14 @@ void ExecutionOutputUTest::test_exec(void)
 	 */
 	Handle clauses =
 		al(AND_LINK,
-			al(EVALUATION_LINK,
+			al(EDGE_LINK,
 				an(PREDICATE_NODE, "_obj"),
 				al(LIST_LINK,
 					an(CONCEPT_NODE, "be"),
 					an(VARIABLE_NODE, "$var1")
 				)
 			),
-			al(EVALUATION_LINK,
+			al(EDGE_LINK,
 				an(VARIABLE_NODE, "$prep"),
 				al(LIST_LINK,
 					an(VARIABLE_NODE, "$var1"),
@@ -141,36 +140,28 @@ void ExecutionOutputUTest::test_exec(void)
 
 	Handle hcapital;
 	// Create data on which the above pattern should match
-	al(EVALUATION_LINK,
+	al(EDGE_LINK,
 		an(PREDICATE_NODE, "_obj"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "be"),
-			hcapital = an(CONCEPT_NODE, "capital")
-		)
-	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
+			hcapital = an(CONCEPT_NODE, "capital")));
 
 	Handle hprep;
-	al(EVALUATION_LINK,
+	al(EDGE_LINK,
 		hprep = an(PREDICATE_NODE, "of"),
 		al(LIST_LINK,
 			an(CONCEPT_NODE, "capital"),
-			an(CONCEPT_NODE, "Spain")
-		)
-	)->setValue(truth_key(), createFloatValue(std::vector<double>({1.0})));
+			an(CONCEPT_NODE, "Spain")));
 
 	const char * str =
 	"(define (make-verb-prep verb prep) \n"
-	"	(cog-new-link 'EvaluationLink \n"
-	"		(cog-new-node 'ConceptNode \n"
-	"			(string-append (cog-name verb) \"_\" (cog-name prep)) \n"
-	"		) \n"
-	"		(cog-new-link 'ListLink \n"
-	"			(cog-new-node 'ConceptNode (cog-name verb)) \n"
-	"			(cog-new-node 'PredicateNode (cog-name prep)) \n"
-	"		) \n"
-	"	) \n"
-	")";
-	eval.eval(str);
+	"	(Edge \n"
+	"		(Concept \n"
+	"			(string-append (cog-name verb) \"_\" (cog-name prep))) \n"
+	"		(List\n"
+	"			(Concept (cog-name verb)) \n"
+	"			(Predicate (cog-name prep)))))\n";
+	eval->eval(str);
 
 	// Result should be a ListLink
 	Handle result = imply(as, clauses, implicand);
@@ -204,7 +195,7 @@ void ExecutionOutputUTest::test_varsub(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	const char * str = "(define (retarg x) x)\n";
-	eval.eval(str);
+	eval->eval(str);
 
 	Handle resolution;
 	// Raw data
@@ -287,13 +278,13 @@ void ExecutionOutputUTest::test_query_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec.scm\")");
+	eval->eval("(load-from-path \"tests/query/exec.scm\")");
 
-	Handle exec_query = eval.eval_h("exec-query");
+	Handle exec_query = eval->eval_h("exec-query");
 	Handle results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 4);
 
-	exec_query = eval.eval_h("quote-exec-query");
+	exec_query = eval->eval_h("quote-exec-query");
 	results = HandleCast(exec_query->execute(as.get()));
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
@@ -313,9 +304,8 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 		N21 = an(NUMBER_NODE, "21"),
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
-	Instantiator inst(as.get());
 	Handle expected = an(NUMBER_NODE, "42");
-	Handle result = HandleCast(inst.execute(twice21));
+	Handle result = HandleCast(twice21->execute(as.get()));
 	result = as->add_atom(result);
 
 	TS_ASSERT_EQUALS(expected, result);
@@ -324,7 +314,7 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 
 	Handle N21_LST = al(LIST_LINK, N21);
 	Handle twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST);
-	Handle result_lst = HandleCast(inst.execute(twice21_lst));
+	Handle result_lst = HandleCast(twice21_lst->execute(as.get()));
 	result_lst = as->add_atom(result_lst);
 
 	TS_ASSERT_EQUALS(expected, result_lst);
@@ -353,9 +343,8 @@ void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
 	Handle exec =
 		al(EXECUTION_OUTPUT_LINK, identity, AB);
 
-	Instantiator inst(as.get());
 	Handle expected = AB;
-	Handle result = HandleCast(inst.execute(exec));
+	Handle result = HandleCast(exec->execute(as.get()));
 
 	TS_ASSERT_EQUALS(expected, result);
 
@@ -366,9 +355,9 @@ void ExecutionOutputUTest::test_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec-gsn.scm\")");
+	eval->eval("(load-from-path \"tests/query/exec-gsn.scm\")");
 
-	ValuePtr result = eval.eval_v("(cog-execute! exec-query-handle)");
+	ValuePtr result = eval->eval_v("(cog-execute! exec-query-handle)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	ValueSeq vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
@@ -376,7 +365,7 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_EQUALS(va->get_type(), UNORDERED_LINK);
 
 	//------------
-	result = eval.eval_v("(cog-execute! exec-query-link-value)");
+	result = eval->eval_v("(cog-execute! exec-query-link-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
@@ -384,7 +373,7 @@ void ExecutionOutputUTest::test_value(void)
 		TS_ASSERT_EQUALS(va->get_type(), LINK_VALUE);
 
 	//------------
-	result = eval.eval_v("(cog-execute! exec-query-string-value)");
+	result = eval->eval_v("(cog-execute! exec-query-string-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 3);
@@ -397,7 +386,7 @@ void ExecutionOutputUTest::test_value(void)
 	// deduplicate to 1 unique result (even though there were 3 matches).
 	// This is expected behavior - see commit 658c9688a "One more bug-fix
 	// for grouping" which explicitly documents result collapsing.
-	result = eval.eval_v("(cog-execute! exec-query-float-value)");
+	result = eval->eval_v("(cog-execute! exec-query-float-value)");
 	TS_ASSERT(nameserver().isA(result->get_type(), LINK_VALUE));
 	vals = LinkValueCast(result)->value();
 	TS_ASSERT_EQUALS(vals.size(), 1);  // 3 matches collapse to 1 unique result
@@ -456,9 +445,9 @@ void ExecutionOutputUTest::test_recursion(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec-factorial.scm\")");
+	eval->eval("(load-from-path \"tests/query/exec-factorial.scm\")");
 
-	Handle result = eval.eval_h(
+	Handle result = eval->eval_h(
 		"(cog-execute! (ExecutionOutput"
 		"     (DefinedSchema \"factorial\") (Number 5)))");
 
@@ -476,22 +465,21 @@ void ExecutionOutputUTest::test_lambda(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec-lambda.scm\")");
-	Handle bl = eval.eval_h("bl");
+	eval->eval("(load-from-path \"tests/query/exec-lambda.scm\")");
+	Handle bl = eval->eval_h("bl");
 
-	Instantiator inst(as.get());
-	Handle result = HandleCast(inst.execute(bl));
-	Handle expect = al(SET_LINK, {
-	                   al(LAMBDA_LINK, {
-	                      an(VARIABLE_NODE, "$X"),
-	                      al(EVALUATION_LINK, {
-	                         an(PREDICATE_NODE, "P"),
-	                         an(CONCEPT_NODE, "A")})})});
+	ValuePtr result = bl->execute(as.get());
+	Handle lamb = al(LAMBDA_LINK, {
+	                  an(VARIABLE_NODE, "$X"),
+	                  al(EDGE_LINK, {
+	                     an(PREDICATE_NODE, "P"),
+	                     an(CONCEPT_NODE, "A")})});
+	ValuePtr expect = createLinkValue(ValueSeq({lamb}));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expect = " << oc_to_string(expect);
 
-	TS_ASSERT_EQUALS(expect, result);
+	TS_ASSERT(*expect == *result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -501,11 +489,10 @@ void ExecutionOutputUTest::test_lambda_get(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval.eval("(load-from-path \"tests/query/exec-lambda-get.scm\")");
-	Handle exo = eval.eval_h("exo");
+	eval->eval("(load-from-path \"tests/query/exec-lambda-get.scm\")");
+	Handle exo = eval->eval_h("exo");
 
-	Instantiator inst(as.get());
-	Handle result = HandleCast(inst.execute(exo));
+	Handle result = as->add_atom(HandleCast(exo->execute(as.get())));
 	Handle expect = al(SET_LINK, {an(NUMBER_NODE, "0.6")});
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -562,9 +549,7 @@ void ExecutionOutputUTest::test_variable_schema(void)
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
 	})});
-	Instantiator inst(as.get());
-
-	ValuePtr result = inst.execute(get_link);
+	ValuePtr result = get_link->execute(as.get());
 	TS_ASSERT_EQUALS(result, al(SET_LINK, {an(NUMBER_NODE, "42")}));
 }
 
@@ -591,9 +576,7 @@ void ExecutionOutputUTest::test_exec_variable(void)
 			al(LIST_LINK, {an(NUMBER_NODE, "6"), an(NUMBER_NODE, "7")})
 		})
 	})});
-	Instantiator inst(as.get());
-
-	ValuePtr result = inst.execute(bind_link);
+	ValuePtr result = bind_link->execute(as.get());
 
 	TS_ASSERT_EQUALS(result, al(SET_LINK, {an(NUMBER_NODE, "42")}));
 }

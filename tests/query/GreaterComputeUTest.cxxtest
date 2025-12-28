@@ -38,8 +38,7 @@ public:
         logger().set_print_to_stdout_flag(true);
 
         as = createAtomSpace();
-        eval = new SchemeEval(as);
-        eval->eval("(use-modules (opencog exec))");
+        eval = SchemeEval::get_scheme_evaluator(as);
         eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
     }
@@ -79,21 +78,21 @@ void GreaterComputeUTest::test_computation(void)
 
     Handle try_out = eval->eval_h("(threshold)");
 
-    Handle crash_b = HandleCast(try_out->execute(as.get()));
+    ValuePtr crash_b = try_out->execute(as.get());
 
     std::cout << "Answer: " << crash_b->to_string() << std::endl;
-    TS_ASSERT_EQUALS(1, getarity(crash_b));
+    TS_ASSERT_EQUALS(1, crash_b->size());
 
     // Create the expected answer, and compare
-    Handle expected = eval->eval_h(
-    "(SetLink "
-    "   (EvaluationLink "
-    "      (PredicateNode \"power\")"
+    ValuePtr expected = eval->eval_v(
+    "(LinkValue "
+    "   (Edge "
+    "      (Predicate \"power\")"
     "      (ListLink "
-    "         (ConceptNode \"Ken\")"
-    "         (NumberNode 1000))))");
+    "         (Concept \"Ken\")"
+    "         (Number 1000))))");
 
-    TS_ASSERT_EQUALS(crash_b, expected);
+    TS_ASSERT(*crash_b == *expected);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -4,7 +4,7 @@
 ; This is a modified copy of an example program. It helps verify that
 ; the example actually works.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
@@ -122,12 +122,12 @@
 	(True
 		(Put
 			(State (Anchor "sum") (Variable "$x"))
-			(Plus (Number 1) (Get (State (Anchor "sum") (Variable "$y")))))))
+			(Plus (Number 1) (Meet (State (Anchor "sum") (Variable "$y")))))))
 
-; GetLink returns a SetLink. Unwrap it to get the NumberNode.
+; MeetLink returns a UnisetValue. Unwrap it to get the NumberNode.
 (define (get-sum)
-	(cog-outgoing-atom (cog-execute!
-		(Get (State (Anchor "sum") (Variable "$x"))))
+	(cog-value-ref (cog-execute!
+		(Meet (State (Anchor "sum") (Variable "$x"))))
 		0))
 
 (*unspecified*)

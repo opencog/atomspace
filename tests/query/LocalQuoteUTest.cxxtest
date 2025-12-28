@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
 
@@ -114,8 +113,7 @@ void LocalQuoteUTest::test_put()
 		vardecl = al(TYPED_VARIABLE_LINK, {X, CT}),
 		put = al(PUT_LINK, {al(LAMBDA_LINK, {vardecl, body}), A});
 
-	Instantiator inst(_as.get());
-	Handle putted = HandleCast(inst.execute(put));
+	Handle putted = HandleCast(put->execute(_as.get()));
 	Handle expected = al(RULE_LINK, {P_A, P_A});
 
 	printf("Executing %s\n", put->to_string().c_str());

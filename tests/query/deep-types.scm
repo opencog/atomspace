@@ -9,7 +9,6 @@
 ; variable groundings must respect the variable type.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog type-utils))
 
 ; =============================================================

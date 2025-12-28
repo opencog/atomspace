@@ -68,7 +68,7 @@ void MatchLink::setUp(void)
 {
 	as = createAtomSpace();
 
-	SchemeEval* eval = new SchemeEval(as);
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
@@ -80,7 +80,6 @@ void MatchLink::setUp(void)
 	untyped_any_match = eval->apply("untyped-any-match", Handle::UNDEFINED);
 	typed_memb_link_match = eval->apply("typed-memb-link-match", Handle::UNDEFINED);
 	typed_pet_node_match = eval->apply("typed-pet-node-match", Handle::UNDEFINED);
-	delete eval;
 }
 
 /*

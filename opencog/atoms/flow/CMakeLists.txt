@@ -6,20 +6,19 @@ ADD_LIBRARY (atomflow
 	AtomSpaceOfLink.cc
 	CollectionOfLink.cc
 	ConcatenateLink.cc
+	DrainLink.cc
 	FilterLink.cc
+	GlobMatch.cc
 	IncomingOfLink.cc
 	IncrementValueLink.cc
 	JsonSplitLink.cc
 	KeysOfLink.cc
 	LinkSignatureLink.cc
 	MessagesOfLink.cc
-	NumberOfLink.cc
-	PromiseLink.cc
 	SetValueLink.cc
 	SizeOfLink.cc
 	SplitLink.cc
 	StreamValueOfLink.cc
-	StringOfLink.cc
 	TypeOfLink.cc
 	ValueOfLink.cc
 	ValueShimLink.cc
@@ -29,33 +28,33 @@ ADD_LIBRARY (atomflow
 ADD_DEPENDENCIES(atomflow opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomflow
+	signature
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
 INSTALL (TARGETS atomflow EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
 	AtomSpaceOfLink.h
 	CollectionOfLink.h
 	ConcatenateLink.h
+	DrainLink.h
 	FilterLink.h
+	GlobMatch.h
 	IncomingOfLink.h
 	IncrementValueLink.h
 	JsonSplitLink.h
 	KeysOfLink.h
 	LinkSignatureLink.h
 	MessagesOfLink.h
-	NumberOfLink.h
-	PromiseLink.h
 	SetValueLink.h
 	SizeOfLink.h
 	SplitLink.h
 	StreamValueOfLink.h
-	StringOfLink.h
 	TypeOfLink.h
 	ValueOfLink.h
 	ValueShimLink.h

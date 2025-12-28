@@ -5,19 +5,19 @@
 ;
 
 ; Populate the AtomSpace with some data
-(Evaluation
+(Edge
 	(Predicate "has-color")
 	(List
 		(Concept "apple")
 		(Concept "green")))
 
-(Evaluation
+(Edge
 	(Predicate "has-color")
 	(List
 		(Concept "banana")
 		(Concept "yellow")))
 
-(Evaluation
+(Edge
 	(Predicate "has-color")
 	(List
 		(Concept "strawberry")
@@ -28,7 +28,7 @@
 ; be used in this way. Sorry.
 (define find-fruit
 	(Meet
-		(Evaluation
+		(Edge
 			(Predicate "has-color")
 			(List
 				(Variable "$fruit")
@@ -41,12 +41,12 @@
 (define find-fruit
 	(Meet
 		(Choice
-			(Evaluation
+			(Edge
 				(Predicate "has-color")
 				(List
 					(Variable "$fruit")
 					(Concept "red")))
-			(Evaluation
+			(Edge
 				(Predicate "has-color")
 				(List
 					(Variable "$fruit")

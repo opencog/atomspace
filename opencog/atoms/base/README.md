@@ -24,8 +24,8 @@ At this time, the type validation system works closely with the
 following types, declared in the
 [`atom_types.script`](../atom_types/atom_types.script) file:
 
-* `EVALUATABLE_LINK`, `BOOLEAN_LINK`, `NUMERIC_INPUT_LINK`,
-  `NUMERIC_OUTPUT_LINK`, `TYPE_INPUT_LINK`, `TYPE_OUTPUT_LINK`
+* `EVALUATABLE_LINK`, `BOOLEAN_LINK`, `NUMERIC_INPUT_SIG`,
+  `NUMERIC_OUTPUT_SIG`, `TYPE_INPUT_SIG`, `TYPE_OUTPUT_SIG`
 
 See the `atom_types.script` file for documentation (near lines 65-107)
 and examples (in the lines that follow). These six link types cause

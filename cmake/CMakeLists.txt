@@ -11,5 +11,9 @@ INSTALL(FILES
 	OpenCogOCaml.cmake
 	OpenCogMacros.cmake
 	OpenCogFunctions.cmake
-	DESTINATION
-	${DATADIR}/cmake/)
+	DESTINATION ${DATADIR}/cmake/)
+
+# PROGRAMS marks the file ugo+x
+install(PROGRAMS
+	cython-wrapper.sh
+	DESTINATION ${DATADIR}/cmake/)

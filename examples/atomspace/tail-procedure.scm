@@ -4,7 +4,7 @@
 ; This explores several variants of loops that can be built from
 ; `DefinedProcedure`.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Place a FloatValue at a location where it can be found.
 (cog-set-value!

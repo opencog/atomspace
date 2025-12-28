@@ -3,9 +3,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (pattern
-	BindLink.cc
 	DualLink.cc
-	GetLink.cc
 	MeetLink.cc
 	PatternJit.cc
 	PatternLink.cc
@@ -23,6 +21,8 @@ ADD_DEPENDENCIES(pattern opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(pattern
 	query-engine
+	free
+	grant
 	rule
 	atomcore
 	atombase
@@ -30,13 +30,11 @@ TARGET_LINK_LIBRARIES(pattern
 )
 
 INSTALL (TARGETS pattern EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 )
 
 INSTALL (FILES
-	BindLink.h
 	DualLink.h
-	GetLink.h
 	MeetLink.h
 	PatternLink.h
 	Pattern.h

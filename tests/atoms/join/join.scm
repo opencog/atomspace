@@ -3,7 +3,7 @@
 ; JoinLink unit test.
 ; See `join-content.scm` for the data that these search for.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; --------------------------------------
 (define max-join
@@ -55,17 +55,17 @@
 
 ; --------------------------------------
 (define max-const
-	(MaximalJoin (Present (Concept "A"))))
+	(MaximalJoin (Concept "A")))
 
 (define min-const
-	(MinimalJoin (Present (Concept "A"))))
+	(MinimalJoin (Concept "A")))
 
 (define max-const-replace
 	(MaximalJoin
-		(Present (Concept "A"))
+		(Concept "A")
 		(Replacement (Concept "A") (Concept "B"))))
 
 (define min-const-replace
 	(MinimalJoin
-		(Present (Concept "A"))
+		(Concept "A")
 		(Replacement (Concept "A") (Concept "B"))))

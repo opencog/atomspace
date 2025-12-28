@@ -88,10 +88,8 @@ public:
 private:
 #endif
 
-    UUID _uuid;
     bool _read_only;
     bool _copy_on_write;
-    bool _transient;
 
     /// Base AtomSpaces wrapped by this space. Empty if top-level.
     /// This AtomSpace will behave like the set-union of the base
@@ -157,19 +155,12 @@ public:
      * with. See COW below.
      */
     AtomSpace(AtomSpace* base=nullptr, bool transient=false);
-    AtomSpace(AtomSpacePtr&);
+    AtomSpace(const AtomSpacePtr&);
     AtomSpace(const HandleSeq&);
     ~AtomSpace();
 
     bool is_node(void) const { return true; }
     bool is_link(void) const { return true; }
-    UUID get_uuid(void) const { return _uuid; }
-
-    /// Transient atomspaces are lighter-weight, faster, but are missing
-    /// some features. They are used during pattern matching, to hold
-    /// temporary results. The are always copy-on-write spaces.
-    void ready_transient(AtomSpace* parent);
-    void clear_transient();
 
     /// Read-only (RO) atomspaces provide protection against update of the
     /// AtomSpace contents. Atoms in a read-only atomspace cannot be
@@ -217,7 +208,6 @@ public:
     virtual size_t size() const { return get_arity(); }
     virtual const HandleSeq& getOutgoingSet() const { return _outgoing; }
     virtual Handle getOutgoingAtom(Arity) const;
-    virtual void setAtomSpace(AtomSpace *);
 
     const std::vector<AtomSpacePtr>& getEnviron() const { return _environ; }
 
@@ -441,11 +431,8 @@ public:
     inline Handle get_node(Type t, std::string&& name) const {
         return lookupHandle(createNode(t, std::move(name)));
     }
-    inline Handle xget_handle(Type t, std::string str) const {
-        return get_node(t, std::move(str));
-    }
-    inline Handle get_handle(Type t, std::string str) const {
-        return get_node(t, std::move(str));
+    inline Handle xget_handle(Type t, std::string name) const {
+        return get_node(t, std::move(name));
     }
 
     /**
@@ -462,9 +449,6 @@ public:
         return lookupHandle(createLink(std::move(outgoing), t));
     }
     inline Handle xget_handle(Type t, HandleSeq outgoing) const {
-        return get_link(t, std::move(outgoing));
-    }
-    inline Handle get_handle(Type t, HandleSeq outgoing) const {
         return get_link(t, std::move(outgoing));
     }
 

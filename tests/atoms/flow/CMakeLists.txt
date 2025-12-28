@@ -1,8 +1,3 @@
-LINK_LIBRARIES(
-	atomflow
-	atomcore
-	atomspace
-)
 
 ADD_CXXTEST(ValueOfUTest)
 ADD_CXXTEST(StreamValueOfUTest)
@@ -22,6 +17,8 @@ IF (HAVE_GUILE)
 
 	ADD_GUILE_TEST(IncrementValueTest increment-value-test.scm)
 	ADD_GUILE_TEST(FilterGlobTest filter-glob-test.scm)
+	ADD_GUILE_TEST(FilterGreedyTest filter-greedy-test.scm)
+	ADD_GUILE_TEST(FilterMoreGreedyTest filter-more-greedy-test.scm)
 	ADD_GUILE_TEST(FilterValueTest filter-value-test.scm)
 	ADD_GUILE_TEST(FilterFloatTest filter-float-test.scm)
 	ADD_GUILE_TEST(FilterRuleTest filter-rule-test.scm)
@@ -30,6 +27,7 @@ IF (HAVE_GUILE)
 	ADD_GUILE_TEST(StringOfTest string-of-test.scm)
 	ADD_GUILE_TEST(FilterStringsTest filter-strings-test.scm)
 	ADD_GUILE_TEST(ConcatenateTest concatenate-test.scm)
+	ADD_GUILE_TEST(DrainTest drain-test.scm)
 	ADD_GUILE_TEST(SplitTest split-test.scm)
 	ADD_GUILE_TEST(JsonSplitTest json-split-test.scm)
 ENDIF (HAVE_GUILE)

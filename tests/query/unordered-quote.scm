@@ -13,7 +13,7 @@
 ; The stuff in here looks kind of crazy, but all of it is needed
 ; to provoke the bug. Simplifying further makes the bug go away.
 
-(use-modules (opencog) (opencog exec) (opencog logger))
+(use-modules (opencog) (opencog logger))
 ; (cog-logger-set-level! "fine")
 ; (cog-logger-set-stdout! #t)
 ; (cog-logger-set-timestamp! #f)
@@ -22,8 +22,7 @@
 (ListLink
 	(LambdaLink (VariableList (VariableNode "$W"))
 		(PresentLink
-			(InheritanceLink (VariableNode "$W") (Concept "A"))
-			(InheritanceLink (Concept "A") (Concept "B"))))
+			(InheritanceLink (VariableNode "$W") (Concept "A"))))
 	(NumberNode "5.000000"))
 
 ; This is never matched, but needs to be present to trigger
@@ -43,20 +42,22 @@
 
 		; Matches the target graph
 		(ListLink (QuoteLink
-			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
-				(PresentLink
-					(UnquoteLink (VariableNode "$cnj-bodies-1"))
-					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
+			(LambdaLink
+				(UnquoteLink (VariableNode "$f-vardecl"))
+				(UnquoteLink
+					(PresentLink
+						(VariableNode "$cnj-bodies-0")))))
 			(VariableNode "$ms-0"))
 
 		; Also matches the target graph
 		(ListLink (QuoteLink
-			(LambdaLink (UnquoteLink (VariableNode "$f-vardecl"))
-				(PresentLink
-					(UnquoteLink (VariableNode "$cnj-bodies-1"))
-					(UnquoteLink (VariableNode "$cnj-bodies-0")))))
+			(LambdaLink
+				(UnquoteLink (VariableNode "$f-vardecl"))
+				(UnquoteLink
+					(PresentLink
+						(VariableNode "$cnj-bodies-1")))))
 			(VariableNode "$ms-1")))))
-	))
+)
 
 ; Run the query.
 ; (cog-execute! query)

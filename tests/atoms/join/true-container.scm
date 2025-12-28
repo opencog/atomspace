@@ -3,7 +3,7 @@
 ; TrueJoinUTest
 ; make sure constraints on the top type works.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Data
 (Member (Concept "A") (Concept "S"))

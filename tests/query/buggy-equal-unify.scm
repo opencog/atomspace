@@ -4,7 +4,7 @@
 ; Unification of variables was mis-handled.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Member
 	(Evaluation

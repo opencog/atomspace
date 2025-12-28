@@ -22,8 +22,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/FreeLink.h>
-#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/free/FreeLink.h>
+#include <opencog/atoms/scope/VariableList.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -41,12 +41,11 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
+		eval = SchemeEval::get_scheme_evaluator(as);
 	}
 
 	~FreeLinkUTest()
 	{
-		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
@@ -179,7 +178,7 @@ void FreeLinkUTest::test_binding(void)
 }
 
 /*
- * FreeLink free-variable extraction test.  Test GetLink.
+ * FreeLink free-variable extraction test.  Test MeetLink.
  */
 void FreeLinkUTest::test_getlink(void)
 {
@@ -190,7 +189,7 @@ void FreeLinkUTest::test_getlink(void)
 	Handle vz = eval->eval_h("(VariableNode \"$z\")");
 	Handle unq = eval->eval_h(
 		"(OrderedLink (VariableNode \"$x\")"
-		"	(GetLink (VariableList (VariableNode \"$ya\")"
+		"	(MeetLink (VariableList (VariableNode \"$ya\")"
 		"			(VariableNode \"$yb\")"
 		"			(VariableNode \"$yc\")"
 		"			(VariableNode \"$yd\"))"
@@ -205,10 +204,10 @@ void FreeLinkUTest::test_getlink(void)
 	fv.find_variables(unq);
 	HandleSeq vars = fv.varseq;
 
-	printf("expecting get $x: %s\n", vars[0]->to_short_string().c_str());
-	printf("expecting get $z: %s\n", vars[1]->to_short_string().c_str());
+	printf("expecting meet $x: %s\n", vars[0]->to_short_string().c_str());
+	printf("expecting meet $z: %s\n", vars[1]->to_short_string().c_str());
 
-	// Expecting only two variables $x and $z, because $y is quoted.
+	// Expecting only two variables $x and $z, because $y variables are bound.
 	// Expecting the order to be preserved: i.e. $x before $z
 	TS_ASSERT_EQUALS(vars.size(), 2);
 	TS_ASSERT_EQUALS(vars[0], vx);

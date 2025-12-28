@@ -42,8 +42,7 @@ first).
 
 * [`basic.scm`](basic.scm)                   -- How to start the guile shell.
 * [`knowledge.scm`](knowledge.scm)           -- Representing knowledge.
-* [`bindlink.scm`](bindlink.scm)             -- Queries and inference with the pattern matcher.
-* [`get-put.scm`](get-put.scm)               -- The two halves of a query: Get and Put.
+* [`querylink.scm`](bindlink.scm)            -- Queries and inference with the pattern matcher.
 * [`assert-retract.scm`](assert-retract.scm) -- Asserting facts in the AtomSpace.
 * [`state.scm`](state.scm)                   -- Maintaining unique state.
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.
@@ -55,6 +54,9 @@ first).
 * [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically computing FloatValues.
 * [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
 * [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
+* [`flow-flat.scm`](flow-flat.scm)           -- Deserializing lists into streams.
+* [`flow-drain.scm`](flow-drain.scm)         -- Run a stream until it is empty.
+* [`flow-sorted.scm`](flow-sorted.scm)       -- Sort items in a stream.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.

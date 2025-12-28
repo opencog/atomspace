@@ -107,7 +107,6 @@ class SatisfyingSet :
 
 		ValuePtr wrap_result(const GroundingMap &var_soln);
 		size_t _num_results;
-		std::map<GroundingMap, ValueSet> _groups;
 
 	public:
 		SatisfyingSet(AtomSpace* as, const ContainerValuePtr& cvp) :
@@ -137,9 +136,6 @@ class SatisfyingSet :
 		// groundings.
 		virtual bool propose_grounding(const GroundingMap &var_soln,
 		                               const GroundingMap &term_soln);
-		virtual bool propose_grouping(const GroundingMap &var_soln,
-		                              const GroundingMap &term_soln,
-		                              const GroundingMap &group);
 
 		virtual bool start_search(void);
 		virtual bool search_finished(bool);

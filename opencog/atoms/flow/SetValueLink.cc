@@ -49,6 +49,7 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 /// When executed, this will execute the third argument to obtain
 /// a Value, and then set that Value at the indicated key on the
 /// first argument. The computed value is returned.
+/// The SetValueOn link returns the Atom, not the Value.
 ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 {
 	// Simple case: just set the Value. Obtain it, as needed.
@@ -61,6 +62,9 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 			pap = _outgoing[2];
 
 		as->set_value(_outgoing[0], _outgoing[1], pap);
+
+		if (SET_VALUE_ON_LINK == get_type())
+			return _outgoing[0];
 		return pap;
 	}
 
@@ -76,12 +80,15 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	exo = as->add_atom(exo);
 
 	ValuePtr fsp;
-	if (args->is_type(NUMERIC_OUTPUT_LINK))
+	if (args->is_type(NUMERIC_OUTPUT_SIG))
 		fsp = createFormulaStream(exo);
 	else
 		fsp = createFutureStream(exo);
 
 	as->set_value(_outgoing[0], _outgoing[1], fsp);
+
+	if (SET_VALUE_ON_LINK == get_type())
+		return _outgoing[0];
 	return fsp;
 }
 

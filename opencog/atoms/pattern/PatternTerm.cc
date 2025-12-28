@@ -32,6 +32,7 @@ PatternTerm::PatternTerm(void)
 	  _has_evaluatable(false),
 	  _is_virtual(false),
 	  _is_identical(false),
+	  _is_exclusive(false),
 	  _has_any_unordered_link(false),
 	  _has_unordered_below(false),
 	  _is_literal(false),
@@ -39,8 +40,7 @@ PatternTerm::PatternTerm(void)
 	  _is_absent(false),
 	  _is_choice(false),
 	  _has_choice(false),
-	  _is_always(false),
-	  _is_grouping(false)
+	  _is_always(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
@@ -60,6 +60,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _has_evaluatable(false),
 	  _is_virtual(false),
 	  _is_identical(false),
+	  _is_exclusive(false),
 	  _has_any_unordered_link(false),
 	  _has_unordered_below(false),
 	  _is_literal(false),
@@ -67,8 +68,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	  _is_absent(false),
 	  _is_choice(false),
 	  _has_choice(false),
-	  _is_always(false),
-	  _is_grouping(false)
+	  _is_always(false)
 {
 	Type t = h->get_type();
 
@@ -141,7 +141,7 @@ bool PatternTerm::isDescendant(const PatternTermPtr& ptm) const
  * Equality operator.  Both the content must match, and the path
  * taken to get to the content must match.
  */
-bool PatternTerm::operator==(const PatternTerm& other)
+bool PatternTerm::operator==(const PatternTerm& other) const
 {
 	if (_handle != other._handle) return false;
 	if (_parent != other._parent) return false;
@@ -272,6 +272,14 @@ void PatternTerm::markIdentical()
 	_is_identical = true;
 }
 
+void PatternTerm::markExclusive()
+{
+	// If quoted, it cannot be evaluated.
+	if (isQuoted()) return;
+
+	_is_exclusive = true;
+}
+
 // ==============================================================
 
 void PatternTerm::addUnorderedBelow()
@@ -367,16 +375,6 @@ void PatternTerm::markAlways()
 
 // ==============================================================
 
-void PatternTerm::markGrouping()
-{
-	// If its quoted, it has no effect.
-	if (isQuoted()) return;
-
-	_is_grouping = true;
-}
-
-// ==============================================================
-
 std::string PatternTerm::to_short_string() const { return to_string(": "); }
 
 std::string PatternTerm::to_short_string(const std::string& sep) const
@@ -413,7 +411,6 @@ std::string PatternTerm::flag_string() const
 	if (_is_choice) str += "C: ";
 	if (_has_choice) str += "HC: ";
 	if (_is_always) str += "ALW: ";
-	if (_is_grouping) str += "GRP: ";
 	str += _handle->id_to_string();
 	return str;
 }

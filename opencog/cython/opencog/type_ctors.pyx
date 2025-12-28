@@ -1,0 +1,231 @@
+#
+# Helper functions to add Atoms to the current AtomSpace for this thread.
+#
+from libcpp.string cimport string
+from libcpp.vector cimport vector
+
+# Internal C++ declarations (not exposed in atomspace.pxd)
+cdef extern from "opencog/util/exceptions.h" namespace "opencog":
+    cdef cppclass cPythonException "opencog::PythonException":
+        const string& get_python_exception_type() except +
+        const char* get_message() except +
+
+cdef extern from "opencog/eval/FrameStack.h" namespace "opencog":
+    cValuePtr get_frame() nogil
+    void push_frame() nogil
+    void pop_frame() nogil
+    void set_frame(cHandle atomspace) nogil
+
+cdef extern from "opencog/cython/opencog/TypeCtors.h" namespace "opencog":
+    cHandle c_add_node "opencog::add_node" (Type t, const string s) nogil except +
+    cHandle c_add_link "opencog::add_link" (Type t, const vector[cHandle]) nogil except +
+
+from contextlib import contextmanager
+from contextvars import ContextVar
+import threading
+import contextvars
+
+# ========================================================================
+# Helper functions to add Atoms to the current AtomSpace for this thread.
+
+# Make sure the current thread has some reasonable AtomSpace
+# If TLS came up empty-handed, get the context from python
+# and then tell c++ about it. FYI: the AtomSpace returned by
+# `get_frame()` should be identical to what python `atomspace`
+# is pointing at. The two should be in perfect sync, and since
+# we think our code is bug-free, we don't actually check. This
+# saves a tad of cpu-time.
+cdef inline void _current_atomspace():
+    cdef cValuePtr context = get_frame()
+    if context.get() == NULL:
+        atomspace = _atomspace_context.get()
+        set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+
+
+def add_link(Type t, outgoing):
+    _current_atomspace()
+
+    # Unwrap double-wrapped lists. The type constructors create these.
+    if 1 == len(outgoing) and isinstance(outgoing[0], list):
+        outgoing = outgoing[0]
+
+    # Use a temporary cpp vector
+    cdef vector[cHandle] handle_vector
+    for atom in outgoing:
+        if isinstance(atom, Atom):
+            handle_vector.push_back(<cHandle&>(<Atom>atom).shared_ptr)
+        else:
+            raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
+
+    cdef cHandle result
+    result = c_add_link(t, handle_vector)
+    if result == result.UNDEFINED: return None
+    return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
+
+
+def add_node(Type t, atom_name):
+    """
+    Add Node to the atomspace from the current context
+    """
+    _current_atomspace()
+
+    # NumberNodes can take lists of numbers.
+    if type(atom_name) is list :
+        atom_name = ' '.join(map(str, atom_name))
+
+    # NumberNodes can be single numbers.
+    if type(atom_name) is int :
+        atom_name = str(atom_name)
+
+    if type(atom_name) is float :
+        atom_name = str(atom_name)
+
+    # Valid strings include those coming from e.g. iso8859-NN
+    # filenames, which break when shoved through UTF-8 because
+    # they contain bytes that cannot be converted to UTF-8 using
+    # default encoding tables. Such strings typically come from
+    # Microsoft, which had a habit of spewing screwball characters
+    # into random texts. So, rather than catching python's exception,
+    # just escape these bytes. The result is a valid UTF-8 string
+    # with the screwy byte properly encoded.
+    cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
+    cdef cHandle result = c_add_node(t, name)
+
+    if result == result.UNDEFINED: return None
+    return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
+
+# ========================================================================
+# AtomSpace management for above.
+#
+# The code here is slightly non-obvious, so an explanation follows.
+# When working with an AtomSpace, it is convenient to have all
+# operations happen for "this AtomSpace", where "this" is the current
+# AtomSpace for this thread. When working cross-language, i.e. with
+# scheme code (GroundedPredicate, etc.) and with external c++ libs,
+# all users need to agree about what "this" AtomSpace is, for this
+# thread. This is solved with c++ code; the get_frame() and set_frame()
+# calls. The c++ get_frame() call is the final authority for what the
+# correct AtomSpace is for this thread. And it all works great!
+#
+# ... except when new threads are created. We want the new threads to
+# get the same AtomSpace as this thread. For scheme, fluids work great,
+# and do exactly that.  But `get_frame()` is implemented in c++, and
+# uses TLS to hold the current AtomSpace. There is no concept of a fluid
+# in c++. For that matter, there is no concept of a fluid in python,
+# either. But we really really really want child threads to use the
+# AtomSpace of the parent thread, and so we hack that up here.
+#
+# Here's how it works. The c++ get_frame() is the authority for what
+# the AtomSpace is for the current thread. That's perfect, unless a
+# brand-new thread has been created, and TLS delivers us a null pointer.
+# For this case, we fall back to the python context-var to find out
+# what the AtomSpace should have been for this thread. We promptly tell
+# c++ what it is, so that the c++ code can remain the master authority
+# on this topic. And bingo! it just all works great!
+#
+# ... except that python contextvars are for python asyncio green
+# threads, instead of OS kernel threads. That is, python contextvars
+# are fluids, but only fluids for green threads. Which makes them kind
+# of useless. So to get around that limitation, we monkey-patch python
+# threads. Perhaps a tad stinky, but I don't see any other solution.
+
+# ContextVar to maintain AtomSpace across Python threads.
+_atomspace_context: ContextVar = ContextVar('atomspace', default=None)
+cdef cValuePtr _init_context = get_frame()
+if _init_context.get() != NULL:
+    _atomspace_context.set(AtomSpace_factoid(handle_cast(_init_context)))
+
+# Monkey-patch threading.Thread to inherit context variables.
+# Python's ContextVar doesn't automatically copy to child threads,
+# so we patch Thread to capture and restore the parent's context.
+#
+# The goal here is to emulate scheme's fluids, so that new python
+# threads automatically inherit the current AtomSpace from the parent
+# thread. The monkey-patch here avoids endless hackery in user-space
+# code to get and set AtomSpaces when toggling around multi-threaded
+# processing. Basically, this just makes things work "as expected":
+# whatever AtomSpace is being used "right now" is the one that the
+# child thread will use, also.
+_original_thread_init = threading.Thread.__init__
+_original_thread_run = threading.Thread.run
+
+def _patched_thread_init(self, *args, **kwargs):
+    self._parent_context = contextvars.copy_context()
+    _original_thread_init(self, *args, **kwargs)
+
+def _patched_thread_run(self):
+    if hasattr(self, '_parent_context'):
+        self._parent_context.run(_original_thread_run, self)
+    else:
+        _original_thread_run(self)
+
+threading.Thread.__init__ = _patched_thread_init
+threading.Thread.run = _patched_thread_run
+
+# -----------------------
+
+def set_thread_atomspace(atomspace):
+    """
+    Set the AtomSpace used in the current thread.
+
+    Args:
+        atomspace: An AtomSpace instance to use for this thread.
+
+    Raises:
+        TypeError: If atomspace is None or not an AtomSpace instance.
+    """
+    if atomspace is None:
+        raise TypeError("atomspace cannot be None")
+    if not isinstance(atomspace, AtomSpace):
+        raise TypeError(
+            f"atomspace must be an AtomSpace, not {type(atomspace).__name__}")
+    set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+    _atomspace_context.set(atomspace)
+
+
+def push_thread_atomspace():
+    """
+    Create a temporary scratch-space AtomSpace for the current thread.
+    Everything in the current AtomSpace will be visible in this
+    scratch space. Any changes will be made ONLY to the temporary;
+    those changes will be discarded when the temporary is popped.
+
+    If you need to make some changes permanent, you can either copy
+    those Atoms into whatever desired AtomSpace you wish. Alternately,
+    disable the copy-on-write (COW) flag on *this* AtomSpace; this
+    will cause changes to pass through to the base AtomSpace.
+
+    Use pop_thread_atomspace() to pop.
+    """
+    push_frame()
+    return get_thread_atomspace()
+
+
+def get_thread_atomspace():
+    """
+    Get the AtomSpace being used in this thread.
+    """
+    cdef cValuePtr context = get_frame()
+    if context.get() != NULL:
+        return AtomSpace_factoid(handle_cast(context))
+
+    # TLS is empty; the Python contextvar will hold the correct
+    # AtomSpace for this thread.
+    atomspace = _atomspace_context.get()
+    if atomspace is not None:
+        # Sync TLS with contextvar
+        set_frame(handle_cast((<AtomSpace>atomspace).shared_ptr))
+        return atomspace
+
+    # No atomspace anywhere
+    return None
+
+
+def pop_thread_atomspace():
+    """
+    Pop the temporary scratch-space AtomSpace from the stack.
+
+    Ths assumes the stack was previously pushed with
+    push_thread_atomspace().
+    """
+    pop_frame()

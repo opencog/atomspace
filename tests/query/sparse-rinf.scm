@@ -6,7 +6,6 @@
 ; an inf loop detector.
 ;
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; This defines an broken esterification reaction.
 (define ester

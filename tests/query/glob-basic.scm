@@ -2,7 +2,7 @@
 ; glob-basic.scm
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;;; Populate the atomspace with some "sentences".
 (ListLink

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_FUNCTION_LINK_H
 #define _OPENCOG_FUNCTION_LINK_H
 
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/free/FreeLink.h>
 
 namespace opencog
 {

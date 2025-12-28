@@ -146,27 +146,22 @@ public:
     {
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion()");
 
-
-        // Tell the python evaluator to create its singleton instance.
-        PythonEval::create_singleton_instance();
-
-        // Delete the singleton instance of the PythonEval.
-        PythonEval::delete_singleton_instance();
-
-        PythonEval::create_singleton_instance();
-
-        // Delete the singleton instance of the PythonEval.
-        PythonEval::delete_singleton_instance();
-
-
         // Initialize Python.
         global_python_initialize();
 
-        // Repeat the process
-        PythonEval::create_singleton_instance();
+        // Test evaluator pool creation
+        AtomSpacePtr as1 = createAtomSpace();
+        PythonEval* evaluator1 = PythonEval::get_python_evaluator(as1);
+        TS_ASSERT(evaluator1 != nullptr);
 
-        // Delete the singleton instance of the PythonEval.
-        PythonEval::delete_singleton_instance();
+        // Get evaluator for different atomspace
+        AtomSpacePtr as2 = createAtomSpace();
+        PythonEval* evaluator2 = PythonEval::get_python_evaluator(as2);
+        TS_ASSERT(evaluator2 != nullptr);
+
+        // Getting evaluator for same atomspace should return same instance
+        PythonEval* evaluator1_again = PythonEval::get_python_evaluator(as1);
+        TS_ASSERT(evaluator1 == evaluator1_again);
 
         logger().debug("[PythonEvalUTest] testPythonEvalSingletonCreationDeletion() DONE");
     }
@@ -174,8 +169,8 @@ public:
     void testPythonEvalEvalExpr()
     {
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr()");
-        PythonEval::create_singleton_instance();
-        PythonEval* evaluator = &PythonEval::instance();
+        AtomSpacePtr as = createAtomSpace();
+        PythonEval* evaluator = PythonEval::get_python_evaluator(as);
 
         // Check that our atom space global is visible and can add a node.
         evaluator->clear_pending();
@@ -184,15 +179,13 @@ public:
         evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
         evaluator->eval_expr("print ('Total atoms = ', ATOMSPACE.size(), '\\n')");
 
-        // Delete the singleton instance.
-        PythonEval::delete_singleton_instance();
         logger().debug("[PythonEvalUTest] testPythonEvalEvalExpr() DONE");
     }
 
     void testApplyAndApplyTV()
     {
-        PythonEval::create_singleton_instance();
-        PythonEval* python = &PythonEval::instance();
+        AtomSpacePtr as = createAtomSpace();
+        PythonEval* python = PythonEval::get_python_evaluator(as);
 
         // No. Throwing messes up the cogserver.  Just report this as
         // an ordinary syntax error.
@@ -202,7 +195,6 @@ public:
         // Define python functions for use by scheme.
         std::string eval_res = python->eval(
             "from opencog.atomspace import Atom\n"
-            "from opencog.type_constructors import TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    ATOMSPACE = atom1.atomspace\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
@@ -212,11 +204,9 @@ public:
         std::cout << "eval_res:" << std::endl << eval_res << std::endl;
 
 #ifdef HAVE_GUILE
-        AtomSpacePtr as = createAtomSpace();
         // Create a scheme evaluator to trigger cog-execute.
-        SchemeEval* scheme = new SchemeEval(as);
+        SchemeEval* scheme = SchemeEval::get_scheme_evaluator(as);
 
-        scheme->eval("(use-modules (opencog exec))");
 
         // Test execute -> PythonEval::apply
         scheme->eval_h(
@@ -238,8 +228,8 @@ public:
 
     void testCodeBlockWithNewline()
     {
-        PythonEval::create_singleton_instance();
-        PythonEval* python = &PythonEval::instance();
+        AtomSpacePtr as = createAtomSpace();
+        PythonEval* python = PythonEval::get_python_evaluator(as);
 
         // Define python functions with newline within the code block
         string result = python->eval(
@@ -260,10 +250,10 @@ public:
 
     void testCodeBlockWithNewlineThreaded()
     {
-        PythonEval::create_singleton_instance();
-        PythonEval* python = &PythonEval::instance();
+        AtomSpacePtr as = createAtomSpace();
+        PythonEval* python = PythonEval::get_python_evaluator(as);
         std::vector<std::thread> threads;
-        std::string s = 
+        std::string s =
                 "tmp = 0\n"
                 "def fun(x):\n"
                 "    y = x + 1\n"

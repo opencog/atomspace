@@ -6,14 +6,13 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 ; Raw data to populate the search space
 ;
 ; TRC rower Ken Gates set a world record in 2015--
 ; an under-3-minute 1K time at the Erg Rodeo
 ; a week before a 1st place finish at the CRASH-B's
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "ergs")
 	(ListLink
 		(ConceptNode "Ken")
@@ -21,7 +20,7 @@
 	)
 )
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "ergs")
 	(ListLink
 		(ConceptNode "Peter")
@@ -29,7 +28,7 @@
 	)
 )
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "ergs")
 	(ListLink
 		(ConceptNode "Linas")
@@ -37,7 +36,7 @@
 	)
 )
 
-(EvaluationLink
+(EdgeLink
 	(PredicateNode "ergs")
 	(ListLink
 		(ConceptNode "Joe Novice")
@@ -54,7 +53,7 @@
 ; It associates person with the cube of the quantity.
 ; (Announces who is attending CRASH-B's this year.)
 (define (crash-b who quant)
-	(EvaluationLink
+	(EdgeLink
 		(PredicateNode "power")
 		(ListLink
 			who
@@ -64,14 +63,13 @@
 )
 
 (define (threshold)
-	(CollectionOf
 	(QueryLink
 		(VariableList
 			(VariableNode "$who")
 			(VariableNode "$how_much")
 		)
 		(AndLink
-			(EvaluationLink
+			(EdgeLink
 				(PredicateNode "ergs")
 				(ListLink
 					(VariableNode "$who")
@@ -107,6 +105,5 @@
 				(VariableNode "$how_much")
 			)
 		)
-	)
 	)
 )

@@ -67,6 +67,7 @@ public:
 	virtual ~Frame();
 
 	bool is_atom(void) const { return true; }
+	virtual void setAtomSpace(AtomSpace *);
 };
 
 typedef std::shared_ptr<Frame> FramePtr;

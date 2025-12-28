@@ -108,7 +108,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 void BasicSCMUTest::setUp(void)
 {
 	as = createAtomSpace();
-	eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 
 	// Proper UTF-8 behaviour requires the right locale.
 	// Do not use LC_ALL, as otherwise the printing of the numeric
@@ -122,8 +122,6 @@ void BasicSCMUTest::setUp(void)
 
 void BasicSCMUTest::tearDown(void)
 {
-	delete eval;
-	eval = NULL;
 }
 
 // ============================================================
@@ -205,7 +203,7 @@ void BasicSCMUTest::test_single_atom(void)
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval->eval("(add-to-load-path \"../..\")");
 
-	std::string rs = eval->eval("(load-from-path \"tests/scm/typedefs.scm\")");
+	std::string rs = eval->eval("(load-from-path \"tests/scm/basic-scm-typedefs.scm\")");
 	eval_err = eval->eval_error();
 	if (eval_err)
 		printf("Ohh noooo! %s\n", rs.c_str());
@@ -251,11 +249,6 @@ void BasicSCMUTest::test_extract(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to extract atom AAA!", !eval_err);
 
-	eval->eval("(cog-atom? l)");
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to evaluate scheme predicate!", !eval_err);
-
 	Handle li = eval->eval_h("(cog-atom l)");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
@@ -278,7 +271,7 @@ void BasicSCMUTest::test_clear(void)
 	for (int i = 0; i < n; ++i)
 		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
 
-	std::string rs = eval->eval("(clear)");
+	std::string rs = eval->eval("(cog-atomspace-clear)");
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error

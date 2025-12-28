@@ -25,7 +25,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/scope/ScopeLink.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -42,16 +42,16 @@ class HashUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _asp;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 
 public:
-	HashUTest() : _asp(createAtomSpace()), _eval(_asp)
+	HashUTest() : _asp(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_asp))
 	{
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
-		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval->eval("(load-from-path \"tests/atoms/hash.scm\")");
 	}
 
 	void setUp() {}
@@ -70,16 +70,19 @@ public:
 	void test_times_plus_compute_hash();
 
 	// Test that unordered links have the same hash regardless of the
-	// order of their outgoing set
+	// order of their outgoing set. These do not have their own ctors,
+	// and so are more easily messed up by uncareful edits to
+	// atom_types.script.
 	void test_equallink();
+	void test_andor();
 };
 
 void HashUTest::test_scope_compute_hash_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle bl1 = _eval.eval_h("bl-1"),
-		bl2 = _eval.eval_h("bl-2");
+	Handle bl1 = _eval->eval_h("bl-1"),
+		bl2 = _eval->eval_h("bl-2");
 
 	TS_ASSERT_DIFFERS(bl1.value(), bl2.value());
 
@@ -90,8 +93,8 @@ void HashUTest::test_scope_compute_hash_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle gl1 = _eval.eval_h("gl-1"),
-		gl2 = _eval.eval_h("gl-2");
+	Handle gl1 = _eval->eval_h("gl-1"),
+		gl2 = _eval->eval_h("gl-2");
 
 	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
 
@@ -101,16 +104,16 @@ void HashUTest::test_scope_compute_hash_2()
 void HashUTest::test_scope_compute_hash_3(){
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle h1 = _eval.eval_h("ll-1");
-	Handle h2 = _eval.eval_h("ll-2");
+	Handle h1 = _eval->eval_h("ll-1");
+	Handle h2 = _eval->eval_h("ll-2");
 	TS_ASSERT_DIFFERS(h1.value(), h2.value());
 
-	h1 = _eval.eval_h("ll-3");
-	h2 = _eval.eval_h("ll-4");
+	h1 = _eval->eval_h("ll-3");
+	h2 = _eval->eval_h("ll-4");
 	TS_ASSERT_DIFFERS(h1.value(), h2.value());
 
-	h1 = _eval.eval_h("ll-5");
-	h2 = _eval.eval_h("ll-6");
+	h1 = _eval->eval_h("ll-5");
+	h2 = _eval->eval_h("ll-6");
 	TS_ASSERT_DIFFERS(h1.value(), h2.value());
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -120,8 +123,8 @@ void HashUTest::test_scope_compute_hash_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle bl3 = _eval.eval_h("bl-3"),
-		bl4 = _eval.eval_h("bl-4");
+	Handle bl3 = _eval->eval_h("bl-3"),
+		bl4 = _eval->eval_h("bl-4");
 
 	TS_ASSERT_DIFFERS(bl3.value(), bl4.value());
 
@@ -132,8 +135,8 @@ void HashUTest::test_scope_compute_hash_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle bl5 = _eval.eval_h("bl-5"),
-		bl6 = _eval.eval_h("bl-6");
+	Handle bl5 = _eval->eval_h("bl-5"),
+		bl6 = _eval->eval_h("bl-6");
 
 	TS_ASSERT_DIFFERS(bl5.value(), bl6.value());
 
@@ -144,8 +147,8 @@ void HashUTest::test_sequential_compute_hash()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle sal = _eval.eval_h("sal"),
-		sol = _eval.eval_h("sol");
+	Handle sal = _eval->eval_h("sal"),
+		sol = _eval->eval_h("sol");
 
 	TS_ASSERT_DIFFERS(sal.value(), sol.value());
 
@@ -156,8 +159,8 @@ void HashUTest::test_times_plus_compute_hash()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle tl = _eval.eval_h("tl"),
-		pl = _eval.eval_h("pl");
+	Handle tl = _eval->eval_h("tl"),
+		pl = _eval->eval_h("pl");
 
 	TS_ASSERT_DIFFERS(tl.value(), pl.value());
 
@@ -169,10 +172,47 @@ HashUTest::test_equallink()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// This test fails, if someone monkeys with the atom_types.script
+	// file and gets it wrong.
 	Handle X = an(VARIABLE_NODE, "$X");
 	Handle Y = an(VARIABLE_NODE, "$Y");
 	Handle EqXY = al(EQUAL_LINK, X, Y);
 	Handle EqYX = al(EQUAL_LINK, Y, X);
 
 	TS_ASSERT_EQUALS(EqXY.value(), EqYX.value());
+
+	// ----------------------------
+	// Should be symmetric, as well.
+	Handle IdXY = al(IDENTICAL_LINK, X, Y);
+	Handle IdYX = al(IDENTICAL_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(IdXY.value(), IdYX.value());
+
+	// ----------------------------
+	Handle EqvXY = al(EQUIVALENCE_LINK, X, Y);
+	Handle EqvYX = al(EQUIVALENCE_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(EqvXY.value(), EqvYX.value());
+}
+
+void
+HashUTest::test_andor()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// This test fails, if someone monkeys with the atom_types.script
+	// file and gets it wrong.
+	Handle X = an(VARIABLE_NODE, "$X");
+	Handle Y = an(VARIABLE_NODE, "$Y");
+	Handle AndXY = al(AND_LINK, X, Y);
+	Handle AndYX = al(AND_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(AndXY.value(), AndYX.value());
+
+	// ----------------------------
+	// Should be symmetric, as well.
+	Handle OrXY = al(OR_LINK, X, Y);
+	Handle OrYX = al(OR_LINK, Y, X);
+
+	TS_ASSERT_EQUALS(OrXY.value(), OrYX.value());
 }

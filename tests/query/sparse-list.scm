@@ -5,7 +5,6 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog exec))
 
 (define est
 	(MeetLink

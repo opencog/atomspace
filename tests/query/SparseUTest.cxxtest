@@ -15,6 +15,7 @@ class SparseUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpacePtr as;
+		SchemeEval* eval;
 
 	public:
 
@@ -65,10 +66,9 @@ class SparseUTest :  public CxxTest::TestSuite
 void SparseUTest::setUp(void)
 {
 	as = createAtomSpace();
-	SchemeEval* eval = new SchemeEval(as);
+	eval = SchemeEval::get_scheme_evaluator(as);
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
-	delete eval;
 }
 
 #define getarity(hand) hand->get_arity()
@@ -80,7 +80,6 @@ void SparseUTest::test_glob(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/sparse.scm\")");
 	Handle result;
 
@@ -110,7 +109,6 @@ void SparseUTest::test_palin(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/sparse.scm\")");
 	Handle result;
 
@@ -131,7 +129,6 @@ void SparseUTest::test_palin_dab(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/sparse.scm\")");
 	Handle result;
 
@@ -152,7 +149,6 @@ void SparseUTest::test_glob_ord(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/sparse-list.scm\")");
 	Handle result;
 
@@ -173,7 +169,6 @@ void SparseUTest::test_palin_ord(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/sparse-list.scm\")");
 	Handle result;
 
@@ -194,7 +189,6 @@ void SparseUTest::test_chem_bad(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/sparse-react.scm\")");
 	Handle result;
@@ -216,7 +210,6 @@ void SparseUTest::test_chem_good(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/sparse-react.scm\")");
 	Handle result;
@@ -238,7 +231,6 @@ void SparseUTest::test_chem_inf(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/sparse-rinf.scm\")");
 	Handle result;
@@ -260,7 +252,6 @@ void SparseUTest::test_chem_order(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	SchemeEval* eval = new SchemeEval(as);
 	eval->eval("(load-from-path \"tests/query/chem_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/sparse-react-ordered.scm\")");
 	Handle result;

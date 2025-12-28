@@ -1,0 +1,76 @@
+/*
+ * tests/atoms/pattern/QueryLinkUTest.cxxtest
+ *
+ * Copyright (C) 2019 SingularityNET Foundation
+ * All Rights Reserved
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/pattern/QueryLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+// Test QueryLink
+//
+class QueryLinkUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+
+public:
+	QueryLinkUTest()
+	{
+		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::INFO);
+		logger().set_timestamp_flag(false);
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_full_quotation();
+};
+
+#define AN _as.add_node
+#define AL _as.add_link
+
+/**
+ * Test quoted query link, where vardecl, body and rewrite terms are
+ * unquoted variables. Just make sure that it doesn't crash or throw
+ * exception.
+ */
+void QueryLinkUTest::test_full_quotation()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle unquoted_vardecl = AL(UNQUOTE_LINK, AN(VARIABLE_NODE, "$vardecl"));
+	Handle unquoted_body = AL(UNQUOTE_LINK, AN(VARIABLE_NODE, "$body"));
+	Handle unquoted_rewrite = AL(UNQUOTE_LINK, AN(VARIABLE_NODE, "$rewrite"));
+
+	TS_ASSERT_THROWS_NOTHING(AL(QUOTE_LINK,
+	                           AL(QUERY_LINK,
+	                              unquoted_vardecl,
+	                              unquoted_body,
+	                              unquoted_rewrite)));
+}

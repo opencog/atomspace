@@ -61,7 +61,6 @@ static bool check_evaluatable(const Handle& bool_atom)
 		// PutLinks and GetLinks cannot be type-checked statically.
 		// Checking has to be deferred until runtime.
 		if (PUT_LINK == t) continue;
-		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
 		if (GLOB_NODE == t) continue;
 		if (DEFINED_PREDICATE_NODE == t) continue;
@@ -98,7 +97,12 @@ static bool check_evaluatable(const Handle& bool_atom)
 		// This is used by PLN to avoid type-checking.
 		if (h->is_type(DIRECTLY_EVALUATABLE_LINK)) continue;
 
-		if (not h->is_type(EVALUATABLE_LINK)) return false;
+		// Accept both EVALUATABLE_LINK and BOOLEAN_OUTPUT_SIG.
+		// CRISP_OUTPUT_SIG inherits from both, so crisp boolean
+		// operations can work with either evaluatable expressions
+		// or boolean value expressions (like BoolValueOfLink).
+		if (not h->is_type(EVALUATABLE_LINK) and
+		    not h->is_type(BOOLEAN_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -115,7 +119,7 @@ static bool check_bool_vect(const Handle& bool_atom)
 		if (h->is_type(DEFINED_PROCEDURE_NODE)) continue;
 		if (EXECUTION_OUTPUT_LINK == t) continue;
 
-		if (not h->is_type(BOOLEAN_OUTPUT_LINK)) return false;
+		if (not h->is_type(BOOLEAN_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -152,7 +156,7 @@ static bool check_numeric(const Handle& bool_atom)
 		if (QUOTE_LINK == t) continue;
 		if (UNQUOTE_LINK == t) continue;
 
-		if (not h->is_type(NUMERIC_OUTPUT_LINK)) return false;
+		if (not h->is_type(NUMERIC_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -169,7 +173,7 @@ static bool check_type_ctors(const Handle& bool_atom)
 		// Intervals are commonly used with GlobNodes.
 		if (INTERVAL_LINK == t) continue;
 
-		if (not h->is_type(TYPE_OUTPUT_LINK)) return false;
+		if (not h->is_type(TYPE_OUTPUT_SIG)) return false;
 	}
 	return true;
 }
@@ -177,8 +181,8 @@ static bool check_type_ctors(const Handle& bool_atom)
 /* This runs when the shared lib is loaded. */
 static __attribute__ ((constructor)) void init(void)
 {
-	classserver().addValidator(CRISP_INPUT_LINK, check_evaluatable);
-	classserver().addValidator(BOOLEAN_INPUT_LINK, check_bool_vect);
-	classserver().addValidator(NUMERIC_INPUT_LINK, check_numeric);
-	classserver().addValidator(TYPE_INPUT_LINK, check_type_ctors);
+	classserver().addValidator(CRISP_INPUT_SIG, check_evaluatable);
+	classserver().addValidator(BOOLEAN_INPUT_SIG, check_bool_vect);
+	classserver().addValidator(NUMERIC_INPUT_SIG, check_numeric);
+	classserver().addValidator(TYPE_INPUT_SIG, check_type_ctors);
 }

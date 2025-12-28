@@ -77,6 +77,10 @@ DualLink::DualLink(const HandleSeq&& hseq, Type t)
 ValuePtr DualLink::execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot run queries outside of an AtomSpace!");
+
 	Recognizer reco(as);
 	reco.satisfy(PatternLinkCast(get_handle()));
 	return as->add_atom(Handle(createUnorderedLink(reco._rules, SET_LINK)));

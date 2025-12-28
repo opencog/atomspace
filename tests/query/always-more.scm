@@ -15,7 +15,7 @@
 ; balls, and no others. A fancier query finds those baskets that
 ; have balls all of the same color (whatever color that might be).
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------
 ; Populate the atomspace with baskets holding balls.
@@ -43,16 +43,16 @@
 (Member (Concept "ochre ball")    (Concept "yellows basket"))
 
 ; Predicate that tests the colors of the balls
-(Evaluation (Predicate "is red") (Concept "red ball"))
-(Evaluation (Predicate "is red") (Concept "red ball too"))
-(Evaluation (Predicate "is red") (Concept "red ball also"))
-(Evaluation (Predicate "is red") (Concept "a red ball"))
-(Evaluation (Predicate "is red") (Concept "b red ball"))
+(Edge (Predicate "is red") (Concept "red ball"))
+(Edge (Predicate "is red") (Concept "red ball too"))
+(Edge (Predicate "is red") (Concept "red ball also"))
+(Edge (Predicate "is red") (Concept "a red ball"))
+(Edge (Predicate "is red") (Concept "b red ball"))
 
-(Evaluation (Predicate "is green")  (Concept "green ball"))
+(Edge (Predicate "is green")  (Concept "green ball"))
 
-(Evaluation (Predicate "is yellow") (Concept "yellow ball"))
-(Evaluation (Predicate "is yellow") (Concept "ochre ball"))
+(Edge (Predicate "is yellow") (Concept "yellow ball"))
+(Edge (Predicate "is yellow") (Concept "ochre ball"))
 
 ; ---------------------------------------------------------
 ; The query below will search for those baskets that have
@@ -73,7 +73,7 @@
 			; Always means that *every* ball in the basket MUST
 			; be red! Any single failure to satisfy this invalidates
 			; the entire search.
-			(Always (Evaluation (Predicate "is red") (Variable "ball")))
+			(Always (Edge (Predicate "is red") (Variable "ball")))
 		)
 
 		; Report the basket which has only red balls in it.
@@ -107,8 +107,8 @@
 			; Pick out two balls from the same basket.
 			(Member (Variable "some ball")         (Variable "basket"))
 			(Member (Variable "other ball")        (Variable "basket"))
-			(Evaluation (Variable "some color")    (Variable "some ball"))
-			(Evaluation (Variable "other color")   (Variable "other ball"))
+			(Edge (Variable "some color")          (Variable "some ball"))
+			(Edge (Variable "other color")         (Variable "other ball"))
 
 			; Are those two balls of the same color?
 			(Always (Equal (Variable "some color") (Variable "other color")))

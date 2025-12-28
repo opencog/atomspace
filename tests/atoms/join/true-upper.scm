@@ -3,7 +3,7 @@
 ; TrueJoinUTest
 ; Validate that UpperSet works correctly.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "ontology")
 	(List
@@ -12,15 +12,15 @@
 
 (define min-join
 	(MinimalJoin
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))
 
 (define max-join
 	(MaximalJoin
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))
 
 (define upper-set
 	(UpperSet
-		(Present (Concept "crow"))
-		(Present (Concept "bird"))))
+		(Concept "crow")
+		(Concept "bird")))

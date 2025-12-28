@@ -25,11 +25,10 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/TypeUtils.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/Transient.h>
 
 #include "JoinLink.h"
 
@@ -89,13 +88,16 @@ void JoinLink::validate(void)
 
 		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
-		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_SIG)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_SIG)) continue;
 
 		// Variable decls are allowed only in the first location.
 		if (0 == i and nameserver().isA(t, VARIABLE_LIST)) continue;
 		if (0 == i and nameserver().isA(t, VARIABLE_SET)) continue;
 		if (0 == i and nameserver().isA(t, TYPED_VARIABLE_LINK)) continue;
+
+		// Constant terms (nodes) are allowed
+		if (clause->is_node()) continue;
 
 		throw SyntaxException(TRACE_INFO, "Not supported (yet?) Got %s",
 			clause->to_string().c_str());
@@ -118,12 +120,12 @@ void JoinLink::setup_meet(void)
 		Type t = clause->get_type();
 		if (REPLACEMENT_LINK == t) continue;
 		if (nameserver().isA(t, TYPE_NODE)) continue;
-		if (nameserver().isA(t, TYPE_INPUT_LINK)) continue;
-		if (nameserver().isA(t, TYPE_OUTPUT_LINK)) continue;
+		if (nameserver().isA(t, TYPE_INPUT_SIG)) continue;
+		if (nameserver().isA(t, TYPE_OUTPUT_SIG)) continue;
 
 		// If variable declarations are missing, then
-		// we insist on the first link being a PresentLink
-		if (i == 0 and not (PRESENT_LINK == t)) continue;
+		// we insist on the first link being a PresentLink or a Node
+		if (i == 0 and not (PRESENT_LINK == t) and not clause->is_node()) continue;
 
 		// The top-var clauses cannot be passed to the meet.
 		if (_top_var and is_free_in_tree(clause, _top_var)) continue;
@@ -139,13 +141,7 @@ void JoinLink::setup_meet(void)
 			continue;
 		}
 
-		// If we are here, there are no variables. Its a constant
-		if (PRESENT_LINK != t)
-			throw SyntaxException(TRACE_INFO,
-				"Constant terms should be wrapped in a PresentLink, got %s",
-				clause->to_short_string().c_str());
-
-		_const_terms.insert(clause->getOutgoingAtom(0));
+		_const_terms.insert(clause);
 	}
 
 	_vsize = _variables.varseq.size();
@@ -248,8 +244,8 @@ void JoinLink::setup_top_types(void)
 
 		// Type type nodes get applied to the container.
 		if (nameserver().isA(t, TYPE_NODE) or
-		    nameserver().isA(t, TYPE_INPUT_LINK) or
-		    nameserver().isA(t, TYPE_OUTPUT_LINK))
+		    nameserver().isA(t, TYPE_INPUT_SIG) or
+		    nameserver().isA(t, TYPE_OUTPUT_SIG))
 		{
 			_top_types.push_back(clause);
 		}
@@ -357,10 +353,10 @@ HandleSet JoinLink::principals(AtomSpace* as,
 
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
-	AtomSpace* temp = grab_transient_atomspace(as);
-	Handle meet = temp->add_atom(_meet);
+	AtomSpacePtr scratch = createAtomSpace(as);
+	Handle meet = scratch->add_atom(_meet);
 	ValuePtr vp = meet->execute();
-	release_transient_atomspace(temp);
+	scratch->clear();
 
 	// The MeetLink returned everything that the variables in the
 	// clause could ever be...
@@ -429,7 +425,7 @@ void JoinLink::principal_filter(Traverse& trav,
 	// Ignore type specifications, other containers!
 	Type t = h->get_type();
 	if (nameserver().isA(t, PRESENT_LINK) or
-	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_SIG) or
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 
@@ -448,7 +444,7 @@ void JoinLink::principal_filter_map(Traverse& trav,
 	// Ignore type specifications, other containers!
 	Type t = h->get_type();
 	if (nameserver().isA(t, PRESENT_LINK) or
-	    nameserver().isA(t, TYPE_OUTPUT_LINK) or
+	    nameserver().isA(t, TYPE_OUTPUT_SIG) or
 	    nameserver().isA(t, JOIN_LINK))
 		return;
 
@@ -607,10 +603,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
                               Traverse& trav) const
 {
 	HandleSet rejects;
-
-	AtomSpace* temp = nullptr;
-	if (0 < _top_clauses.size())
-		temp = grab_transient_atomspace(as);
+	AtomSpacePtr scratch = createAtomSpace(as);
 
 	for (const Handle& h : trav.containers)
 	{
@@ -638,15 +631,16 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 
 			// Plug in any variables ...
 			Handle topper = Replacement::replace_nocheck(toc, plugs);
-			topper = temp->add_atom(topper);
-			if (not topper->bevaluate(temp, silent))
+			topper = scratch->add_atom(topper);
+			if (not topper->bevaluate(scratch.get(), silent))
 			{
 				rejects.insert(h);
 				break;
 			}
 		}
 	}
-	if (temp) release_transient_atomspace(temp);
+
+	scratch->clear();
 
 	// Remove the rejects
 	HandleSet accept;

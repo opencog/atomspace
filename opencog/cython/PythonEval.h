@@ -40,22 +40,11 @@
 
 #include "PyIncludeWrapper.h"
 
-#include <condition_variable>
-#include <filesystem>
-#include <map>
-#include <mutex>
-#include <string>
-#include <vector>
-
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/eval/GenericEval.h>
 
-
 namespace opencog {
-
-class AtomSpace;
 
 /**
  * Singleton class used to initialize python interpreter in the main thread.
@@ -67,48 +56,20 @@ class PythonEval : public GenericEval
     private:
         void initialize_python_objects_and_imports(void);
 
-        // Module utility functions
-        void import_module(const std::filesystem::path &file,
-                           PyObject* pyFromList);
-        void add_module_directory(const std::filesystem::path &directory);
-        void add_module_file(const std::filesystem::path &file);
-        void add_modules_from_path(std::string path);
-        void add_modules_from_abspath(std::string path);
-
         // Python utility functions
-        void add_to_sys_path(std::string path);
-        PyObject * atomspace_py_object(AtomSpacePtr);
-        void print_dictionary(PyObject*);
-        PyObject* find_object(PyObject* pyModule,
-                              const std::string& objectName);
         PyObject* get_function(const std::string& moduleFunction);
         PyObject* do_call_user_function(const std::string& moduleFunction,
                                         PyObject* pyArguments);
 
         // Call functions; execute scripts.
-        PyObject* call_user_function(const std::string& func,
-                                     Handle varargs);
+        ValuePtr call_user_function(const std::string& func,
+                                    const HandleSeq& args);
         std::string build_python_error_message(const std::string&);
+        void throw_python_exception(const std::string&);
 
         std::string execute_string(const char*);
         std::string execute_script(const std::string&);
         std::string exec_wrap_stdout(const std::string&);
-
-        // Single-threaded design.
-        static PythonEval* singletonInstance;
-
-        // Single, global mutex for serializing access to the atomspace.
-        // The singleton-instance design of this class forces us to
-        // serialize access (the GIL is not enough), because there is
-        // no way to guarantee that python won't accidentally be called
-        // from multiple threads.  That's because the EvaluationLink
-        // is called from scheme and from the pattern engine, and its
-        // unknown how many threads those things might be running in.
-        // The lock is recursive, because we may need to use multiple
-        // different atomspaces with the evaluator, in some nested
-        // fashion. So this lock prevents other threads from using the
-        // wrong atomspace in some other thread.  Quite unfortunate.
-        static std::recursive_mutex _mtx;
 
         // Computed results are typically polled in a distinct thread.
         bool _eval_done;
@@ -116,13 +77,7 @@ class PythonEval : public GenericEval
         std::mutex _eval_mutex;
         std::condition_variable _wait_done;
 
-        PyObject* _pyGlobal;
-        PyObject* _pyLocal;
         PyObject* _pyRootModule;
-
-        PyObject* _pySysPath;
-
-        std::map <std::string, PyObject*> _modules;
 
         std::string _result;
         std::string _capture_stdout;
@@ -130,25 +85,20 @@ class PythonEval : public GenericEval
         void eval_expr_line(const std::string&);
         bool check_for_error();
 
+    protected:
+        AtomSpacePtr _atomspace;
+
     public:
-        PythonEval();
+        PythonEval(void);
         ~PythonEval();
         virtual std::string get_name(void) const { return "PythonEval"; }
 
-        /**
-         * Create the singleton instance with the supplied atomspace.
-         */
-        static void create_singleton_instance();
+        // Return per-thread, per-atomspace evaluator using pool management
+        static PythonEval* get_python_evaluator(AtomSpace*);
+        static PythonEval* get_python_evaluator(const AtomSpacePtr&);
 
-        /**
-         * Delete the singleton instance.
-         */
-        static void delete_singleton_instance();
-
-        /**
-         * Get a reference to the singleton instance.
-         */
-        static PythonEval & instance();
+        virtual void set_atomspace(const AtomSpacePtr&);
+        virtual AtomSpacePtr get_atomspace(void);
 
         // The async-output interface.
         virtual void begin_eval(void);
@@ -177,23 +127,6 @@ class PythonEval : public GenericEval
         Handle apply(AtomSpace * as, const std::string& func,
                      Handle varargs)
         { return HandleCast(apply_v(as, func, varargs)); }
-
-        /**
-         * Calls the Python function passed in `func`, passing it
-         * the AtomSpace as an argument, returning void.
-         */
-        void apply_as(const std::string& func, AtomSpace*);
-
-#if 0
-        /**
-         * Debug utility
-         */
-        void print_root_dictionary()
-        {
-            printf("The root dictionary is:\n");
-            this->print_dictionary(PyModule_GetDict(_pyRootModule));
-        }
-#endif
 };
 
 /**

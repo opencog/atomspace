@@ -22,8 +22,9 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 #include "CollectionOfLink.h"
 
@@ -77,7 +78,12 @@ void CollectionOfLink::check_typespec(void)
 	_out_type = TypeNodeCast(_outgoing[0])->get_kind();
 
 	_out_is_link = nameserver().isLink(_out_type);
-	if (not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE))
+
+	// Normally, we'd re-write only into LinkValues, only.
+	// But FormulaStream inherits from FloatValue, and we
+	// want to allow FormulaStream rewrites. So support that.
+	if ((not _out_is_link and not nameserver().isA(_out_type, LINK_VALUE)) and
+	    (not _out_is_link and not nameserver().isA(_out_type, FLOAT_VALUE)))
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting type to be a Link or LinkValue, got %s for %s",
 				nameserver().getTypeName(_out_type).c_str(),
@@ -92,14 +98,14 @@ ValuePtr CollectionOfLink::rewrap_h(AtomSpace* as, const Handle& base)
 	{
 		if (_out_is_link)
 			return as->add_link(_out_type, {base});
-		return createLinkValue(_out_type, ValueSeq({base}));
+		return valueserver().create(_out_type, ValueSeq({base}));
 	}
 
 	if (_out_is_link)
 		return as->add_link(_out_type,
 			HandleSeq(base->getOutgoingSet()));
 
-	return createLinkValue(_out_type, base->getOutgoingSet());
+	return valueserver().create(_out_type, base->getOutgoingSet());
 }
 
 // ---------------------------------------------------------------
@@ -122,7 +128,7 @@ ValuePtr CollectionOfLink::rewrap_v(AtomSpace* as, const ValuePtr& vp)
 	if (vp->get_type() == _out_type)
 		return vp;
 
-	return createLinkValue(_out_type, lvp->value());
+	return valueserver().create(_out_type, lvp->value());
 }
 
 // ---------------------------------------------------------------
@@ -144,11 +150,11 @@ ValuePtr CollectionOfLink::execute(AtomSpace* as, bool silent)
 
 	// Hmmm. FilterLink returns null pointer when the filter
 	// is empty. Is this a bug in FilterLink? Not sure any more.
-	if (nullptr == vp)
+	if (nullptr == vp) // or VOID_VALUE == vp->get_type()) ???
 	{
 		if (_out_is_link)
 			return createLink(_out_type);
-		return createLinkValue(_out_type, ValueSeq({}));
+		return valueserver().create(_out_type, ValueSeq({}));
 	}
 
 	if (vp->is_atom())

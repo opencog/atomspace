@@ -6,7 +6,7 @@
 #
 from opencog.atomspace import AtomSpace
 from opencog.atomspace import types
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
 asp = AtomSpace()
 

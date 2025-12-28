@@ -32,6 +32,8 @@ namespace opencog
  */
 class QueryLink : public PatternLink
 {
+private:
+	bool _recursing;
 protected:
 	void init(void);
 

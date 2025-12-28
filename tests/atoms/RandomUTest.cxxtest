@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 
 using namespace opencog;
 
@@ -40,13 +41,12 @@ public:
         logger().set_print_to_stdout_flag(true);
 
         as = createAtomSpace();
-        eval = new SchemeEval(as);
+        eval = SchemeEval::get_scheme_evaluator(as);
         eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
     }
 
     ~RandomUTest()
     {
-        delete eval;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().get_filename().c_str());
@@ -80,12 +80,16 @@ void RandomUTest::test_weights(void)
 
     eval->eval_v("(cog-execute! (DefinedPredicate \"loop a lot of times\"))");
 
-    Handle countA = eval->eval_h(
-        "(cog-execute! (Get (State (Anchor \"sum-A\") (Variable \"$x\"))))");
+    ValuePtr vcountA = eval->eval_v(
+        "(cog-execute! (Meet (State (Anchor \"sum-A\") (Variable \"$x\"))))");
+    LinkValuePtr lvcountA = LinkValueCast(vcountA);
+    Handle countA = HandleCast(lvcountA->value()[0]);
     printf("A-count = %s\n", countA->to_string().c_str());
 
-    Handle countB = eval->eval_h(
-        "(cog-execute! (Get (State (Anchor \"sum-B\") (Variable \"$x\"))))");
+    ValuePtr vcountB = eval->eval_v(
+        "(cog-execute! (Meet (State (Anchor \"sum-B\") (Variable \"$x\"))))");
+    LinkValuePtr lvcountB = LinkValueCast(vcountB);
+    Handle countB = HandleCast(lvcountB->value()[0]);
     printf("B-count = %s\n", countB->to_string().c_str());
 
     Handle ratio = eval->eval_h(

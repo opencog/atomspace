@@ -1,7 +1,7 @@
 ;
 ; threaded.scm -- Multi-threading in Atomese
 ;
-; Many atomspace operatins are highly repetitive, and it would be
+; Many atomspace operations are highly repetitive, and it would be
 ; nice to parallelize them, so that they can be done at the same time.
 ; The ExecuteThreadedLink does exactly this -- it wraps executable
 ; link types, and runs them in distinct threads, then packages up the
@@ -10,7 +10,7 @@
 ; See also `parallel.scm`, which does something similar, but is more
 ; appropriate for scripting control.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Populate the AtomSpace with some data.
 (Inheritance (Concept "rock") (Concept "mineral"))

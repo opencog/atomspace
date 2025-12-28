@@ -6,7 +6,7 @@
 ; during search. Similar to `unordered-odo-indistinct.scm`, except
 ; that the search space is more constrained.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Set (Concept "A")
 	(Set (Concept "A") (Predicate "P") (Predicate "Q") (Predicate "R")))

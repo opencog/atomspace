@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; or-more-test.scm -- Verify more variations involving the OrLink.
 ; Reflects the discussion in issue opencog/atomspace#2644
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

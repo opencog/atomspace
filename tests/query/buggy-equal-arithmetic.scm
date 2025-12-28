@@ -3,7 +3,7 @@
 ;
 ; Unit test for github bug report opencog/atomspace#2284
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Number 1)
 (Number 2)

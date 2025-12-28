@@ -703,7 +703,7 @@ during the build, will be more precise as to which parts will not be built.
 * https://cython.org
 * For Debian/Ubuntu,  `apt install cython libpython3-dev`
 * For Fedora/Redhat,  `yum install cython python3-devel`
-* For unit tests: `python3-nose2`
+* For unit tests: `python3-pytest`
 
 ### Building AtomSpace
 
@@ -714,9 +714,9 @@ Perform the following steps at the shell prompt:
     mkdir build
     cd build
     cmake ..
-    make -j8
+    make -j
     sudo make install
-    make -j8 check
+    make -j check ARGS=-j
 ```
 Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.

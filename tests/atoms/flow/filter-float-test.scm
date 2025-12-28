@@ -1,10 +1,13 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; filter-float-test.scm -- Verify that various wiki pages don't lie.
 ; Specifically, that the demo in
 ; https://wiki.opencog.org/w/PromiseLink
 ; works as promised.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (srfi srfi-1))
 (use-modules (opencog test-runner))
 
@@ -97,18 +100,19 @@
 ; --------------------
 ; Promise Multi-target filtering
 (define prom
-	(Promise
+	(CollectionOf
 		(TypeNode 'FutureStream)
-		(Filter
-			(Rule
-				(TypedVariable (Variable "$x") (TypeNode 'FloatValue))
-				(Variable "$x")  ;  body
-				(Plus (Variable "$x") (Number -2))
-				(Plus (Variable "$x") (Number -1))
-				(Variable "$x")
-				(Plus (Variable "$x") (Number 1))
-				(Plus (Variable "$x") (Number 2)))
-			(Time))))
+		(OrderedLink
+			(Filter
+				(Rule
+					(TypedVariable (Variable "$x") (TypeNode 'FloatValue))
+					(Variable "$x")  ;  body
+					(Plus (Variable "$x") (Number -2))
+					(Plus (Variable "$x") (Number -1))
+					(Variable "$x")
+					(Plus (Variable "$x") (Number 1))
+					(Plus (Variable "$x") (Number 2)))
+				(Time)))))
 (define promset (cog-execute! prom))
 
 (define linkset (cog-value->list promset))

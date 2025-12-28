@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; meet-link-value.scm
 ;
@@ -5,7 +8,7 @@
 ; one variable to report.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
@@ -16,17 +19,17 @@
 (define tvkey (Predicate "*-TruthValueKey-*"))
 
 ; A pair of vectors
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "dog")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "dog")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "dog")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "dog")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "dog")) tvkey (FloatValue 1 0 5))
 
-(cog-set-value! (Evaluation (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
-(cog-set-value! (Evaluation (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
-(cog-set-value! (Evaluation (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
-(cog-set-value! (Evaluation (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
-(cog-set-value! (Evaluation (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
+(cog-set-value! (Edge (Predicate "has legs") (Concept "cat")) tvkey (FloatValue 1 0 1))
+(cog-set-value! (Edge (Predicate "has nose") (Concept "cat")) tvkey (FloatValue 1 0 2))
+(cog-set-value! (Edge (Predicate "has tail") (Concept "cat")) tvkey (FloatValue 1 0 3))
+(cog-set-value! (Edge (Predicate "furry")    (Concept "cat")) tvkey (FloatValue 1 0 4))
+(cog-set-value! (Edge (Predicate "domestic") (Concept "cat")) tvkey (FloatValue 1 0 5))
 
 (define flow-pairs
 	(Meet
@@ -34,7 +37,7 @@
 			(TypedVariable (Variable "$cpt") (Type 'Concept))
 			(TypedVariable (Variable "$prop") (Type 'Predicate)))
 		(Present
-			(Evaluation (Variable "$prop") (Variable "$cpt")))))
+			(Edge (Variable "$prop") (Variable "$cpt")))))
 
 (define qvalue (cog-execute! flow-pairs))
 

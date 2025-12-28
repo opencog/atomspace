@@ -3,7 +3,7 @@
 ;
 ; Many knowledge representation systems want to view the world in
 ; terms of objects that have properties on them. This can already
-; be done quite easily with EvaluationLinks and Predicates.
+; be done quite easily with EdgeLinks and Predicates.
 ; But what if one wants a strict guarantee that there is only one
 ; property of a given name, and then change it time to time?
 ;
@@ -17,7 +17,7 @@
 ; This example shows how to set properties, and three different ways
 ; of getting a named property on a atom.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Two different atoms, to which a number will be associated.
 (Concept "asdf")
@@ -71,7 +71,7 @@
 ;     (List (Concept "qwerty") (Predicate "truthiness"))
 ; which is perhaps an example of "really bad knowledgebase design".
 ; A better design might have been
-;     (Evaluation (Predicate "truthiness") (List (Concept "qwerty")))
+;     (Edge (Predicate "truthiness") (List (Concept "qwerty")))
 ; or even
 ;     (Inheritance (Predicate "truthiness") (Concept "qwerty"))
 ;

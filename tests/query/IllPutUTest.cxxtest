@@ -33,17 +33,17 @@ class IllPutUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpacePtr _as;
-	SchemeEval _eval;
+	SchemeEval* _eval;
 
 public:
-	IllPutUTest() : _as(createAtomSpace()), _eval(_as)
+	IllPutUTest() : _as(createAtomSpace()), _eval(SchemeEval::get_scheme_evaluator(_as))
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
-		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+		_eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
-		_eval.eval("(use-modules (opencog logger))");
+		_eval->eval("(use-modules (opencog logger))");
 	}
 
 	~IllPutUTest()
@@ -76,9 +76,9 @@ void IllPutUTest::test_ill_put()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	_eval.eval("(load-from-path \"tests/query/ill-put.scm\")");
+	_eval->eval("(load-from-path \"tests/query/ill-put.scm\")");
 
-	Handle get_put = _eval.eval_h("get-put");
+	Handle get_put = _eval->eval_h("get-put");
 
 	bool caught = false;
 	try

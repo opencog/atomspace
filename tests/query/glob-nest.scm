@@ -3,7 +3,7 @@
 ;
 ; Test nested glob expressions.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; The use of the MemberLink here messes it up.
 ; Earlier code incorrectly finds only one instance.

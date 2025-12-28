@@ -32,7 +32,7 @@
 
 ; Change the state of the robot arm.
 (State (Concept "robot arm")
-	(Evaluation (Predicate "holding") (Concept "block 42")))
+	(Edge (Predicate "holding") (Concept "block 42")))
 
 ; Print everything. The state should have changed.
 (cog-prt-atomspace)

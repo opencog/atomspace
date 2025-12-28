@@ -72,7 +72,7 @@ QueryLink::QueryLink(const Handle& body, const Handle& rewrite)
 {}
 
 QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
-	: PatternLink(std::move(hseq), t)
+	: PatternLink(std::move(hseq), t), _recursing(false)
 {
 	init();
 }
@@ -92,20 +92,26 @@ QueryLink::QueryLink(const HandleSeq&& hseq, Type t)
  *          VariableNode "$var0"
  *          VariableNode "$var1"
  *       AndList
- *          etc ...
+ *          ClauseA
+ *          ClauseB
+ *          ...
+ *       Implicand
+ *          ImpliedThing...
  *
  * The whole point of the QueryLink is to do nothing more than
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  *
- * Use the default implicator to find pattern-matches. Associated truth
- * values are completely ignored during pattern matching; if a set of
- * atoms that could be a ground are found in the atomspace, then they
- * will be reported.
+ * Use the default implicator to find pattern-matches.  If a set of
+ * atoms that can validily bind to the variables can be found in the
+ * AtomSpace, then they are reported as a grounding.
  */
 ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 {
 	if (nullptr == as) as = _atom_space;
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot run queries outside of an AtomSpace!");
 
 	/*
 	 * The `do_conn_check` flag stands for "do connectivity check"; if the
@@ -117,7 +123,7 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	 * in the URE, for doing disconnected searches.
 	 */
 	bool do_conn_check = false;
-	if (do_conn_check and 0 == _virtual.size() and 1 < _components.size())
+	if (do_conn_check and 0 == _virtual.size() and 1 < _parts.size())
 		throw InvalidParamException(TRACE_INFO,
 		                            "QueryLink consists of multiple "
 		                            "disconnected components!");
@@ -170,10 +176,19 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 	if (0 == pat.pmandatory.size() and 0 < pat.absents.size()
 	    and not intu->optionals_present())
 	{
-		Instantiator inst(as);
 		cvp->open();
 		for (const Handle& himp: get_implicand())
-			cvp->add(std::move(inst.execute(himp, true)));
+		{
+			if (himp->is_executable())
+			{
+				ValuePtr vp(himp->execute(as, true));
+				if (vp->is_atom())
+					vp = as->add_atom(HandleCast(vp));
+				cvp->add(std::move(vp));
+			}
+			else
+				cvp->add(himp);
+		}
 		cvp->close();
 		return cvp;
 	}
@@ -183,7 +198,11 @@ ContainerValuePtr QueryLink::do_execute(AtomSpace* as, bool silent)
 
 ValuePtr QueryLink::execute(AtomSpace* as, bool silent)
 {
-	return do_execute(as, silent);
+	if (_recursing) return get_handle();
+	_recursing = true;
+	ValuePtr vp(do_execute(as, silent));
+	_recursing = false;
+	return vp;
 }
 
 DEFINE_LINK_FACTORY(QueryLink, QUERY_LINK)

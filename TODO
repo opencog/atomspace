@@ -16,3 +16,44 @@ Reading-list TODO:
   "We present a computable algorithm that assigns probabilities to
   every logical statement in a given formal language, and refines
   those probabilities over time."
+
+Others:
+ * Constructible Duality Logic, Anna Patterson
+   PhD thesis
+
+ * algeraic mind 1996 Science paper
+
+ * Programming with galois connections
+
+ * Andre Joyal on simplex category dualities
+   https://ncatlab.org/nlab/files/JoyalThetaCategories.pdf
+
+ * http://people.csail.mit.edu/jiex/papers/robogrammar/index.html
+
+ * http://moghs.csail.mit.edu/
+
+ * https://en.wikipedia.org/wiki/Modelica
+
+
+Writing TODO
+------------
+* Logical negation corresponds to vector space complements.
+  For example, King-Man+Woman should be interpreted as linear logic,
+  and NOT as set theory intersection, subtraction, union operations.
+
+* The voting/club-membership algo in the learn project performs
+  generalization.
+
+Coding TODO
+-----------
+* Remove GROUP_LINK from pattern matcher; this can be done with
+  a GROUP_VALUE, instead. See SORT_VALUE for an example. This will
+  maintain ultiple sub-lists, grouping inserted items into one of
+  the sublists.
+
+* Remove ALWAYS_LINK from pattern matcher. Same idea as above:
+  just use ALWAYS_VALUE, modelled on SORT_VALUE, that will turn
+  into an empty set if all the items in it are not all the same.
+
+* Have some global thread pool or thread manager? Some way of
+  observing threads? Maybe killing them?

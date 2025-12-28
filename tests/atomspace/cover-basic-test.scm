@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; cover-basic-test.scm
 ; Verify basic operations of layere atomspace frames.
@@ -40,7 +43,7 @@
 
 ; ------------------------------------------------------
 ; Do it again, one level up.
-(define top-space (cog-new-atomspace base-space))
+(define top-space (AtomSpace base-space))
 (cog-set-atomspace! top-space)
 
 ; x1 is still in the base.

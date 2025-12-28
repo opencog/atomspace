@@ -300,3 +300,168 @@ Complications are introduced due to the following features:
    black-box links can have a side-effect (e.g. they can send a
    message) or can depend on external data (evaluate to true/false
    depending on whether a message has been received).
+
+AlwaysLink
+----------
+The pattern engine includes support for AlwaysLink, whose intended
+interpretation is "for all" or "always the case". This is a predicate
+that must evaluate to true for all possible contextualized groundings
+for that predicate, within the context of the search.
+
+```
+    (Always (P X))
+```
+The above can be read as "for all `X`, `(P X)` is true".
+
+When a pattern contains the AlwaysLink, the variable `X` ranges over the
+"domain of discourse" for the search: over all `X` that are allowed by
+the other clauses in the query. The interpretation then becomes that the
+pattern is satisfiable if and only if `(P X)` is true for all groundings
+of `X` that occur in the query; else the pattern is not satisfiable and
+returns no results.
+
+### Algorithms
+The idea, and appropriate algorithms, can be exposed through a series
+of examples.  First, consider a pattern where the domain of discourse
+is determined by the presence of some structure in the AtomSpace:
+```
+    (SomeStructure X)
+    (Always (P X))
+```
+One may proceed by grounding the structure first, by finding the set
+`{gX}` of all `gX` for which `(SomeStructure gX)` is present in the
+AtomSpace. More generally, the structure can contain evaluatable terms,
+and so the set is of those `gX` which satisfy the structure.
+
+After this is obtained, one can loop over all `gX` in the set, compute
+`(P gx)` for each, and then accept or reject the entire set `{gX}`
+depending on whether or not they are all true. This has the form of a
+post-processing step: the entire set `{gX}` is obtained before any of
+the `(P gX)` are evaluated.
+
+Clearly it seems that perhaps early termination should be possible: as
+the `gX` dribble in, each can be tested, and the query can be terminated
+early when the first false `(P gX)` is observed. This sounds like the
+right thing to do in principle. In practice, the pattern `SomeStructure`
+can be so complicated that there are provisional groundings `gX` that
+float around early on, and are later discarded. The trick is then to
+sample sufficiently late in the grounding algorithm such that there are
+no such stray false members of the domain of discourse. Finding this
+sampling point is difficult, given the current rather ad-hoc structure
+of the grounding algorithm.  Thus, below, some alternatives are
+considered.
+
+An interesting variant arises when the search pattern has the form
+```
+    (SomeStructure X Y)
+    (Always (P X))
+```
+For this example, the domain of discourse is parameterized by the
+variable `Y`. Here, a potential grounding `gY` of `Y` is acceptable if
+and only if the "contextualized" `gX` all satisfy the predicate. If
+they do, then the `gY` is acceptable; else `gY` must be discarded.
+
+That is, the satisfying set `{gX}` depends on `gY` (is parameterized
+by `gY`.)
+
+This suggests several algorithms. One is to proceed with the grounding
+of the clause `(SomeStructure X Y)` as normal. Then, for each candidate
+`(X := gX, Y:= gY)`, the value of `gX` is ignored/discarded, the (new)
+clause `(SomeStructure X gY)` is constructed, and then a grounding loop
+of this parameterized clause is performed (evaluating `P` on each result).
+
+Implementing the above is remarkably hard for the current query engine:
+First, it is hard to "forget" `gX`, and second, it requires finding a
+"starting point" for the search, which is not generally available late
+in the game (it's in the InitiateSearch mixin.)
+
+The more direct variant algorithm is to proceed with the grounding of
+the clause in such a way that `Y` is grounded first. The loop over `X`
+is saved for last; then for each candidate `gX`, the `P` is evaluated.
+
+The difficulty here is in saving the loop over 'X' for last. The
+expressions for `X` can be sufficiently tangled into `SomeStructure`
+that candidates `gX` are offered up, that are later discarded. This
+can happen when `X` appears in multiple clauses, and is the only common,
+connecting term between those clauses; thus, it gets a provisional
+grounding before the full set of clauses in `SomeStructure` have been
+fully evaluated.
+
+To give a concrete example:
+```
+    (SomeStructure X Y)
+    (OtherStructure X Z)
+    (Always (P X))
+```
+Here, both `Y` and `Z` act as parameters. But, before `gY` and `gZ` can
+be found, there must be some connecting `cX` that is used to avoid the
+full Cartesian product implied above: but the provisional `cX` might be
+discarded if there are no appropriate `gY` and `gZ`.  That is, when
+`(SomeStructure cX gY)` exists, but `(OtherStructure cX gZ)` does not.
+Such a provisional `cX` is not part of the domain of discourse, and one
+must NOT accidentally evaluate `(P cX)`.
+
+### Multiple Variables
+Several generalizations to multiple variables are possible. One is
+presumably obvious:
+```
+    (SomeStructure X1 X2 ... Y1 Y2 ...)
+    (Always (P1 X1))
+    (Always (P2 X2))
+    ...
+```
+Here `SomeStructure` is grounded first, and then nested loops make
+a pass over each AlwaysLink.
+
+Difficulties arise for disconnected components:
+```
+    (SomeStructure X1 ... Y1 ...)
+    (OtherStructure X3 ... Y3 ...)
+    (Always (P1 X1 X3))
+```
+Here, the AlwaysLink becomes the "virtual", bridging over the
+disconnected components.
+
+### Connectivity
+The above considerations suggest that perhaps the order in which the
+graph crawl is done should be formalized, and computed during the pattern
+analysis stage. That is, some clauses can be grounded before others; the
+crawl can start in some places but not others, and ForAll/Always terms
+should be saved for last.
+
+The pattern analysis code already generates a connectivity graph, but it
+does not encode this ordering information; it is not semi-directed to
+indicate the plausible search order.
+
+Note that a full analysis cannot be made at pattern-compilation time;
+efficient algos start with the "thinnest" Atoms, and the measure of the
+"thickness" is available only at crawl time, and not at compilation
+time.  Thus, a collection of candidate starting points can be
+pre-computed, but the actual starts must be deferred.
+
+Currently, this is implemented in a rather ad-hoc fashion, and is
+performed at crawl time, not at pattern analysis time. At crawl time,
+the `InitiateSearchMixin::get_next_clause()` method performs this
+determination.
+
+The de-facto implementation uses `InitiateSearchMixin::get_clause_list()`
+to return a starting set of clauses to be grounded; these are the
+mandatory clauses in the common case. The next clause to ground is
+set up by `InitiateSearchMixin::next_connections()` This is called by
+`PatternMatchEngine::do_next_clause()` which then calls
+`PatternMatchEngine::explore_clause()`. This could be a good place
+to implement an `explore_clause_always()` method, if it can be
+guaranteed that there will be no false positives (no false reports of
+membership in the domain of discourse).
+
+I made five distinct attempts to reform, rewrite, rework the above using
+Claude Code; each was a hopeless failure. The complexity of the current
+pattern engine appears to be far beyond what Claude is capable of
+understanding, and the offered solutions were always wildly insane and
+insanely over-complex.  After the first attempt, I focused on
+baby-steps, yet even these were overwhelming.  For now, punt.
+
+(N.B. There was an early suggestion that the current code is buggy,
+but perhaps Claude was lying to me about this. It did not offer up any
+actual unit test that actually fails. There may be a bug; but we don't
+know of it, yet.)

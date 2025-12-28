@@ -1,7 +1,7 @@
 ;
 ; define.scm -- Using DefineLink to give names to things.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ;; Some data to populate the AtomSpace.
 (Inheritance
@@ -12,19 +12,19 @@
 	(Concept "transistor")
 	(Concept "electrical device"))
 
-(Evaluation
+(Edge
 	(Predicate "PartOf")
 	(List
 		(Concept "battery")
 		(Variable "car")))
 
-(Evaluation
+(Edge
 	(Predicate "PartOf")
 	(List
 		(Concept "transistor")
 		(Variable "phone")))
 
-(Evaluation
+(Edge
 	(Predicate "PartOf")
 	(List
 		(Concept "windshield")
@@ -38,7 +38,7 @@
 		(Inheritance
 			(Variable "$x")
 			(Concept "electrical device"))
-		(Evaluation
+		(Edge
 			(Predicate "PartOf")
 			(List
 				(Variable "$x")
@@ -65,7 +65,7 @@
 
 (DefineLink
 	(DefinedPredicate "Part-whole Relation")
-	(Evaluation
+	(Edge
 		(Predicate "PartOf")
 		(List
 			(Variable "$x")

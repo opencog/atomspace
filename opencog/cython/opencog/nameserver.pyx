@@ -96,11 +96,6 @@ def regenerate_types():
     # print("Exit regenerate_types")
     return types
 
-def get_refreshed_types():
-    warnings.warn('get_refreshed_types is deprecated; use regenerate_types instead',
-            DeprecationWarning)
-    return regenerate_types()
-
 # Provide API so that new atom types can be added with python.
 def begin_type_decls(module):
     return nameserver().beginTypeDecls(module.encode('UTF-8'))
@@ -123,33 +118,54 @@ def decl_type(parent, name):
     setattr(types, name, type_id)
     return type_id
 
+# Cache for Python constructors
+cdef dict _python_ctor_cache = {}
+
 cdef create_python_value_from_c_value(const cValuePtr& value):
     if value.get() == NULL:
         return None
 
-    value_type = value.get().get_type()
-    type_name = get_type_name(value_type)
-    ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>value)
+    cdef cValue* val_ptr = value.get()
+    cdef Type value_type = val_ptr.get_type()
+    cdef str type_name
+    cdef Value instance
 
-    thismodule = sys.modules[__name__]
-    clazz = getattr(thismodule, type_name, None)
-    if clazz is not None:
-        return clazz(ptr_holder=ptr_holder)
+    # Check cache first
+    cdef object py_class_ctor = _python_ctor_cache.get(value_type)
+    if py_class_ctor is not None:
+        instance = py_class_ctor.__new__(py_class_ctor)
+        instance.shared_ptr = value
+        return instance
 
-    # For handling the children types of LinkValue.
-    if is_a(value_type, types.LinkValue):
-        return LinkValue(ptr_holder=ptr_holder)
-    # For handling the children types of QueueValue.
-    if is_a(value_type, types.QueueValue):
-        return QueueValue(ptr_holder=ptr_holder)
-    # For handling the children types of Atom.
-    if is_a(value_type, types.Atom):
-        return Atom(ptr_holder=ptr_holder)
+    # Cache miss - find the correct python ctor to use.
+    # AtomSpace must be checked before Atom since AtomSpace is-a Atom
+    if is_a(value_type, types.AtomSpace):
+        py_class_ctor = AtomSpace
+    elif is_a(value_type, types.Atom):
+        py_class_ctor = Atom
+    elif is_a(value_type, types.QueueValue):
+        py_class_ctor = QueueValue
+    elif is_a(value_type, types.UnisetValue):
+        py_class_ctor = UnisetValue
+    elif is_a(value_type, types.LinkValue):
+        py_class_ctor = LinkValue
+    elif is_a(value_type, types.FloatValue):
+        py_class_ctor = FloatValue
+    elif is_a(value_type, types.StringValue):
+        py_class_ctor = StringValue
+    elif is_a(value_type, types.BoolValue):
+        py_class_ctor = BoolValue
+    elif is_a(value_type, types.VoidValue):
+        py_class_ctor = VoidValue
+    else:
+        # Can't build one of these - this should never happen
+        type_name = get_type_name(value_type)
+        raise TypeError("Non-constructible Type: " + type_name)
 
-    # For handling the children types of Value.
-    if is_a(value_type, types.Value):
-        return Value(ptr_holder=ptr_holder)
-
-    raise TypeError("Python API for " + type_name + " is not implemented yet")
+    # Cache the result (is_a() results never change)
+    _python_ctor_cache[value_type] = py_class_ctor
+    instance = py_class_ctor.__new__(py_class_ctor)
+    instance.shared_ptr = value
+    return instance
 
 # ========================== END OF FILE =========================

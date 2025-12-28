@@ -24,8 +24,9 @@
 #define _OPENCOG_FILTER_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/free/Quotation.h>
+#include "GlobMatch.h"
 
 namespace opencog
 {
@@ -63,12 +64,6 @@ protected:
 
 	ValuePtr rewrite_one(const ValuePtr&, AtomSpace*, bool) const;
 
-	// Handy utility
-	template<typename VECT>
-	bool glob_compare(const HandleSeq&, const VECT&,
-	                  ValueMap&, AtomSpace*, bool, Quotation,
-	                  ValuePtr (*)(const VECT&&),
-	                  size_t, size_t) const;
 	mutable bool _recursive_glob;
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);

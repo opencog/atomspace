@@ -1,6 +1,7 @@
 
 # Build the query-engine library
 ADD_LIBRARY(query-engine
+	ConstraintDomain.cc
 	ContinuationMixin.cc
 	InitiateSearchMixin.cc
 	NextSearchMixin.cc
@@ -23,14 +24,17 @@ ADD_DEPENDENCIES(query-engine
 )
 
 TARGET_LINK_LIBRARIES(query-engine
+	free
+	signature
 	execution
 )
 
 INSTALL (TARGETS query-engine
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
+	ConstraintDomain.h
 	ContinuationMixin.h
 	Implicator.h
 	InitiateSearchMixin.h

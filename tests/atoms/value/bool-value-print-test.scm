@@ -1,8 +1,11 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; bool-value-print-test.scm -- Verify that BoolValue to_string() works
 ; (It doesn't; it needs a length value, but no one cares right now)
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

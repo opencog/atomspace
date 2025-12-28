@@ -3,7 +3,7 @@
 ; JoinLink unit test. Performs an actual join, for real,
 ; i.e. an actual set intersection of the filters.
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Data
 (Evaluation (Predicate "Pa") (List (Concept "A")))
@@ -42,24 +42,24 @@
 
 (define min-const-ab
 	(MinimalJoin
-		(Present (Concept "A"))
-		(Present (Concept "B"))))
+		(Concept "A")
+		(Concept "B")))
 
 (define max-const-ab
 	(MaximalJoin
-		(Present (Concept "A"))
-		(Present (Concept "B"))))
+		(Concept "A")
+		(Concept "B")))
 
 (define min-const-ap
 	(MinimalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(Present (Concept "B"))))
+		(Concept "B")))
 
 ; (cog-execute! min-const-ap)
 
 (define max-const-ap
 	(MaximalJoin
 		(TypedVariable (Variable "P") (Type 'PredicateNode))
-		(Present (Concept "B"))))
+		(Concept "B")))
 
 ; (cog-execute! max-const-ap)

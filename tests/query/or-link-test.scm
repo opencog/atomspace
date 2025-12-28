@@ -1,22 +1,26 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; or-link-test.scm -- Verify that OrLink produces sums during search.
 ; Reflects the discussion in issue opencog/atomspace#2644
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)
 (define tname "or-link-test")
 (test-begin tname)
 
-; Initial data. The IsTrueLink looks at the BooValue directly.
+; Initial data. The is-true looks at the BooValue directly.
 (define tvkey (Predicate "*-TruthValueKey-*"))
+(define (is-true x) (BoolValueOf x tvkey))
 
 (State (Concept "you") (Concept "thirsty"))
 (State (Concept "me") (Concept "hungry"))
-(cog-set-value! (Evaluation (Predicate "cold") (Concept "me"))
+(cog-set-value! (Edge (Predicate "cold") (Concept "me"))
 	tvkey (BoolValue #t))
-(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+(cog-set-value! (Edge (Predicate "tired") (Concept "her"))
 	tvkey (BoolValue #t))
 
 (define qr2
@@ -35,8 +39,8 @@
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
-				(Present (Evaluation (Predicate "cold") (Variable "someone")))
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
+				(Present (Edge (Predicate "cold") (Variable "someone")))
+				(is-true (Edge (Predicate "cold") (Variable "someone"))))))))
 
 
 (test-assert "thirsty or cold"
@@ -49,7 +53,7 @@
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(And
-				(IsTrue (Evaluation (Predicate "cold") (Variable "someone"))))))))
+				(is-true (Edge (Predicate "cold") (Variable "someone"))))))))
 
 (test-assert "thirsty or cold"
 	(equal? (cog-execute! qr5) (Set (Concept "you") (Concept "me"))))
@@ -59,10 +63,10 @@
 	(CollectionOf (Meet (TypedVariable (Variable "someone") (Type 'Concept))
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
-			(IsTrue (Evaluation (Predicate "cold") (Variable "someone")))
-			(IsTrue (Evaluation (Predicate "tired") (Variable "someone")))))))
+			(is-true (Edge (Predicate "cold") (Variable "someone")))
+			(is-true (Edge (Predicate "tired") (Variable "someone")))))))
 
-(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+(cog-set-value! (Edge (Predicate "tired") (Concept "her"))
 	tvkey (BoolValue #f))
 
 (test-assert "thirsty or cold but not tired"
@@ -70,7 +74,7 @@
 
 ; ------------
 ; Add the stv to force it to be strictly true.
-(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+(cog-set-value! (Edge (Predicate "tired") (Concept "her"))
 	tvkey (BoolValue #t))
 
 (test-assert "thirsty or cold or tired"
@@ -78,9 +82,9 @@
 		(Set (Concept "you") (Concept "me") (Concept "her"))))
 
 ; ------------
-(cog-set-value! (Evaluation (Predicate "cold") (Concept "me"))
+(cog-set-value! (Edge (Predicate "cold") (Concept "me"))
 	tvkey (FloatValue 0.9 0.8))
-(cog-set-value! (Evaluation (Predicate "tired") (Concept "her"))
+(cog-set-value! (Edge (Predicate "tired") (Concept "her"))
 	tvkey (FloatValue 0.6 0.1))
 
 (define (strength-of ATOM) (ElementOf (Number 0) (ValueOf ATOM tvkey)))
@@ -90,10 +94,10 @@
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(GreaterThan (strength-of
-					(Evaluation (Predicate "cold") (Variable "someone")))
+					(Edge (Predicate "cold") (Variable "someone")))
 				(Number 0.5))
 			(GreaterThan (strength-of
-					(Evaluation (Predicate "tired") (Variable "someone")))
+					(Edge (Predicate "tired") (Variable "someone")))
 				(Number 0.5))))))
 
 (test-assert "strong tired no confidence"
@@ -105,9 +109,9 @@
 		(Or
 			(Present (State (Variable "someone") (Concept "thirsty")))
 			(Not (GreaterThan (Number 0.5) (strength-of
-				(Evaluation (Predicate "cold") (Variable "someone")))))
+				(Edge (Predicate "cold") (Variable "someone")))))
 			(Not (GreaterThan (Number 0.5) (strength-of
-				(Evaluation (Predicate "tired") (Variable "someone")))))))))
+				(Edge (Predicate "tired") (Variable "someone")))))))))
 
 (test-assert "not strong tired no confidence"
 	(equal? (cog-execute! qr8)

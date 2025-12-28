@@ -53,7 +53,12 @@ public:
                           nameserver().isA(t, FRAME));
             }
             else if (t >= VALUE) {
+                printf("Expected Value at %d, got %d %s\n",
+                       VALUE, t, nameserver().getTypeName(t).c_str());
                 TS_ASSERT(nameserver().isA(t, VALUE));
+            }
+            else if (t >= SIG and t < VALUE) {
+                TS_ASSERT(nameserver().isA(t, SIG));
             }
             else {
                 TS_ASSERT(nameserver().isA(t, ARG));

@@ -19,10 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/Instantiator.h>
-
 #include "CondLink.h"
 
 using namespace opencog;
@@ -95,32 +91,19 @@ ValuePtr CondLink::execute(AtomSpace *scratch, bool silent)
 {
 	for (unsigned i = 0; i < conds.size(); ++i)
 	{
-		if (EvaluationLink::crisp_eval_scratch(scratch, conds[i], scratch, silent))
+		if (conds[i]->bevaluate(scratch, silent))
 		{
 			if (exps[i]->is_executable())
 				return exps[i]->execute(scratch, silent);
 
-			// Instantiator does the wrong kind of things inside of
-			// Evaluatable links. So don't let it go there.
-			if (exps[i]->is_type(EVALUATABLE_LINK))
-				return exps[i];
-
-			// At this time, not every Atom type knows how to execute
-			// itself. So if the above didn't work, try again, forcing
-			// further reduction.
-			Instantiator inst(scratch);
-			return inst.execute(exps[i]);
+			return exps[i];
 		}
 	}
 
 	if (default_exp->is_executable())
 		return default_exp->execute(scratch, silent);
 
-	if (default_exp->is_type(EVALUATABLE_LINK))
-		return default_exp;
-
-	Instantiator inst(scratch);
-	return inst.execute(default_exp);
+	return default_exp;
 }
 
 DEFINE_LINK_FACTORY(CondLink, COND_LINK)

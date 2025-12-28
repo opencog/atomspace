@@ -13,7 +13,6 @@ SET(CMAKE_CXX_FLAGS
 	"${CMAKE_CXX_FLAGS} -fno-strict-aliasing -Wno-unused-function")
 
 ADD_SUBDIRECTORY (opencog)
-ADD_SUBDIRECTORY (executioncontext)
 
 INCLUDE_DIRECTORIES(
 	${Python3_INCLUDE_DIRS}
@@ -24,12 +23,16 @@ INCLUDE_DIRECTORIES(
 # Python Module init
 FILE(MAKE_DIRECTORY opencog)
 FILE(COPY opencog/__init__.py DESTINATION opencog)
+FILE(COPY opencog/utilities.py DESTINATION opencog)
+FILE(COPY opencog/type_constructors.py DESTINATION opencog)
 
 ADD_LIBRARY(PythonEval
+	PythonError.cc
 	PythonEval.cc
+	PythonLoader.cc
 )
 
-ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython type_constructors)
+ADD_DEPENDENCIES(PythonEval py_atomspace_header atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	pattern
@@ -37,7 +40,7 @@ TARGET_LINK_LIBRARIES(PythonEval
 	atomflow
 	atombase
 	atomspace
-	executioncontext
+	framestack
 	${Python3_LIBRARIES}
 )
 
@@ -48,7 +51,7 @@ TARGET_LINK_LIBRARIES(PythonEval
 GET_FILENAME_COMPONENT(PYLIBNAME ${Python3_LIBRARIES} NAME)
 TARGET_COMPILE_DEFINITIONS(PythonEval PRIVATE PYLIBNAME="${PYLIBNAME}")
 
-INSTALL (TARGETS PythonEval EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS PythonEval EXPORT AtomSpaceTargets DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
 	PythonEval.h
@@ -76,11 +79,11 @@ IF(HAVE_GUILE)
 	ADD_GUILE_MODULE (FILES
 		opencog/python.scm
 		DEPENDS PythonSCM
-	#	COMPILE
+		COMPILE
 	)
 
 	INSTALL (TARGETS PythonSCM
 		EXPORT AtomSpaceTargets
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+		DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog"
 	)
 ENDIF(HAVE_GUILE)

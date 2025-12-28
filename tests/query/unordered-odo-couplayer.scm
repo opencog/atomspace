@@ -9,7 +9,7 @@
 ; See also unordered-odo-couple.scm for same test case, but with
 ; ordered embedding links.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; ----------------------------------------------------
 ; Coupled sets, expect 2! * (2! * 2!) = 8 permutations

@@ -2,7 +2,7 @@
 ; nested-and.scm
 ; Test recursively-nested AndLinks
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 (Evaluation (Predicate "has-a")
 	(List (Concept "car") (Concept "battery")))

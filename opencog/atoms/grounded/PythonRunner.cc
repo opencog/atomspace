@@ -43,11 +43,13 @@ PythonRunner::PythonRunner(std::string s)
 // ----------------------------------------------------------
 
 /// `execute()` -- evaluate a PythonRunner with arguments.
+/// Execution happens in the scratch space.
 ///
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
 ValuePtr PythonRunner::execute(AtomSpace* as,
+                               AtomSpace* scratch,
                                const ValuePtr& vargs,
                                bool silent)
 {
@@ -63,24 +65,9 @@ ValuePtr PythonRunner::execute(AtomSpace* as,
 	// draw the line here: the callee necesssarily expects
 	// arguments to be in the atomspace. So we add now.
 	Handle cargs = HandleCast(vargs);
-	Handle asargs = as->add_atom(cargs);
+	Handle asargs = scratch->add_atom(cargs);
 
-	PythonEval* applier = get_evaluator_for_python(as);
-	return applier->apply_v(as, _fname, asargs);
-}
-
-ValuePtr PythonRunner::evaluate(AtomSpace* as,
-                                const ValuePtr& vargs,
-                                bool silent)
-{
-	if (not vargs->is_atom())
-		throw SyntaxException(TRACE_INFO,
-			"PythonRunner: Expecting Handle; got %s",
-			vargs->to_string().c_str());
-
-	Handle cargs = HandleCast(vargs);
-	Handle asargs = as->add_atom(cargs);
-
-	PythonEval* applier = get_evaluator_for_python(as);
-	return applier->apply_v(as, _fname, asargs);
+	PythonEval* applier = get_evaluator_for_python(scratch);
+	ValuePtr vp(applier->apply_v(scratch, _fname, asargs));
+	return vp;
 }

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 #
 # nameserver_example.py
 #
@@ -9,10 +9,8 @@ walk the Type hierarchy.
 """
 
 from opencog.atomspace import *
-from opencog.type_constructors import *
+from opencog.atomspace import *
 
-# Tell the type constructors which atomspace to use.
-set_default_atomspace(AtomSpace())
 
 # A SetLink is of the type UnorderedLink. This can be checked directly.
 set_is_unordered = is_a(get_type("SetLink"), get_type("UnorderedLink"))

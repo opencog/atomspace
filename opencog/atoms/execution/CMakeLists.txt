@@ -3,16 +3,16 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (execution
-	Force.cc
+	EvaluatableLink.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
-	Instantiator.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(execution opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(execution
+	scope
 	parallel
 	clearbox
 	atomflow
@@ -22,13 +22,12 @@ TARGET_LINK_LIBRARIES(execution
 
 INSTALL (TARGETS execution
 	EXPORT AtomSpaceTargets
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
+	EvaluatableLink.h
 	EvaluationLink.h
 	ExecutionOutputLink.h
-	Force.h
 	GroundedProcedureNode.h
-	Instantiator.h
 	DESTINATION "include/opencog/atoms/execution"
 )

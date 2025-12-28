@@ -24,8 +24,8 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/ScopeLink.h>
-#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/scope/Variables.h>
 
 #include <tests/atoms/base/test_types.h>
 
@@ -50,7 +50,7 @@ public:
 // libs. This tests the code in opencog/atomspace#2809
 void FactoryUTest::testFactory(void)
 {
-	AtomSpace* as = new AtomSpace();
+	AtomSpacePtr as = createAtomSpace();
 
 	Handle t_intvl = al(TIME_INTERVAL_LINK, {
 	                    an(TIME_NODE, "1"),

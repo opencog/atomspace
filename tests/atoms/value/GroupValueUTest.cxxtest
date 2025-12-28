@@ -1,0 +1,220 @@
+/*
+ * tests/atoms/value/GroupValueUTest.cxxtest
+ *
+ * Copyright (C) 2025 BrainyBlaze LLC
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <opencog/atoms/value/GroupValue.h>
+#include <opencog/atoms/value/VoidValue.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
+
+#include <cxxtest/TestSuite.h>
+#include <vector>
+
+using namespace opencog;
+
+class GroupValueUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpacePtr _asp;
+
+public:
+	GroupValueUTest(void);
+
+	void setUp(void);
+	void test_group_by_size(void);
+	void test_single_bucket(void);
+	void test_all_different(void);
+};
+
+GroupValueUTest::GroupValueUTest(void)
+	: _asp(createAtomSpace())
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+	logger().set_sync_flag(true);
+	logger().set_timestamp_flag(false);
+}
+
+void GroupValueUTest::setUp(void)
+{
+}
+
+// =========================================================
+
+void GroupValueUTest::test_group_by_size(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a GroupValue that groups items by their arity (size).
+	// Two items are equivalent if they have the same size.
+	ValuePtr group_val = eval->eval_v(R"(
+		(GroupValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(Equal (SizeOf (Variable "$A")) (SizeOf (Variable "$B")))))
+	)");
+
+	GroupValuePtr gvp = GroupValueCast(group_val);
+	TS_ASSERT(gvp != nullptr);
+
+	// Create items of different sizes
+	Handle size1_a = eval->eval_h("(Item \"a\")");           // size 1
+	Handle size1_b = eval->eval_h("(Item \"b\")");           // size 1
+	Handle size2_a = eval->eval_h("(List (Item \"x\") (Item \"y\"))");  // size 2
+	Handle size2_b = eval->eval_h("(List (Item \"p\") (Item \"q\"))");  // size 2
+	Handle size3 = eval->eval_h("(List (Item \"1\") (Item \"2\") (Item \"3\"))");  // size 3
+
+	gvp->add(size1_a);
+	gvp->add(size2_a);
+	gvp->add(size1_b);  // Goes with size1_a
+	gvp->add(size3);
+	gvp->add(size2_b);  // Goes with size2_a
+
+	// Close the GroupValue
+	gvp->close();
+
+	// Remove buckets
+	std::vector<ValuePtr> buckets;
+	while (true)
+	{
+		ValuePtr bucket = gvp->remove();
+		if (bucket->is_type(VOID_VALUE))
+			break;
+		buckets.push_back(bucket);
+	}
+
+	// Should have 3 buckets: size-1, size-2, size-3
+	TS_ASSERT_EQUALS(buckets.size(), 3);
+
+	printf("GroupValue by size (%zu buckets):\n", buckets.size());
+	for (size_t i = 0; i < buckets.size(); i++)
+		printf("  Bucket[%zu]: %s\n", i, buckets[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// =========================================================
+
+void GroupValueUTest::test_single_bucket(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a GroupValue where all items are considered equivalent
+	// (always returns true). Use GreaterThan on 1 > 0 which is always true.
+	ValuePtr group_val = eval->eval_v(R"(
+		(GroupValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(GreaterThan (Number 1) (Number 0))))
+	)");
+
+	GroupValuePtr gvp = GroupValueCast(group_val);
+	TS_ASSERT(gvp != nullptr);
+
+	// Add multiple different items
+	Handle item_a = eval->eval_h("(Item \"a\")");
+	Handle item_b = eval->eval_h("(Item \"b\")");
+	Handle item_c = eval->eval_h("(Item \"c\")");
+
+	gvp->add(item_a);
+	gvp->add(item_b);
+	gvp->add(item_c);
+
+	// Close the GroupValue
+	gvp->close();
+
+	// Remove buckets
+	std::vector<ValuePtr> buckets;
+	while (true)
+	{
+		ValuePtr bucket = gvp->remove();
+		if (bucket->is_type(VOID_VALUE))
+			break;
+		buckets.push_back(bucket);
+	}
+
+	// Should have only 1 bucket containing all items
+	TS_ASSERT_EQUALS(buckets.size(), 1);
+
+	printf("Single bucket test (%zu buckets):\n", buckets.size());
+	for (size_t i = 0; i < buckets.size(); i++)
+		printf("  Bucket[%zu]: %s\n", i, buckets[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// =========================================================
+
+void GroupValueUTest::test_all_different(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_scheme_evaluator(_asp);
+
+	// Create a GroupValue where no items are considered equivalent
+	// (always returns false). Use GreaterThan on 0 > 1 which is always false.
+	ValuePtr group_val = eval->eval_v(R"(
+		(GroupValue
+			(Lambda
+				(VariableList (Variable "$A") (Variable "$B"))
+				(GreaterThan (Number 0) (Number 1))))
+	)");
+
+	GroupValuePtr gvp = GroupValueCast(group_val);
+	TS_ASSERT(gvp != nullptr);
+
+	// Add multiple items
+	Handle item_a = eval->eval_h("(Item \"a\")");
+	Handle item_b = eval->eval_h("(Item \"b\")");
+	Handle item_c = eval->eval_h("(Item \"c\")");
+
+	gvp->add(item_a);
+	gvp->add(item_b);
+	gvp->add(item_c);
+
+	// Close the GroupValue
+	gvp->close();
+
+	// Remove buckets
+	std::vector<ValuePtr> buckets;
+	while (true)
+	{
+		ValuePtr bucket = gvp->remove();
+		if (bucket->is_type(VOID_VALUE))
+			break;
+		buckets.push_back(bucket);
+	}
+
+	// Should have 3 buckets, one for each item
+	TS_ASSERT_EQUALS(buckets.size(), 3);
+
+	printf("All different test (%zu buckets):\n", buckets.size());
+	for (size_t i = 0; i < buckets.size(); i++)
+		printf("  Bucket[%zu]: %s\n", i, buckets[i]->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ======================THE END============================
+// =========================================================

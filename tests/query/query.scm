@@ -2,7 +2,7 @@
 ; query.scm -- QueryLink usage example.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; -------------
 ; Create three bits of "knowledge".

@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; filter-irc-eltof-test.scm -- Failiing FilterLink.
 ;
@@ -5,7 +8,7 @@
 ; ElementOfLink, and the original code was not checking for
 ; deeply nested ValueShims.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

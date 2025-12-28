@@ -178,11 +178,8 @@ SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
 
 SCM SchemeSmob::ss_atom_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
-		return SCM_BOOL_F;
-
-	if (not pa->is_atom())
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
 	return SCM_BOOL_T;
@@ -193,11 +190,11 @@ SCM SchemeSmob::ss_atom_p (SCM s)
 
 SCM SchemeSmob::ss_node_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (pa->is_node()) return SCM_BOOL_T;
+	if (h->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -207,11 +204,11 @@ SCM SchemeSmob::ss_node_p (SCM s)
 
 SCM SchemeSmob::ss_link_p (SCM s)
 {
-	ValuePtr pa(scm_to_protom(s));
-	if (nullptr == pa)
+	Handle h(scm_to_handle(s));
+	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (pa->is_link()) return SCM_BOOL_T;
+	if (h->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 
@@ -506,6 +503,10 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
 	Type t = verify_type(stype, "cog-node", 1);
+
+	if (not nameserver().isA(t, NODE))
+		scm_wrong_type_arg_msg("cog-node", 1, stype, "Node typename");
+
 	std::string name = verify_string (sname, "cog-node", 2,
 									"string name for the node");
 
@@ -513,9 +514,9 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-node");
 
-	// Now, look for the actual node... in the actual atom space.
+	// Now, look for the actual node... in the actual AtomSpace.
 	Handle h(asp->get_node(t, std::string(name)));
-	if (nullptr == h) return SCM_EOL;
+	if (nullptr == h) return SCM_BOOL_F;
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -754,6 +755,8 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
 	Type t = verify_type(stype, "cog-link", 1);
+	if (not nameserver().isA(t, LINK))
+		scm_wrong_type_arg_msg("cog-link", 1, stype, "Link typename");
 
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
@@ -762,7 +765,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_link(t, std::move(outgoing_set)));
-	if (nullptr == h) return SCM_EOL;
+	if (nullptr == h) return SCM_BOOL_F;
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

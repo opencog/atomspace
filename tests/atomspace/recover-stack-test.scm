@@ -1,3 +1,6 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; recover-stack-test.scm
 ;
@@ -40,9 +43,9 @@
 (define (recompute N NLOOP)
 	(when (< 0 NLOOP)
 		(make-atoms N)
-		(cog-set-atomspace! (cog-new-atomspace (cog-atomspace)))
+		(cog-set-atomspace! (AtomSpace (cog-atomspace)))
 		(cog-extract-recursive! (Concept "bar"))
-		(cog-set-atomspace! (cog-new-atomspace (cog-atomspace)))
+		(cog-set-atomspace! (AtomSpace (cog-atomspace)))
 		(recompute (+ N 3) (- NLOOP 1)))
 )
 

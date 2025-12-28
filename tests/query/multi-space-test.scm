@@ -1,9 +1,12 @@
+#! /usr/bin/env guile
+-s
+!#
 ;
 ; multi-space-test.scm -- Using multiple AtomSpaces at the same time.
 ; This is the unit test for the `multi-space.scm` demo.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 (use-modules (opencog test-runner))
 
 (opencog-test-runner)

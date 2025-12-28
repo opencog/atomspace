@@ -2,16 +2,27 @@
 def createLinkValue(arg):
     cdef shared_ptr[cLinkValue] c_ptr
     if (isinstance(arg, list)):
-        c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector(arg)))
+        c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector(arg))
     else:
-        c_ptr.reset(new cLinkValue(LinkValue.list_of_values_to_vector([arg])))
-    return LinkValue(PtrHolder.create(<shared_ptr[cValue]&>(c_ptr, c_ptr.get())))
+        c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector([arg]))
+    cdef LinkValue instance = LinkValue.__new__(LinkValue)
+    instance.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+    return instance
 
 cdef class LinkValue(Value):
 
+    def __init__(self, arg=None):
+        cdef shared_ptr[cLinkValue] c_ptr
+        if arg is not None:
+            if isinstance(arg, list):
+                c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector(arg))
+            else:
+                c_ptr = c_createLinkValue(LinkValue.list_of_values_to_vector([arg]))
+            self.shared_ptr = <cValuePtr&>(c_ptr, c_ptr.get())
+
     def to_list(self):
         return LinkValue.vector_of_values_to_list(
-            &((<cLinkValue*>self.get_c_value_ptr().get()).value()))
+            &((<cLinkValue*>self.get_c_raw_ptr()).value()))
 
     @staticmethod
     cdef vector[cValuePtr] list_of_values_to_vector(list python_list):

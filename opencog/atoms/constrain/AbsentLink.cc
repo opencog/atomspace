@@ -1,0 +1,60 @@
+/*
+ * AbsentLink.cc
+ *
+ * Copyright (C) 2017, 2021 Linas Vepstas
+ *
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009, 2015, 2017
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the
+ * exceptions at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include "AbsentLink.h"
+
+using namespace opencog;
+
+AbsentLink::AbsentLink(const HandleSeq&& oset, Type t)
+	: PresentLink(std::move(oset), t)
+{
+	if (not nameserver().isA(t, ABSENT_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an AbsentLink, got %s", tname.c_str());
+	}
+}
+
+/// Return true, if none of the outgoing set is present in the
+/// indicated AtomSpace. It only makes sense to call this if
+/// the current "this" pointer is not in any AtomSpace.
+bool AbsentLink::bevaluate(AtomSpace* as, bool silent)
+{
+	if (nullptr == as) return true;
+
+	for (const Handle& h : _outgoing)
+	{
+		Handle maybe(as->get_atom(h));
+		if (maybe) return false;
+	}
+
+	return true;
+}
+
+// ---------------------------------------------------------------
+
+DEFINE_LINK_FACTORY(AbsentLink, ABSENT_LINK)
+
+/* ===================== END OF FILE ===================== */

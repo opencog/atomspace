@@ -248,7 +248,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  *    implemented for the C++ types, this seems plausible. However,
  *    actually writing code to do this, and making it run as a plug
  *    in module for other scheme modules not in the git repo... ouch.
- *    Seems complicated, and I could not thik of a good way of doing
+ *    Seems complicated, and I could not think of a good way of doing
  *    this. So punt on the factory idea.
  *
  * Option B)
@@ -283,31 +283,40 @@ ValuePtr SchemeSmob::make_value (Type t, SCM svalue_list)
 	// First, look to see if explicit argument types are given.
 	// If they are, and the scheme value matches the argument
 	// type, then run the constructor for that argument type.
-	if (just_one_arg and
-	    nameserver().isA(t, STRING_ARG) and
-	    scm_is_string(first_arg))
+	if (just_one_arg)
 	{
-		std::string name = verify_string(first_arg, "cog-new-value", 2);
-		return valueserver().create(t, std::move(name));
-	}
-
-	if (just_one_arg and
-	    nameserver().isA(t, HANDLE_ARG))
-	{
-		ValuePtr vp(scm_to_protom(first_arg));
-		if (vp and vp->is_atom())
+		if (nameserver().isA(t, STRING_ARG) and
+		    scm_is_string(first_arg))
 		{
-			Handle h(verify_handle(first_arg, "cog-new-value", 2));
-			return valueserver().create(t, h);
+			std::string name = verify_string(first_arg, "cog-new-value", 2);
+			return valueserver().create(t, std::move(name));
 		}
-	}
 
-	if (just_one_arg and
-	    nameserver().isA(t, INT_ARG) and
-	    scm_is_integer(first_arg))
-	{
-		int dim = verify_int(first_arg, "cog-new-value", 2);
-		return valueserver().create(t, dim);
+	   if (nameserver().isA(t, HANDLE_ARG))
+		{
+			ValuePtr vp(scm_to_protom(first_arg));
+			if (vp and vp->is_atom())
+			{
+				Handle h(verify_handle(first_arg, "cog-new-value", 2));
+				return valueserver().create(t, h);
+			}
+		}
+
+		if (nameserver().isA(t, INT_ARG) and
+		    scm_is_integer(first_arg))
+		{
+			int dim = verify_int(first_arg, "cog-new-value", 2);
+			return valueserver().create(t, dim);
+		}
+
+	   if (nameserver().isA(t, VALUE_ARG))
+		{
+			ValuePtr vp(scm_to_protom(first_arg));
+			return valueserver().create(t, vp);
+		}
+
+		// Hmm. We have to fall through, here, to handle the other cases.
+		// scm_wrong_type_arg_msg("cog-new-value", 1, svalue_list, "single value");
 	}
 
 	// -------------------------
@@ -501,14 +510,14 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<float> v = Float32ValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = (float) verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloat32Value(t, v);
+		nvp = valueserver().create(t, v);
 	}
 	else if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		std::vector<double> v = FloatValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = createFloatValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, BOOL_VALUE))
@@ -516,7 +525,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<bool> v = BoolValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
-		nvp = createBoolValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, STRING_VALUE))
@@ -524,7 +533,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<std::string> v = StringValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
-		nvp = createStringValue(t, v);
+		nvp = valueserver().create(t, v);
 	}
 
 	if (nameserver().isA(t, LINK_VALUE))
@@ -532,7 +541,7 @@ SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
 		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
 		if (v.size() <= index) v.resize(index+1);
 		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = createLinkValue(t, std::move(v));
+		nvp = valueserver().create(t, std::move(v));
 	}
 
 	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");

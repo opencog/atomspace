@@ -2,7 +2,7 @@
 ; dynamic.scm -- test-case version of `flow-formulas.scm` example.
 ;
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; For DynamicUTest::test_predicate_formula()
 
@@ -58,10 +58,10 @@
 
 (cog-execute!
 	(SetValue a-implies-b tvkey
-		(PromiseLink
+		(CollectionOfLink (Type 'FormulaStream) (OrderedLink
 			(ExecutionOutput
 				(DefinedProcedure "has a reddish color")
-				(List (Concept "A") (Concept "B"))))))
+				(List (Concept "A") (Concept "B")))))))
 
 ; -----------
 ; For DynamicUTest::test_defined_dynamic()
@@ -71,10 +71,10 @@
 	(SetValue
 		(Implication (Concept "P") (Concept "Q"))
 		tvkey
-		(PromiseLink
+		(CollectionOfLink (Type 'FormulaStream) (OrderedLink
 			(ExecutionOutput
 				(DefinedProcedure "has a reddish color")
-				(List (Concept "A") (Concept "B"))))))
+				(List (Concept "A") (Concept "B")))))))
 
 ; -------------------------------------------------------------
 ; for DynamicUTest::test_formula_stream()

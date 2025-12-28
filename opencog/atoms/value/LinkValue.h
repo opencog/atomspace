@@ -43,11 +43,13 @@ class LinkValue
 	: public Value
 {
 	friend class TransposeColumn;
+	friend class FlatStream;
 
 protected:
 	mutable std::vector<ValuePtr> _value;
 	virtual void update() const {}
 
+	std::string to_string(const std::string&, Type) const;
 	LinkValue(Type t) : Value(t) {}
 public:
 	LinkValue(void)
@@ -62,6 +64,7 @@ public:
 	LinkValue(ValueSeq&& vlist)
 		: Value(LINK_VALUE), _value(std::move(vlist)) {}
 
+protected:
 	LinkValue(Type t, const ValueSeq& vlist)
 		: Value(t), _value(vlist) {}
 
@@ -77,6 +80,7 @@ public:
 	LinkValue(Type t, const HandleSet& hset)
 		: Value(t), _value(hset.begin(), hset.end()) {}
 
+public:
 	LinkValue(const ValueSet& vset)
 		: Value(LINK_VALUE), _value(vset.begin(), vset.end()) {}
 
@@ -94,7 +98,8 @@ public:
 	size_t size() const { return _value.size(); }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent = "") const;
+	virtual std::string to_string(const std::string& indent = "") const
+	{ return to_string(indent, _type); }
 	virtual std::string to_short_string(const std::string& indent = "") const;
 
 	/** Returns true if the two atoms are equal, else false.  */

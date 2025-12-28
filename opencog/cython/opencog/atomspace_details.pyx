@@ -2,106 +2,175 @@ from libcpp cimport bool
 from libcpp.set cimport set as cpp_set
 from libcpp.vector cimport vector
 from libcpp.memory cimport static_pointer_cast
+from libcpp.string cimport string as cpp_string
 from cython.operator cimport dereference as deref, preincrement as inc
+import cython
+import warnings
 
 # from atomspace cimport *
 
-# tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*") which
-# is the key under which all TruthValues are stored.
+cdef extern from "Python.h":
+    bint PyBool_Check(object)
+
+# tvkey holds a pointer to (PredicateNode "*-TruthValueKey-*").
+# This is technically obsolete, but is heavily used in the unit tests.
+# So, for now, leave it as a weirdo backwards compatibility hack,
+# XXX FIXME -- remove this someday.
 tvkey = create_python_value_from_c_value(<cValuePtr>(truth_key()))
 
 # @todo use the guide here to separate out into a hierarchy
 # http://wiki.cython.org/PackageHierarchy
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles):
     cdef vector[cHandle].iterator handle_iter
     cdef cHandle handle
-    result = []
+    cdef Py_ssize_t size = <Py_ssize_t>handles.size()
+    cdef list result = [None] * size
+    cdef Py_ssize_t idx = 0
     handle_iter = handles.begin()
     while handle_iter != handles.end():
         handle = deref(handle_iter)
-        value = create_python_value_from_c_value(<cValuePtr&>(handle, handle.get()))
-        result.append(value)
+        result[idx] = create_python_value_from_c_value(<cValuePtr&>(handle, handle.get()))
         inc(handle_iter)
+        idx += 1
     return result
 
 cdef convert_handle_set_to_python_list(cpp_set[cHandle] handles):
     return [create_python_value_from_c_value(<cValuePtr&>(h, h.get())) for h in handles]
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef vector[cHandle] atom_list_to_vector(list lst):
     cdef vector[cHandle] handle_vector
+    handle_vector.reserve(len(lst))
     for atom in lst:
         if isinstance(atom, Atom):
-            handle_vector.push_back(deref((<Atom>(atom)).handle))
+            handle_vector.push_back(<cHandle&>(<Atom>atom).shared_ptr)
         else:
-            raise TypeError("outgoing set should contain atoms, got {0} instead".format(type(atom)))
+            raise TypeError("Outgoing set should contain atoms, got {0} instead".format(type(atom)))
     return handle_vector
 
 
 cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
-    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) except +
+    cdef cValuePtr c_do_execute_atom "do_execute"(cAtomSpace*, cHandle) nogil except +
 
 
-cdef AtomSpace_factoid(cValuePtr to_wrap):
+cdef AtomSpace_factoid(cHandle to_wrap):
+    if to_wrap.get() == NULL:
+        raise RuntimeError("Cannot create AtomSpace from null pointer")
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
-    instance.asp = to_wrap
-    instance.atomspace = <cAtomSpace*> to_wrap.get()
-    # print("Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap.get()))
+    instance.shared_ptr = static_pointer_cast[cValue, cAtom](to_wrap)
+    instance.parent_atomspace = None
     return instance
 
 
-cdef class AtomSpace(Value):
-    # these are defined in atomspace.pxd:
-    # cdef cAtomSpace *atomspace
-    # cdef object parent_atomspace
+cdef object raise_python_exception_from_cpp(const cPythonException& exc):
+    """Convert C++ PythonException back to native Python exception"""
+    cdef cpp_string exc_type_cpp = exc.get_python_exception_type()
+    cdef const char* exc_msg_c = exc.get_message()
 
-    # A tacky hack to pass in a pointer to an atomspace from C++-land.
-    # basically, pass an int, and cast it to the C++ pointer.  This
-    # works, but is not very safe, and has a certain feeling of "ick"
-    # about it.  But I can't find any better way.
-    def __init__(self, long addr = 0, object parent=None):
-        if (addr == 0) :
-            self.asp = createAtomSpace(<cAtomSpace*> NULL)
-        else :
-            self.asp = as_cast(<cAtomSpace*> PyLong_AsVoidPtr(addr))
-        self.atomspace = <cAtomSpace*> self.asp.get()
+    exc_type_name = exc_type_cpp.decode('utf-8')
+    exc_message = exc_msg_c.decode('utf-8') if exc_msg_c else ""
+
+    # Map to Python exception type
+    exception_map = {
+        'TypeError': TypeError,
+        'ValueError': ValueError,
+        'ZeroDivisionError': ZeroDivisionError,
+        'AttributeError': AttributeError,
+        'ImportError': ImportError,
+        'ModuleNotFoundError': ModuleNotFoundError,
+        'KeyError': KeyError,
+        'IndexError': IndexError,
+        'NameError': NameError,
+        'RuntimeError': RuntimeError,
+    }
+
+    exc_class = exception_map.get(exc_type_name, RuntimeError)
+    raise exc_class(exc_message)
+
+
+cdef class AtomSpace(Atom):
+    def __init__(self, arg=None, object parent=None):
+        """Create a new AtomSpace.
+
+        Args:
+            arg: Optional first argument - either a string (name) or
+                 an AtomSpace (parent reference).
+            parent: Optional parent atomspace reference (keyword only).
+
+        Examples:
+            AtomSpace()                    # unnamed, no parent
+            AtomSpace("my-space")          # named, no parent
+            AtomSpace(parent_as)           # unnamed, with parent
+            AtomSpace("my-space", parent_as)  # named, with parent
+
+        Creates a new C++ AtomSpace. If there is a current thread
+        atomspace, the new atomspace is inserted into it. (The guile
+        bindings also do it this way.)
+
+        To wrap an existing C++ AtomSpace pointer, use AtomSpace_factoid().
+        """
+        # Parse the first argument - could be name (string) or parent (AtomSpace)
+        cdef object name = None
+        if arg is not None:
+            if isinstance(arg, str):
+                name = arg
+            elif isinstance(arg, AtomSpace):
+                if parent is not None:
+                    raise TypeError("Parent specified twice")
+                parent = arg
+            else:
+                raise TypeError("First argument must be a string (name) or AtomSpace (parent)")
+
+        # Create the atomspace, passing parent to C++ if specified
+        cdef cHandle new_as
+        cdef cAtomSpace* parent_asp
+        if parent is not None:
+            parent_asp = <cAtomSpace*>(<AtomSpace>parent).shared_ptr.get()
+            new_as = createAtomSpace(parent_asp)
+        else:
+            new_as = createAtomSpace(<cAtomSpace*> NULL)
+
+        self.shared_ptr = static_pointer_cast[cValue, cAtom](new_as)
         self.parent_atomspace = parent
-        self.ptr_holder = PtrHolder.create(<shared_ptr[cValue]&>self.asp);
 
-    cdef cAtomSpacePtr get_atomspace_ptr(self):
-        # Cast the ValuePtr to AtomSpacePtr
-        return static_pointer_cast[cAtomSpace, cValue](self.asp)
+        # Set the name if provided
+        cdef cAtomSpace* asp
+        if name is not None:
+            asp = <cAtomSpace*>self.shared_ptr.get()
+            asp.set_name(name.encode('UTF-8'))
+
+        # Insert into current atomspace if one exists
+        cdef cValuePtr ctx = get_frame()
+        cdef cAtomSpace* ctx_as
+        if ctx.get() != NULL:
+            ctx_as = <cAtomSpace*>ctx.get()
+            ctx_as.add_atom(new_as)
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
             return NotImplemented
         cdef AtomSpace atomspace_1 = <AtomSpace>as_1
-        cdef AtomSpace atomspace_2 = <AtomSpace>as_1
-
-        cdef cValuePtr c_atomspace_1 = atomspace_1.asp
-        cdef cValuePtr c_atomspace_2 = atomspace_2.asp
+        cdef AtomSpace atomspace_2 = <AtomSpace>as_2
 
         is_equal = True
-        if c_atomspace_1 != c_atomspace_2:
+        if atomspace_1.shared_ptr != atomspace_2.shared_ptr:
             is_equal = False
         if op == 2: # ==
             return is_equal
         elif op == 3: # !=
             return not is_equal
 
-    def add(self, Type t, name=None, out=None):
-        """ add method that determines exact method to call from type """
-        if is_a(t, types.Node):
-            assert out is None, "Nodes can't have outgoing sets"
-            atom = self.add_node(t, name)
-        else:
-            assert name is None, "Links can't have names"
-            atom = self.add_link(t, out)
-        return atom
-
     def add_atom(self, Atom atom):
-        cdef cHandle result = self.atomspace.add_atom(atom.get_c_handle())
+        cdef cHandle h = <cHandle&>atom.shared_ptr
+        cdef cHandle result
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.add_atom(h)
         if result == result.UNDEFINED:
             return None
         return create_python_value_from_c_value(<cValuePtr&>(result, result.get()))
@@ -111,13 +180,13 @@ cdef class AtomSpace(Value):
         @todo support type name for type.
         @returns the newly created Atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-
-        # See comments on encoding "invalid" bytes in utilities.pyx
+        # See comments on encoding "invalid" bytes in type_ctors.pyx
         # These bytes are from Microsoft Windows doggie litter.
         cdef string name = atom_name.encode('UTF-8', 'surrogateescape')
-        cdef cHandle result = self.atomspace.xadd_node(t, name)
+        cdef cHandle result
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.xadd_node(t, name)
 
         if result == result.UNDEFINED: return None
         return Atom.createAtom(result);
@@ -127,27 +196,28 @@ cdef class AtomSpace(Value):
         @todo support type name for type.
         @returns handle referencing the newly created Atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         # create temporary cpp vector
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
         cdef cHandle result
-        result = self.atomspace.xadd_link(t, handle_vector)
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.xadd_link(t, handle_vector)
         if result == result.UNDEFINED: return None
         return Atom.createAtom(result);
 
     def is_valid(self, atom):
         """ Check whether the passed handle refers to an actual atom
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         try:
             assert isinstance(atom, Atom)
         except AssertionError:
             raise TypeError("Need Atom object")
-        if self.atomspace.is_valid_handle(deref((<Atom>atom).handle)):
-            return True
-        return False
+        cdef bint result
+        cdef cHandle h = <cHandle&>(<Atom>atom).shared_ptr
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.is_valid_handle(h)
+        return result
 
     def remove(self, Atom atom, recursive=False):
         """ Removes an atom from the atomspace
@@ -160,39 +230,42 @@ cdef class AtomSpace(Value):
         Returns True if the Atom was successfully removed. False, otherwise.
 
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef bint recurse = recursive
-        return self.atomspace.extract_atom(deref(atom.handle),recurse)
+        cdef bint result
+        cdef cHandle h = <cHandle&>atom.shared_ptr
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.extract_atom(h, recurse)
+        return result
 
     def clear(self):
         """ Remove all atoms from the AtomSpace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-        self.atomspace.clear()
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            asp.clear()
 
     def set_value(self, Atom atom, Atom key, Value value):
         """ Set the value on the atom at key
+        Returns the atom (which may be a new atom instance)
         """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-        self.atomspace.set_value(deref(atom.handle), deref(key.handle),
-                                 value.get_c_value_ptr())
+        cdef cHandle result
+        cdef cHandle atom_h = <cHandle&>atom.shared_ptr
+        cdef cHandle key_h = <cHandle&>key.shared_ptr
+        cdef cValuePtr val_ptr = value.get_c_value_ptr()
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.set_value(atom_h, key_h, val_ptr)
+        return Atom.createAtom(result)
 
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
         cdef cHandle result
-        result = self.atomspace.get_atom(deref((<Atom>(atom)).handle))
+        cdef cHandle h = <cHandle&>(<Atom>atom).shared_ptr
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.get_atom(h)
         return result != result.UNDEFINED
-
-    # Maybe this should be called __repr__ ???
-    def __str__(self):
-        """ Description of the atomspace """
-        return ("<AtomSpace\n" +
-                "   addr: " + hex(<long>self.atomspace) + "\n" +
-                "   name: " + self.atomspace.get_name().decode('UTF-8') + ">\n"
-               )
 
     def __len__(self):
         """ Return the number of atoms in the AtomSpace """
@@ -200,54 +273,87 @@ cdef class AtomSpace(Value):
 
     def __iter__(self):
         """ Support iterating across all atoms in the atomspace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         return iter(self.get_atoms_by_type(types.Atom))
 
     def size(self):
         """ Return the number of atoms in the AtomSpace """
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
-        return self.atomspace.get_size()
+        cdef int result
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.get_size()
+        return result
 
     # query methods
     def get_atoms_by_type(self, Type t, subtype = True):
-        if self.atomspace == NULL:
-            raise RuntimeError("Null AtomSpace!")
         cdef vector[cHandle] handle_vector
         cdef bint subt = subtype
-        self.atomspace.get_handles_by_type(handle_vector,t,subt)
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            asp.get_handles_by_type(handle_vector,t,subt)
         return convert_handle_seq_to_python_list(handle_vector)
 
     def is_node_in_atomspace(self, Type t, s):
         cdef string name = s.encode('UTF-8', 'surrogateescape')
-        result = self.atomspace.xget_handle(t, name)
+        cdef cHandle result
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.xget_handle(t, name)
         return result != result.UNDEFINED
 
     def is_link_in_atomspace(self, Type t, outgoing):
         cdef vector[cHandle] handle_vector = atom_list_to_vector(outgoing)
-        result = self.atomspace.xget_handle(t, handle_vector)
+        cdef cHandle result
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        with nogil:
+            result = asp.xget_handle(t, handle_vector)
         return result != result.UNDEFINED
 
     def execute(self, Atom atom):
         if atom is None:
             raise ValueError("No atom provided!")
-        cdef cValuePtr c_value_ptr = c_do_execute_atom(
-            self.atomspace, deref(atom.handle))
-        return create_python_value_from_c_value(c_value_ptr)
+        cdef cValuePtr c_value_ptr
+        cdef cHandle h = <cHandle&>atom.shared_ptr
+        cdef cAtomSpace* asp = <cAtomSpace*>self.shared_ptr.get()
+        try:
+            with nogil:
+                c_value_ptr = c_do_execute_atom(asp, h)
+            return create_python_value_from_c_value(c_value_ptr)
+        except RuntimeError as e:
+            cpp_except_to_pyerr(e)
 
-cdef api object py_atomspace(cValuePtr c_atomspace) with gil:
-    cdef AtomSpace atomspace = AtomSpace_factoid(c_atomspace)
-    return atomspace
+cdef api object py_atom(cHandle h):
+    return create_python_value_from_c_value(<cValuePtr&>(h, h.get()))
 
-cdef api object py_atom(const cHandle& h):
-    cdef Atom atom = Atom.createAtom(h)
-    return atom
+# Older cythons (before 2024) get compiler errors with the noexcept
+# keyword. Newer cythons without it get nag notes about optimization.
+# ubuntu-24.04 works; ubuntu-22.04 fails; debian-bokworm (2023) fails
+# cdef api cValuePtr py_value_ptr(object py_value) noexcept with gil:
+cdef api cValuePtr py_value_ptr(object py_value) with gil:
+    """Extract C++ ValuePtr from Python Value object.
+
+    Handles Python booleans by converting them to BoolValue.
+    Returns a copy of the C++ shared_ptr (24-byte smart pointer).
+    The copy increments the refcount, so the C++ object stays alive.
+    """
+    cdef bool bval
+
+    # Handle Python boolean (True or False) -> BoolValue
+    if PyBool_Check(py_value):
+        bval = (py_value == True)
+        return <cValuePtr>c_createBoolValue_single(bval)
+
+    # Handle Value objects (Atoms, BoolValue, etc.)
+    if not isinstance(py_value, Value):
+        return cValuePtr()  # Return null/empty shared_ptr
+    return (<Value>py_value).shared_ptr
 
 def create_child_atomspace(object atomspace):
-    cdef cValuePtr asp = createAtomSpace((<AtomSpace>(atomspace)).atomspace)
-    cdef AtomSpace result = AtomSpace_factoid(asp)
-    result.parent_atomspace = atomspace
-    return result
+    """Deprecated: Use AtomSpace(parent) instead."""
+    warnings.warn(
+        "create_child_atomspace() is deprecated, use AtomSpace(parent) instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return AtomSpace(atomspace)
 
 # ====================== end of file ============================

@@ -34,15 +34,31 @@ Listed in order of dependency:
  * `value` -- The C++ base class for Atoms and for Values. The
    `FloatValue`, `StringValue` and `LinkValue` are defined here.
 
- * `truthvalue` -- various kinds of `TruthValue`s are defined here.
-
  * `base` -- The C++ base classes for `Atom`, `Node` and `Link` are
    defined here. The Atom factory (aka `classserver`) is defined here.
 
- * `core` -- A large collection of Atoms that have "fairly simple"
-   C++ classes behind them.  Here, "fairly simple" means that they do
-   not depend on other C++ subsystems, such as scheme, python, the
-   pattern matcher, etc.
+ * `core` -- A small miscellaneous collection of unrelated Atoms.
+   This used to be a large directory of "core" Atoms, but has been
+   split into smaller, more managable groupings.
+
+ * `free` -- Atoms and utilities for picking out VariableNodes from
+   expressions. These deal mostly with "free variables", i.e.
+   expressions that do not bind the variables in them. Some simpler
+   beta-reduction tools are here.
+
+ * `scope` -- Atoms and utilities that define Lambda expressions,
+   and the related mechanics for scoping (binding) variables.
+   Includes utilities for working with Quoted expressions, plus
+   more complex beta-reduction code that can deal with scoped
+   variables, and quoted expressions.
+
+   TODO:
+   -- There are half-a-dozen re-implementations of beta reduction.
+      Some are simple, lightwieght and fast; others are complicated
+      and gnarly. There's probably lots of duplication that could be
+      removed.
+   -- The Quotation design seems to be over-complex, opaque and
+      certainly half-broken in many ways. It needs to be fixed.
 
  * `flow` -- Atoms that move (get/set) Values from/to Atoms.
 

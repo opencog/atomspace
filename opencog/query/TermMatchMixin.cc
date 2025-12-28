@@ -24,11 +24,9 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/core/FindUtils.h>
-#include <opencog/atoms/core/Replacement.h>
-#include <opencog/atoms/core/StateLink.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atomspace/Transient.h>
+#include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/free/Replacement.h>
+#include <opencog/atoms/grant/StateLink.h>
 
 #include "TermMatchMixin.h"
 
@@ -72,7 +70,7 @@ Set set_intersection(const Set& s1, const Set& s2)
 TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 	_nameserver(nameserver())
 {
-	_temp_aspace = grab_transient_atomspace(as);
+	_temp_aspace = createAtomSpace(AtomSpaceCast(as));
 
 	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(SEQUENTIAL_OR_LINK);
@@ -87,12 +85,8 @@ TermMatchMixin::TermMatchMixin(AtomSpace* as) :
 
 TermMatchMixin::~TermMatchMixin()
 {
-	// If we have a transient atomspace, release it.
-	if (_temp_aspace)
-	{
-		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = nullptr;
-	}
+	// The temp atomspace will be automatically released
+	// when the shared_ptr goes out of scope.
 }
 
 /* ======================================================== */
@@ -414,11 +408,9 @@ bool TermMatchMixin::clause_match(const Handle& ptrn,
 		// does not contain any variables, and so does not need any
 		// further grounding. This actually seems reasonable. The second
 		// assumption is that the EvaluationLink is actually evaluatable,
-		// which seems reasonable, except that everything else in the
-		// default callback ignores the TV on EvaluationLinks. So this
-		// is kind-of schizophrenic here.  Not sure what else to do.
+		// which seems reasonable.
 		_temp_aspace->clear();
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, grnd, _temp_aspace);
+		bool crispy = grnd->bevaluate(_temp_aspace.get());
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yielded: "
 		                      << crispy << std::endl;})
@@ -475,8 +467,8 @@ bool TermMatchMixin::optional_clause_match(const Handle& ptrn,
  * used by the pattern matcher.) The AlwaysLink must always be
  * satsifed, every time it is called, from the beginning of the
  * search to the end.  The AlwaysLinks is satsified whenever
- * grnd != null, and otherwise, if fails. That is, if grnd==nullptr
- * then there is some grounding of (all of) the other clauses of
+ * grnd != null, and otherwise, it fails. That is, if grnd==nullptr
+ * then there is some grounding of (all of) the other clauses in
  * the pattern, with AlwaysLink failing to be satisfied. Reject
  * this case, now and forever. (viz, this is stateful.)
  */
@@ -523,7 +515,7 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	_temp_aspace->clear();
 	try
 	{
-		bool crispy = EvaluationLink::crisp_eval_scratch(_as, gvirt, _temp_aspace, true);
+		bool crispy = gvirt->bevaluate(_temp_aspace.get(), true);
 		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
 		                      << crispy << std::endl;})
 		return crispy;

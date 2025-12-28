@@ -75,37 +75,18 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "Profile")
 # Listed in alphabetical order, more or less.
 # CogUtil must come first, because it supplies various FindXXX macros.
 
-# Add the 'lib' dir to cmake's module search path
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
-
 # Cogutil
-FIND_PACKAGE(CogUtil CONFIG)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
+FIND_PACKAGE(CogUtil 2.2.1 CONFIG REQUIRED)
+IF (NOT COGUTIL_FOUND)
 	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed!")
-ENDIF (COGUTIL_FOUND)
+ENDIF ()
 
-# add the 'cmake' directory from cogutil to search path
-list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 include(OpenCogGccOptions)
 include(OpenCogLibOptions)
 include(OpenCogInstallOptions)
 include(Summary)
 
 # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
-
-# ----------------------------------------------------------
-# Optional, but needed for unit tests.
-
-FIND_PACKAGE(Cxxtest)
-IF (CXXTEST_FOUND)
-	MESSAGE(STATUS "CxxTest found.")
-ELSE (CXXTEST_FOUND)
-	MESSAGE(STATUS "CxxTest missing: needed for unit tests.")
-ENDIF (CXXTEST_FOUND)
 
 # ----------------------------------------------------------
 # Optional, uses slightly more efficient replacement for std::set
@@ -144,7 +125,7 @@ IF (SPARSEHASH_FOUND)
 	# The below is used in atomspace.pc for pkg-config
 	# SET(ATOMSPACE_CFLAGS "-DHAVE_SPARSEHASH -DUSE_SPARSE_INCOMING")
 ELSE (SPARSEHASH_FOUND)
-	MESSAGE(STATUS "SparseHash missing: provides more efficient std::set replacement.")
+	MESSAGE(STATUS "SparseHash missing: provides efficient std::set replacement.")
 ENDIF (SPARSEHASH_FOUND)
 
 # ----------------------------------------------------------
@@ -212,85 +193,19 @@ ADD_SUBDIRECTORY(cmake)
 ADD_SUBDIRECTORY(opencog)
 ADD_SUBDIRECTORY(lib)
 
-IF (CXXTEST_FOUND)
-	ADD_CUSTOM_TARGET(tests)
-	ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
-	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# doing coverage stuff while running tests if this is the Coverage build
-		ADD_CUSTOM_TARGET(covtest
-			# TODO lcov should be found by cmake first
-			# TODO set it up so that we can pick to run coverage per test, or
-			# combined across all tests (the latter is MUCH faster). Use a define?
-			# There is coverage specific stuff in AddCxxTest.cmake now...
-			# -
-			WORKING_DIRECTORY tests
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			COMMENT "Running tests with coverage..."
-		)
-		ADD_CUSTOM_TARGET(check
-			DEPENDS covtest
-			WORKING_DIRECTORY ./
-			# This script combines the coverage analysis of each test,
-			# then creates html in tests/lcov
-			# COMMAND genhtml -o ../lcov -t "All AtomSpace unit tests" *.info
-			COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
-			COMMENT "Generating lcov report..."
-		)
-	ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-		# Coverage is disabled; test normally
-		ADD_CUSTOM_TARGET(check
-			DEPENDS tests
-			WORKING_DIRECTORY tests
-			# COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
-			COMMENT "Running tests..."
-		)
-	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+# ----------------------------------------------------------
+# Setup testing infrastructure (tests target, check target)
+INCLUDE(OpenCogTestOptions)
+OPENCOG_SETUP_TESTING()
 
-	ADD_CUSTOM_TARGET(test_atomese
-		DEPENDS tests
-		WORKING_DIRECTORY tests/atoms
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Atomese tests..."
-	)
-	ADD_CUSTOM_TARGET(test_atomspace
-		DEPENDS tests
-		WORKING_DIRECTORY tests/atomspace
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Atomspace tests..."
-	)
-	ADD_CUSTOM_TARGET(test_flow
-		DEPENDS tests
-		DEPENDS tests/atoms/flow
-		WORKING_DIRECTORY tests/atoms/flow
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Flow/stream tests..."
-	)
-	ADD_CUSTOM_TARGET(test_guile
-		DEPENDS tests
-		WORKING_DIRECTORY tests/scm
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Guile and Python-bridge tests..."
-	)
-	ADD_CUSTOM_TARGET(test_join
-		DEPENDS tests
-		DEPENDS tests/atoms/container
-		WORKING_DIRECTORY tests/atoms/container
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Pattern Container tests..."
-	)
-	ADD_CUSTOM_TARGET(test_python
-		WORKING_DIRECTORY tests/cython
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Python and Cython tests..."
-	)
-	ADD_CUSTOM_TARGET(test_query
-		DEPENDS tests
-		WORKING_DIRECTORY tests/query
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Pattern Engine tests..."
-	)
-ENDIF (CXXTEST_FOUND)
+# Project-specific test targets
+OPENCOG_ADD_TEST_TARGET(test_atomese   tests/atoms      "Running Atomese tests...")
+OPENCOG_ADD_TEST_TARGET(test_atomspace tests/atomspace  "Running Atomspace tests...")
+OPENCOG_ADD_TEST_TARGET(test_flow      tests/atoms/flow "Running Flow/stream tests...")
+OPENCOG_ADD_TEST_TARGET(test_guile     tests/scm        "Running Guile tests...")
+OPENCOG_ADD_TEST_TARGET(test_join      tests/atoms/container "Running Container tests...")
+OPENCOG_ADD_TEST_TARGET(test_python    tests/cython     "Running Python tests...")
+OPENCOG_ADD_TEST_TARGET(test_query     tests/query      "Running Pattern Engine tests...")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
 
@@ -347,8 +262,7 @@ SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.1)"
 	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
-	"libpq-dev (>=9.3.24)"
-	"libcogutil-dev (>= 2.0.2)"
+	"libcogutil-dev (>= 2.2.1)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
@@ -369,7 +283,7 @@ SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 # Don't print, it's never used.
 # SUMMARY_ADD("Folly" "Replacement for std::set" HAVE_FOLLY)
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
-SUMMARY_ADD("Python tests" "Python bindings nose2 tests" HAVE_NOSETESTS)
+SUMMARY_ADD("Python tests" "Python bindings pytest tests" HAVE_PYTEST)
 SUMMARY_ADD("Scheme bindings" "Scheme (guile) bindings" HAVE_GUILE)
 SUMMARY_ADD("SparseHash" "Replacement for std::set" HAVE_SPARSEHASH)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)

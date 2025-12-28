@@ -86,7 +86,9 @@ const Handle& truth_key(void)
 void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
 	// We want to know if the key is .. being used as a key.
-	key->markIsKey();
+	// Self-keys don't count. This ends up weirdly recursive.
+	if (key.get() != this and *key != *this)
+		key->markIsKey();
 
 	// This is rather irritating, but we fake it for the
 	// PredicateNode "*-TruthValueKey-*" because if we don't
@@ -165,7 +167,7 @@ ValuePtr Atom::incrementCount(const Handle& key, const std::vector<double>& coun
 
 	// If we are here, an existing value was not found.
 	// Create a brand new float.
-	ValuePtr nv = createFloatValue(FLOAT_VALUE, count);
+	ValuePtr nv = createFloatValue(count);
 
 	_values[key] = nv;
 	return nv;
@@ -201,7 +203,7 @@ ValuePtr Atom::incrementCount(const Handle& key, size_t idx, double count)
 	new_vect.resize(idx+1, 0.0);
 	new_vect[idx] += count;
 
-	ValuePtr nv = createFloatValue(FLOAT_VALUE, new_vect);
+	ValuePtr nv = createFloatValue(new_vect);
 
 	_values[key] = nv;
 	return nv;
@@ -219,11 +221,41 @@ HandleSet Atom::getKeys() const
 
 void Atom::copyValues(const Handle& other)
 {
-    HandleSet okeys(other->getKeys());
-    for (const Handle& k: okeys)
-    {
-        setValue(k, other->getValue(k));
-    }
+	// Avoid any accidental crazy-making.
+	if (this == other.get()) return;
+	OC_ASSERT (get_hash() == other->get_hash(), "Internal error!");
+
+	// Copy the persistent flags (IS_KEY_FLAG and IS_MESSAGE_FLAG).
+	// These indicate properties of the atom content, not per-instance state.
+	static constexpr uint8_t PERSISTENT_FLAGS = IS_KEY_FLAG | IS_MESSAGE_FLAG;
+	uint8_t other_flags = other->_flags.load() & PERSISTENT_FLAGS;
+	if (other_flags)
+		_flags.fetch_or(other_flags);
+
+	// Grab everything in `other`, in bulk.
+	KVP_UNIQUE_LOCK;
+	KVPMap vcpy(other->_values);
+
+	// Are we empty? The do a fast-path bulk replace.
+	if (_values.empty())
+	{
+		_values.swap(vcpy);
+		return;
+	}
+
+	// Cannot use _values.merge(vcpy) because it fails to clobber
+	// existing keys. Doing _values[pr.first] = pr.second; works fine
+	// but the insert_or_assign is slightly faster.
+	for (const auto& pr : vcpy)
+		_values.insert_or_assign(std::move(pr.first), std::move(pr.second));
+}
+
+void Atom::bulkCopyValues(const Handle& other)
+{
+	// Note that other has exactly the same content hash as we do,
+	// and thus the same lock protects `other` as well as `this`.
+	KVP_UNIQUE_LOCK;
+	_values = other->_values;
 }
 
 void Atom::clearValues(void)
@@ -316,12 +348,32 @@ bool Atom::setPresent(void)
 
 void Atom::markIsKey(void)
 {
-    _flags.fetch_or(IS_KEY_FLAG);
+	uint8_t old_flags = _flags.fetch_or(IS_KEY_FLAG);
+	if (old_flags & IS_KEY_FLAG) return;
+
+	// Avoid recursion!
+	if (is_type(PREDICATE_NODE) and 0 == get_name().compare("*-IsKeyFlag-*"))
+		return;
+
+	Handle mark = createNode(PREDICATE_NODE, "*-IsKeyFlag-*");
+
+	// We should force-insert this into read-only AtmSpaces,
+	// but I am too tired to fight with making this atomic, right now.
+	if (_atom_space and 0 == _atom_space->get_read_only())
+		mark = _atom_space->add_atom(mark);
+	setValue(mark, createBoolValue(true));
 }
 
 void Atom::markIsMessage(void)
 {
-    _flags.fetch_or(IS_MESSAGE_FLAG);
+	uint8_t old_flags = _flags.fetch_or(IS_MESSAGE_FLAG);
+	if (old_flags & IS_MESSAGE_FLAG) return;
+
+	Handle mark = createNode(PREDICATE_NODE, "*-IsMessageFlag-*");
+
+	if (_atom_space and 0 == _atom_space->get_read_only())
+		mark = _atom_space->add_atom(mark);
+	setValue(mark, createBoolValue(true));
 }
 
 // ==============================================================
@@ -758,8 +810,8 @@ std::string Atom::id_to_string() const
 {
     std::stringstream ss;
     ss << "[" << std::hex << get_hash() << "][";
-    if (_atom_space) ss << _atom_space->get_uuid();
-    else ss << "-1";
+    if (_atom_space) ss << _atom_space->get_name();
+    else ss << "-";
     ss << "]";
     if (isAbsent()) ss << "[absent]";
     if (isMarkedForRemoval()) ss << " !!! ERROR: marked for removal!";

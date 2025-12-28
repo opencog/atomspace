@@ -40,15 +40,13 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		as = createAtomSpace();
-		eval = new SchemeEval(as);
+		eval = SchemeEval::get_scheme_evaluator(as);
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
-		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~DefineLinkUTest()
 	{
-		delete eval;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
@@ -107,7 +105,7 @@ void DefineLinkUTest::test_schema(void)
 	TS_ASSERT_EQUALS(2, getarity(timestamp));
 
 	// Executing the above should return something like this:
-	// (EvaluationLink
+	// (EdgeLink
 	//	 (PredicateNode "start-interaction-timestamp")
 	//	 (ListLink
 	//		 (NumberNode "1442342173.000000")))

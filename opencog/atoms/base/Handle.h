@@ -47,10 +47,6 @@
  */
 namespace opencog
 {
-
-//! UUID == Universally Unique Identifier
-typedef size_t UUID;
-
 //! ContentHash == 64-bit hash of an Atom.
 typedef uint64_t ContentHash;
 

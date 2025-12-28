@@ -6,7 +6,7 @@
 ; or not.  This can be done using the GroundedPredicateNode, as shown
 ; in this demo.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
 
 ; Define a function that takes an atom and returns an OpenCog truth
 ; value. In this case, it randomly returns true or false, about half the
@@ -40,11 +40,11 @@
 
 ; The pattern-matching requires some data in the AtomSpace to match
 ; against. So populate the AtomSpace with some data.
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "Aristotle") (Concept "logician")))
 
-(Evaluation
+(Edge
 	(Predicate "is-a")
 	(List (Concept "CS Pierce") (Concept "logician")))
 
@@ -61,7 +61,7 @@
 		(And
 			; The first clause: find a grounding for the variable, such
 			; that the variable is grounded by the name of a logician.
-			(Evaluation
+			(Edge
 				(Predicate "is-a")
 				(List (Variable "$person") (Concept "logician")))
 

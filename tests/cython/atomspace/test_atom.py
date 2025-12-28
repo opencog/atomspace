@@ -3,10 +3,10 @@ from unittest import TestCase
 
 from opencog.atomspace import Atom, tvkey
 
-from opencog.atomspace import types, is_a, get_type, get_type_name, create_child_atomspace
+from opencog.atomspace import types, is_a, get_type, get_type_name
 
-from opencog.type_constructors import *
-from opencog.utilities import push_default_atomspace, pop_default_atomspace
+from opencog.atomspace import *
+from opencog.atomspace import set_thread_atomspace
 
 from time import sleep
 
@@ -14,17 +14,13 @@ class AtomTest(TestCase):
 
     def setUp(self):
         self.space = AtomSpace()
-        push_default_atomspace(self.space)
-
-    def tearDown(self):
-        self.space = None
-        pop_default_atomspace()
+        set_thread_atomspace(self.space)
 
     def test_get_value(self):
         atom = Concept('foo')
         key = Predicate('bar')
         value = FloatValue([1.0, 2.0, 3.0])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         self.assertEqual(value, atom.get_value(key))
 
     def test_get_keys(self):
@@ -33,7 +29,7 @@ class AtomTest(TestCase):
         self.assertEqual(0, len(keys))
 
         tv = FloatValue([0.7, 0.7])
-        atom.set_value(tvkey, tv)
+        atom = self.space.set_value(atom, tvkey, tv)
         keys = atom.get_keys()
         self.assertEqual(1, len(keys))
         # Check that the value it refers to is the same.
@@ -41,7 +37,7 @@ class AtomTest(TestCase):
 
         key = Predicate('bar')
         value = FloatValue([1.0, 2.0, 3.0])
-        atom.set_value(key, value)
+        atom = self.space.set_value(atom, key, value)
         keys = atom.get_keys()
         self.assertEqual(2, len(keys))
         self.assertIn(key, keys)
@@ -57,7 +53,9 @@ class AtomTest(TestCase):
         # No guarantee of the order in which Atoms are returned.
         # self.assertEqual(lissy, [atom, getall])
         # self.assertEqual(lissy, [getall, atom])
-        setty = set(getall.execute())
+        # Filter out internal marker atoms like *-IsKeyFlag-*
+        marker = Predicate("*-IsKeyFlag-*")
+        setty = set(a for a in getall.execute() if a != marker)
         self.assertEqual(setty, set([atom, getall]))
 
     def test_get_out(self):
@@ -81,9 +79,9 @@ class AtomTest(TestCase):
 
     def test_invalid_key(self):
         string_node = Concept("String")
-        error_str = "key should be an instance of Atom, got {0} instead".format(str)
+        error_str = "Argument 'key' has incorrect type"
         with self.assertRaisesRegex(TypeError, error_str):
-            string_node.set_value("bad key", StringValue("Hello, World!"))
+            self.space.set_value(string_node, "bad key", StringValue("Hello, World!"))
 
     def test_grounded_cond(self):
         grounded_cond = CondLink(
