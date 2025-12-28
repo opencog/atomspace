@@ -50,7 +50,8 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
 }
 
 /**
- * instantiate -- create a grounded expression from an ungrounded one.
+ * instantiate -- create a grounded expression from an ungrounded one,
+ * and then execute it.  That is, beta-reduce, then execute.
  *
  * Given a handle to an ungrounded expression, and a set of groundings,
  * this will create a grounded expression.
@@ -59,8 +60,8 @@ static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
  * maps variable names to their groundings -- it maps variable names to
  * atoms that already exist in the atomspace.  This method will then go
  * through all of the variables in the expression, and substitute them
- * with their values, creating a new expression. The new expression is
- * added to the atomspace, and its handle is returned.
+ * with their grounding, creating a new expression. The new expression
+ * is then executed in the provided AtomSpace.
  */
 ValuePtr opencog::instantiate(AtomSpace* as,
                               const GroundingMap& varmap,
@@ -102,11 +103,14 @@ ValuePtr opencog::instantiate(AtomSpace* as,
 	}
 #endif
 
-	// Instantiate.
+	// Beta-reduce, respecting quotes
 	QuoteReduce qreduce(varmap);
 	Handle grounded(qreduce.walk_tree(expr));
 
-	// Fire any other executable links, not handled above.
+	// Fire executable links.
+	// We currently exclude EVALUATABLE_LINK here; the evaluatables
+	// will have (true == grounded->is_executable()) but currently
+	// a dozen unit tests fail if we execute them. I don't know why.
 	Type gt = grounded->get_type();
 	if (nameserver().isA(gt, EXECUTABLE_LINK))
 		return grounded->execute(as, silent);
