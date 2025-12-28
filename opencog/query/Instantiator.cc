@@ -33,31 +33,6 @@ Instantiator::Instantiator(AtomSpace* as, const GroundingMap& varmap) :
 	_varmap(varmap)
 {}
 
-/// Perform beta-reduction on the expression `expr`, using the `vmap`
-/// to fish out values for variables.  The map holds pairs: the first
-/// member of the pair is the variable; the second is the value that
-/// should be used as its replacement.  (Note that "variables" do not
-/// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
-{
-	if (vmap.empty()) return expr;
-
-	// Format conversion. FreeVariables::substitute_nocheck() performs
-	// beta-reduction correctly, so we just use that. But we have to
-	// jam the map into the format it expects.
-	HandleSeq vals;
-	FreeVariables crud;
-	unsigned int idx = 0;
-	for (const auto& pr : vmap)
-	{
-		crud.varseq.push_back(pr.first);
-		crud.index.insert({pr.first, idx});
-		vals.push_back(pr.second);
-		idx++;
-	}
-	return crud.substitute_nocheck(expr, vals);
-}
-
 /// walk_tree() performs beta-reduction, respecting the use of
 /// quotations and quotation contexts. This is a hack, because
 /// of a combination of two things: QuoteLink is mis-designed,
@@ -158,6 +133,31 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	Handle subl(createLink(std::move(oset_results), t));
 	subl->bulkCopyValues(expr);
 	return subl;
+}
+
+/// Perform beta-reduction on the expression `expr`, using the `vmap`
+/// to fish out values for variables.  The map holds pairs: the first
+/// member of the pair is the variable; the second is the value that
+/// should be used as its replacement.  (Note that "variables" do not
+/// have to actually be VariableNode's; they can be any atom.)
+static Handle beta_reduce(const Handle& expr, const GroundingMap& vmap)
+{
+	if (vmap.empty()) return expr;
+
+	// Format conversion. FreeVariables::substitute_nocheck() performs
+	// beta-reduction correctly, so we just use that. But we have to
+	// jam the map into the format it expects.
+	HandleSeq vals;
+	FreeVariables crud;
+	unsigned int idx = 0;
+	for (const auto& pr : vmap)
+	{
+		crud.varseq.push_back(pr.first);
+		crud.index.insert({pr.first, idx});
+		vals.push_back(pr.second);
+		idx++;
+	}
+	return crud.substitute_nocheck(expr, vals);
 }
 
 /**
