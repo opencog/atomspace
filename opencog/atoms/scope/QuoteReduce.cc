@@ -124,10 +124,7 @@ Handle QuoteReduce::walk_tree(const Handle& expr)
 	if (not changed)
 		return expr;
 
-	// Move over any Values hanging on the link.
-	Handle subl(createLink(std::move(oset_results), t));
-	subl->bulkCopyValues(expr);
-	return subl;
+	return createLink(std::move(oset_results), t);
 }
 
 /* ===================== END OF FILE ===================== */
