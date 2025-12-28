@@ -3,12 +3,10 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (scope
-	Context.cc
 	FilterVardecl.cc
 	LambdaLink.cc
 	PrenexLink.cc
 	PutLink.cc
-	QuoteReduce.cc
 	RewriteLink.cc
 	ScopeLink.cc
 	TypedVariableLink.cc
@@ -33,12 +31,10 @@ INSTALL (TARGETS scope EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
-	Context.h
 	FilterVardecl.h
 	LambdaLink.h
 	PrenexLink.h
 	PutLink.h
-	QuoteReduce.h
 	RewriteLink.h
 	ScopeLink.h
 	TypedVariableLink.h

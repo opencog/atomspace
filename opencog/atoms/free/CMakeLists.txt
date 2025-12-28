@@ -3,10 +3,12 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (free
+	Context.cc
 	FindUtils.cc
 	FreeLink.cc
 	FreeVariables.cc
 	Quotation.cc
+	QuoteReduce.cc
 	Replacement.cc
 )
 
@@ -23,10 +25,12 @@ INSTALL (TARGETS free EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	Context.h
 	FindUtils.h
 	FreeLink.h
 	FreeVariables.h
 	Quotation.h
+	QuoteReduce.h
 	Replacement.h
 	DESTINATION "include/opencog/atoms/free"
 )

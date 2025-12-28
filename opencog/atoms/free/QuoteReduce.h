@@ -19,7 +19,7 @@
 #ifndef _OPENCOG_QUOTE_REDUCE_H
 #define _OPENCOG_QUOTE_REDUCE_H
 
-#include <opencog/atoms/scope/Context.h>
+#include <opencog/atoms/free/Context.h>
 
 /**
  * class QuoteReduce -- create grounded expressions from ungrounded
