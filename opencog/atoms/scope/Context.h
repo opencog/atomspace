@@ -79,9 +79,9 @@ struct Context
 	VariablesStack scope_variables;
 
 	/**
-	 * Update the context over an atom. That is if the atom is a
-	 * consumable quotation then update the context quotation. If
-	 * the atom is a scope link then update the context shadow.
+	 * Update the context over an atom. If the atom is a consumable
+	 * quotation, then update the context quotation. If the atom is
+	 * a scope link, then update the context shadow.
 	 */
 	void update(const Handle& h);
 

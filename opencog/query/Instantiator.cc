@@ -122,11 +122,11 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 	HandleSeq oset_results;
 	bool changed = false;
-	Context cp_context = _context;
+	Context save_context = _context;
 	for (const Handle& h : expr->getOutgoingSet())
 	{
 		Handle hg(walk_tree(h));
-		_context = cp_context;
+		_context = save_context;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
