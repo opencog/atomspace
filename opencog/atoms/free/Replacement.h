@@ -27,10 +27,10 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/free/Quotation.h>
 
 namespace opencog
 {
+class Context;
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -71,10 +71,9 @@ protected:
 	static Handle substitute_scoped(Handle, const HandleSeq&,
 	                                const IndexMap&,
 	                                bool do_exec,
-	                                Quotation quotation=Quotation());
+	                                const Context&);
+
 	static bool must_alpha_convert(const Handle& scope, const HandleSeq& args);
-	static bool must_alpha_hide(const Handle& scope, const IndexMap& index_map);
-	static IndexMap alpha_hide(const Handle& scope, const IndexMap& index_map);
 };
 
 /** @}*/

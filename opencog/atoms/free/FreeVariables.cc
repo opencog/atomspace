@@ -473,7 +473,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          bool silent,
                                          bool do_exec) const
 {
-	return substitute_scoped(term, args, index, do_exec);
+	return substitute_scoped(term, args, index, do_exec, false);
 }
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
@@ -481,7 +481,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          bool silent,
                                          bool do_exec) const
 {
-	return substitute_scoped(term, make_sequence(vm), index, do_exec);
+	return substitute_scoped(term, make_sequence(vm), index, do_exec, false);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const
