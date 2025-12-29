@@ -57,11 +57,15 @@ protected:
 	/// Variables bound in the body.
 	Variables _variables;
 
+	/// Terms in the body containing variables.
+	HandleSet _shadows;
+
 	bool _quoted;
 
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& vardecl);
+	bool extract_shadowed_terms(const Handle&);
 
 	bool skip_init(Type);
 	virtual ContentHash compute_hash() const;
@@ -80,6 +84,7 @@ public:
 	const Variables& get_variables(void) const { return _variables; }
 	const Handle& get_vardecl(void) const { return _vardecl; }
 	const Handle& get_body(void) const { return _body; }
+	const HandleSet& get_shadow_terms(void) const { return _shadows; }
 
 	// Remove any variables that do NOT appear anywhere in the provided
 	// HandleSeq. This can be used to clean up vardecls, when variables

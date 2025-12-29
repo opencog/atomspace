@@ -45,11 +45,17 @@ void Context::update(const Handle& h)
 	Type t = h->get_type();
 
 	// Update shadow
-	if (quotation.is_unquoted() and nameserver().isA(t, SCOPE_LINK)) {
-		const Variables& variables = ScopeLinkCast(h)->get_variables();
+	if (quotation.is_unquoted() and nameserver().isA(t, SCOPE_LINK))
+	{
+		const ScopeLinkPtr& slp(ScopeLinkCast(h));
+		const Variables& variables = slp->get_variables();
+		const HandleSet& scoped_terms = slp->get_shadow_terms();
 
 		// Insert the new shadowing variables from the scope link
 		shadow.insert(variables.varset.begin(), variables.varset.end());
+
+		// Also insert terms that contain shadowing variables...
+		shadow.insert(scoped_terms.begin(), scoped_terms.end());
 
 		// Push the variables to scope_variables
 		if (store_scope_variables)

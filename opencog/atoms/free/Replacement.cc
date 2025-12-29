@@ -73,20 +73,20 @@ Handle Replacement::substitute_scoped(Handle term,
 {
 	bool unquoted = context.is_unquoted();
 
-	// If we are not in a quote context, and `term` is a variable,
-	// then just return the corresponding argument.
+	// If we are not in a quote context, and `term` is not shadowing a
+	// bound (scoped) term, then just return the corresponding grounding.
 	if (unquoted)
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
 		{
-			// Substitute if variable is not a shadowing var inside a ScopeLink
+			// Substitute if term is not a shadowing term inside a ScopeLink
 			if (0 == context.shadow.count(term))
 				return args.at(idx->second);
 		}
 	}
 
-	// If its a node, and its not a variable, then it is a constant,
+	// If its a node, (and its not a variable), then it is a constant,
 	// and just return that.
 	if (not term->is_link()) return term;
 

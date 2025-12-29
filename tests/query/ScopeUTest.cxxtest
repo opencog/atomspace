@@ -216,13 +216,15 @@ void ScopeUTest::test_quote()
 	Handle list = eval->eval_h("(cog-execute! blist)");
 	Handle andl = eval->eval_h("(cog-execute! bland)");
 
-	Handle elist = eval->eval_h("(SetLink (OrderedLink p-lamb q-lamb))");
-	Handle eandl = eval->eval_h("(SetLink (UnorderedLink p-lamb q-lamb))");
+	Handle elist = eval->eval_h("(SetLink (List p-lamb q-lamb))");
+	Handle eandl = eval->eval_h(
+		"(SetLink (List p-lamb q-lamb) (List q-lamb p-lamb))");
 
-	logger().debug("ListLink expect: %s\ngot: %s",
-		elist->to_string().c_str(), list->to_string().c_str());
-	logger().debug("AndLink expect: %s\ngot: %s",
-		eandl->to_string().c_str(), andl->to_string().c_str());
+	logger().debug("Expect: %s", elist->to_string().c_str());
+	logger().debug("List got: %s", list->to_string().c_str());
+
+	logger().debug("AndExpect: %s", eandl->to_string().c_str());
+	logger().debug("AndLink got: %s", andl->to_string().c_str());
 
 	TS_ASSERT_EQUALS(list, elist);
 	TS_ASSERT_EQUALS(andl, eandl);
@@ -278,8 +280,8 @@ void ScopeUTest::test_hide_2()
 	Handle result = HandleCast(rule->execute(as.get()));
 	Handle expected = al(SET_LINK, rule->getOutgoingAtom(0)->getOutgoingAtom(2));
 
-	std::cout << "result = " << oc_to_string(result);
-	std::cout << "expected = " << oc_to_string(expected);
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
 
@@ -316,8 +318,8 @@ void ScopeUTest::test_rule()
 		al(SET_LINK,
 		   eval->eval_h("(DefinedSchemaNode \"deduction-inheritance-rule\")"));
 
-	std::cout << "result = " << oc_to_string(result);
-	std::cout << "expected = " << oc_to_string(expected);
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
 
@@ -339,7 +341,7 @@ void ScopeUTest::test_trivial_scope()
 
 	Handle sc = al(SCOPE_LINK, an(VARIABLE_NODE, "$X"));
 
-	std::cout << "sc = " << oc_to_string(sc);
+	logger().debug() << "sc = " << oc_to_string(sc);
 
 	TS_ASSERT(sc);
 
