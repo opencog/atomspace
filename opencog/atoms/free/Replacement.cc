@@ -1,7 +1,7 @@
 /*
- * atoms/free/Replacement.cc
+ * opencog/atoms/free/Replacement.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015, 2025  Linas Vepstas
  *               2019 SingularityNET Foundation
  *
  * Authors: Linas Vepstas <linasvepstas@gmail.com>  January 2009
@@ -16,11 +16,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atoms/base/Atom.h>
@@ -82,7 +77,7 @@ Handle Replacement::substitute_scoped(Handle term,
 	// then just return the corresponding argument.
 	if (unquoted)
 	{
-		Replacement::IndexMap::const_iterator idx = index_map.find(term);
+		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
 		{
 			// Substitute if variable is not a shadowing var inside a ScopeLink
@@ -108,7 +103,7 @@ Handle Replacement::substitute_scoped(Handle term,
 		// If a substituting value happens to be a variable in a ScopeLink,
 		// then alpha-convert the scope to avoid variable name
 		// collision. Loop in the rare case the new names collide.
-		while (Replacement::must_alpha_convert(term, args))
+		while (must_alpha_convert(term, args))
 			term = ScopeLinkCast(term)->alpha_convert();
 
 		// Add this scope's variables to the shadow set.
@@ -121,56 +116,56 @@ Handle Replacement::substitute_scoped(Handle term,
 	bool changed = false;
 	for (const Handle& h : term->getOutgoingSet())
 	{
+		Handle sub(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
+
 		// GlobNodes are matched with a list of one or more arguments.
 		// Those arguments need to be in-lined, stripping off the list
 		// that wraps them up.  See FilterLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
 			// `wrap_glob_with_list()` in RewriteLink.cc
-			if (glst->get_type() == LIST_LINK)
-				for (const Handle &gl : glst->getOutgoingSet())
+			if (sub->get_type() == LIST_LINK)
+				for (const Handle &gl : sub->getOutgoingSet())
 					oset.emplace_back(gl);
 			else
-				oset.emplace_back(glst);
-		}
-		else
-		{
-			Handle sub(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
-			if (sub != h)
-			{
-				changed = true;
+				oset.emplace_back(sub);
 
-				// End of the line for streaming data. If the arguments
-				// that were being plugged in were executable streams,
-				// but they're being placed into something that is not
-				// executable, then run those streams, terminating them.
-				// The final result is then just a plain-old ordinary
-				// non-executable Atom, and nothing more.
-				//
-				// Well, sort-of. Execution could return something that
-				// is not an Atom. In that case, we record the original
-				// form. This original form might be executed again,
-				// later on, and if this execution has side-effects,
-				// then, well, things get ugly.  But there's no obvious
-				// way of avoiding this; we'd need some method that
-				// tells us if execution returns only Atoms and never
-				// Values. And we don't have such a function...
-				if (do_exec and
-				    not term->is_executable() and
-				    sub->is_executable())
-				{
-					// AtomSpace* as = term->getAtomSpace();
-					ValuePtr evp = sub->execute();
-					if (evp->is_atom())
-						sub = HandleCast(evp);
-				}
-			}
-			oset.emplace_back(sub);
+			continue;
 		}
+
+		if (sub != h)
+		{
+			changed = true;
+
+			// End of the line for streaming data. If the arguments
+			// that were being plugged in were executable streams,
+			// but they're being placed into something that is not
+			// executable, then run those streams, terminating them.
+			// The final result is then just a plain-old ordinary
+			// non-executable Atom, and nothing more.
+			//
+			// Well, sort-of. Execution could return something that
+			// is not an Atom. In that case, we record the original
+			// form. This original form might be executed again,
+			// later on, and if this execution has side-effects,
+			// then, well, things get ugly.  But there's no obvious
+			// way of avoiding this; we'd need some method that
+			// tells us if execution returns only Atoms and never
+			// Values. And we don't have such a function...
+			if (do_exec and
+			    not term->is_executable() and
+			    sub->is_executable())
+			{
+				// AtomSpace* as = term->getAtomSpace();
+				ValuePtr evp = sub->execute();
+				if (evp->is_atom())
+					sub = HandleCast(evp);
+			}
+		}
+		oset.emplace_back(sub);
 	}
 
 	// Return the original atom, if it was not modified.
