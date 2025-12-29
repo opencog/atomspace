@@ -152,7 +152,9 @@
 			(Identical
 				(Variable "$X")
 				(Variable "$Z"))
-			(List (Quote (Variable "$X")) (Variable "$X"))))))
+			;; two implicands
+			(Quote (Variable "$X"))
+			(Variable "$X")))))
 
 (format #t "Got ~A\n" tuuv2)
 (test-assert "UnifyTest::test_unify_undeclared_var_2_alt"
