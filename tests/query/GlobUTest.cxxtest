@@ -446,7 +446,7 @@ void GlobUTest::test_glob_unorder(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle unorder = eval->eval_h("(cog-execute! (CollectionOf unorder))");
-	printf("unorder %s\n", unorder->to_string().c_str());
+	logger().debug("unorder got %s\n", unorder->to_string().c_str());
 	TS_ASSERT_EQUALS(1, unorder->get_arity());
 
 	// 32-bit and 64-bit hashes differ because std::hash() returns
@@ -465,6 +465,9 @@ void GlobUTest::test_glob_unorder(void)
 		"    (ConceptNode \"lime\")"
 		"    (ConceptNode \"honeydew\")))"
 	);
+	logger().debug("one possible response %s", response1->to_string().c_str());
+	logger().debug("other poss  response %s", response2->to_string().c_str());
+
 	TS_ASSERT((unorder == response1) or (unorder == response2));
 
 	// ----
