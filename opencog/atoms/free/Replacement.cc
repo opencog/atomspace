@@ -90,26 +90,18 @@ Handle Replacement::substitute_scoped(Handle term,
 	// and just return that.
 	if (not term->is_link()) return term;
 
-	Type ty = term->get_type();
-
-	// Update quotation for subsequent recursive calls
-	Context updated_ctxt(context);
-	updated_ctxt.quotation.update(ty);
-
-	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
+	// Perform alpha-conversion duck-n-cover.
+	if (unquoted and term->is_type(SCOPE_LINK))
 	{
-		// Perform alpha-conversion duck-n-cover.
-
 		// If a substituting value happens to be a variable in a ScopeLink,
 		// then alpha-convert the scope to avoid variable name
 		// collision. Loop in the rare case the new names collide.
 		while (must_alpha_convert(term, args))
 			term = ScopeLinkCast(term)->alpha_convert();
-
-		// Add this scope's variables to the shadow set.
-		const Variables& variables = ScopeLinkCast(term)->get_variables();
-		updated_ctxt.shadow.insert(variables.varset.begin(), variables.varset.end());
 	}
+
+	Context updated_ctxt(context);
+	updated_ctxt.update(term);
 
 	// Recursively fill out the subtrees.
 	HandleSeq oset;

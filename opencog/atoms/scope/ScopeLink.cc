@@ -191,7 +191,7 @@ void ScopeLink::trim(const HandleSeq& terms)
 /// Find all of the terms in the body that contain variables.
 /// These terms cannot (must not) be replaced during replacement
 /// or grounding (in the same way that the scoped/bound variables
-/// cannot be touched, either.) 
+/// cannot be touched, either.)
 bool ScopeLink::extract_shadowed_terms(const Handle& term)
 {
 	if (_variables.varset_contains(term)) return true;
