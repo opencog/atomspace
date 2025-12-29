@@ -127,7 +127,9 @@ Handle Replacement::substitute_scoped(Handle term,
 
 			// Also unwrap any ListLinks that were inserted by
 			// `wrap_glob_with_list()` in RewriteLink.cc
-			if (sub->get_type() == LIST_LINK)
+			// (Unordered globs get wrapped with UnorderedLink)
+			if (sub->get_type() == LIST_LINK or
+			    sub->get_type() == UNORDERED_LINK)
 				for (const Handle &gl : sub->getOutgoingSet())
 					oset.emplace_back(gl);
 			else
