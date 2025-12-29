@@ -65,6 +65,7 @@ protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& vardecl);
+	bool extract_shadowed_terms(const Handle&);
 
 	bool skip_init(Type);
 	virtual ContentHash compute_hash() const;

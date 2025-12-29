@@ -44,6 +44,7 @@ void ScopeLink::init(void)
 	// and so nothing to be done. Skip variable extraction.
 	if (_quoted) return;
 	extract_variables(_outgoing);
+	extract_shadowed_terms(_body);
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
@@ -183,6 +184,27 @@ void ScopeLink::init_scoped_variables(const Handle& vardecl)
 void ScopeLink::trim(const HandleSeq& terms)
 {
 	_variables.trim(terms);
+}
+
+/* ================================================================= */
+
+/// Find all of the terms in the body that contain variables.
+/// These terms cannot (must not) be replaced during replacement
+/// or grounding (in the same way that the scoped/bound variables
+/// cannot be touched, either.) 
+bool ScopeLink::extract_shadowed_terms(const Handle& term)
+{
+	if (_variables.varset_contains(term)) return true;
+	if (not term->is_link()) return false;
+
+	// Be sure to explore *all* terms, all the way down.
+	// Don't break off the exploration early.
+	bool shad = false;
+	for (const Handle& ho : term->getOutgoingSet())
+		shad = shad or extract_shadowed_terms(ho);
+
+	if (shad) _shadows.insert(term);
+	return shad;
 }
 
 /* ================================================================= */
