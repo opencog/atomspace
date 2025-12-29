@@ -82,11 +82,10 @@
       A1-lamb
       A2-lamb)
     ; result
-    (OrderedLink
-      A1-lamb
-      A2-lamb))
+    A1-lamb
+    A2-lamb
   )
-)
+))
 
 ; The pattern matcher, looks for the And variant. Notice that
 ; the quoting is different from the above.
@@ -124,8 +123,7 @@
           (UnquoteLink
             (VariableNode "$A2")))))
     ; output result
-    (UnorderedLink
-      A1-lamb
-      A2-lamb))
+    A1-lamb
+    A2-lamb
   )
-)
+))
