@@ -1,7 +1,7 @@
 /*
- * atoms/free/Replacement.cc
+ * opencog/atoms/free/Replacement.cc
  *
- * Copyright (C) 2009, 2014, 2015 Linas Vepstas
+ * Copyright (C) 2009, 2014, 2015, 2025  Linas Vepstas
  *               2019 SingularityNET Foundation
  *
  * Authors: Linas Vepstas <linasvepstas@gmail.com>  January 2009
@@ -16,16 +16,12 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/free/Context.h>
 #include <opencog/atoms/scope/ScopeLink.h>
 
 namespace opencog {
@@ -45,7 +41,7 @@ Handle Replacement::replace_nocheck(const Handle& term,
 		insert_index.insert({pr.first, idx});
 		idx++;
 	}
-	return substitute_scoped(term, to_insert, insert_index, do_exec);
+	return substitute_scoped(term, to_insert, insert_index, do_exec, false);
 }
 
 /* ================================================================= */
@@ -73,9 +69,9 @@ Handle Replacement::substitute_scoped(Handle term,
                                       const HandleSeq& args,
                                       const IndexMap& index_map,
                                       bool do_exec,
-                                      Quotation quotation)
+                                      const Context& context)
 {
-	bool unquoted = quotation.is_unquoted();
+	bool unquoted = context.is_unquoted();
 
 	// If we are not in a quote context, and `term` is a variable,
 	// then just return the corresponding argument.
@@ -83,7 +79,11 @@ Handle Replacement::substitute_scoped(Handle term,
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
-			return args.at(idx->second);
+		{
+			// Substitute if variable is not a shadowing var inside a ScopeLink
+			if (0 == context.shadow.count(term))
+				return args.at(idx->second);
+		}
 	}
 
 	// If its a node, and its not a variable, then it is a constant,
@@ -92,38 +92,23 @@ Handle Replacement::substitute_scoped(Handle term,
 
 	Type ty = term->get_type();
 
-	// Update for subsequent recursive calls of substitute_scoped
-	quotation.update(ty);
-
-	// If the term is a scope the index map might change, to avoid copy
-	// we either point to the original map, or the new one.
-	const IndexMap* index_map_ptr = &index_map;
-	IndexMap hidden_map;
+	// Update quotation for subsequent recursive calls
+	Context updated_ctxt(context);
+	updated_ctxt.quotation.update(ty);
 
 	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.
 
-		// If a substituting value is equal to a variable of that scope,
+		// If a substituting value happens to be a variable in a ScopeLink,
 		// then alpha-convert the scope to avoid variable name
 		// collision. Loop in the rare case the new names collide.
 		while (must_alpha_convert(term, args))
 			term = ScopeLinkCast(term)->alpha_convert();
 
-		// Hide any variables of the scope that are to be substituted,
-		// that is remove them from the index.
-		if (must_alpha_hide(term, index_map))
-		{
-			hidden_map = alpha_hide(term, index_map);
-
-			// If the hidden map is empty, then there is no more
-			// substitution to be done.
-			if (hidden_map.empty())
-				return term;
-
-			// Otherwise the new map must be passed down below
-			index_map_ptr = &hidden_map;
-		}
+		// Add this scope's variables to the shadow set.
+		const Variables& variables = ScopeLinkCast(term)->get_variables();
+		updated_ctxt.shadow.insert(variables.varset.begin(), variables.varset.end());
 	}
 
 	// Recursively fill out the subtrees.
@@ -131,56 +116,58 @@ Handle Replacement::substitute_scoped(Handle term,
 	bool changed = false;
 	for (const Handle& h : term->getOutgoingSet())
 	{
+		Handle sub(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
+
 		// GlobNodes are matched with a list of one or more arguments.
 		// Those arguments need to be in-lined, stripping off the list
 		// that wraps them up.  See FilterLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_scoped(h, args, *index_map_ptr, do_exec, quotation));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
 			// `wrap_glob_with_list()` in RewriteLink.cc
-			if (glst->get_type() == LIST_LINK)
-				for (const Handle &gl : glst->getOutgoingSet())
+			// (Unordered globs get wrapped with UnorderedLink)
+			if (sub->get_type() == LIST_LINK or
+			    sub->get_type() == UNORDERED_LINK)
+				for (const Handle &gl : sub->getOutgoingSet())
 					oset.emplace_back(gl);
 			else
-				oset.emplace_back(glst);
-		}
-		else
-		{
-			Handle sub(substitute_scoped(h, args, *index_map_ptr, do_exec, quotation));
-			if (sub != h)
-			{
-				changed = true;
+				oset.emplace_back(sub);
 
-				// End of the line for streaming data. If the arguments
-				// that were being plugged in were executable streams,
-				// but they're being placed into something that is not
-				// executable, then run those streams, terminating them.
-				// The final result is then just a plain-old ordinary
-				// non-executable Atom, and nothing more.
-				//
-				// Well, sort-of. Execution could return something that
-				// is not an Atom. In that case, we record the original
-				// form. This original form might be executed again,
-				// later on, and if this execution has side-effects,
-				// then, well, things get ugly.  But there's no obvious
-				// way of avoiding this; we'd need some method that
-				// tells us if execution returns only Atoms and never
-				// Values. And we don't have such a function...
-				if (do_exec and
-				    not term->is_executable() and
-				    sub->is_executable())
-				{
-					// AtomSpace* as = term->getAtomSpace();
-					ValuePtr evp = sub->execute();
-					if (evp->is_atom())
-						sub = HandleCast(evp);
-				}
-			}
-			oset.emplace_back(sub);
+			continue;
 		}
+
+		if (sub != h)
+		{
+			changed = true;
+
+			// End of the line for streaming data. If the arguments
+			// that were being plugged in were executable streams,
+			// but they're being placed into something that is not
+			// executable, then run those streams, terminating them.
+			// The final result is then just a plain-old ordinary
+			// non-executable Atom, and nothing more.
+			//
+			// Well, sort-of. Execution could return something that
+			// is not an Atom. In that case, we record the original
+			// form. This original form might be executed again,
+			// later on, and if this execution has side-effects,
+			// then, well, things get ugly.  But there's no obvious
+			// way of avoiding this; we'd need some method that
+			// tells us if execution returns only Atoms and never
+			// Values. And we don't have such a function...
+			if (do_exec and
+			    not term->is_executable() and
+			    sub->is_executable())
+			{
+				// AtomSpace* as = term->getAtomSpace();
+				ValuePtr evp = sub->execute();
+				if (evp->is_atom())
+					sub = HandleCast(evp);
+			}
+		}
+		oset.emplace_back(sub);
 	}
 
 	// Return the original atom, if it was not modified.
@@ -198,59 +185,6 @@ bool Replacement::must_alpha_convert(const Handle& scope,
 		if (vars.find(value) != vars.end())
 			return true;
 	return false;
-}
-
-// Evaluate whether any variable must be hidden/removed from the
-// index_map.
-bool Replacement::must_alpha_hide(const Handle& scope,
-                                  const IndexMap& index_map)
-{
-	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
-	for (const Handle& v : vars)
-		if (index_map.find(v) != index_map.end())
-			return true;
-	return false;
-}
-
-/* ================================================================= */
-
-/// Remove the variables from the given index map that are present in
-/// the given the variables of a scope, as well as non variables
-Replacement::IndexMap Replacement::alpha_hide(const Handle& scope,
-                                              const IndexMap& index_map)
-{
-	// Make a copy... this is what's computationally expensive.
-	IndexMap hidden_map = index_map;
-
-	// Remove the alpha-hidden variables.
-	const HandleSet& vars = ScopeLinkCast(scope)->get_variables().varset;
-	for (const Handle& v : vars)
-	{
-		IndexMap::const_iterator idx = hidden_map.find(v);
-		if (idx != hidden_map.end())
-		{
-			hidden_map.erase(idx);
-		}
-	}
-
-	// Also remove everything that is not a variable.
-	// The map will, in general, contain terms that
-	// contain alpha-hidden variables; those also have
-	// to go, or they will mess up the substitution.
-	for (auto it = hidden_map.begin(); it != hidden_map.end();)
-	{
-		Type tt = it->first->get_type();
-		if (tt != VARIABLE_NODE and tt != GLOB_NODE)
-		{
-			it = hidden_map.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
-
-	return hidden_map;
 }
 
 /* ================================================================= */
