@@ -31,13 +31,6 @@
 
 namespace opencog {
 
-// Internal helper that uses Context for efficient shadow tracking
-static Handle substitute_with_context(Handle term,
-                                      const HandleSeq& args,
-                                      const Replacement::IndexMap& index_map,
-                                      bool do_exec,
-                                      Context context);
-
 /* ================================================================= */
 
 Handle Replacement::replace_nocheck(const Handle& term,
@@ -53,7 +46,7 @@ Handle Replacement::replace_nocheck(const Handle& term,
 		insert_index.insert({pr.first, idx});
 		idx++;
 	}
-	return substitute_scoped(term, to_insert, insert_index, do_exec);
+	return substitute_scoped(term, to_insert, insert_index, do_exec, false);
 }
 
 /* ================================================================= */
@@ -81,22 +74,7 @@ Handle Replacement::substitute_scoped(Handle term,
                                       const HandleSeq& args,
                                       const IndexMap& index_map,
                                       bool do_exec,
-                                      Quotation quotation)
-{
-	// Convert Quotation to Context for efficient shadow tracking.
-	// Context uses a shadow set instead of copying/filtering the index_map.
-	Context context(quotation, HandleSet(), false);
-	return substitute_with_context(term, args, index_map, do_exec, context);
-}
-
-/// Internal helper using Context for efficient shadow tracking.
-/// Instead of copying and filtering the index_map when entering scopes,
-/// we accumulate shadowed variables in context.shadow and check membership.
-static Handle substitute_with_context(Handle term,
-                                      const HandleSeq& args,
-                                      const Replacement::IndexMap& index_map,
-                                      bool do_exec,
-                                      Context context)
+                                      const Context& context)
 {
 	bool unquoted = context.is_unquoted();
 
@@ -120,7 +98,8 @@ static Handle substitute_with_context(Handle term,
 	Type ty = term->get_type();
 
 	// Update quotation for subsequent recursive calls
-	context.quotation.update(ty);
+	Context updated_ctxt(context);
+	updated_ctxt.quotation.update(ty);
 
 	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
@@ -134,7 +113,7 @@ static Handle substitute_with_context(Handle term,
 
 		// Add this scope's variables to the shadow set.
 		const Variables& variables = ScopeLinkCast(term)->get_variables();
-		context.shadow.insert(variables.varset.begin(), variables.varset.end());
+		updated_ctxt.shadow.insert(variables.varset.begin(), variables.varset.end());
 	}
 
 	// Recursively fill out the subtrees.
@@ -147,7 +126,7 @@ static Handle substitute_with_context(Handle term,
 		// that wraps them up.  See FilterLinkUTest for examples.
 		if (GLOB_NODE == h->get_type())
 		{
-			Handle glst(substitute_with_context(h, args, index_map, do_exec, context));
+			Handle glst(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
 			changed = true;
 
 			// Also unwrap any ListLinks that were inserted by
@@ -160,7 +139,7 @@ static Handle substitute_with_context(Handle term,
 		}
 		else
 		{
-			Handle sub(substitute_with_context(h, args, index_map, do_exec, context));
+			Handle sub(substitute_scoped(h, args, index_map, do_exec, updated_ctxt));
 			if (sub != h)
 			{
 				changed = true;
