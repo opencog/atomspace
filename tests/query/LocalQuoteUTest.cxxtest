@@ -61,8 +61,8 @@ void LocalQuoteUTest::setUp()
 	X = an(VARIABLE_NODE, "$X");
 	P = an(PREDICATE_NODE, "P");
 	Q = an(PREDICATE_NODE, "Q");
-	P_X = al(EVALUATION_LINK, P, X);
-	Q_X = al(EVALUATION_LINK, Q, X);
+	P_X = al(EDGE_LINK, P, X);
+	Q_X = al(EDGE_LINK, Q, X);
 	forall = al(LAMBDA_LINK, X, P_X);
 	VT = an(TYPE_NODE, "VariableNode");
 	vardecl_var = an(VARIABLE_NODE, "$vardecl");
@@ -75,8 +75,8 @@ void LocalQuoteUTest::setUp()
 	forall_get = al(COLLECTION_OF_LINK, {al(MEET_LINK, vardecl, al(LOCAL_QUOTE_LINK, forall_pattern))});
 	A = an(CONCEPT_NODE, "A");
 	CT = an(TYPE_NODE, "ConceptNode");
-	P_A = al(EVALUATION_LINK, P, A);
-	Q_A = al(EVALUATION_LINK, Q, A);
+	P_A = al(EDGE_LINK, P, A);
+	Q_A = al(EDGE_LINK, Q, A);
 }
 
 void LocalQuoteUTest::tearDown()
