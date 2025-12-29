@@ -639,7 +639,8 @@ GLOB_NODE <- VARIABLE_NODE
 
 // Everything under a QuoteLink is interpreted literally. Variable
 // substitution (beta-reduction) is not performed into quoted variables.
-QUOTE_LINK <- ORDERED_LINK
+// It's executable itself; executing it just unwraps the quotes.
+QUOTE_LINK <- ORDERED_LINK, EXECUTABLE_LINK
 
 // The QuoteLink is actually a quasi-quote. The UnquoteLink undoes the
 // quoting.  Defined to work kind-of like in lisp/scheme. (XXX TODO,
@@ -652,7 +653,7 @@ UNQUOTE_LINK <- ORDERED_LINK
 // matched pattern is itself executable. Vaguely like QuoteLink, but
 // instead of blocking beta-reduction, it blocks execution.
 // It's executable itself; executing it just returns what it wraps.
-DONT_EXEC_LINK <- ORDERED_LINK,EXECUTABLE_LINK
+DONT_EXEC_LINK <- ORDERED_LINK, EXECUTABLE_LINK
 
 // Like QuoteLink but only affects the direct child, not its
 // descendants. It has the same effect as wrapping the child with a

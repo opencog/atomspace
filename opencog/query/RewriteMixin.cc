@@ -18,7 +18,7 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/grant/DefineLink.h>
-#include <opencog/atoms/free/QuoteReduce.h>
+#include <opencog/atoms/free/Replacement.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "RewriteMixin.h"
@@ -117,8 +117,7 @@ static ValuePtr instantiate(AtomSpace* as,
 	}
 
 	// Beta-reduce, respecting quotes
-	QuoteReduce qreduce(varmap);
-	Handle grounded(qreduce.walk_tree(expr));
+	Handle grounded(Replacement::replace_nocheck(expr, varmap));
 
 	// Fire executable links.
 	// We currently exclude EVALUATABLE_LINK here; the evaluatables

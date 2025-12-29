@@ -8,7 +8,7 @@ ADD_LIBRARY (free
 	FreeLink.cc
 	FreeVariables.cc
 	Quotation.cc
-	QuoteReduce.cc
+	QuoteLink.cc
 	Replacement.cc
 )
 
@@ -30,7 +30,7 @@ INSTALL (FILES
 	FreeLink.h
 	FreeVariables.h
 	Quotation.h
-	QuoteReduce.h
+	QuoteLink.h
 	Replacement.h
 	DESTINATION "include/opencog/atoms/free"
 )

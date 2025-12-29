@@ -82,7 +82,7 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 }
 
 /**
- * Make sure that executing the following
+ * Executing
  *
  * (QuoteLink
  *   (LambdaLink
@@ -91,14 +91,11 @@ void QuotationUTest::test_root_local_quote_over_consumption()
  *   (UnquoteLink
  *     (VariableNode "$body"))))
  *
- * does not turn into
+ * should return
  *
  * (LambdaLink
  *    (VariableNode "$vardecl")
  *    (VariableNode "$body"))
- *
- * Instead the quotation should be left intact, as to not change the
- * semantics of the Lambda.
  */
 void QuotationUTest::test_lambda_quote_over_consumption()
 {
@@ -107,11 +104,9 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 	std::string rs = _eval->eval("(load-from-path \"tests/atoms/scope/quotations.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Handle quoted_lambda = _eval->eval_h("quoted-lambda"),
-		result = quoted_lambda->is_executable()
-			? HandleCast(quoted_lambda->execute(_asp.get()))
-			: quoted_lambda,
-		expected = quoted_lambda;
+	Handle quoted_lambda = _eval->eval_h("quoted-lambda");
+	Handle result = HandleCast(quoted_lambda->execute(_asp.get()));
+	Handle expected = _eval->eval_h("raw-lambda");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
