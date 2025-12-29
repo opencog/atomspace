@@ -425,7 +425,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		{
 			const auto& valpair = valmap.find(var);
 			if (valmap.end() == valmap.find(var))
-				throw RuntimeException (TRACE_INFO,
+				throw SyntaxException (TRACE_INFO,
 					"Malformed FilterLink; no value for %s in %s",
 					to_string().c_str(), var->to_string().c_str());
 

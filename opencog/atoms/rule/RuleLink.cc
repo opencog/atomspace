@@ -136,7 +136,7 @@ void RuleLink::extract_variables(const HandleSeq& oset)
 
 /* ================================================================= */
 
-// Execute h. It its a lambda, unwrap it.
+// Execute h. If its a lambda, unwrap it.
 static Handle maybe_exec(const Handle& h, Variables& redvars)
 {
 	Handle hred(h);
@@ -171,6 +171,11 @@ static Handle maybe_exec(const Handle& h, Variables& redvars)
 /// Reduce the link; i.e. call execute on everything that it wraps.
 ValuePtr RuleLink::execute(AtomSpace* as, bool silent)
 {
+	if (0 == _implicand.size())
+		throw SyntaxException(TRACE_INFO,
+			"Expecting one or more implicands in %s",
+			to_string().c_str());
+
 	Variables redvars = _variables;
 
 	HandleSeq redbody;
