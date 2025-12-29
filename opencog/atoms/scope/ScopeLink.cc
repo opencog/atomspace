@@ -44,7 +44,7 @@ void ScopeLink::init(void)
 	// and so nothing to be done. Skip variable extraction.
 	if (_quoted) return;
 	extract_variables(_outgoing);
-	extract_shadowed_terms(_body);
+	if (_body) extract_shadowed_terms(_body);
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
