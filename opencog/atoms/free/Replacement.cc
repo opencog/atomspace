@@ -81,7 +81,8 @@ Handle Replacement::substitute_scoped(Handle term,
 		if (idx != index_map.end())
 		{
 			// Substitute if term is not a shadowing term inside a ScopeLink
-			if (0 == context.shadow.count(term))
+			if (0 == context.shadow.count(term) and
+			    0 == context.shadow_terms.count(term))
 				return args.at(idx->second);
 		}
 	}

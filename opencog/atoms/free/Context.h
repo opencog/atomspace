@@ -68,6 +68,7 @@ struct Context
 
 	// Set of shadowing variables
 	HandleSet shadow;
+	HandleSet shadow_terms;
 
 	// Flag to ignore pushing scope variables to avoid that cost when
 	// not necessary
