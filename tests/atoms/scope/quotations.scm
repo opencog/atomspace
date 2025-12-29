@@ -52,6 +52,12 @@
     (UnquoteLink
       (VariableNode "$body")))))
 
+; Above, with quotes removed.
+(define raw-lambda
+    (LambdaLink
+      (VariableNode "$vardecl")
+      (VariableNode "$body")))
+
 (define quoted-clauses
 (LocalQuoteLink
   (AndLink
