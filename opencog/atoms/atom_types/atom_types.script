@@ -761,13 +761,11 @@ PATTERN_LINK <- RULE_LINK
 // Finds all groundings, returns generic Value
 SATISFYING_LINK <- PATTERN_LINK,EXECUTABLE_LINK
 
-// The GetLink is almost exactly the same thing as a SatsifyingSetLink,
-// except that GetLink is imperative, while SatisfyingSetLink is
-// declarative.  Likewise, BindLink is exactly the same thing as an
-// ImplicationLink, except that its imperative, not declarative.
-// Both return SetLinks holding the results.
-// QueryLink is identical to BindLink, except it returns a LinkValue
-// holding the result, instead of a SetLink. (Less AtomSpace pollution).
+// The MeetLink is much like a SatsifyingSetLink, except that Meet
+// is imperative performing a search when executed, while SatisfyingSet
+// is purely declarative.  Likewise, QueryLink has the form of an
+// ImplicationLink, or of a RUleLink, except that its imperative, not
+// declarative. Both return LinkValues holding the results.
 MEET_LINK <- SATISFYING_LINK       // Finds all groundings, returns them
 QUERY_LINK <- SATISFYING_LINK      // Finds all groundings, substitutes.
 
