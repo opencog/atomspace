@@ -71,7 +71,7 @@ public:
     void test_crash(void);
     void test_exec_getlink(void);
     void test_quote_self(void);
-    void xtest_quote_glob(void);
+    void test_quote_glob(void);
     void test_quote_scope(void);
 };
 
@@ -357,9 +357,7 @@ void QuoteUTest::test_quote_self(void)
 }
 
 // Test for bug #2583 (simpler version of above)
-// XXX FIXME disabled for now, because the design of QuoteLink is
-// just plain broken. It does not work right. It needs to be fixed.
-void QuoteUTest::xtest_quote_glob(void)
+void QuoteUTest::test_quote_glob(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
