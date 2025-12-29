@@ -424,6 +424,11 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		for (const Handle& var : _mvars->varseq)
 		{
 			const auto& valpair = valmap.find(var);
+			if (valmap.end() == valmap.find(var))
+				throw RuntimeException (TRACE_INFO,
+					"Malformed FilterLink; no value for %s in %s",
+					to_string().c_str(), var->to_string().c_str());
+
 			valseq.emplace_back(HandleCast(valpair->second));
 		}
 		return scratch->add_link(LIST_LINK, std::move(valseq));
