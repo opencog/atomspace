@@ -38,6 +38,9 @@ using namespace opencog;
 
 void FilterLink::init(void)
 {
+	_recursive_glob = false;
+	_recursive_exec = false;
+
 	// Filters consist of a function, and the data to apply the
 	// function to.  The function can be explicit (inheriting from
 	// ScopeLink) or implicit (we automatically fish out free variables).
@@ -500,7 +503,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	return scratch->add_link(LIST_LINK, std::move(hseq));
 }
 
-ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
+ValuePtr FilterLink::do_execute(AtomSpace* as, bool silent) const
 {
 	ValuePtr vex(_outgoing[1]);
 
@@ -571,6 +574,21 @@ ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
 
 	// Its a singleton. Just remap that.
 	return rewrite_one(vex, as, silent);
+}
+
+ValuePtr FilterLink::execute(AtomSpace* as, bool silent)
+{
+	// This can execute recursively, if the AtomSpace is searched for
+	// FilterLinks, and then the results passed through a FilterLink.
+	// This is "rare", but the other outcome is stack exhaustion and
+	// crash.
+	if (_recursive_exec)
+		return get_handle();
+
+	_recursive_exec = true;
+	ValuePtr vp(do_execute(as, silent));
+	_recursive_exec = false;
+	return vp;
 }
 
 DEFINE_LINK_FACTORY(FilterLink, FILTER_LINK)

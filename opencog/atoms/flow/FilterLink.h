@@ -54,6 +54,12 @@ protected:
 	// Rules will have a rewrite
 	HandleSeq _rewrite;
 
+	// FIXME: these flags should be per-instance AND per-thread, so
+	// that multiple threads can run this instance without collision.
+	// But for now, this is rare, so punt.
+	mutable bool _recursive_glob;
+	mutable bool _recursive_exec;
+
 	void init(void);
 
 	FilterLink(Type, const Handle&);
@@ -63,8 +69,8 @@ protected:
 	             Quotation quotation=Quotation()) const;
 
 	ValuePtr rewrite_one(const ValuePtr&, AtomSpace*, bool) const;
+	ValuePtr do_execute(AtomSpace*, bool) const;
 
-	mutable bool _recursive_glob;
 public:
 	FilterLink(const HandleSeq&&, Type=FILTER_LINK);
 	FilterLink(const Handle& pattern, const Handle& term);
