@@ -1,7 +1,7 @@
 /*
  * QuoteLink.cc
  *
- * Copyright (C) 2025 OpenCog Foundation
+ * Copyright (C) 2025 BrainyBlaze Dynamics LLC
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -12,11 +12,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -41,8 +36,7 @@ QuoteLink::QuoteLink(const HandleSeq&& oset, Type t)
 // ---------------------------------------------------------------
 
 /// Helper: recursively walk tree, consuming UnquoteLinks at level 1.
-/// This implements the paired Quote/Unquote semantics.
-/// Quote and Unquote are paired brackets: (Quote (stuff (Unquote X)))
+/// Quote and Unquote are paired: (Quote (stuff (Unquote X)))
 /// when unwrapped becomes (stuff X).
 static Handle consume_unquotes(const Handle& h, Quotation quotation)
 {

@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/core/QuoteLink.h
  *
- * Copyright (C) 2025 OpenCog Foundation
+ * Copyright (C) 2025 BrainyBlaze Dynamics, LLC
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -13,11 +13,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_QUOTE_LINK_H
@@ -31,10 +26,11 @@ namespace opencog
  *  @{
  */
 
-/// The QuoteLink prevents evaluation of its contents during pattern
-/// matching and other operations. When executed, it returns the quoted
-/// content, removing the outermost Quote. If the content is an
-/// UnquoteLink, both Quote and Unquote are removed (involution).
+/// The QuoteLink is used to prevent evaluation of its contents during
+/// pattern matching and during beta reduction. To unwrap the quoted
+/// expression ("to consume the quotes"), it is enough to execute the
+/// QuoteLink: the quoted content will be returned. Matching nested
+/// Unquotes are consumed in the process.
 ///
 /// For example:
 ///
@@ -46,11 +42,11 @@ namespace opencog
 ///
 /// And:
 ///
-///     (Quote (Unquote (Concept "bar")))
+///     (Quote (List (Unquote (Concept "bar"))))
 ///
 /// when executed returns:
 ///
-///     (Concept "bar")
+///     (List (Concept "bar"))
 ///
 class QuoteLink : public Link
 {
