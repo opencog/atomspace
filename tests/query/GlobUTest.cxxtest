@@ -465,6 +465,9 @@ void GlobUTest::test_glob_unorder(void)
 		"    (ConceptNode \"lime\")"
 		"    (ConceptNode \"honeydew\")))"
 	);
+	logger().debug("one possible response %s", response1->to_string().c_str());
+	logger().debug("other poss  response %s", response2->to_string().c_str());
+
 	TS_ASSERT((unorder == response1) or (unorder == response2));
 
 	// ----
