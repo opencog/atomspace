@@ -165,7 +165,7 @@
 	(define pair (List THING-A THING-B))
 	(cog-execute!
 		(SetValue pair (Predicate "Alt MI Key")
-			(CollectionOf (Tpe 'FormulaStream) (OrderedLink
+			(CollectionOf (Type 'FormulaStream) (OrderedLink
 				(ExecutionOutput (DefinedProcedure "scalar MI") pair))))))
 
 ; Convenience wrapper, works with strings.

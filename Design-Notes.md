@@ -586,14 +586,14 @@ So what happened when I wrote `(FlatStream (SortedValue))`?
 * I designed a c++ class called `FlatStream`, whose ctor takes a
   single Value. It pulls from that Value, by driving it's `update()`
   method.
-* There is (currently) no external description, although both
-  `FlatStream` and `SortedValue` have SIG's and ARG's that allow them
-  to be attached via the class factory.
+* There is (currently) no Atomese description of this API, although
+  both `FlatStream` and `SortedValue` have SIG's and ARG's that allow
+  them to be attached via the class factory.
 * These SIGs, ARGs and the general type hierarchy is NOT stored in the
   AtomSpace.
 * Despite things like TypeInhNode, etc. there is no actual way that
   an Atomese expression can be written to walk/explore/analyze the
-  type ierarchy.
+  type hierarchy.
 * There is no definition, either hand-written or auto-generated, that
   expresses (re-expresses) the SIG/ARG type constrctors/constraints
   in terms of `Connector`, `ConnectorSeq`, `Section` that we've been
@@ -622,3 +622,94 @@ Wow. Those are like six really damning design flaws. That I have not
 had to face yet. How did that happen?
 
 What's the priority order for fixing any of this?
+
+Connectors and Pipes
+--------------------
+To arrive at a connector-based syntax for hooking up pipelines, lets
+start with a simpler, more "obvious" solution. Consider having an
+`InputNode`. It can be used anywhere a stream value is used, and acts
+as a place-holder or "promise" for future input. Thus, one can write
+```
+   (FlatStream (InputNode "input-for-flattener"))
+```
+Polling `FlatStream` would call `InputNode::update()` which then blocks,
+as no actual source of input is connected.
+
+The directionality of `Input` and `Output` labels is mildly confusing,
+while `ConsumerNode` and `ProducerNode` are perhaps less so?
+
+To provide an input, one writes:
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		(ProducerNode "output-from-sorter"))
+```
+Creating this PipeLink and placing it in the AtomSpace would wake up
+the `ConsumerNode` (via c++ `std::condwait` on some `std::mutex`) and
+then (magic happens here) it gets stream data from `OutputNode`.
+
+How might that work? Well, lets try this:
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		(ValueOfLink (Anchor "some place") (Predicate "some key")))
+```
+which should "work as expected", except that we're once again using
+Anchors, which is a design point I kind of want to move away from.
+
+Side comment: The `ValueOf` returns `VoidValue`, unless a `SetValue`
+was done earlier. The `VoidValue` is already used as an end-of-stream
+marker, so the consumer would immediately receive an end-of-stream
+unless the producer had been previously declared. There's no obvious
+way  of fixing this without inventing some `WaitVauleOf` that camps
+on that key, waiting for something to be attached. This does need to
+be fixed; we do want to be able to define flows in arbitrary order,
+so that they can e.g. be retreived from Storage.
+
+Lets try some others:
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		(MeetLink ... pattern...)
+```
+Clearly this wires up the output of the `Meet` to the consumer. No
+
+Another:
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		(ExecutionOutput ... )
+```
+This wires up the output of the `ExecutionOutput`. No problems here.
+
+There is no obvious design for a `OutputNode` aka `ProducerNode`.
+So the initial motivating example above is flawed.
+
+Earlier designs used `Lambda`s:
+```
+    (Define (DefinedProceedureNode "named function")
+       (Lambda
+           (VariableList ... inputs ...)
+           (... body ...)))
+```
+Here, the input variables are explicit placeholders; but they only
+provide half of what `ConsumerNode` provides: we know what the inputs
+are, but we don't know where they "came from".
+
+The `ExecutionOutput` provide "half" of `PipeLink`:
+```
+   (ExecutionOutput
+      (DefinedProcedure "named function ")
+      (... producers ...))
+```
+The output of the execution is not routed "anywhere", it just arrives
+"here", an unspecified, anonymous "here and now" when `FooLink::execute()`
+is called.
+
+   (CollectionOf
+      (Type 'FormulaStream)
+      (ExecutionOutput (DefinedProcedure "named function ")
+
+
+
+SortedValue
