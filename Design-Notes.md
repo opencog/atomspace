@@ -782,10 +782,64 @@ when executed, would return:
 That's it -- The list prserves the positional value of the types, while
 discarding the associated names.
 
+### Output Types
+The function type constructor is `ArrowLink`, indicating input types on
+one side, output types on the other. It was to correspond to the function
+type in ML, CaML, Haskell, etc.
 
-Arrow
+There were plans to create `CoArrowLink`, the category-theoretic "opposite"
+of the arrow. This was never done.
 
-So an early idea was to use `ConnectorLink` to specify inputs and
-outputs, `ConnectorSeq`
+There were plans to create `LeftArrow` and `RightArrow`, corresponding to
+associative monoidal left and right multiplecation. This was never done.
 
+There were vague ideas of talking about arrows as functors. This would
+have then required left and right adjoints.
 
+Natural transformations could then be interpreted as homotopic
+refactorings of Atomese, i.e. transformations between two different
+Atomese representations for the "same thing".
+
+There was talk of applying such natural transformations automatically,
+as a convenience to the user of Atomese as a KR system.
+
+### Shape rotators
+This very rapdily slides down the slide of re-interpreting graph
+rewrites as theorems, or at least rules, and then forward/backward
+chaining them. Or, alternately, using ASP as a constraint solver.
+Which then calls for a generalized axiomatic system.
+
+This is, of course, what a shape rotator is. Insofar as LLM's are
+wordcels, the core project ot Atomese, and the AtomSpace, is to design
+a generic shape rotator that can perceive and work with and manipulate
+shapes. To work natively with axiomatic systems, proof-nets, sheaves
+of interconnecting jigsaws. So, here we are. That's why we do this.
+
+### Connectors and ConnectorSeqs
+An early idea was to use `ConnectorLink` to specify inputs and outputs,
+with `ConnectorSeq` bracketing a collection of connectors into a jigsaw.
+The jigsaw would simultaneously generalize the notion `SignatureLink` and
+`ArrowLink`.  What was never created was a formal specification for moving
+between those types, and jigsaws. Lets try this now:
+
+```
+   (JigsawOfLink
+       (VariableList
+            (TypedVariable (Variable "foo") (Type 'Concept))
+            (TypedVariable (Variable "bar") (Type 'Predicate))))
+```
+when executed, would return:
+```
+    (ConnectorSeq
+       (Connector
+          (Type 'Concept)
+          (SexNode "input"))
+       (Connector
+          (Type 'Predicate)
+          (SexNode "input")))
+```
+which indicates both the type, and the directionality. (I want to make
+a joke about the Manosphere, here. Something about taking a plain lambda
+and looksmaxxing it. Hypergamy and gender-affirming care for declarative
+programming interfaces. The mysogeny of higher-order logic. Constructive
+mathematics is just a construction of mathematicians. But I digress...)
