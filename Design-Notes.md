@@ -682,9 +682,23 @@ Another:
 ```
 This wires up the output of the `ExecutionOutput`. No problems here.
 
+The generic form is then
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		( ... producers ... )
+```
+The `( ... producers ... )` are any c++ class `FooLink` with an
+`FooLink::execute()` method on it.
+
+The output of the execution is not routed "anywhere", it just arrives
+"here", an unspecified, anonymous "here and now" when `FooLink::execute()`
+is called.
+
 There is no obvious design for a `OutputNode` aka `ProducerNode`.
 So the initial motivating example above is flawed.
 
+### Here and Now
 Earlier designs used `Lambda`s:
 ```
     (Define (DefinedProceedureNode "named function")
@@ -703,13 +717,16 @@ The `ExecutionOutput` provide "half" of `PipeLink`:
       (... producers ...))
 ```
 The output of the execution is not routed "anywhere", it just arrives
-"here", an unspecified, anonymous "here and now" when `FooLink::execute()`
-is called.
+at the unspecified, anaonymous location of "here and now".
 
-   (CollectionOf
-      (Type 'FormulaStream)
-      (ExecutionOutput (DefinedProcedure "named function ")
+The `CollectionOf` provides a way of wiring single-output streams into
+place:
+```
+   (CollectionOfLink
+      (Type 'SortedValue)
+      (... producers ..))
+```
+Written in this way, it suggests that `CollectionOfLink` and
+`ExecutionOutputLink` can be collapsed into one common do-it-all Link.
 
 
-
-SortedValue
