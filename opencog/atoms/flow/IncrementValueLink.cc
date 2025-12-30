@@ -41,7 +41,7 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 	}
 
 	size_t ary = _outgoing.size();
-	if (INCREMENT_VALUE_LINK == t and 3 != ary)
+	if (is_type(INCREMENT_VALUE_LINK) and 3 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting three atoms!");
 }
 
