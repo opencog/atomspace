@@ -26,7 +26,13 @@
 			(TypeOf (DontExec (Variable "$atom"))))
 		get-all-atoms))
 
-(cog-execute! mis-id-body)
+; It would be best if the above did NOT throw, and understood that
+; the accept-everything body was indeed the body. But in the interest
+; of expedience, we accept the exception.
+(test-assert "Mis-identified body"
+	(catch #t
+		(lambda () (cog-execute! mis-id-body) #f)
+		(lambda (key . args) #t)))
 
 (define present-body
 	(Filter

@@ -152,7 +152,10 @@ bool FilterLink::extract(const Handle& termpat,
                          AtomSpace* scratch, bool silent,
                          Quotation quotation) const
 {
-	if (termpat == gnd) return true;
+	// We can save a bit of time by not recording self-grounds.
+	// However, this will trigger the "Internal Error" below,
+	// when the Filter recursively encounters itself.
+	// if (termpat == gnd) return true;
 
 	ValuePtr vgnd(gnd);
 
@@ -450,9 +453,11 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	{
 		auto valpair = valmap.find(var);
 
+		// This can happen in some unusual cases. So don't complain.
 		if (valmap.end() == valpair)
 			throw FatalErrorException(TRACE_INFO,
-				"Internal error; bug in filtering code");
+			     "Internal error; bug in filtering code");
+			// continue;
 
 		const ValuePtr& gnding(valpair->second);
 
