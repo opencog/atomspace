@@ -729,4 +729,63 @@ place:
 Written in this way, it suggests that `CollectionOfLink` and
 `ExecutionOutputLink` can be collapsed into one common do-it-all Link.
 
+### Types
+However, there is a big difference: `CollectionOf` was meant to be a
+type-casting device: Whatever typethe producers are producing, the output
+will be recast to the indicated type.
+
+This is in contrast to the `LambdaLink`, which uses `TypedVariable` to
+specify the input types.  But what, exactly, is the point of that? If
+the input types don't match, then what? Ignore them? So, an implicit
+`FilterLink` behavior? Or throw an exception? So, while `TypedVariable`
+makes sense for pattern matching, it is not at all clear why or how
+Lambdas should respect it.
+
+There is no Atomese way to work with those type declarations, either,
+except to the extent provided by the current `RuleLink`. Lambdas do
+not specify thier output type either: and if they did, what would happen
+if the Lambda body failed to generate the specified output type? Ugh.
+
+There's yet more confusion. Typed variables are explicitly named: they
+are not anonymous. But those names do not matter to external observers;
+the names only matter to the internal body. Externally, the variables
+may as well be anonymous; only thier positional value matters. This is
+the mess that leads to the need for alpha-conversion, when there are
+naming conflicts. Ugh.
+
+The original conception for `SignatureLink` was to allow *anonymous*
+type signatures to be written down. Although it is possible to compute
+a `SignatureLink` from a given `Lambda`, there is currently no code
+that actually does this.  This is not hard to solve:
+```
+    (SignatureOfLink (Lambda ...))
+```
+when executed, would create a `SignatureLink` that corresponds to the
+Variable declarations in the Lambda. There already is a `VardeclOfLink`
+that returns the vars in raw form.
+
+### Signature
+Lets take a short moment to give an explicit example. Consider
+```
+   (SignatureOfLink
+       (VariableList
+            (TypedVariable (Variable "foo") (Type 'Concept))
+            (TypedVariable (Variable "bar") (Type 'Predicate))))
+```
+when executed, would return:
+```
+    (SignatureLink
+       (ListLink
+          (Type 'Concept)
+          (Type 'Predicate)))
+```
+That's it -- The list prserves the positional value of the types, while
+discarding the associated names.
+
+
+Arrow
+
+So an early idea was to use `ConnectorLink` to specify inputs and
+outputs, `ConnectorSeq`
+
 
