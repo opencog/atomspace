@@ -41,7 +41,8 @@
 			(TypeOf (DontExec (Variable "$atom"))))
 		get-all-atoms))
 
-(cog-execute! present-body)
+; (define peabody (cog-execute! present-body))
+; (format #t "Peabody: ~A\n" peabody)
 
 (define vardecl-unconstrained
 	(Filter
@@ -51,7 +52,22 @@
 			(TypeOf (DontExec (Variable "$atom"))))
 		get-all-atoms))
 
-(cog-execute! vardecl-unsoncstrained)
+(define uncon (cog-execute! vardecl-unconstrained))
+(format #t "Unconstrained ~A\n" uncon)
+(test-assert "unconstrained search"
+	(equal? uncon
+		(LinkValue
+			(Type 'DontExec)
+			(Type 'Filter)
+			(Type 'Filter)
+			(Type 'Filter)
+			(Type 'Meet)
+			(Type 'Predicate)
+			(Type 'Present)
+			(Type 'Rule)
+			(Type 'Rule)
+			(Type 'Rule)
+			(Type 'TypeOf))))
 
 (define vardecl-atoms
 	(Filter
@@ -61,7 +77,8 @@
 			(TypeOf (DontExec (Variable "$atom"))))
 		get-all-atoms))
 
-(cog-execute! vardecl-atoms)
+(define vatoms (cog-execute! vardecl-atoms))
+; (format #t "vardecl atoms: ~A\n" vatoms)
 
 ; -----------
 
