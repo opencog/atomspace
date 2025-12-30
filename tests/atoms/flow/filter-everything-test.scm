@@ -19,6 +19,9 @@
 		(Variable "$atom") ; match anything
 	))
 
+; ---------------------------------------
+; XXX FIXME The RuleLink logic for extracting the body
+; is currently broken. Should be fixed.
 (define mis-id-body
 	(Filter
 		(Rule
@@ -34,6 +37,8 @@
 		(lambda () (cog-execute! mis-id-body) #f)
 		(lambda (key . args) #t)))
 
+; ---------------------------------------
+; XXX FIXME This is broken.
 (define present-body
 	(Filter
 		(Rule
@@ -41,9 +46,13 @@
 			(TypeOf (DontExec (Variable "$atom"))))
 		get-all-atoms))
 
+; XXX FIXME executing this currently throws one of two different
+; kinds of exceptions, based on ... stuff
 ; (define peabody (cog-execute! present-body))
 ; (format #t "Peabody: ~A\n" peabody)
 
+; ---------------------------------------
+; This works fine, at this time.
 (define vardecl-unconstrained
 	(Filter
 		(Rule
@@ -69,6 +78,9 @@
 			(Type 'Rule)
 			(Type 'TypeOf))))
 
+; ---------------------------------------
+; This works fine, at this time.
+; The returns list is long.
 (define vardecl-atoms
 	(Filter
 		(Rule
