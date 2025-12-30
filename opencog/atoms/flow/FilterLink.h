@@ -66,7 +66,7 @@ protected:
 
 	bool extract(const Handle&, const ValuePtr&, ValueMap&,
 	             AtomSpace*, bool,
-	             Quotation quotation=Quotation()) const;
+	             const Quotation& = Quotation()) const;
 
 	ValuePtr rewrite_one(const ValuePtr&, AtomSpace*, bool) const;
 	ValuePtr do_execute(AtomSpace*, bool) const;

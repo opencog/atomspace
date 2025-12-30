@@ -150,7 +150,7 @@ bool FilterLink::extract(const Handle& termpat,
                          const ValuePtr& gnd,
                          ValueMap& valmap,
                          AtomSpace* scratch, bool silent,
-                         Quotation quotation) const
+                         const Quotation& quotation) const
 {
 	// We can save a bit of time by not recording self-grounds.
 	// However, this will trigger the "Internal Error" below,
@@ -199,14 +199,14 @@ bool FilterLink::extract(const Handle& termpat,
 		if (nullptr == vgnd) return false;
 	}
 
-	// Save quotation state before updating it
-	Quotation quotation_cp;
-	quotation.update(t);
-
 	// Consume quotation
-	if (quotation_cp.consumable(t))
+	if (quotation.consumable(t))
+	{
+		Quotation uquot(quotation);
+		uquot.update(t);
 		return extract(termpat->getOutgoingAtom(0), vgnd, valmap,
-		               scratch, silent, quotation);
+		               scratch, silent, uquot);
+	}
 
 	if (VARIABLE_NODE == t and 0 < _varset->count(termpat))
 	{
