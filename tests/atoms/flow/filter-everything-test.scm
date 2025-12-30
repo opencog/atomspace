@@ -75,6 +75,24 @@
 (define vatoms (cog-execute! vardecl-atoms))
 ; (format #t "vardecl atoms: ~A\n" vatoms)
 
+; ---------------------------------------
+; Works
+(define count-types
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
+			(Variable "$typ") ; body - accept everything
+			(IncrementValue (Variable "$typ") (Predicate "cnt") (Number 0 0 1)))
+		vardecl-atoms))
+
+(define count-list (cog-execute! count-types))
+(format #t "List length: ~A\n" (length (cog-value->list count-list)))
+
+; The actual count will change if the above is changed, but this gets
+; us into the general ballpark, for now. Sloppy, but whatever.
+(test-assert "num counts"
+	(equal? 24 (length (cog-value->list count-list))))
+
 ; -----------
 
 (test-end tname)
