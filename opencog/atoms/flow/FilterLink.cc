@@ -157,20 +157,24 @@ bool FilterLink::extract(const Handle& termpat,
 	// when the Filter recursively encounters itself.
 	// if (termpat == gnd) return true;
 
-	ValuePtr vgnd(gnd);
+	Type t = termpat->get_type();
 
-	// Execute the proposed grounding term, first. Notice that this is
-	// a "deep" execution, because there may have been lots of
-	// non-executable stuff above us. Is this deep execution actually
-	// a good idea? I dunno; this is an older design decision, motivated
-	// by the URE. Is it a good design decision? I dunno. For now, there's
-	// not enough experience to say. There is, however, a unit test to
-	// check this behavior.
-	Handle hgnd(HandleCast(gnd));
-	if (hgnd and hgnd->is_executable())
+	// If its a variable, then see if we know its value already;
+	// Do this first, before attempting execution; this avoids
+	// some recursive uglies.
+	if (VARIABLE_NODE == t and 0 < _varset->count(termpat))
 	{
-		vgnd = hgnd->execute(scratch, silent);
-		if (nullptr == vgnd) return false;
+		// If we already have a value, the value must be identical.
+		auto val = valmap.find(termpat);
+		if (valmap.end() != val)
+			return (val->second == gnd);
+
+		// If the type is acceptable; don't go any farrther.
+		if (_mvars->is_type(termpat, gnd))
+		{
+			valmap.emplace(std::make_pair(termpat, gnd));
+			return true;
+		}
 	}
 
 	// Let the conventional type-checker deal with complicated types.
@@ -178,26 +182,21 @@ bool FilterLink::extract(const Handle& termpat,
 	if (termpat->is_type(TYPE_NODE) or
 	    (termpat->is_type(TYPE_OUTPUT_SIG) and
 	       (not termpat->is_type(LINK_SIGNATURE_LINK))))
-		return value_is_type(termpat, vgnd);
+		return value_is_type(termpat, gnd);
 
-	Type t = termpat->get_type();
-	// If its a variable, then see if we know its value already;
-	// If not, then record it.
-	if (VARIABLE_NODE == t and 0 < _varset->count(termpat))
+	// Execute the proposed grounding term. Notice that this is
+	// a "deep" execution, because there may have been lots of
+	// non-executable stuff above us. Is this deep execution actually
+	// a good idea? I dunno; this is an older design decision, motivated
+	// by the URE. Is it a good design decision? I dunno. For now, there's
+	// not enough experience to say. There is, however, a unit test to
+	// check this behavior.
+	ValuePtr vgnd(gnd);
+	Handle hgnd(HandleCast(gnd));
+	if (hgnd and hgnd->is_executable())
 	{
-		auto val = valmap.find(termpat);
-		if (valmap.end() != val)
-		{
-			// If we already have a value, the value must be identical.
-			return (val->second == vgnd);
-		}
-
-		// Check the type of the value.
-		if (not _mvars->is_type(termpat, vgnd)) return false;
-
-		// If we are here, everything looks good. Record and return.
-		valmap.emplace(std::make_pair(termpat, vgnd));
-		return true;
+		vgnd = hgnd->execute(scratch, silent);
+		if (nullptr == vgnd) return false;
 	}
 
 	// Save quotation state before updating it
@@ -208,6 +207,21 @@ bool FilterLink::extract(const Handle& termpat,
 	if (quotation_cp.consumable(t))
 		return extract(termpat->getOutgoingAtom(0), vgnd, valmap,
 		               scratch, silent, quotation);
+
+	if (VARIABLE_NODE == t and 0 < _varset->count(termpat))
+	{
+		// If we already have a value, the value must be identical.
+		auto val = valmap.find(termpat);
+		if (valmap.end() != val)
+			return (val->second == vgnd);
+
+		// Check the type of the value.
+		if (not _mvars->is_type(termpat, vgnd)) return false;
+
+		// If we are here, everything looks good. Record and return.
+		valmap.emplace(std::make_pair(termpat, vgnd));
+		return true;
+	}
 
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
