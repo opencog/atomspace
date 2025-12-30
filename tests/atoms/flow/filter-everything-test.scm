@@ -38,20 +38,6 @@
 		(lambda (key . args) #t)))
 
 ; ---------------------------------------
-; XXX FIXME This is broken.
-(define present-body
-	(Filter
-		(Rule
-			(Present (Variable "$atom")) ; clearly rule body
-			(TypeOf (DontExec (Variable "$atom"))))
-		get-all-atoms))
-
-; XXX FIXME executing this currently throws one of two different
-; kinds of exceptions, based on ... stuff
-; (define peabody (cog-execute! present-body))
-; (format #t "Peabody: ~A\n" peabody)
-
-; ---------------------------------------
 ; This works fine, at this time.
 (define vardecl-unconstrained
 	(Filter
@@ -69,11 +55,8 @@
 			(Type 'DontExec)
 			(Type 'Filter)
 			(Type 'Filter)
-			(Type 'Filter)
 			(Type 'Meet)
 			(Type 'Predicate)
-			(Type 'Present)
-			(Type 'Rule)
 			(Type 'Rule)
 			(Type 'Rule)
 			(Type 'TypeOf))))
