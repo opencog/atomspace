@@ -876,9 +876,83 @@ this:
       (Type 'FlatStream)
       (NameNode "input-for-flattener"))
 ```
-
-The `NameNode` is now seem to be dual to `VariableNode`. Variables are
+The `NameNode` is now seen to be dual to `VariableNode`. Variables are
 used internally in a Lambda, to ease the wiring up of the guts inside
 the Lambda. The outside does not care about this wiring, or these names.
+The `NameNode` is the opposite: only the outsides care: the wiring
+diagram is extramural.
 
-the
+Huh. So the above paints the Lambdas as a cellular wall, dividing inside
+from outside. Curious. I've never quite thought of it that way.
+
+### Directionality
+The directionality is implicit. In `PipeLink`, the `NameNode` comes
+first; thus it is the sink for whatever follows. In `CollectionOf`,
+it is second, therefore the source. This inputs-come-second pattern
+is generic in Atomese:
+```
+    (ExecutionOutput
+       (function name or defintition)
+       (arguments))
+```
+or
+```
+    (FilterLink
+       (filter definition)
+       (items to be filtered))
+```
+For minimalist, human-authored Atomese, this is sufficient. For a
+connectionist approach, we want more. For example, executing
+```
+    (JigsawOfLink
+       (ExecutionOutput
+          (function name or defintition)
+          (arguments)))
+```
+should return
+```
+    (Section
+       (function name or definition) ; this is the "name" of the section
+       (ConnectorSeq
+          (Connector
+              (TypeNode 'Value)   ; type of output; generic Value
+              (SexNode "output")) ; its an output
+          (Connector
+              (TypeNode 'Foo)     ; type of first argument
+              (SexNode "input"))  ; its an input
+          (Connector
+              (TypeNode 'Atom)    ; type of second argument
+              (SexNode "input"))))  ; its an input
+```
+Here, the output type of the `ExecutionOutput` is known a-priori; it is
+always a `Value` because the c++ method is `ValuePtr Atom::execute()`.
+
+Even when the output is named:
+```
+   (PipeLink
+		(NameNode "named output")
+		( ... producer ...))
+```
+it has to be assumed to be a generic `Value`. We can narrow the type:
+```
+   (PipeLink
+      (Connector
+         (TypeNode 'FooNode)
+         (SexNode "output"))
+		( ... producer ...))
+```
+The above types the output, but the output remains anonymous. To name
+it, we have to get more verbose:
+```
+   (PipeLink
+      (Section
+		   (NameNode "named output")
+         (Connector
+            (TypeNode 'FooNode)
+            (SexNode "output")))
+		( ... producer ...))
+```
+This is verbose and unpleasant to hand-write. Thus, for hand-written
+pipelines, the un-typed but named `NameNode` seems to be the way to go.
+
+### Alternative styles
