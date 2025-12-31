@@ -843,3 +843,42 @@ a joke about the Manosphere, here. Something about taking a plain lambda
 and looksmaxxing it. Hypergamy and gender-affirming care for declarative
 programming interfaces. The mysogeny of higher-order logic. Constructive
 mathematics is just a construction of mathematicians. But I digress...)
+
+### Named Outputs
+The proposal above, repeated here, can now be critiqued and deconstructed:
+```
+   (PipeLink
+		(ConsumerNode "input-for-flattener")
+		(ProducerNode "output-from-sorter"))
+```
+The difficulty/impossiblity of definining the `ProducerNode` indicates
+that it does not exist. Thne naming ambiguity of Input/OutputLink
+indicates that it is neither, or both. The examples all were of the form
+```
+   (PipeLink
+		(NameNode "named output")
+		( ... producer ...))
+```
+Here, the producer, producing anonymouos, unnamed values via calles to
+it's `Producer::execute()` method, has a name assigned to that output.
+
+The consumer takes several forms:
+```
+   (FlatStream (NameNode "input-for-flattener"))
+```
+Oh no ...! Should that be `(NameNode "named output")`? Is it an input
+or an output? Well, its both... the naming difficulty persists.
+
+Anyway, a `FlatStream` is not an Atom, so the correct represention is
+this:
+```
+   (CollectionOfLink
+      (Type 'FlatStream)
+      (NameNode "input-for-flattener"))
+```
+
+The `NameNode` is now seem to be dual to `VariableNode`. Variables are
+used internally in a Lambda, to ease the wiring up of the guts inside
+the Lambda. The outside does not care about this wiring, or these names.
+
+the
