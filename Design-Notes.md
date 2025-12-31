@@ -386,8 +386,8 @@ We seem to have multiple ideas, but its not clear how to combine them:
   off the downstream.
 * Hoarders can be streamers; as long as they are open, they can block if
   empty.
-* Streaming and HoardingSig do seem incompatbile: both block, but in
-  different places, for different reasnos.
+* Streaming and HoardingSig do seem incompatible: both block, but in
+  different places, for different reasons.
 * It only makes sense to be a HoardingSig if upstream is known to be
   finite; otherwise, low/high-watermark management is required (and is
   currently implemented in SortedStream.)
@@ -560,14 +560,14 @@ is some mashup of type theory, ideas from Link Grammar, and ideas like
 introspection from Java or from D-Bus.  That, at least, is the sexy
 idea. The actual practice is anything but -- just a lot of carefully
 designed, hand-built pipelines. I got enough of the idea across that
-Calude could build some of them, but I had to supervise.  There's no
+Claude could build some of them, but I had to supervise.  There's no
 general assembly mechanism, and this remains far off and unworkable
 despite repeated attempts.  What's going wrong?
 
 Two or three things seem to be desirable:
 * Something other than the use of anchors as attachment points where
   SetValue and ValueOf can rendezvous.
-* Pipelines need to be descriptively ddefined.
+* Pipelines need to be descriptively defined.
 * It would be OK if there was some constructor that performed the actual
   wiring, given the description. That is, the description itself does
   not have to be runnable; it just needs to be compilable/assemblable
@@ -577,7 +577,7 @@ There are two meta-goals I have to decouple:
 * The short-medium term issue of making pipelines defacto easier to
   write, over the coming months. Ideally using some descriptive
   framework having some OK properties.
-* The long-term goal os self-assembly and recursive algorithmic
+* The long-term goal of self-assembly and recursive algorithmic
   self-design.
 
 Pipeline Assembly
@@ -606,7 +606,7 @@ FWIW, There's the unexplored alternative of hooking these up with
 the existing anchor-point design.
 ```
 (cog-execute! (SetValue (Anchor "foo") (Predicate "key")
-	(LinkSignatue (Type 'SortedValue) ...?))
+	(LinkSignature (Type 'SortedValue) ...?))
 
 (cog-execute!
 	(LinkSignature (Type 'FlatStream) ...
@@ -701,7 +701,7 @@ So the initial motivating example above is flawed.
 ### Here and Now
 Earlier designs used `Lambda`s:
 ```
-    (Define (DefinedProceedureNode "named function")
+    (Define (DefinedProcedureNode "named function")
        (Lambda
            (VariableList ... inputs ...)
            (... body ...)))
@@ -717,7 +717,7 @@ The `ExecutionOutput` provide "half" of `PipeLink`:
       (... producers ...))
 ```
 The output of the execution is not routed "anywhere", it just arrives
-at the unspecified, anaonymous location of "here and now".
+at the unspecified, anonymous location of "here and now".
 
 The `CollectionOf` provides a way of wiring single-output streams into
 place:
@@ -731,7 +731,7 @@ Written in this way, it suggests that `CollectionOfLink` and
 
 ### Types
 However, there is a big difference: `CollectionOf` was meant to be a
-type-casting device: Whatever typethe producers are producing, the output
+type-casting device: Whatever type the producers are producing, the output
 will be recast to the indicated type.
 
 This is in contrast to the `LambdaLink`, which uses `TypedVariable` to
@@ -779,7 +779,7 @@ when executed, would return:
           (Type 'Concept)
           (Type 'Predicate)))
 ```
-That's it -- The list prserves the positional value of the types, while
+That's it -- The list preserves the positional value of the types, while
 discarding the associated names.
 
 ### Output Types
@@ -791,7 +791,7 @@ There were plans to create `CoArrowLink`, the category-theoretic "opposite"
 of the arrow. This was never done.
 
 There were plans to create `LeftArrow` and `RightArrow`, corresponding to
-associative monoidal left and right multiplecation. This was never done.
+associative monoidal left and right multiplication. This was never done.
 
 There were vague ideas of talking about arrows as functors. This would
 have then required left and right adjoints.
@@ -804,7 +804,7 @@ There was talk of applying such natural transformations automatically,
 as a convenience to the user of Atomese as a KR system.
 
 ### Shape rotators
-This very rapdily slides down the slide of re-interpreting graph
+This very rapidly slides down the slide of re-interpreting graph
 rewrites as theorems, or at least rules, and then forward/backward
 chaining them. Or, alternately, using ASP as a constraint solver.
 Which then calls for a generalized axiomatic system.
@@ -848,7 +848,7 @@ The proposal above, repeated here, can now be critiqued and deconstructed:
 		(ConsumerNode "input-for-flattener")
 		(ProducerNode "output-from-sorter"))
 ```
-The difficulty/impossiblity of defining the `ProducerNode` indicates
+The difficulty/impossibility of defining the `ProducerNode` indicates
 that it does not exist. Then naming ambiguity of Input/OutputLink
 indicates that it is neither, or both. The examples all were of the form
 ```
@@ -856,7 +856,7 @@ indicates that it is neither, or both. The examples all were of the form
 		(NameNode "named output")
 		( ... producer ...))
 ```
-Here, the producer, producing anonymouos, unnamed values via calls to
+Here, the producer, producing anonymous, unnamed values via calls to
 it's `Producer::execute()` method, has a name assigned to that output.
 
 The consumer takes several forms:
@@ -877,7 +877,7 @@ The `NameNode` is now seen to be dual to `VariableNode`. Variables are
 used internally in a Lambda, to ease the wiring up of the guts inside
 the Lambda. The outside does not care about this wiring, or these names.
 The `NameNode` is the opposite: only the outsides care: the wiring
-diagram is extramural.
+diagram is extra-mural.
 
 Huh. So the above paints the Lambdas as a cellular wall, dividing inside
 from outside. Curious. I've never quite thought of it that way.
@@ -962,7 +962,7 @@ Are there other ways?  Well, historically we have
 We concluded earlier that `SignatureLink` always strips off names.
 Therefore,
 ```
-   (SignaureOfLink
+   (SignatureOfLink
       (TypedVariable
          (Variable "var name")
          (TypeNode 'Foo)))
@@ -1036,16 +1036,16 @@ This is verbose, and awkward-seeming. Perhaps
           (Type 'Predicate)
           (SexNode "input")))
 ```
-### Homotpy engines
+### Homotopy engines
 Two remarks:
 * None of this blabber about sections and signature really matters until
   we have some assembly engine in place.  The above are examples of the
-  type specifications that the assembly engnine would need to work with,
+  type specifications that the assembly engine would need to work with,
   but only experimental experience can hone the details.
 * The malleability and flexibility (and thus, uncertainty) of the
   representation is a central feature of such axiomatic systems. That is,
-  there are homotpic representations of any given structure, and there
-  are homotopic deformantions that preserve the semantics. From the
+  there are homotopic representations of any given structure, and there
+  are homotopic deformations that preserve the semantics. From the
   distance, it seems that many different kinds of representations are
   adequate. Any one can do.
 * We do not have a homotopy engine: a system for transforming one kind
@@ -1054,7 +1054,7 @@ Two remarks:
 The idea of a homotopy engine sends me into a recursive tail-spin.
 Homotopies are necessarily definable as a collection of rewrite rules,
 each rewrite being a valid homotopic transformation in its own right.
-The homotpy engine is then nothing more but a rule engine that applies
+The homotopy engine is then nothing more but a rule engine that applies
 transformations from the homotopy rule set.
 
 As to rule engines: been there; done that.  At least part of the idea
@@ -1080,26 +1080,26 @@ convert any kind of axiomatic system, the axioms and inference rules
 for "anything at all" into jigsaws. I'm still floundering here.
 
 This seems like step one for building a shape rotator. I can watch
-Claude "think" via wordcel constructions; its clear that wordcell
-representations of shapes are possible, but quite inefficnet. But I
+Claude "think" via wordcel constructions; its clear that wordcel
+representations of shapes are possible, but quite inefficient. But I
 digress...
 
 The conclusion seems to be:
 * The discussion of Signatures, Types, Connectors and Sections
-  constitute a small step towards a rule engine, (from which a homotpy
+  constitute a small step towards a rule engine, (from which a homotopy
   engine or an axiomatic theorem-proving engine could be built) but it
   remains out of reach, and of seemingly low priority, and won't be
   explored further(?) in this text(?)
 
 ### Duality
 The `PipeLink` and `NameNode` appear to be dual, in some sense, to
-`DefineLink` and `DeffinedProceedureNode`. This is worth (another)
+`DefineLink` and `DefinedProcedureNode`. This is worth (another)
 quick review.
 
 Consider the (valid) expression, given earlier:
 ```
     (Define
-       (DefinedProceedureNode "named function")
+       (DefinedProcedureNode "named function")
        (Lambda
            (VariableList ... inputs ...)
            (... body ...)))
@@ -1151,12 +1151,12 @@ By contrast, the expression below is invalid/wrong:
       (Type 'FlatStream)
       (DefinedProcedureNode "input-for-flattener"))
 ```
-It's non-sensical, more or less: The `DefinedProceedure` needs inputs;
+It's non-sensical, more or less: The `DefinedProcedure` needs inputs;
 it can't provide anything to the flattener.  I wrote "more or less"
 only because one can imagine, for this example, that the lambda
 arguments can be hoisted, and this expression put into prenex form,
 so that it is interpreted as a brand-new (un-named) lambda that is a
-function composition of the anonymous flatttener, and whatever came
+function composition of the anonymous flattener, and whatever came
 before.
 
 ### Composition
@@ -1226,7 +1226,7 @@ After;
 When is was difficult to express the initial stream in pure Atomese, the
 scheme `(cog-set-value! atom key value)` function was used: but this is
 an end-run, a fallback to scheme, instead of pure Atomese. We will avoid
-createding a `(cog-set-pipe-source! name value)` function to provide a
+creating a `(cog-set-pipe-source! name value)` function to provide a
 similar end-run.
 
 TODO:
