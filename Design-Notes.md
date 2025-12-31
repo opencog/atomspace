@@ -1091,14 +1091,12 @@ The conclusion seems to be:
   remains out of reach, and of seemingly low priority, and won't be
   explored further(?) in this text(?)
 
-### Pipeline authoring recap and conclusions(?)
-The `PipeLink` and `NameNode` appear to allow simpler pipeline authoring.
-Is this true?
+### Duality
+The `PipeLink` and `NameNode` appear to be dual, in some sense, to
+`DefineLink` and `DeffinedProceedureNode`. This is worth (another)
+quick review.
 
-Ball of confusion below. Belw is all wrong and will be fixed tomorrow.
-XXX fixme.
-
-Earlier, we had
+Consider the (valid) expression, given earlier:
 ```
     (Define
        (DefinedProceedureNode "named function")
@@ -1106,8 +1104,12 @@ Earlier, we had
            (VariableList ... inputs ...)
            (... body ...)))
 ```
-But this seems to be identical to the propsal:
-XXX this is wrong; bad bad will fix tomorrow. Goodnight.
+This takes an anonymous, un-named `Lambda` and gives it a name.  What,
+exactly, is given a name? The output, or the function? It has to be the
+latter, since the `Lambda` by itself "does nothing" unless it is applied
+to some arguments (with the `ExOutLink`.)
+
+It is tempting to write the (invalid, incorrect) expression:
 ```
     (PipeLink
        (NameNode "named function")
@@ -1115,36 +1117,80 @@ XXX this is wrong; bad bad will fix tomorrow. Goodnight.
            (VariableList ... inputs ...)
            (... body ...)))
 ```
-Earlier, we had:
+Why is this invalid? The intent of the `NameNode` is to name the output,
+not the functiion. The `Lambda` body is utterly incapable of providing
+any output: it would need to be applied to some inputs.  That is, the
+`NameNode` is to be applied, as a label, to an already-available output,
+or a future promise of output. The mechanics at the "other end" are of no
+concern.
+
+Thus, the duality: `DefinedProcedure` names functions requiring inputs,
+and provides a convient handle with which the function can be appplied
+to those inputs.  Or, using a more connectionist vocabulary: it provides
+a convenient name for attaching input streams to the input side of a
+processing function.
+
+The `NameNode` gives a name to the output side. There's no thought of
+what the inputs may be: they are irrelevant to the output. All we know
+is that there is some output stream of data, and, in order to avoid it's
+anonymity, we want to give it a name.  That name is then a stand-in for
+a data source: anything that has a name is guaranteed to deliver data.
+
+Thus, for example, we have a valid use of `NameNode`
 ```
    (CollectionOfLink
       (Type 'FlatStream)
       (NameNode "input-for-flattener"))
 ```
-But this seems to be identical to the old syntax:
+The intent is clear: the `NameNode` will deliver data, and the flattener
+will flatten it.
+
+By contrast, the expression below is invalid/wrong:
 ```
    (CollectionOfLink
       (Type 'FlatStream)
       (DefinedProcedureNode "input-for-flattener"))
 ```
+It's non-sensical, more or less: The `DefinedProceedure` needs inputs;
+it can't provide anything to the flattener.  I wrote "more or less"
+only because one can imagine, for this example, that the lambda
+arguments can be hoisted, and this expression put into prenex form,
+so that it is interpreted as a brand-new (un-named) lambda that is a
+function composition of the anonymous flatttener, and whatever came
+before.
 
-It is not obvious that `PipeLink` does anything at all that `DefineLink`
-does not already do.
+### Composition
+Many years ago, there had been proposals for a `ComposeLink`; these were
+nixed, because the existing infrastructure fo `ExOutLink` could already
+do function composition (the `PrenexLink` was implemented: it hoists the
+variable declarations to the front.)
 
-However, `NameNode` does seem to be different from `DefinedProceedure`.
-The current semantics is that, in c++, whenever a `DefinedProceedure`
-is encountered, the definition is substituted in place (in the c++ code)
-and then the c++ `Atom::execute()` is called on the topmost Atom of the
-resulting expression.
+Function composition can be thought of as a certain axiom that describes
+how functions are to be combined.  That is, if functions are the objects
+of your theory, then the application of one function to another can be
+thought of as an associative operation: that thing that you get when you
+take the function symbols `f` and `g` and write them next to each other:
+`fg`. This is a basic axiom of category theory. In the language of lambda
+calculus, this winds down the roads of application, beta reduction,
+combinators.  It is more-or-less "fully" implementeed in Atomese by the
+`PrenexLink`.
 
-But `NameNode` seems to define a conduit. It seems that it will need to
-behave a bit like a `CollectionValue`, blocking, until a defintion
-arrives (i.e. possibly at some later time in the future.) Then, when
-values are to be pulled out of the `NameNode`, they are pulled from
-the named expression; it is assumed that the named epression is "ready
-to go". This is in sharp contrast to the `DefinedProceedure`, which
-is useless without inputs, and is necessary to wrap it in an ExOutLink,
-and provide the required inputs to it.
+But this is all a red herring; irrelevant to the current task: the goal
+here is to process data streams, and to specify the wiring diagram that
+performs that processing.  Lambdas and function composition provide the
+wrong abstraction, or perhaps an inconvenient abstraction:  yes, of
+course the expression `fg` means "connect `f` to `g`, but this is
+unmanageable, if we were to specify an electrical circuit in this way.
+(Of course, Verilog and VHDL are not the answer, either.) The point of
+the connectionist approach is to say "this is attached to that" and to
+find a simple way of writing that down.
+
+The `PipeLink` and `NameNode` are meant to make pipeline authoring easy.
+
+### Pipeline authoring recap and conclusions(?)
+The `PipeLink` and `NameNode` appear to allow simpler pipeline authoring.
+Is this true?
+
 
 TODO:
 * Collapse together ExecutionOutput and CollectionOf
