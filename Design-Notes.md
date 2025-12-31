@@ -1187,10 +1187,51 @@ find a simple way of writing that down.
 
 The `PipeLink` and `NameNode` are meant to make pipeline authoring easy.
 
-### Pipeline authoring recap and conclusions(?)
-The `PipeLink` and `NameNode` appear to allow simpler pipeline authoring.
-Is this true?
+### Pipeline authoring recap and conclusions
+A quick peek at how `PipeLink` and `NameNode` replace and improve on
+the previous idea.
 
+Before:
+```
+   (FilterLink
+      (RuleLink ...)
+      (ValueOf (Anchor "anchor name") (Predicate "name of stage")))
+```
+
+After:
+```
+   (FilterLink
+      (RuleLink ...)
+      (NameNode "name of stage"))
+```
+So clearly, its more compact. The c++ implementation of a `NameNode`
+class also allows for customized handling of promises, streams,
+blocking, etc. The precise design of which is TBD. (Note the earlier
+confusion about blocking and streaming; it persists here.)
+
+Before:
+```
+   (SetValue
+      (Anchor "anchor name") (Predicate "name of stage")
+      (... some stream expressed in Atomese ...)
+
+```
+After;
+```
+   (PipeLink
+      (NameNode "name of stage")
+      (... some stream expressed in Atomese ...)
+
+```
+When is was dificult to express the initial stream in pure Atomese, the
+scheme `(cog-set-value! atom key value)` function was used: but this is
+an end-run, a fallback to scheme, instead of pure Atomese. We will avoid
+createding a `(cog-set-pipe-source! name value)` function to provide a
+similar end-run.
 
 TODO:
-* Collapse together ExecutionOutput and CollectionOf
+-----
+Compare and contrast `ExecutionOutputLink`, `CollectionOfLink` and
+`FilterLink`. All three of these seem to have overlapping semantics,
+and perhaps they can all be collapsed down to just one do-it-all Link
+type.
