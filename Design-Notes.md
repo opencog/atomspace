@@ -989,5 +989,162 @@ returns
 which indicates that it is always the case that such typing expressions
 are talking about inputs.
 
-Unlike earlier proposals, the JigsawOf here is attempting to propagate
+Unlike earlier proposals, the `JigsawOf` here is attempting to propagate
 the name. This is not obviously correct.
+
+Earlier, it was suggested that
+```
+   (JigsawOfLink
+       (VariableList
+            (TypedVariable (Variable "foo") (Type 'Concept))
+            (TypedVariable (Variable "bar") (Type 'Predicate))))
+```
+when executed, would return:
+```
+    (ConnectorSeq
+       (Connector
+          (Type 'Concept)
+          (SexNode "input"))
+       (Connector
+          (Type 'Predicate)
+          (SexNode "input")))
+```
+Now we seem to be suggesting that, instead, it should return named
+connctors:
+```
+    (ConnectorSeq
+       (Section
+          (Variable "foo")
+          (Connector
+             (Type 'Concept)
+             (SexNode "input")))
+       (Section
+          (Variable "bar")
+          (Connector
+             (Type 'Predicate)
+             (SexNode "input"))))
+```
+This is verbose, and awkward-seeming. Perhaps
+```
+    (ConnectorSeq
+       (Connector
+          (Variable "foo")
+          (Type 'Concept)
+          (SexNode "input"))
+       (Connector
+          (Variable "bar")
+          (Type 'Predicate)
+          (SexNode "input")))
+```
+### Homotpy engines
+Two remarks:
+* None of this blabber abour sections and signature really matters until
+  we have some assembly engine in place.  The above are examples of the
+  type specifications that the assembly engnine would need to work with,
+  but only experimental experience can hone the details.
+* The malleability and flexibility (and thus, uncertainty) of the
+  representation is a central feature of such axiomatic systems. That is,
+  there are homotpic representations of any given structure, and there
+  are homotopic deformantions that preserve the semantics. From the
+  distance, it seems that many different kinds of representations are
+  adequate. Any one can do.
+* We do not have a homotopy engine: a system for transforming one kind
+  of type sepcification into another, equivalent one.
+
+The idea of a homotopy engine sends me into a recursive tail-spin.
+Homotopies are necessarily definable as a collection of rewrite rules,
+each rewrite being a valid homotopic transformation in its own right.
+The homotpy engine is then nothing more but a rule engine that applies
+transformations from the homotopy rule set.
+
+As to rule engines: been there; done that.  At least part of the idea
+of ML, CaML, Haskell is that the rule engines for types are simpler
+than of the code itself. (I view a compiler as a big complicated,
+special-purpose rule engine.)
+
+Does typing become recurisvely simpler? That is, the rules for a type
+engine are few in number and simple in structure: function composition,
+something more for relations.  The rules themselves have "types":
+functions can be plugged into relations, but not vice-versa. Relations
+are always (bool) true/false.  The rule system for the rule system
+is going to be even simpler? What's the "final ultimate grounding",
+is it set theory? Category theory? Something else? Something simpler?
+This is hard to talk about without explicit examples. But it again
+highlights that an appropriate rule engine remains out of reach for
+Atomese.
+
+### Assembly engines
+That is, we need an assembly engine capable of assembling jigsaws, and
+we need an exploration of th expressive power of jigsaws: we need to
+convert any kind of axiomatic system, the axioms and inference rules
+for "anything at all" into jigsaws. I'm still floundering here.
+
+This seems like step one for building a shape rotator. I can watch
+Claude "think" via wordcel constructions; its clear that wordcell
+representations of shapes are possible, but quite inefficnet. But I
+digress...
+
+The conclusion seems to be:
+* The discussion of Signatures, Types, Connectors and Sections
+  constitute a small step towards a rule engine, (from which a homotpy
+  engine or an axiomatic theorem-proving engine could be built) but it
+  remains out of reach, and of seemingly low priority, and won't be
+  explored further(?) in this text(?)
+
+### Pipeline authoring recap and conclusions(?)
+The `PipeLink` and `NameNode` appear to allow simpler pipeline authoring.
+Is this true?
+
+Ball of confusion below. Belw is all wrong and will be fixed tomorrow.
+XXX fixme.
+
+Earlier, we had
+```
+    (Define
+       (DefinedProceedureNode "named function")
+       (Lambda
+           (VariableList ... inputs ...)
+           (... body ...)))
+```
+But this seems to be identical to the propsal:
+XXX this is wrong; bad bad will fix tomorrow. Goodnight.
+```
+    (PipeLink
+       (NameNode "named function")
+       (Lambda
+           (VariableList ... inputs ...)
+           (... body ...)))
+```
+Earlier, we had:
+```
+   (CollectionOfLink
+      (Type 'FlatStream)
+      (NameNode "input-for-flattener"))
+```
+But this seems to be identical to the old syntax:
+```
+   (CollectionOfLink
+      (Type 'FlatStream)
+      (DefinedProcedureNode "input-for-flattener"))
+```
+
+It is not obvious that `PipeLink` does anything at all that `DefineLink`
+does not already do.
+
+However, `NameNode` does seem to be different from `DefinedProceedure`.
+The current semantics is that, in c++, whenever a `DefinedProceedure`
+is encountered, the definition is substituted in place (in the c++ code)
+and then the c++ `Atom::execute()` is called on the topmost Atom of the
+resulting expression.
+
+But `NameNode` seems to define a conduit. It seems that it will need to
+behave a bit like a `CollectionValue`, blocking, until a defintion
+arrives (i.e. possibly at some later time in the future.) Then, when
+values are to be pulled out of the `NameNode`, they are pulled from
+the named expression; it is assumed that the named epression is "ready
+to go". This is in sharp contrast to the `DefinedProceedure`, which
+is useless without inputs, and is necessary to wrap it in an ExOutLink,
+and provide the required inputs to it.
+
+TODO:
+* Collapse together ExecutionOutput and CollectionOf
