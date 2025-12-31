@@ -436,7 +436,7 @@ assembling streams.
 
 ### 25 December 2025 Status Update
 Some notes about the current situation:
-* Most of teh grunt-ugly stuff above has now been cleaned up.
+* Most of the grunt-ugly stuff above has now been cleaned up.
 * All of the big issues remain unsolved.
 * `(FlatStream (SortedValue))` works great.
 * `SortedValue` is very minimal.
@@ -450,7 +450,7 @@ Some notes about the current situation:
   drain of upstream, refilling the hoarder, just before drawing on it.
   So a design maintaining temporal consistency, but lacking the power
   to be a driving engine, pulling/draining forever, independent of
-  exernal forces.  i.e. unlike DrainLink, there's no thread that pulls.
+  external forces.  i.e. unlike DrainLink, there's no thread that pulls.
 * There's no `DrainValue`.
 * `FlatStream` seems to hint at being a general streaming API. With
   flaws discussed earlier.
@@ -565,8 +565,8 @@ general assembly mechanism, and this remains far off and unworkable
 despite repeated attempts.  What's going wrong?
 
 Two or three things seem to be desirable:
-* Something other than the use of anchors as attachement points where
-  SetValue and ValueOf can rendevous.
+* Something other than the use of anchors as attachment points where
+  SetValue and ValueOf can rendezvous.
 * Pipelines need to be descriptively ddefined.
 * It would be OK if there was some constructor that performed the actual
   wiring, given the description. That is, the description itself does
@@ -595,7 +595,7 @@ So what happened when I wrote `(FlatStream (SortedValue))`?
   an Atomese expression can be written to walk/explore/analyze the
   type hierarchy.
 * There is no definition, either hand-written or auto-generated, that
-  expresses (re-expresses) the SIG/ARG type constrctors/constraints
+  expresses (re-expresses) the SIG/ARG type constructors/constraints
   in terms of `Connector`, `ConnectorSeq`, `Section` that we've been
   giving lip-service to.
 * There is no way to take a description written in terms of Connectors
@@ -614,7 +614,7 @@ the existing anchor-point design.
 ```
 
 * There's no way to convert the anchor point design into a
-  hierarachical design, or back.
+  hierarchical design, or back.
 * Any given anchor-point connection is not validated via the SIG
   mechanism. Invalid anchor-point connections are easily constructed.
 
@@ -664,7 +664,7 @@ unless the producer had been previously declared. There's no obvious
 way  of fixing this without inventing some `WaitVauleOf` that camps
 on that key, waiting for something to be attached. This does need to
 be fixed; we do want to be able to define flows in arbitrary order,
-so that they can e.g. be retreived from Storage.
+so that they can e.g. be retrieved from Storage.
 
 Lets try some others:
 ```
@@ -743,13 +743,13 @@ Lambdas should respect it.
 
 There is no Atomese way to work with those type declarations, either,
 except to the extent provided by the current `RuleLink`. Lambdas do
-not specify thier output type either: and if they did, what would happen
+not specify their output type either: and if they did, what would happen
 if the Lambda body failed to generate the specified output type? Ugh.
 
 There's yet more confusion. Typed variables are explicitly named: they
 are not anonymous. But those names do not matter to external observers;
 the names only matter to the internal body. Externally, the variables
-may as well be anonymous; only thier positional value matters. This is
+may as well be anonymous; only their positional value matters. This is
 the mess that leads to the need for alpha-conversion, when there are
 naming conflicts. Ugh.
 
@@ -810,7 +810,7 @@ chaining them. Or, alternately, using ASP as a constraint solver.
 Which then calls for a generalized axiomatic system.
 
 This is, of course, what a shape rotator is. Insofar as LLM's are
-wordcels, the core project ot Atomese, and the AtomSpace, is to design
+wordcels, the core project of Atomese, and the AtomSpace, is to design
 a generic shape rotator that can perceive and work with and manipulate
 shapes. To work natively with axiomatic systems, proof-nets, sheaves
 of interconnecting jigsaws. So, here we are. That's why we do this.
@@ -848,15 +848,15 @@ The proposal above, repeated here, can now be critiqued and deconstructed:
 		(ConsumerNode "input-for-flattener")
 		(ProducerNode "output-from-sorter"))
 ```
-The difficulty/impossiblity of definining the `ProducerNode` indicates
-that it does not exist. Thne naming ambiguity of Input/OutputLink
+The difficulty/impossiblity of defining the `ProducerNode` indicates
+that it does not exist. Then naming ambiguity of Input/OutputLink
 indicates that it is neither, or both. The examples all were of the form
 ```
    (PipeLink
 		(NameNode "named output")
 		( ... producer ...))
 ```
-Here, the producer, producing anonymouos, unnamed values via calles to
+Here, the producer, producing anonymouos, unnamed values via calls to
 it's `Producer::execute()` method, has a name assigned to that output.
 
 The consumer takes several forms:
@@ -866,7 +866,7 @@ The consumer takes several forms:
 Oh no ...! Should that be `(NameNode "named output")`? Is it an input
 or an output? Well, its both... the naming difficulty persists.
 
-Anyway, a `FlatStream` is not an Atom, so the correct represention is
+Anyway, a `FlatStream` is not an Atom, so the correct representation is
 this:
 ```
    (CollectionOfLink
@@ -889,7 +889,7 @@ it is second, therefore the source. This inputs-come-second pattern
 is generic in Atomese:
 ```
     (ExecutionOutput
-       (function name or defintition)
+       (function name or definition)
        (arguments))
 ```
 or
@@ -903,7 +903,7 @@ connectionist approach, we want more. For example, executing
 ```
     (JigsawOfLink
        (ExecutionOutput
-          (function name or defintition)
+          (function name or definition)
           (arguments)))
 ```
 should return
@@ -1010,7 +1010,7 @@ when executed, would return:
           (SexNode "input")))
 ```
 Now we seem to be suggesting that, instead, it should return named
-connctors:
+connectors:
 ```
     (ConnectorSeq
        (Section
@@ -1038,7 +1038,7 @@ This is verbose, and awkward-seeming. Perhaps
 ```
 ### Homotpy engines
 Two remarks:
-* None of this blabber abour sections and signature really matters until
+* None of this blabber about sections and signature really matters until
   we have some assembly engine in place.  The above are examples of the
   type specifications that the assembly engnine would need to work with,
   but only experimental experience can hone the details.
@@ -1049,7 +1049,7 @@ Two remarks:
   distance, it seems that many different kinds of representations are
   adequate. Any one can do.
 * We do not have a homotopy engine: a system for transforming one kind
-  of type sepcification into another, equivalent one.
+  of type specification into another, equivalent one.
 
 The idea of a homotopy engine sends me into a recursive tail-spin.
 Homotopies are necessarily definable as a collection of rewrite rules,
@@ -1062,7 +1062,7 @@ of ML, CaML, Haskell is that the rule engines for types are simpler
 than of the code itself. (I view a compiler as a big complicated,
 special-purpose rule engine.)
 
-Does typing become recurisvely simpler? That is, the rules for a type
+Does typing become recursively simpler? That is, the rules for a type
 engine are few in number and simple in structure: function composition,
 something more for relations.  The rules themselves have "types":
 functions can be plugged into relations, but not vice-versa. Relations
@@ -1118,14 +1118,14 @@ It is tempting to write the (invalid, incorrect) expression:
            (... body ...)))
 ```
 Why is this invalid? The intent of the `NameNode` is to name the output,
-not the functiion. The `Lambda` body is utterly incapable of providing
+not the function. The `Lambda` body is utterly incapable of providing
 any output: it would need to be applied to some inputs.  That is, the
 `NameNode` is to be applied, as a label, to an already-available output,
 or a future promise of output. The mechanics at the "other end" are of no
 concern.
 
 Thus, the duality: `DefinedProcedure` names functions requiring inputs,
-and provides a convient handle with which the function can be appplied
+and provides a convenient handle with which the function can be applied
 to those inputs.  Or, using a more connectionist vocabulary: it provides
 a convenient name for attaching input streams to the input side of a
 processing function.
@@ -1161,7 +1161,7 @@ before.
 
 ### Composition
 Many years ago, there had been proposals for a `ComposeLink`; these were
-nixed, because the existing infrastructure fo `ExOutLink` could already
+nixed, because the existing infrastructure for `ExOutLink` could already
 do function composition (the `PrenexLink` was implemented: it hoists the
 variable declarations to the front.)
 
@@ -1172,7 +1172,7 @@ thought of as an associative operation: that thing that you get when you
 take the function symbols `f` and `g` and write them next to each other:
 `fg`. This is a basic axiom of category theory. In the language of lambda
 calculus, this winds down the roads of application, beta reduction,
-combinators.  It is more-or-less "fully" implementeed in Atomese by the
+combinators.  It is more-or-less "fully" implemented in Atomese by the
 `PrenexLink`.
 
 But this is all a red herring; irrelevant to the current task: the goal
@@ -1223,7 +1223,7 @@ After;
       (... some stream expressed in Atomese ...)
 
 ```
-When is was dificult to express the initial stream in pure Atomese, the
+When is was difficult to express the initial stream in pure Atomese, the
 scheme `(cog-set-value! atom key value)` function was used: but this is
 an end-run, a fallback to scheme, instead of pure Atomese. We will avoid
 createding a `(cog-set-pipe-source! name value)` function to provide a
