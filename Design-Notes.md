@@ -838,11 +838,8 @@ when executed, would return:
           (Type 'Predicate)
           (SexNode "input")))
 ```
-which indicates both the type, and the directionality. (I want to make
-a joke about the Manosphere, here. Something about taking a plain lambda
-and looksmaxxing it. Hypergamy and gender-affirming care for declarative
-programming interfaces. The mysogeny of higher-order logic. Constructive
-mathematics is just a construction of mathematicians. But I digress...)
+which indicates both the type, and the directionality. (This might not
+be quite right; further below, there's a proposal to include the names.
 
 ### Named Outputs
 The proposal above, repeated here, can now be critiqued and deconstructed:
@@ -956,3 +953,41 @@ This is verbose and unpleasant to hand-write. Thus, for hand-written
 pipelines, the un-typed but named `NameNode` seems to be the way to go.
 
 ### Alternative styles
+Are there other ways?  Well, historically we have
+```
+   (TypedVariable
+      (Variable "var name")
+      (TypeNode 'Foo))
+```
+We concluded earlier that `SignatureLink` always strips off names.
+Therefore,
+```
+   (SignaureOfLink
+      (TypedVariable
+         (Variable "var name")
+         (TypeNode 'Foo)))
+```
+returns
+```
+   (TypeNode 'Foo)
+```
+while
+```
+   (JigsawOfLink
+      (TypedVariable
+         (Variable "var name")
+         (TypeNode 'Foo)))
+```
+returns
+```
+   (Section
+      (Variable "var name")
+      (Connector
+         (TypeNode 'Foo)
+         (SexNode "input")))
+```
+which indicates that it is always the case that such typing expressions
+are talking about inputs.
+
+Unlike earlier proposals, the JigsawOf here is attempting to propagate
+the name. This is not obviously correct.
