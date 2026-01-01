@@ -1,6 +1,14 @@
 
 C++ to Guile wrapper examples
 -----------------------------
+***WARNING!!*** Writing new guile interfaces for c++ code is a bad idea,
+from the point of view of Atomese and this project. The goal of this
+project is to describe systems, agents and organisms in Atomese, and not
+to glue together parts with external programming languages, such as
+scheme (or python, or even C++ itself). If you need some new function,
+design an Atom (or Value) for it. Do NOT create a C++-to-guile wrapper!
+(This example remains here as historical documentation for subsystems
+that are still in use.)
 
 The `PrimitiveExample.cc` file demonstrates how to wrap C++ class
 methods with guile (scheme) wrappers. It also shows how to call guile

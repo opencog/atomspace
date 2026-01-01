@@ -1,49 +1,23 @@
 # Python Examples
 
 ## Intro Remarks
-The examples below are written in python. At the philosophical level,
-this is just plain wrong. Atomese is not intended for human programmers,
-it is intended for automated algorithms. This means that the syntax for
-Atomese is was designed to make it easy for algorithms to create,
-process and run it. The syntax is very easy to parse, manipulate
-and rewrite: after all, Atomese is 'just' a (hyper-)graph.
+The examples below are written in python. From the point of view of
+this projet (Atomese, the AtomSpace) programming in python (or scheme,
+or even c++, for that matter) is an abuse. It is even wrong, in a sense.
+The goal of this project is to provide infrastructure for sensori-motor
+agents and organisms that can remember, create, move, analyze and react.
+That infrastructure is "Atomese"; it is not python, scheme, c++ or any
+other "human-oriented" programming language.  That is, Atomese is not
+for "programming" but for "knowledge represetntation" in a machine-
+readable, self-assembling, self-describing, self-reflecting manner.
+Sensori-motor organisms are "made out of" Atomese.  Structures and
+processes are embodied in Atomese, and are not to be glued together
+in python, scheme or c++.
 
-This also means that it is verbose, and often awkward for human
-programmers. You can express anything in Atomese, but it is not
-a human-freindly programming language, and was never meant to be.
-
-Roughly speaking, programming in Atomese is like programming in
-assembly: it can be done, and many humans specialize in and enjoy
-assembly coding. However, most of the rest stick to high-level
-languages.  The analogy here, though, is flawed: Atomese is for
-machine manipulation; there isn't a high-level language built on
-top of it, nor should there be. Conventional programming languages
-already do an excellent job. Atomese provides graphs. Use it as
-a graph processing system.  That's what it's for.
-
-Footnote: graph processing libraries, such as
-[NetworkX](https://networkx.org/) are ***ideal*** for doing graph
-processing, *if you are a human programmer*. And that's fine!  However,
-if you are trying to create systems that automatically learn new
-algorithms and structures, you need to be able to express your algo,
-*as a graph*. And NetworkX cannot do that.
-
-Consider the problem of creating a million algorithms, giving each one
-of them a weight, or several weights. Maybe providing them with a vector
-embedding, or perhaps vice-versa: the algos provide a basis for a vector
-embedding of words. Word2Vec and GloVe attach vectors of numbers to
-words. Imagine instead attaching vectors of algos to words. Now imagine
-running them, all at the same time. Managing that, and adjusting
-execution priority based on weights. Using them to process a shifting
-stream of perceptual data. You can't do that with NetworkX. You can,
-with Atomese. This is the raison d'etre. (This paragraph describes
-the old MOSES idea from Moshe Looks, but in modern terms; MOSES helped
-inspire Atomese.)
-
-All that said: if you are debugging complex graph processing algorithms,
-you won't get far if you don't understand what the graph represents.
-The demos in this directory walk through some of the basics of Atomese,
-using python as the embedding language.
+That said, there has to be a way to use Atomese "from the outside",
+and python, scheme and c++ provide that interface, for now. These
+allow Atomese components to be tinkered with. Thus, python provides
+a way for constructing and manipulating Atomese.
 
 Review the wiki page for more:
 [Atomese](https://wiki.opencog.org/w/Atomese)
@@ -71,13 +45,16 @@ Start a python3 shell in your favorite way.
       help('opencog')
   ```
 
-* The contents of a single module can be viewed by using `dir` function.
-  For example,
+* The main python module is `opencog.atomspace`. There are only two
+  others: `opencog.logger` for the logging subsystem, and
+  `opencog.scheme` for the python-to-scheme interfaces. It is not
+  expected that there will ever be more (because the goal is to reduce
+  the amount of python needed to interact with Atomese, and not to
+  increase it.)  The contents of a module can be viewed by using `dir`
+  function. For example:
   ```
       import opencog.atomspace
-      import opencog.type_constructors
       print(dir(opencog.atomspace))
-      print(dir(opencog.type_constructors))
   ```
 
 * You can run the examples from your shell. For example,
@@ -95,8 +72,8 @@ graph edges.
 
 ### [vector_tutorial.py](vector_tutorial.py)
 A more complex example, showing how to perform queries, how to use the
-query system to perform basic processng (counting, in this example) and
-how to vectorize the results (so that vector data an be fed to GPU's.)
+query system to perform basic processing (counting, in this example) and
+how to vectorize the results (so that vector data can be fed to GPU's.)
 
 ### [create_atoms_lowlevel.py](create_atoms_lowlevel.py)
 For the bulk loading of an AtomSpace from python, direct access
@@ -111,7 +88,6 @@ few users will need to work with the nameserver.
 ### [stop_go.py](stop_go.py)
 An example of a "behavior tree". Demos the use of the
 GroundedPredicateNode to call from Atomese back into python.
-
 
 ### Mixing python, scheme and Atomese
 Atomese has both scheme and python bindings, and the two programming
