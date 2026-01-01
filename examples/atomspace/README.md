@@ -62,19 +62,34 @@ time-varying aspects of data flows that make it useful.  The AtomSpace
 is not just a static database; it provides a way for describing dataflow
 networks.
 
+The [query](../query) folder provides pattern matching demos.  The ideas
+illustrated here are vital for understanding the Atomese concepts of
+patterns, queries and rules needed for graph re-writing, inference and
+deduction.
+
+One can think of an AtomSpace as a "global workspace"; but it is also
+useful to have explicit subspaces, containing specific subsets of data.
+These can be layered or disjoint; they provide the rudiments of the
+biologically-inspired idea of "membrane computing".
+
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
 
-After going through the above, go to the demos in the
-[pattern-matcher](../pattern-matcher) folder. The pattern matching
-demos are vital for understanding how to be effective in writing
-queries and formulating rules.  Then return to the advanced demos below.
-
-
 Advanced Demos
 --------------
-System programmers will need to know the following examples in order to
-be effective.
+A hodge-podge of more abstruse demos. These roughly correspond to
+conventional ideas from "(operating) system programmming", such as
+threading, locking, fore-gin-function calls. exceptions, logging,
+tail-recursive calls, etc. These ideas are all expressed in Atomese,
+and appear to be necessary to master, in order to build complex systems.
+
+They are also a bit left-of-field for the core concerns of Atomese,
+which is the (self-assembling) construction and automation of sensori-
+motor networks that are capable of memory, reasoning and inference.
+Thus, the concepts demonstrated below are (for the most part) entirely
+conventional comp-sci topics; what's not clear is whether these
+demonstrate the "best" way to access such ideas in a self-assembling,
+declarative information processng organism.
 
 * [`tail-loop.scm`](tail-loop.scm)            -- Writing tail-recursive loops.
 * [`tail-procedure.scm`](tail-procedure.scm)  -- General tail-call loop.
@@ -191,11 +206,15 @@ To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
-Two modules are provided by the AtomSpace. The main module is just
+Several modules are provided by the AtomSpace. The main module is just
 called `opencog`.  The logger module is here, as a historical artifact.
+The test-runner is used by the unit tess. The python module allows
+python code to be called from scheme.
 ```
 (use-modules (opencog))
 (use-modules (opencog logger))
+(use-modules (opencog python))
+(use-modules (opencog test-runner))
 ```
 There are many other modules provided in other projects and repos.
 The key, important (supported and active) modules in other git include:
@@ -209,10 +228,8 @@ The key, important (supported and active) modules in other git include:
 (use-modules (opencog persist-file))
 (use-modules (opencog persist-rocks))
 (use-modules (opencog persist-sql))
-(use-modules (opencog python))
 (use-modules (opencog randgen))
 (use-modules (opencog sensory))
-(use-modules (opencog test-runner))
 (use-modules (opencog uuid))
 ```
 
@@ -227,8 +244,9 @@ into action for when they are next needed:
 (use-modules (opencog vision))
 ```
 
-These modules are obsolete; they are no longer maintained. They have
-bit-rotted and won't compile.
+The modules below are obsolete; they are no longer maintained. They
+have served thier purpose as research projects, but are now bit-rotted
+and won't compile.
 ```
 (use-modules (opencog attention))
 (use-modules (opencog attention-bank))

@@ -11,12 +11,16 @@ go through the contents here, in the order below. Keep in mind that
 wiki.
 
 * atomspace     - Demos of all of the basic AtomSpace features and
-                  functions. VISIT THIS FIRST!!
+                  functions. ***VISIT THIS FIRST!!***
 
-* pattern-matcher - Example code demonstrating the graph query system.
-                  It shows how to search for data that fits a pattern,
-                  how to search for patterns that fit the data, and
-                  how to trigger actions when these are found.
+* flow          - The AtomSpace is not only a database for graphs,
+                  but is also a data streaming system for data
+                  processing networks described by graphs. This is
+                  how sensory data is analyzed and ransformed in
+                  real-time.
+
+* query         - The graph query system shows how to find AtomSpace
+                  contents that match a given subgraph or pattern.
 
 * storage       - Moving Atoms and AtomSpaces between disk and AM, or
                   between network nodes ("Districuted AtomSpace")
