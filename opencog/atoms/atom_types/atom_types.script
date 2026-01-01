@@ -637,6 +637,27 @@ VARIABLE_SET <- CONNECTOR_SET
 // the default type cnstructor for it will accept multiple matches.
 GLOB_NODE <- VARIABLE_NODE
 
+// A label that is used to name the stream of data exiting from a
+// function. The "output" of a function, which would otherwise be
+// anonymous.  It is dual to variables, to the use of variables to give
+// names to function inputs. That is, variables can be understood to
+// name the inputs of a function; their usage inside of lambdas can be
+// thought of as helping determine the "wiring diagram" "inside" of the
+// lambda.
+//
+// The name tagging the output of a function should not be confused
+// with the name of the function itself. Functions exist in and of
+// themselves, even when not applied to data. But when a function is
+// applied to/ some specifi data stream, there will be some specific
+// output. Normally, such datastream outputs are anonymous; they have
+// no name. The NameNode provides a way of tagging a particular data
+// stream emerging from some process.
+//
+// These nammes are used to construct wiring diagrams one the "outside":
+// how process streams and functions are to be connected to one another.
+// The actual tagging of outputs with names is done with a PipeLink (below).
+NAME_NODE <- TAG_NODE
+
 // Everything under a QuoteLink is interpreted literally. Variable
 // substitution (beta-reduction) is not performed into quoted variables.
 // It's executable itself; executing it just unwraps the quotes.
@@ -836,6 +857,21 @@ STATE_LINK <- UNIQUE_LINK
 // second definition into the AtomSpace will throw an exception.
 // Restricted to DefinedProcedure, DefinedSchema, etc.
 DEFINE_LINK <- UNIQUE_LINK
+
+// Uniquely naming outputs of streams "exiting" from processes.
+// When some specific inputs or streams of data are passed through
+// some specific function, the result of applying that function to
+// that particular data stream is anonymous: it has no name. (It
+// cannot be the function name, as different data streams passed
+// throught the same function will yeild differrent outputs.) The
+// PipeLink provides a way of attaching a NameNode to an output. Dual
+// in a way, to DefineLink: the DefineLink gives names to anonymous
+// functions. The PipeLink gives names to anonymous data flows.
+// Only NameNodes can be used to anem things.
+//
+// Attempting to give two different data flows the same name will throw
+// an exception.
+PIPE_LINK <- DEFINE_LINK
 
 // Unqiue, exclusive relationships. Attempting to insert a second relation
 // into the AtomSpace will silently fail, and the original relation is
