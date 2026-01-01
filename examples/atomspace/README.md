@@ -49,9 +49,7 @@ first).
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.
 * [`floatvalues.scm`](floatvalues.scm)       -- Associating numeric values with a proposition.
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
-* [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
-* [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
-* [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
+
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
 
