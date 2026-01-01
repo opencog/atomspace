@@ -11,15 +11,12 @@ underlying the AtomSpace. This includes:
     - Setting unique state
     - Designing properties
     - Assigning values and using key-value pairs efficiently
-    - Handling rapidly time-varying data (video/audio streams).
 
 After this come examples for assorted advanced features that are
 typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in RocksDB, PostgreSQL or plain-text files.
-* Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
 * Multi-threading with ParallelLink and JoinLink
@@ -31,14 +28,24 @@ a good idea of the basics from the demos here, go and explore the
 examples there. Return to the advanced examples here after exploring
 the pattern engine.
 
+Network and disk I/O demos are in the [storage](../storage) directory.
+Data processing streams (for dynamic sensorimotor processing) demos are
+in the [flow](../flow) directory.
+
 Introductory Examples
 ---------------------
 It is recommended that you go through the examples in the order given.
 These are "basic" demos that all users should know. Open each of these
 in your favorite text editor, and start reading. Cut-and-paste from the
 text-editor to the guile prompt: this gives you a chance to see what
-happens, and how the system reacts. (But read the "Introduction" below,
-first).
+happens, and how the system reacts.
+
+These are written in Scheme; they can be "easily" translated to Python
+by re-arranging parenthesis. Nothing here is special or specific to
+scheme or python.  The deoms would look the same in c++ or Haskell. This
+is because they are deoming [Atomese](https://wiki.opencog.org/w/Atomese),
+which has the same form no mater what the wrapper language (python, scheme,
+...) The "Introcution" further below provides a HOWTO get started.
 
 * [`basic.scm`](basic.scm)                   -- How to start the guile shell.
 * [`knowledge.scm`](knowledge.scm)           -- Representing knowledge.
@@ -48,28 +55,41 @@ first).
 * [`property.scm`](property.scm)             -- Designing Atoms with properties.
 * [`floatvalues.scm`](floatvalues.scm)       -- Associating numeric values with a proposition.
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
-* [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
-* [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
-* [`flows.scm`](flows.scm)                   -- Flowing Values around.
-* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically computing FloatValues.
-* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
-* [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
-* [`flow-flat.scm`](flow-flat.scm)           -- Deserializing lists into streams.
-* [`flow-drain.scm`](flow-drain.scm)         -- Run a stream until it is empty.
-* [`flow-sorted.scm`](flow-sorted.scm)       -- Sort items in a stream.
-* [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
+
+After going through the above, go to the demos in the [flow](../flow)
+folder.  The AtomSpace stores graph data; but it is the dynamic,
+time-varying aspects of data flows that make it useful.  The AtomSpace
+is not just a static database; it provides a way for describing dataflow
+networks.
+
+The [query](../query) folder provides pattern matching demos.  The ideas
+illustrated here are vital for understanding the Atomese concepts of
+patterns, queries and rules needed for graph re-writing, inference and
+deduction.
+
+One can think of an AtomSpace as a "global workspace"; but it is also
+useful to have explicit subspaces, containing specific subsets of data.
+These can be layered or disjoint; they provide the rudiments of the
+biologically-inspired idea of "membrane computing".
+
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
 
-After going through the above, go to the demos in the
-[pattern-matcher](../pattern-matcher) folder. The pattern matching
-demos are vital for understanding how to be effective in writing
-queries and formulating rules.  Then return to the advanced demos below.
-
 Advanced Demos
 --------------
-System programmers will need to know the following examples in order to
-be effective.
+A hodge-podge of more abstruse demos. These roughly correspond to
+conventional ideas from "(operating) system programmming", such as
+threading, locking, fore-gin-function calls. exceptions, logging,
+tail-recursive calls, etc. These ideas are all expressed in Atomese,
+and appear to be necessary to master, in order to build complex systems.
+
+They are also a bit left-of-field for the core concerns of Atomese,
+which is the (self-assembling) construction and automation of sensori-
+motor networks that are capable of memory, reasoning and inference.
+Thus, the concepts demonstrated below are (for the most part) entirely
+conventional comp-sci topics; what's not clear is whether these
+demonstrate the "best" way to access such ideas in a self-assembling,
+declarative information processng organism.
 
 * [`tail-loop.scm`](tail-loop.scm)            -- Writing tail-recursive loops.
 * [`tail-procedure.scm`](tail-procedure.scm)  -- General tail-call loop.
@@ -81,13 +101,6 @@ be effective.
 * [`threaded.scm`](threaded.scm)              -- Multi-threading in Atomese.
 * [`parallel.scm`](parallel.scm)              -- Multi-threading in Atomese.
 * [`except.scm`](except.scm)                  -- Throwing and catching exceptions.
-* [`persist-file.scm`](persist-file.scm)      -- Dump and load Atoms to a plain-text file.
-* [`persist-store.scm`](persist-store.scm)    -- StorageNode API to a plain-text file.
-* [`persistence.scm`](persistence.scm)        -- StorageNode API to an SQL database.
-* [`persist-query.scm`](persist-query.scm)    -- Fetching sets of Atoms with queries.
-* [`persist-multi.scm`](persist-multi.scm)    -- Work with multiple databases/servers at once.
-* [`persist-proxy.scm`](persist-proxy.scm)    -- Work with proxy agents to access multiple dbs.
-* [`persist-buffer.scm`](persist-buffer.scm)  -- Delay repeated writes so as to limit I/O.
 * [`copy-on-write.scm`](copy-on-write.scm)    -- Read-only AtomSpace, with r/w overlays.
 * [`frame.scm`](frame.scm)                    -- Using StateLink in overlays.
 * [`gperf.scm`](gperf.scm)                    -- Some very crude performance measurements.
@@ -193,34 +206,30 @@ To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
-Three modules are provided by the AtomSpace. The main module is just
-called `opencog`. The `opencog exec` module remains as a historical
-artifact, and probably should be merged into the main `opencog` module.
-For now, it is distinct. The Logger modules is here, because it is
-otherwise an orphan with no home.
+Several modules are provided by the AtomSpace. The main module is just
+called `opencog`.  The logger module is here, as a historical artifact.
+The test-runner is used by the unit tess. The python module allows
+python code to be called from scheme.
 ```
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog logger))
+(use-modules (opencog python))
+(use-modules (opencog test-runner))
 ```
 There are many other modules provided in other projects and repos.
-Here is a list of some of the key, important (supported and active)
-modules in other git repos:
+The key, important (supported and active) modules in other git include:
 ```
 (use-modules (opencog cogserver))
 (use-modules (opencog learn))
+(use-modules (opencog lg-atomese))
 (use-modules (opencog matrix))
-(use-modules (opencog nlp))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp lg-export))
 (use-modules (opencog persist))
 (use-modules (opencog persist-cog))
 (use-modules (opencog persist-file))
 (use-modules (opencog persist-rocks))
 (use-modules (opencog persist-sql))
-(use-modules (opencog python))
 (use-modules (opencog randgen))
-(use-modules (opencog test-runner))
+(use-modules (opencog sensory))
 (use-modules (opencog uuid))
 ```
 
@@ -235,14 +244,15 @@ into action for when they are next needed:
 (use-modules (opencog vision))
 ```
 
-These modules are more or less obsolete and are no longer being
-maintained. It seems unlikely that they will ever be maintained
-again.
+The modules below are obsolete; they are no longer maintained. They
+have served thier purpose as research projects, but are now bit-rotted
+and won't compile.
 ```
 (use-modules (opencog attention))
 (use-modules (opencog attention-bank))
 (use-modules (opencog ghost))
 (use-modules (opencog miner))
+(use-modules (opencog nlp))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
