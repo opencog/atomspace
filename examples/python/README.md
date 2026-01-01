@@ -45,9 +45,13 @@ Start a python3 shell in your favorite way.
       help('opencog')
   ```
 
-* At this time, there is only one python module. It is not expected
-  that there will ever be more.  The contents of this module can be
-  viewed by using `dir` function.
+* The main python module is `opencog.atomspace`. There are only two
+  others: `opencog.logger` for the logging subsystem, and
+  `opencog.scheme` for the python-to-scheme interfaces. It is not
+  expected that there will ever be more (because the goal is to reduce
+  the amount of python needed to interact with Atomese, and not to
+  increase it.)  The contents of a module can be viewed by using `dir`
+  function. For example:
   ```
       import opencog.atomspace
       print(dir(opencog.atomspace))
