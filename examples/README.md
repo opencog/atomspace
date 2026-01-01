@@ -14,23 +14,24 @@ wiki.
                   functions. ***VISIT THIS FIRST!!***
 
 * flow          - The AtomSpace is not only a database for graphs,
-                  but is also a data streaming system for data
+                  but is also a system for streaming data through
                   processing networks described by graphs. This is
-                  how sensory data is analyzed and ransformed in
-                  real-time.
+                  how sensory data is analyzed and transformed by
+                  agents or organisms expressed in Atomese.
 
 * query         - The graph query system shows how to find AtomSpace
                   contents that match a given subgraph or pattern.
 
-* storage       - Moving Atoms and AtomSpaces between disk and AM, or
-                  between network nodes ("Districuted AtomSpace")
+* storage       - Moving Atoms and AtomSpaces between disk and memory
+                  (i.e. RAM), or between network nodes ("Districuted
+                  AtomSpace")
 
 * python        - Python usage examples.
 
+* type-system   - Creating and using new kinds of Atom Types.
+
 * c++           - Example CMakefile and demos for C++ code.
 * c++-guile     - Creating guile wrappers for C++ code.
-
-* type-system   - Creating and using new kinds of Atom Types.
 
 * foreign       - Working with generic abstract syntax trees in the
                   AtomSpace. It shows how to store json, scheme and
