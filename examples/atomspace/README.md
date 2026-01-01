@@ -38,8 +38,14 @@ It is recommended that you go through the examples in the order given.
 These are "basic" demos that all users should know. Open each of these
 in your favorite text editor, and start reading. Cut-and-paste from the
 text-editor to the guile prompt: this gives you a chance to see what
-happens, and how the system reacts. (But read the "Introduction" below,
-first).
+happens, and how the system reacts.
+
+These are written in Scheme; they can be "easily" translated to Python
+by re-arranging parenthesis. Nothing here is special or specific to
+scheme or python.  The deoms would look the same in c++ or Haskell. This
+is because they are deoming [Atomese](https://wiki.opencog.org/w/Atomese),
+which has the same form no mater what the wrapper language (python, scheme,
+...) The "Introcution" further below provides a HOWTO get started.
 
 * [`basic.scm`](basic.scm)                   -- How to start the guile shell.
 * [`knowledge.scm`](knowledge.scm)           -- Representing knowledge.
@@ -50,6 +56,12 @@ first).
 * [`floatvalues.scm`](floatvalues.scm)       -- Associating numeric values with a proposition.
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
 
+After going through the above, go to the demos in the [flow](../flow)
+folder.  The AtomSpace stores graph data; but it is the dynamic,
+time-varying aspects of data flows that make it useful.  The AtomSpace
+is not just a static database; it provides a way for describing dataflow
+networks.
+
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
 
@@ -57,6 +69,7 @@ After going through the above, go to the demos in the
 [pattern-matcher](../pattern-matcher) folder. The pattern matching
 demos are vital for understanding how to be effective in writing
 queries and formulating rules.  Then return to the advanced demos below.
+
 
 Advanced Demos
 --------------
