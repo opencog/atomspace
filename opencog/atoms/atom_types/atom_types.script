@@ -1291,7 +1291,7 @@ CONCATENATE_LINK <- COLLECTION_OF_LINK
 
 // The ExecutionOutputLink is a specific kind of function: it must have
 // a Schema of some kind in it's first argument. Current choices include:
-// Schema, GroundedSchema, DefinedSchema and PromiseSchema. The other
+// Schema, GroundedSchema, and DefinedSchema. The other
 // kinds of FunctionLinks do not need this; the function they perform,
 // that is, the schema, is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
