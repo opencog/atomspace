@@ -31,9 +31,10 @@ namespace opencog
  *  @{
  */
 
-/// The DefineLink is used to define procedures, predicates and schemas.
-/// It is intended to allow procedures, predicates and schemas to be
-/// invoked by name, instead of anonymously.
+/// The DefineLink is used to assign a name to anonymous (un-named)
+/// procedures, predicates and schemas. A named procedure, predicate
+/// or schema can then be invoked by name, instead of repeating its
+/// full function description.
 ///
 /// Only one definition is allowed; any attempt to create a second
 /// conflicting definition (of the same name) will throw an error.
