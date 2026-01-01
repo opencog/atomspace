@@ -41,12 +41,16 @@ namespace opencog
 /// such UniqueLink "wins", and blocks subsequnt ones. Thus, they can
 /// be used to build more complex thread-safe Link types.
 ///
-/// This class is intended to be the base class for GrantLink, which
-/// is used to issue unique names for things, the DefineLink, which
-/// is used to define procedures, predicates and schemas, and StateLink,
-/// which is used to maintain current state. It is also used by
-/// TypedAtomLink to ensure that an atom, if it is typed, has a single,
-/// unique type definition.
+/// This class is intended to be the base class for:
+/// * DefineLink, which is used to give names to anonymous functions,
+///   such as Lambdas, procedures, predicates and schemas,
+/// * GrantLink, which is used to implement a thread-safe mutex,
+///   by issuing a unique name on a first-come, first serve basis.
+/// * StateLink, which is used to maintain current state. The
+///   assignment of an Atom to a name is unique, but mutable.
+/// * TypedAtomLink, to ensure that an atom, if it is typed, has a
+///   single, unique type definition.
+/// * PipeLink, which is used to bind a name to a data stream.
 ///
 /// This is a "private" Link type, means as a building block for other
 /// Link types that enforce different kinds of uniqueness semantics.

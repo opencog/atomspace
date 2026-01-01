@@ -29,10 +29,7 @@ using namespace opencog;
 
 void DefineLink::init(void)
 {
-	if (not nameserver().isA(get_type(), DEFINE_LINK))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a DefineLink, got %s",
-				nameserver().getTypeName(get_type()).c_str());
+	if (_type != DEFINE_LINK) return;
 
 	// Must have name and body
 	if (2 != _outgoing.size())

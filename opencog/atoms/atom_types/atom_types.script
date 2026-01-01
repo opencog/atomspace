@@ -996,6 +996,7 @@ TYPED_VARIABLE_LINK <- CONNECTOR,ALPHA_CONVERTIBLE_SIG
 // at a "global" level.  Always arity-2, the first position cannot be
 // any Atom except for a VariableNode, the second must be a type.
 // A given Atom can only ever have just one type, thus, this is unique.
+// XXX Is this redundant? Can SECTION_LINK take it's place?
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // An arity-2 link, used for specifying numeric intervals, that is,
