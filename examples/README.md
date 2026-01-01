@@ -18,10 +18,8 @@ wiki.
                   how to search for patterns that fit the data, and
                   how to trigger actions when these are found.
 
-* foreign       - Working with generic abstract syntax trees in the
-                  AtomSpace. It shows how to store json, scheme and
-                  python source code in the AtomSpace, and then search
-                  for, and execute that code. (Experimental, incomplete)
+* storage       - Moving Atoms and AtomSpaces between disk and AM, or
+                  between network nodes ("Districuted AtomSpace")
 
 * python        - Python usage examples.
 
@@ -29,6 +27,11 @@ wiki.
 * c++-guile     - Creating guile wrappers for C++ code.
 
 * type-system   - Creating and using new kinds of Atom Types.
+
+* foreign       - Working with generic abstract syntax trees in the
+                  AtomSpace. It shows how to store json, scheme and
+                  python source code in the AtomSpace, and then search
+                  for, and execute that code. (Experimental, incomplete)
 
 Some of the examples require addtional modules that are not in the
 core AtomSpace. These modules provide I/O to disk and network. They

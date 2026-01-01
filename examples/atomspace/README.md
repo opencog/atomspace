@@ -18,8 +18,6 @@ typically encountered:
 
 * Creating a read-only base AtomSpace, with a read-write overlay.
 * Throwing exceptions.
-* Storing the AtomSpace in RocksDB, PostgreSQL or plain-text files.
-* Distributed (network/cloud) AtomSpace.
 * Using the logger.
 * Calling Python from within the AtomSpace.
 * Multi-threading with ParallelLink and JoinLink
@@ -30,6 +28,8 @@ Most of the querying and pattern matching examples are in the
 a good idea of the basics from the demos here, go and explore the
 examples there. Return to the advanced examples here after exploring
 the pattern engine.
+
+Network and disk I/O demos are in the [storage](../storage) directory.
 
 Introductory Examples
 ---------------------
@@ -81,13 +81,6 @@ be effective.
 * [`threaded.scm`](threaded.scm)              -- Multi-threading in Atomese.
 * [`parallel.scm`](parallel.scm)              -- Multi-threading in Atomese.
 * [`except.scm`](except.scm)                  -- Throwing and catching exceptions.
-* [`persist-file.scm`](persist-file.scm)      -- Dump and load Atoms to a plain-text file.
-* [`persist-store.scm`](persist-store.scm)    -- StorageNode API to a plain-text file.
-* [`persistence.scm`](persistence.scm)        -- StorageNode API to an SQL database.
-* [`persist-query.scm`](persist-query.scm)    -- Fetching sets of Atoms with queries.
-* [`persist-multi.scm`](persist-multi.scm)    -- Work with multiple databases/servers at once.
-* [`persist-proxy.scm`](persist-proxy.scm)    -- Work with proxy agents to access multiple dbs.
-* [`persist-buffer.scm`](persist-buffer.scm)  -- Delay repeated writes so as to limit I/O.
 * [`copy-on-write.scm`](copy-on-write.scm)    -- Read-only AtomSpace, with r/w overlays.
 * [`frame.scm`](frame.scm)                    -- Using StateLink in overlays.
 * [`gperf.scm`](gperf.scm)                    -- Some very crude performance measurements.
