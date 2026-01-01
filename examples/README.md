@@ -33,23 +33,6 @@ wiki.
                   python source code in the AtomSpace, and then search
                   for, and execute that code. (Experimental, incomplete)
 
-Some of the examples require addtional modules that are not in the
-core AtomSpace. These modules provide I/O to disk and network. They
-can be obtained at
-   https://gitub.com/opencog/atomspace-storage
-and
-   https://gitub.com/opencog/atomspace-rocks
-
-The build and install steps are identical to those for the AtomSpace.
-The `atomspace-storage` component provides a generic network and file
-system API, while `atomspace-rocks` adapts it for the RocksDB database.
-
-Some of the demos mention the Postgres and the CogServer (network)
-storage nodes. Get these with
-   https://gitub.com/opencog/atomspace-pgres
-   https://gitub.com/opencog/atomspace-cog
-   https://gitub.com/opencog/cogserver
-
 Resources
 ---------
 Some links to external sources that might help:

@@ -186,26 +186,19 @@ To make this permanent, add this to the `~/.guile` file.
 
 List of the various modules
 ---------------------------
-Three modules are provided by the AtomSpace. The main module is just
-called `opencog`. The `opencog exec` module remains as a historical
-artifact, and probably should be merged into the main `opencog` module.
-For now, it is distinct. The Logger modules is here, because it is
-otherwise an orphan with no home.
+Two modules are provided by the AtomSpace. The main module is just
+called `opencog`.  The logger module is here, as a historical artifact.
 ```
 (use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog logger))
 ```
 There are many other modules provided in other projects and repos.
-Here is a list of some of the key, important (supported and active)
-modules in other git repos:
+The key, important (supported and active) modules in other git include:
 ```
 (use-modules (opencog cogserver))
 (use-modules (opencog learn))
+(use-modules (opencog lg-atomese))
 (use-modules (opencog matrix))
-(use-modules (opencog nlp))
-(use-modules (opencog nlp lg-dict))
-(use-modules (opencog nlp lg-export))
 (use-modules (opencog persist))
 (use-modules (opencog persist-cog))
 (use-modules (opencog persist-file))
@@ -213,6 +206,7 @@ modules in other git repos:
 (use-modules (opencog persist-sql))
 (use-modules (opencog python))
 (use-modules (opencog randgen))
+(use-modules (opencog sensory))
 (use-modules (opencog test-runner))
 (use-modules (opencog uuid))
 ```
@@ -228,14 +222,14 @@ into action for when they are next needed:
 (use-modules (opencog vision))
 ```
 
-These modules are more or less obsolete and are no longer being
-maintained. It seems unlikely that they will ever be maintained
-again.
+These modules are obsolete; they are no longer maintained. They have
+bit-rotted and won't compile.
 ```
 (use-modules (opencog attention))
 (use-modules (opencog attention-bank))
 (use-modules (opencog ghost))
 (use-modules (opencog miner))
+(use-modules (opencog nlp))
 (use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
