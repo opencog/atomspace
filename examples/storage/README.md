@@ -1,12 +1,11 @@
 
 Demo of various StorageNodes
 ============================
-This directory contains examples that show how Atoms and AtomSpaces can
-be moved around between (tcp/ip) network nodes,  and saved/restored to
-disk.
+Examples of saving, restoring and moving around Atoms and AtomSpaces
+between disk and network nodes.
 
 The prefered disk storage backend is `RocksStorageNode`, which uses
-RocksDB to store Atoms and AtomSpaces. The preference network interface
+RocksDB to store Atoms and AtomSpaces. The prefered network interface
 is `CogStorageNode`, which uses TCP/IP to communicate with remote 
 `CogServerNode`s "out in the cloud".
 
