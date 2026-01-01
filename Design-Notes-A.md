@@ -1,5 +1,5 @@
-Design Notes
-============
+Design Notes A
+==============
 The design and implementation of the AtomSpace has been ongoing since
 about 2002, when it was first created as a workspace for controlling
 small animated virtual creatures. In the decades since, it has seen
@@ -1229,9 +1229,6 @@ an end-run, a fallback to scheme, instead of pure Atomese. We will avoid
 creating a `(cog-set-pipe-source! name value)` function to provide a
 similar end-run.
 
-TODO:
------
-Compare and contrast `ExecutionOutputLink`, `CollectionOfLink` and
-`FilterLink`. All three of these seem to have overlapping semantics,
-and perhaps they can all be collapsed down to just one do-it-all Link
-type.
+The End
+=======
+Continued in [Design Notes B](Design-Notes-B.md).
