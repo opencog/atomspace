@@ -11,7 +11,6 @@ underlying the AtomSpace. This includes:
     - Setting unique state
     - Designing properties
     - Assigning values and using key-value pairs efficiently
-    - Handling rapidly time-varying data (video/audio streams).
 
 After this come examples for assorted advanced features that are
 typically encountered:
@@ -30,6 +29,8 @@ examples there. Return to the advanced examples here after exploring
 the pattern engine.
 
 Network and disk I/O demos are in the [storage](../storage) directory.
+Data processing streams (for dynamic sensorimotor processing) demos are
+in the [flow](../flow) directory.
 
 Introductory Examples
 ---------------------
@@ -50,13 +51,6 @@ first).
 * [`values.scm`](values.scm)                 -- Using Values and attaching them to Atoms.
 * [`stream.scm`](stream.scm)                 -- Using a stream of time-varying Values.
 * [`formulas.scm`](formulas.scm)             -- Representing arithmetic and computing Values.
-* [`flows.scm`](flows.scm)                   -- Flowing Values around.
-* [`flow-formulas.scm`](flow-formulas.scm)   -- Dynamically computing FloatValues.
-* [`flow-futures.scm`](flow-futures.scm)     -- Dynamically updating Values.
-* [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
-* [`flow-flat.scm`](flow-flat.scm)           -- Deserializing lists into streams.
-* [`flow-drain.scm`](flow-drain.scm)         -- Run a stream until it is empty.
-* [`flow-sorted.scm`](flow-sorted.scm)       -- Sort items in a stream.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
