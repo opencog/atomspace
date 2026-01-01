@@ -62,3 +62,9 @@ streams vs. lists vs. sets, represented as Atoms or as Values, streaming,
 or not, blocking, or not.   Applying functions is easy. Untangling the
 intended semantics of different kinds of data streams is hard.
 
+### Comments
+Maybbe some of the above is wrong.
+* The `GroundedProcedureNode` is "by defintion" without any type
+  declarations.  The `ExecutionOutputLink` has no issue with this:
+  it just applies whatever arguments are given. The FilterLink cou;d
+  do this too, but its less interesting, less compelling.

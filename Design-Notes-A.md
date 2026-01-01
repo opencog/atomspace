@@ -1198,7 +1198,7 @@ Before:
       (ValueOf (Anchor "anchor name") (Predicate "name of stage")))
 ```
 
-After:
+After:DEFINED_PROCEDURE
 ```
    (FilterLink
       (RuleLink ...)
@@ -1228,6 +1228,53 @@ scheme `(cog-set-value! atom key value)` function was used: but this is
 an end-run, a fallback to scheme, instead of pure Atomese. We will avoid
 creating a `(cog-set-pipe-source! name value)` function to provide a
 similar end-run.
+
+### VHDL and Verilog
+Contrast and compare. In VHDL, one would write:
+```
+   architcture ... of:
+       signal func_result : std_logic_vector;
+       signal overflow : std_logic;
+   begin
+       U1: entity func
+          port map (
+             output => func_result,
+             ...
+          );
+       U2: entity register
+          port map (
+             input => func_result,
+             ...
+          );
+   end architecture
+```
+The difference between this and Verilog syntax is minor.
+
+So `(NameNode "func_result") becomes `signal func_result` there.  The
+`NameNode` is untyped, by default; a type declaration would be
+```
+   (Section
+      (NameNode "func_result")
+      (Signature
+          (TypeNode 'BoolVec)      ; The logic signal
+          (TypeNode 'BoolValue)))  ; The overflow/error "signal"
+```
+The second part of  the signal wire is not given a distinct name here;
+it could have been, but isn't. Instead, its positional.  The `Section`
+uses a `Signature` here, instead of a `ConnectorSeq`, because both ends
+of the wire are "the same": wires have no polarity, and don't transform
+what they carry. The use of `Signature` replaces the need for declaring
+two connectors, one at each end of the wire, having exactly the same
+type, differeing only in Sex.
+
+The type declaration for the wire (the `Section`) can appear anywhere,
+and does not have to be grouped with the `Name`.  Likewise, the usage
+of `NameNode` does not have to be grouped, either; whatever it connects
+to, it connects to.  No surprise: Atomese is not a text file format.
+
+The terms "signal" or "wire" or "port" or "portmap" do not seem to offer
+any improvement over `NameNode` and `PipeLink`.
+
 
 The End
 =======
