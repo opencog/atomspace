@@ -41,11 +41,17 @@ NameNode::NameNode(Type t, const std::string&& str) :
 
 ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 {
-printf("duuude\n");
 	Handle defn(PipeLink::get_stream(get_handle()));
+
+	// It seems we have a choice of two implementations, here. We can
+	// complain that the desired does not yet have a stream associated
+	// with it, or we can block and wait, until some other thread
+	// provides a definition.  Both implementations seem plausible
+	// The first is easier to debug when Atomese is hand-written;
+	// the second seems more appropriate for automation.
 	if (nullptr == defn)
 		throw RuntimeException(TRACE_INFO,
-			"Not implemented");
+			"Not yet defined: %s", to_string().c_str());
 
 	return defn;
 }
