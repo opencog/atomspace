@@ -26,9 +26,22 @@
 		(LinkSignature (Type 'StringValue) (Concept "do-da"))
 		(LinkSignature (Type 'StringValue) (Concept "zip-a-dee do-dah day"))))
 
-; Executing the name causes the corresponding stream to be looked up
-; and returned.
-(cog-execute! (NameNode "words"))
+; The stream that is associated with the name can be gotten by executing
+; the NameNode:
+(cog-execute! (Name "words"))
+
+(define xform
+	(Filter
+		(Rule
+			(Variable "word")
+			(Variable "word")
+			(LinkSignature (Type 'LinkValue)
+				(Concept "You said: ") (Variable "word")))
+		(Name "words"))) 
+
+(cog-execute! xform)
+
+; Concatenate
 
 
 	(LinkSignature (Type 'FlatStream)
