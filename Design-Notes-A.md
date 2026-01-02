@@ -1232,7 +1232,7 @@ similar end-run.
 ### VHDL and Verilog
 Contrast and compare. In VHDL, one would write:
 ```
-   architcture ... of:
+   architecture ... of:
        signal func_result : std_logic_vector;
        signal overflow : std_logic;
    begin
@@ -1250,7 +1250,7 @@ Contrast and compare. In VHDL, one would write:
 ```
 The difference between this and Verilog syntax is minor.
 
-So `(NameNode "func_result") becomes `signal func_result` there.  The
+So `(NameNode "func_result")1 becomes `signal func_result` there.  The
 `NameNode` is untyped, by default; a type declaration would be
 ```
    (Section

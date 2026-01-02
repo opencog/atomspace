@@ -28,22 +28,22 @@ A short history.
   a list".  It does not work in Atomese, because most things are not
   lists, and even when they are, the collection of items in a list can
   be highly non-uniform. It can be impossible to apply some functions
-  on some inputs, and so the idea of srfi-1 `filter`, or even 
+  on some inputs, and so the idea of srfi-1 `filter`, or even
   `filter-map` becomes more appropriate.  The function to be applied
   selects elements out of the list, or, if it is a RuleLink, applies
   a rewrite to the selected items.
 
 The `FilterLink` mostly accepts most of the same kinds of functions
 that `ExecutationOutput` does; except it does not (currently) handle
-the `GroundedSchemaNode`s. As I writte this, I cannot thiink of any
-tehnical reason why these two could not be merged into one common Link.
+the `GroundedSchemaNode`s. As I write this, I cannot thiink of any
+technical reason why these two could not be merged into one common Link.
 
 * The `CollectionOfLink` is very recent; it was born of the idea that
   some types of lists (e.g. `ListValue`s) sometimes need to be rewritten
   into other kinds of lists (e.g. `ListLink` or `Setlink`). It was meant
   to be a quick cheesy hack utility, but has proven to be remarkably
   versatile, usable in situations outside its originally envisioned
-  utility. But, as I write this, it begines to feel a bit like a 
+  utility. But, as I write this, it begins to feel a bit like a
   `FilterLink` that can apply rules for type re-writting. Is it really
   needed as a distinct function?
 
@@ -63,8 +63,8 @@ or not, blocking, or not.   Applying functions is easy. Untangling the
 intended semantics of different kinds of data streams is hard.
 
 ### Comments
-Maybbe some of the above is wrong.
-* The `GroundedProcedureNode` is "by defintion" without any type
+Maybe some of the above is wrong.
+* The `GroundedProcedureNode` is "by definition" without any type
   declarations.  The `ExecutionOutputLink` has no issue with this:
-  it just applies whatever arguments are given. The FilterLink cou;d
+  it just applies whatever arguments are given. The FilterLink could
   do this too, but its less interesting, less compelling.
