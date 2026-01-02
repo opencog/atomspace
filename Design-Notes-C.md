@@ -1,4 +1,4 @@
-Design Notes B
+Design Notes C
 ==============
 Continuation of [Design Notes A](Design-Notes-A.md). January 2026
 
