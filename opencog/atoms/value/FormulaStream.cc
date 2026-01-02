@@ -24,6 +24,7 @@
 #include <opencog/atoms/value/FormulaStream.h>
 #include <opencog/atoms/value/ValueFactory.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -105,12 +106,21 @@ void FormulaStream::update() const
 		{
 			ValuePtr vp = _formula[0]->execute(_as);
 
-			if (not vp->is_type(FLOAT_VALUE))
-				throw SyntaxException(TRACE_INFO,
-					"Expecting formula to return a FloatValue, got %s",
-					vp->to_string().c_str());
+			if (NUMBER_NODE == vp->get_type())
+			{
+				_value = NumberNodeCast(vp)->value();
+				return;
+			}
 
-			_value = FloatValueCast(vp)->value();
+			if (vp->is_type(FLOAT_VALUE))
+			{
+				_value = FloatValueCast(vp)->value();
+				return;
+			}
+
+			throw SyntaxException(TRACE_INFO,
+				"Expecting formula to return a Number or FloatValue, got %s",
+				vp->to_string().c_str());
 		}
 		return;
 	}
