@@ -50,7 +50,7 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 	// or whatever, as long as that signature has only one blank slot
 	// in it. If there's more than one blank, then ... well, see the
 	// wiki page https://wiki.opencog.org/w/LinkSignatureLink for what
-	// alse could be done here, and a hint of maybe why it should not be.
+	// else could be done here, and a hint of maybe why it should not be.
 	if (not oset[0]->is_type(TYPE_NODE))
 		throw InvalidParamException(TRACE_INFO,
 			"LinkSignatureLink only supports TypeNode at this time, got %s",
@@ -174,9 +174,15 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 	// The _kind will usually be some LinkValue. One interesting
 	// case is the stream, which takes some Handle argument that
 	// controls the stream operation. Examples include SortedStream
-	// and FlatStream. Pss that directly to the correct factory.
+	// and FlatStream. Pass that directly to the correct factory.
 	if (nameserver().isA(_kind, HANDLE_ARG) and 2 == _outgoing.size())
 		return valueserver().create(_kind, _outgoing[1]);
+
+	if (nameserver().isA(_kind, HANDLE_VEC_ARG) and 1 <  _outgoing.size())
+	{
+		HandleSeq rest(_outgoing.begin() + 1, _outgoing.end());
+		return valueserver().create(_kind, std::move(rest));
+	}
 
 	ValueSeq voset;
 	for (size_t i=1; i < _outgoing.size(); i++)
