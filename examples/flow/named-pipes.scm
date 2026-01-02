@@ -35,12 +35,48 @@
 (cog-execute! (Name "five-n-dime store"))
 
 ; -----------
-; Give a name to a source data streamm. This is a static source. Just to
-; make it a little bit interesting, it is the output of a LinkSignature.
-; The LinkSginature generates some Values, when executed, by converting
-; the strings (stored as ConceptNodes) to StringValues. It is a stand-in
-; for some data source, that generates data, and can be given a name.
-; Note that this is a static declaration. Nothing is executed (yet.)
+; The above could have been acheived in a far more brutish and indirect
+; fashion, using the SetValueLink and the ValueOfLink.
+
+ (cog-execute!
+	 (SetValue
+		 (Anchor "strip mall")
+		 (Predicate "Dollar General")
+		 (LinkSignature
+			 (Type 'FormulaStream)
+			 (RandomNumber (Number 1) (Number 2)))))
+
+; The call to `cog-execute!` is needed to have the SetValue take effect.
+; the name is a compound name: an Atom (the Anchor) and a key on that
+; Atom (the PredicateNode).  Setting the value would normally just
+; dereference the random number generator; to keep it flowing, it needs
+; to be converted to a stream, with the LinkSignatureLink.  Its clearly
+; much more verbose tthan simply using the PipeLink.
+
+; To get samples from the stream, ValueOfLink is used:
+
+ (cog-execute!
+	 (ValueOf
+		 (Anchor "strip mall")
+		 (Predicate "Dollar General")))
+
+; -----------
+; A much more complex example.
+; The ability to process streams of words is desriable. Thus, this demo
+; shows how this can be done. It is a bit painfully over-wrought, as
+; juggling such streams is not an entirely easy matter.
+;
+; Start by declaring a static data source.  Dynamic data sources ae
+; possible, by using one of the sensory nodes to read from a file or
+; some social media feed; but this is outside the scop of this demo.
+;
+; Just to make it a little bit interesting, the collection of strings
+; are obtained as the output of a LinkSignature. It is used to convert
+; ConceptNodes (which are Atoms) to StringValues (which are not).
+;
+; The PipeLink just attaches a name to this static data source.
+; Note that this is just a declaration; nothing is being executed or
+; processed, yet.
 
 (PipeLink
 	(NameNode "words")
@@ -55,11 +91,11 @@
 (cog-execute! (Name "words"))
 
 ; The TransposeColumn provides a generic utility for concatenating lists
-; of itmes (mostly because there is no particular difference between
+; of items (mostly because there is no particular difference between
 ; transpose and concatenate, when everything is a vector.)
 (cog-execute! (TransposeColumn (Name "words")))
 
-; A more complicated and awkward empedding of the list of words into
+; A more complicated and awkward embedding of the list of words into
 ; sentence fragments.
 (cog-execute!
 	(Filter
