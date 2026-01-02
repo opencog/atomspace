@@ -35,7 +35,7 @@ namespace opencog
 /// one PipeLink with a given name can exist at a time; to change the
 /// assoociation, the original PipeLink must be deleted first.
 ///
-class PipeLink : public DefineLink
+class PipeLink : public UniqueLink
 {
 protected:
 	void init(void);
@@ -44,6 +44,33 @@ public:
 
 	PipeLink(const PipeLink&) = delete;
 	PipeLink& operator=(const PipeLink&) = delete;
+
+	Handle get_alias(void) const { return _outgoing.at(0); }
+	Handle get_stream(void) const { return _outgoing.at(1); }
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * PipeLink
+	 *    <name>
+	 *    <stream>
+	 *
+	 * return <stream>
+	 */
+	static Handle get_stream(const Handle& alias, const AtomSpace*);
+	static Handle get_stream(const Handle& alias)
+	{ return get_stream(alias, alias->getAtomSpace()); }
+
+	/**
+	 * Given a Handle pointing to <name> in
+	 *
+	 * PipeLink
+	 *    <name>
+	 *    <stream>
+	 *
+	 * return the PipeLink for the given AtomSpace.
+	 */
+	static Handle get_link(const Handle& alias, const AtomSpace*);
 
 	static Handle factory(const Handle&);
 };

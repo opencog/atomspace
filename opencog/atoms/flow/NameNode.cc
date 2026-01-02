@@ -18,7 +18,7 @@
  */
 
 #include <opencog/atoms/flow/NameNode.h>
-// #include <opencog/atoms/grant/PipeLink.h>
+#include <opencog/atoms/grant/PipeLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -41,18 +41,13 @@ NameNode::NameNode(Type t, const std::string&& str) :
 
 ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 {
-#if 0
-	Handle defn(DefineLink::get_definition(get_handle()));
+printf("duuude\n");
+	Handle defn(PipeLink::get_stream(get_handle()));
 	if (nullptr == defn)
 		throw RuntimeException(TRACE_INFO,
-			"NameNode \"%s\" is not defined", get_name().c_str());
+			"Not implemented");
 
-	if (not defn->is_executable()) return defn;
-
-	ValuePtr val = defn->execute();
-	return val;
-#endif
-return nullptr;
+	return defn;
 }
 
 DEFINE_NODE_FACTORY(NameNode, NAME_NODE)

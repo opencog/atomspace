@@ -125,7 +125,7 @@ ContentHash UniqueLink::compute_hash() const
 /// UniqueLinks to be hidden by other UniqueLinks in different frames.
 /// That is, the association remains unique, per AtomSpace, but deeper
 /// unique links can be hidden by shallower ones (that are different).
-/// This is particlalry useful for the StateLinks.
+/// This is particularly useful for the StateLinks.
 Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
                                  bool disallow_open, const AtomSpace* as)
 {

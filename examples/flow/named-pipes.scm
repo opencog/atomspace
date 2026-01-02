@@ -26,7 +26,10 @@
 		(LinkSignature (Type 'StringValue) (Concept "do-da"))
 		(LinkSignature (Type 'StringValue) (Concept "zip-a-dee do-dah day"))))
 
-(cog-execute!
+; Executing the name causes the corresponding stream to be looked up
+; and returned.
+(cog-execute! (NameNode "words"))
+
 
 	(LinkSignature (Type 'FlatStream)
 		(LinkSignature (Type 'StringValue) (Concept "do-da"))

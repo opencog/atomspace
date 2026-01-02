@@ -41,9 +41,25 @@ void PipeLink::init(void)
 }
 
 PipeLink::PipeLink(const HandleSeq&& oset, Type t)
-	: DefineLink(std::move(oset), t)
+	: UniqueLink(std::move(oset), t)
 {
 	init();
+}
+
+/**
+ * Get the stream associated with the name.
+ * This will be the second atom of some PipeLink, where
+ * `name` is the first.
+ */
+Handle PipeLink::get_stream(const Handle& name, const AtomSpace* as)
+{
+	Handle uniq(get_unique(name, PIPE_LINK, false, as));
+	return uniq->getOutgoingAtom(1);
+}
+
+Handle PipeLink::get_link(const Handle& name, const AtomSpace* as)
+{
+	return get_unique(name, PIPE_LINK, false, as);
 }
 
 DEFINE_LINK_FACTORY(PipeLink, PIPE_LINK)

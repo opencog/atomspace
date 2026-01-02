@@ -871,7 +871,7 @@ DEFINE_LINK <- UNIQUE_LINK
 //
 // Attempting to give two different data flows the same name will throw
 // an exception.
-PIPE_LINK <- DEFINE_LINK
+PIPE_LINK <- UNIQUE_LINK
 
 // Unqiue, exclusive relationships. Attempting to insert a second relation
 // into the AtomSpace will silently fail, and the original relation is
