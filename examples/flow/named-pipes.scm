@@ -11,7 +11,30 @@
 
 ; -----------
 ; First example.
+; Give a name to a source of random numbers. The RandomNumberLink
+; generates random numbers between a lower and upper bound every time
+; it is executed. Thus, for example, the following generates random
+; numbers betwen five and ten:
 
+(cog-execute! (RandomNumber (Number 5) (Number 10)))
+(cog-execute! (RandomNumber (Number 5) (Number 10)))
+(cog-execute! (RandomNumber (Number 5) (Number 10)))
+
+; It is given a name by declaration:
+(Pipe
+	(Name "five-n-dime store")
+	(RandomNumber (Number 5) (Number 10)))
+
+; Note that the above does NOT have to be executed to have the
+; name declaration to take effect.
+
+; The NameNode is executable. Executing it yeilds the same results as
+; executing the thing that it names:
+(cog-execute! (Name "five-n-dime store"))
+(cog-execute! (Name "five-n-dime store"))
+(cog-execute! (Name "five-n-dime store"))
+
+; -----------
 ; Give a name to a source data streamm. This is a static source. Just to
 ; make it a little bit interesting, it is the output of a LinkSignature.
 ; The LinkSginature generates some Values, when executed, by converting
