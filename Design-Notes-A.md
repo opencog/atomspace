@@ -549,6 +549,23 @@ So lets recap the issues:
    type specification got fancy, got lambda-ish, it would start
    resembling a filter.
 
+Other Half-Forgotten Issues
+---------------------------
+Let me list htem here before they are completely forgotten:
+* The `ConcatenateLink` is hard to use, and doesn't do what one wants.
+  The `TranspoaseColumn` does do what one might have expected Concatente
+  to do; but one doesn't think of it cause it has a weird name.
+  Basically, concatenation of transpose are "the same thing" when
+  everything is a vector.
+* The ConcatenateLink wiki page suggests that the `FlatStream`
+  is spurious and maybe un-needed, and could become cnceptually
+  simpler if it was reframed as `CollectionOf` with `Concatenate`
+  And maybe it could be.
+
+Between these two bullets, its clear that there are yet more confusions
+and badly-designed Atoms involved in the handling of vector streams.
+This needs to be straightened out.
+
 
 The End
 =======
