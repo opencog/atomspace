@@ -41,7 +41,7 @@ NameNode::NameNode(Type t, const std::string&& str) :
 
 ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 {
-	Handle defn(PipeLink::get_stream(get_handle()));
+	Handle strm(PipeLink::get_stream(get_handle()));
 
 	// It seems we have a choice of two implementations, here. We can
 	// complain that the desired does not yet have a stream associated
@@ -49,11 +49,16 @@ ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 	// provides a definition.  Both implementations seem plausible
 	// The first is easier to debug when Atomese is hand-written;
 	// the second seems more appropriate for automation.
-	if (nullptr == defn)
+	if (nullptr == strm)
 		throw RuntimeException(TRACE_INFO,
 			"Not yet defined: %s", to_string().c_str());
 
-	return defn;
+	// The call to execute() needs to be "passed through" to the
+	// stream, so that executing NameNode behaves exactly the same
+	// way as executing the stream that is named.
+	if (not strm->is_executable())
+		return strm;
+	return strm->execute(as, silent);
 }
 
 DEFINE_NODE_FACTORY(NameNode, NAME_NODE)
