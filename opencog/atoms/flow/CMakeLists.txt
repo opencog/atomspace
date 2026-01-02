@@ -15,6 +15,7 @@ ADD_LIBRARY (atomflow
 	KeysOfLink.cc
 	LinkSignatureLink.cc
 	MessagesOfLink.cc
+	NameNode.cc
 	SetValueLink.cc
 	SizeOfLink.cc
 	SplitLink.cc
@@ -51,6 +52,7 @@ INSTALL (FILES
 	KeysOfLink.h
 	LinkSignatureLink.h
 	MessagesOfLink.h
+	NameNode.h
 	SetValueLink.h
 	SizeOfLink.h
 	SplitLink.h

@@ -6,9 +6,9 @@
 ; Converting from a StringValue to a Node presents a challenge, because
 ; there is no way to get "naked strings" in Atomese.
 ;
-; The need to convert transient StringValue streams into concrete
-; Nodes stored in the AtomSpace is fulfilled by the LinkSignatureLink.
-; It will convert between different Node types, and also between
+; The need to convert transient StringValue streams into concrete Nodes
+; stored in the AtomSpace is fulfilled by the LinkSignatureLink. This
+; link will convert between different Node types, and also between
 ; Nodes and StringValues.
 ;
 ; More abstractly: Given dynamic data sources that are flowing streams
@@ -32,6 +32,8 @@
 ;
 (use-modules (opencog))
 
+; -----------
+; First example.
 ; Given the (PredicateNode "bar"), create the (ConceptNode "bar")
 
 (define node-from-node
@@ -40,8 +42,11 @@
 
 ; -----------
 
-; Given a StringValue located somewhere, create a corresponding
-; ConceptNode
+; Second example.
+; Given a StringValue, obtained from a "well-known location", create a
+; corresponding ConceptNode.
+
+; Put a StringValue somewhere, "where it can be found" by reference.
 (cog-set-value! (Anchor "anch") (Predicate "key")
 	(StringValue "a" "b" "c"))
 

@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY (grant
 	DefineLink.cc
 	GrantLink.cc
+	PipeLink.cc
 	StateLink.cc
 	TypedAtomLink.cc
 	UniqueLink.cc
@@ -24,6 +25,7 @@ INSTALL (TARGETS grant EXPORT AtomSpaceTargets
 INSTALL (FILES
 	DefineLink.h
 	GrantLink.h
+	PipeLink.h
 	StateLink.h
 	TypedAtomLink.h
 	UniqueLink.h

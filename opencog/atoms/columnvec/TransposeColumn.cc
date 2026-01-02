@@ -58,7 +58,10 @@ ValuePtr TransposeColumn::do_handle_loop(AtomSpace* as, bool silent,
 
 // ---------------------------------------------------------------
 
+// Rows of length zero is a common end-of-stream indicator.
+// For example, the length of VoidValue is zero.
 #define CHKSZ(ROW) \
+	if (0 == ROW.size()) break; \
 	if (ROW.size() < ncols) \
 		throw RuntimeException(TRACE_INFO, \
 			"Short row! Got %lu want %lu\n", ROW.size(), ncols);

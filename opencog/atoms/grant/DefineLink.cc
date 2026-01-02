@@ -14,14 +14,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include <opencog/atoms/base/ClassServer.h>
 
 #include "DefineLink.h"
 
@@ -29,15 +22,12 @@ using namespace opencog;
 
 void DefineLink::init(void)
 {
-	if (not nameserver().isA(get_type(), DEFINE_LINK))
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a DefineLink, got %s",
-				nameserver().getTypeName(get_type()).c_str());
+	if (_type != DEFINE_LINK) return;
 
 	// Must have name and body
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
-			"Expecting name and definition, got size %d", _outgoing.size());
+			"Expecting name and definition, got %s", to_string().c_str());
 
 	// Type-check. The execution and FunctionLink's only expand
 	// definitions anchored with these types; other definitions won't
@@ -49,7 +39,7 @@ void DefineLink::init(void)
 	    DEFINED_TYPE_NODE != dtype)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting Defined(Procedure/Schema/Predicate/Type)Node, got %s",
-				nameserver().getTypeName(dtype).c_str());
+				to_string().c_str());
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init();
@@ -57,12 +47,6 @@ void DefineLink::init(void)
 
 DefineLink::DefineLink(const HandleSeq&& oset, Type t)
 	: UniqueLink(std::move(oset), t)
-{
-	init();
-}
-
-DefineLink::DefineLink(const Handle& name, const Handle& defn)
-	: UniqueLink(HandleSeq({name, defn}), DEFINE_LINK)
 {
 	init();
 }

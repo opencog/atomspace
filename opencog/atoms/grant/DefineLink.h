@@ -13,11 +13,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_DEFINE_LINK_H
@@ -31,9 +26,10 @@ namespace opencog
  *  @{
  */
 
-/// The DefineLink is used to define procedures, predicates and schemas.
-/// It is intended to allow procedures, predicates and schemas to be
-/// invoked by name, instead of anonymously.
+/// The DefineLink is used to assign a name to anonymous (un-named)
+/// procedures, predicates and schemas. A named procedure, predicate
+/// or schema can then be invoked by name, instead of repeating its
+/// full function description.
 ///
 /// Only one definition is allowed; any attempt to create a second
 /// conflicting definition (of the same name) will throw an error.
@@ -56,8 +52,6 @@ protected:
 	void init(void);
 public:
 	DefineLink(const HandleSeq&&, Type=DEFINE_LINK);
-
-	DefineLink(const Handle& alias, const Handle& body);
 
 	DefineLink(const DefineLink&) = delete;
 	DefineLink& operator=(const DefineLink&) = delete;
