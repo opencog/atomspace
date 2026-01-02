@@ -162,7 +162,7 @@
 ;
 ; Conclude that 1 == 1 and therefore these two are equivalent, and
 ; one of them can be discarded.  So this is an example of deduplication
-; by size. When the compare is <= instead of <, then 1 <> 1 is infered,
+; by size. When the compare is <= instead of <, then 1 <> 1 is inferred,
 ; and both items are kept, as they are different.
 
 ; Construct the stream

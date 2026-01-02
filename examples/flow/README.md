@@ -5,7 +5,7 @@ Examples of data processing networks.  These are networks, described
 in Atomese, that apply transformations to streams of Values and Atoms.
 
 These networks are used to process, transform, work with, remember,
-discard, store, retreive, send, memorize, summarize dynamic, time-varying
+discard, store, retrieve, send, memorize, summarize dynamic, time-varying
 flowing data streams.  These are manipulated in the local, "current"
 AtomSpace, but are generally data that arrives from sensory devices,
 or are commands sent to "motors" to move, or agents to act.
