@@ -561,8 +561,13 @@ Let me list htem here before they are completely forgotten:
   is spurious and maybe un-needed, and could become cnceptually
   simpler if it was reframed as `CollectionOf` with `Concatenate`
   And maybe it could be.
+* The `LinkSignatureLink` is annoyingly similar to `CollectionOfLink`.
+  But different enough to not be interchangable. Neither quite ever
+  does what you expect them do to; as if the person who designed and
+  implemented them didn't really understand what they were doing, and
+  was unable to keep the big picture in mind.
 
-Between these two bullets, its clear that there are yet more confusions
+Between these three bullets, its clear that there are yet more confusions
 and badly-designed Atoms involved in the handling of vector streams.
 This needs to be straightened out.
 
