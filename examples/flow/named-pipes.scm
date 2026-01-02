@@ -26,33 +26,38 @@
 		(LinkSignature (Type 'StringValue) (Concept "do-da"))
 		(LinkSignature (Type 'StringValue) (Concept "zip-a-dee do-dah day"))))
 
-; The stream that is associated with the name can be gotten by executing
-; the NameNode:
+; Execution of the named stream is the same as execution of the stream
+; that is named. That is, both behave the same way; executing one is the
+; same as executing the other.
 (cog-execute! (Name "words"))
 
-(define xform
+; The TransposeColumn provides a generic utility for concatenating lists
+; of itmes (mostly because there is no particular difference between
+; transpose and concatenate, when everything is a vector.)
+(cog-execute! (TransposeColumn (Name "words")))
+
+; A more complicated and awkward empedding of the list of words into
+; sentence fragments.
+(cog-execute!
 	(Filter
 		(Rule
 			(Variable "word")
 			(Variable "word")
 			(LinkSignature (Type 'LinkValue)
-				(Concept "You said: ") (Variable "word")))
-		(Name "words"))) 
+				(LinkSignature (Type 'StringValue) (Concept "You said: "))
+				(Variable "word")))
+		(Name "words")))
 
-(cog-execute! xform)
-
-; Concatenate
-
-
-	(LinkSignature (Type 'FlatStream)
-		(LinkSignature (Type 'StringValue) (Concept "do-da"))
-		(LinkSignature (Type 'StringValue) (Concept "zippity do-dah day"))))
-)
-
-(define string-from-node
-	(cog-value (Anchor "anch") (Predicate "strkey")))
-(format #t "Got string from node ~A\n" string-from-node)
-
-; -----------
+; The TransposeColumn can be used to provide a kind of concatenation:
+(cog-execute!
+	(Filter
+		(Rule
+			(Variable "word")
+			(Variable "word")
+			(TransposeColumn
+				(LinkSignature (Type 'LinkValue)
+					(LinkSignature (Type 'StringValue) (Concept "You said: "))
+					(Variable "word"))))
+		(Name "words")))
 
 ; ----------------- That's all, Folks! The End! -----------------
