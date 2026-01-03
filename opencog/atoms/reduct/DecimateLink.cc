@@ -8,8 +8,8 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -48,12 +48,12 @@ void DecimateLink::init(void)
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// The vector we're planning on cutting down.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, _outgoing[1]));
+	ValuePtr vi(FunctionLink::get_value(as, silent, _outgoing[1]));
 
 	// Lets see what kind of mask this is. We accept three kinds:
 	// A BoolValue, NumberNode and FloatValue
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vm(NumericFunctionLink::get_value(as, silent, _outgoing[0]));
+	ValuePtr vm(FunctionLink::get_value(as, silent, _outgoing[0]));
 	Type mtype = vm->get_type();
 	if (BOOL_VALUE == mtype)
 	{

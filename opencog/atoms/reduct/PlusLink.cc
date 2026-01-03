@@ -48,10 +48,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-		return NumericFunctionLink::get_value(as, silent, fi);
+		return FunctionLink::get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
+	ValuePtr vi(FunctionLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
 	ValuePtr vj(fj);

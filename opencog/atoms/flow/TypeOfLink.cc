@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/signature/TypeNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 
 #include "TypeOfLink.h"
@@ -48,7 +48,7 @@ ValuePtr TypeOfLink::execute(AtomSpace* as, bool silent)
 	HandleSeq tipes;
 	for (const Handle& h : _outgoing)
 	{
-		ValuePtr vi(NumericFunctionLink::get_value(as, silent, h));
+		ValuePtr vi(FunctionLink::get_value(as, silent, h));
 		Type t = vi->get_type();
 		tipes.emplace_back(createTypeNode(t));
 	}

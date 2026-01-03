@@ -8,8 +8,8 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "NumericFunctionLink.h"
 #include "DivideLink.h"
 #include "TimesLink.h"
 
@@ -49,10 +49,10 @@ ValuePtr TimesLink::kons(AtomSpace* as, bool silent,
                          const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-		return NumericFunctionLink::get_value(as, silent, fi);
+		return FunctionLink::get_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
+	ValuePtr vi(FunctionLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
 	ValuePtr vj(fj);

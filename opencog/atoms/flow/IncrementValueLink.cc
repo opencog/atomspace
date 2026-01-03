@@ -22,8 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/value/FloatValue.h>
 
 #include "IncrementValueLink.h"
@@ -73,7 +73,7 @@ ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 
 	// Copy-on-write semantics means as->increment_count() might return
 	// a different Atom than the current ah.
-	ValuePtr vp(NumericFunctionLink::get_value(as, silent, _outgoing[2]));
+	ValuePtr vp(FunctionLink::get_value(as, silent, _outgoing[2]));
 	if (vp->is_type(FLOAT_VALUE))
 	{
 		ah = as->increment_count(ah, ak, FloatValueCast(vp)->value());

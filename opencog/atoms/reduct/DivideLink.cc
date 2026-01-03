@@ -8,9 +8,9 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "DivideLink.h"
-#include "NumericFunctionLink.h"
 
 using namespace opencog;
 
@@ -44,10 +44,10 @@ ValuePtr DivideLink::kons(AtomSpace* as, bool silent,
                           const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ValuePtr vi(NumericFunctionLink::get_value(as, silent, fi));
+	ValuePtr vi(FunctionLink::get_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
-	ValuePtr vj(NumericFunctionLink::get_value(as, silent, fj));
+	ValuePtr vj(FunctionLink::get_value(as, silent, fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers? If so, perform vector (pointwise) subtraction.

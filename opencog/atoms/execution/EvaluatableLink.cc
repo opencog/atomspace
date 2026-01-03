@@ -21,11 +21,11 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
+#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/reduct/NumericFunctionLink.h>
 #include <opencog/atoms/scope/LambdaLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -71,7 +71,7 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 /// Viz, either a NumberNode, or a FloatValue.
 static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
 {
-	ValuePtr pap(NumericFunctionLink::get_value(as, silent, h));
+	ValuePtr pap(FunctionLink::get_value(as, silent, h));
 	Type t = pap->get_type();
 
 	if (nameserver().isA(t, LINK_VALUE))
