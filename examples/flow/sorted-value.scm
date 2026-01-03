@@ -1,56 +1,46 @@
 ;
-; flow-sorted.scm -- Presenting streams in sorted order.
+; sorted-value.scm -- Sorting Atoms and Values
 ;
-; In most conventional usage, it is enough to process a stream in
-; sequential order, on a first-in, first-out (FIFO) basis. Most
-; Atomese stream processing will work in this way. There are two
-; main exceptions: UnisetValue, and SortedStream. The UnisetValue
-; is intended for item deduplication; it will sort items, but in
-; an opaque fashion (nominally, in lexical order of what would have
-; been the string, if the item had been printed.)
+; ContainerValues provide thread-safe, multi-reader, multi-writer
+; dynamically-varying buffers for Values. The most basic container
+; is the QueueValue; it provides a equential first-in, first-out FIFO.
+; The UnisetValue is a deduplicating; it holds at most only once
+; instance of an item (Atom or Value).
 ;
-; The SortedStream allows a custom sort order to be applied, with the
-; sorting operation specified in Atomese. The SortedStream is
-; thread-safe buffer: it can be read from and written to simultaneously.
-; The buffered contents will be kept (and returned) in sorted order.
+; The SortedValue allows a custom order relation to be specifed,
+; and it holds it's contents in that order.  When items are removed,
+; they come from the head of the order; when added, they are added in
+; appropriate sort order.
 ;
-; As a buffer, this is not really intended for sorting static lists,
-; but for sorting items arriving on a stream. However, for the present
-; example, sorting will be applied to statiic lists.
+; As a buffer, the SortedValue is not really intended for sorting
+; static lists, but rather for sorting items arriving in a stream.
+; The example below will (unfortunately) use a static list for the
+; demo; mostly to keep the demo as simple as reasonable.
 ;
-; It seems that the only meaningful way to apply sorting to a stream
-; is to pull as much as possible from the stream, and sort that. The
-; SortedStream does exactly that: it pulls as much as possible from
-; the upstream source, and puts everything it gets into sorted order.
-; To avoid blocking when the upstream source blocks, the pull is done
-; from a separate, privately-maintained thread. To avoid overflowing
-; when the upstream producer is fast, and the downstream producer is
-; slow, high-low watermarks are used on the sorted buffer. These are
-; currently hard-coded.
-
 (use-modules (opencog))
 
 : Demoing a running stream is difficult, and so the demo below will
 ; demonstrate sorting on a static list. This has little overall impact.
 ;
-; The "stream" to be sorted will consist of a collection of Atoms of
-; varying sizes. The sort function will examine the sizes, and order
-; accordingly. Several variants of the sort function are demoed:
+; The dataset to be sorted will consist of a collection of Atoms of
+; varying sizes. The sort relation will examine the sizes, and order
+; accordingly. Several variants of the sort relation are demoed:
 ; ascending, descending and "deduplicating". The deduplicating order
 ; is curious: it only admits one exemplar of a given size in the stream.
 ; Unlucky Atoms that happen to be of the same size, but are otherwise
-; different, are discarded. This deduplication is the same as that
-; provided by the UnisetValue, although that one deduplicates based on
-; the global uniqueness of Atoms.
+; different, are discarded.
 ;
-; The ordering relations will be created with the LambdaLink. This
-; defines two variables: the left and right variable; which can then be
-; used in arbitrarily complicated expressions in the body. For the demo,
-; the SizeOfLink provides a numerical value for the size of an Atom;
-; the GreaterThanLink, LessThanLink, EqualLink and the boolean ops
-; AndLin, OrLink can be combined.
+; The ordering relation can be any function that takes two arguments,
+; and return a crisp ture/false BoolValue. In this wxample, the relation
+; will be a LambdaLink binding two variables: left and right. These can
+; then be used in arbitrarily complicated expressions in the lambda
+; body. For the demo, the SizeOfLink provides a numerical value for the
+; size of an Atom; the GreaterThanLink, LessThanLink, EqualLink and the
+; boolean ops AndLin, OrLink can be combined.
 ;
 (define greater-or-equal-relation
+(Define
+	(DefinedPredicate "greater-or-equal-relation")
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Or
@@ -80,21 +70,16 @@
 			(List (Item "g") (Item "h")))
 	))
 
-; Construct the stream.
-(define ge-stream (SortedStream greater-or-equal-relation item-list))
+; Construct the Value
+(define ge-value (SortedValue greater-or-equal-relation item-list))
 
-; Access the stream. Each access returns a list holding one item.
-; The largest is returned first.
-(cog-value->list ge-stream)
+(define ge-value
+	(SortedValue
+	(DefinedPredicate "greater-or-equal-relation")
+	item-list))
 
-; Subsequent accesses returns the next and the next ... and eventually
-; the empty list.
-(cog-value->list ge-stream)
-(cog-value->list ge-stream)
-(cog-value->list ge-stream)
-(cog-value->list ge-stream)
-(cog-value->list ge-stream)
-(cog-value->list ge-stream)
+; Access the Value in one big gulp: get the whole thing.
+(cog-value->list ge-value)
 
 ; The largest came first. Note that this is not a "stable sort": some
 ; of the atoms that are later in the original list, get sorted earlier.
