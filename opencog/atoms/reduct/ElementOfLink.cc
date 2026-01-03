@@ -140,6 +140,9 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		return createBoolValue(std::move(chopped));
 	}
 
+	if (VOID_VALUE == vitype)
+		return vi;
+
 	// WTF. Should never be reached.
 	return get_handle();
 }
