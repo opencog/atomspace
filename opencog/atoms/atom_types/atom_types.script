@@ -1383,8 +1383,8 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // DefinedPredicateNodes are used to make human-written Atomese easier
 // to read by humans. They have no other fundamental usefulness...
 // They are meant to be wrappers for more complex Atomese that return
-// some TruthValue.
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE,PROCEDURE_NODE
+// a crisp true/false BoolValue.
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE,DEFINED_PROCEDURE_NODE
 
 // ==============================================================
 // Serializers, for GPU's
