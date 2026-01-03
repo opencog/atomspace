@@ -38,9 +38,8 @@
 ; size of an Atom; the GreaterThanLink, LessThanLink, EqualLink and the
 ; boolean ops AndLin, OrLink can be combined.
 ;
-(define greater-or-equal-relation
 (Define
-	(DefinedPredicate "greater-or-equal-relation")
+	(DefinedPredicate "greater-or-equal")
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Or
@@ -52,7 +51,8 @@
 				(SizeOf (Variable "$right"))))))
 
 ; Create a list of items of varying sizes.
-(define item-list
+(PipeLink
+	(Name "item-list")
 	(OrderedLink
 		(Item "a")       ; size 1
 		(Item "b")       ; size 1
@@ -71,12 +71,10 @@
 	))
 
 ; Construct the Value
-(define ge-value (SortedValue greater-or-equal-relation item-list))
-
 (define ge-value
 	(SortedValue
-	(DefinedPredicate "greater-or-equal-relation")
-	item-list))
+		(DefinedPredicate "greater-or-equal")
+		(Name "item-list")))
 
 ; Access the Value in one big gulp: get the whole thing.
 (cog-value->list ge-value)
@@ -92,7 +90,8 @@
 ; --------------------------------------------------------
 ; Numerical (total) orders have the usual symmetries:
 ; Greater-or-equal is the same as not-less-than
-(define not-less-relation
+(Define
+	(DefinedPredicate "not-less")
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Not
@@ -101,17 +100,18 @@
 				(SizeOf (Variable "$right"))))))
 
 ; Should work as before.
-(define nlt-stream (SortedStream not-less-relation item-list))
+(define nlt-sort
+	(SortedValue
+		(DefinedPredicate "not-less")
+		(Name "item-list")))
 
-; Access the stream.
-(cog-value->list nlt-stream)
-(cog-value->list nlt-stream)
-(cog-value->list nlt-stream)
-(cog-value->list nlt-stream)
+; Print the sorted list.
+(cog-value->list nlt-sort)
 
 ; --------------------------------------------------------
 ; Make sure this is not a happy accident, and reverse the order.
-(define not-greater-relation
+(Define
+	(DefinedPredicate "not-greater")
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(Not
@@ -120,17 +120,18 @@
 				(SizeOf (Variable "$right"))))))
 
 ; This time, the smallest come first.
-(define ngt-stream (SortedStream not-greater-relation item-list))
+(define ngt-sort
+	(SortedValue
+		(DefinedPredicate "not-greater")
+		(Name "item-list")))
 
-; Access the stream.
-(cog-value->list ngt-stream)
-(cog-value->list ngt-stream)
-(cog-value->list ngt-stream)
-(cog-value->list ngt-stream)
+; Print the result
+(cog-value->list ngt-sort)
 
 ; --------------------------------------------------------
 ; Now for fun and games: deduplication.
-(define greater-relation
+(Define
+	(DefinedPredicate "greater-dedupe")
 	(Lambda
 		(VariableList (Variable "$left") (Variable "$right"))
 		(GreaterThan
@@ -150,14 +151,14 @@
 ; by size. When the compare is <= instead of <, then 1 <> 1 is inferred,
 ; and both items are kept, as they are different.
 
-; Construct the stream
-(define gt-stream (SortedStream greater-relation item-list))
+; Construct the Value
+(define gt-dedupe
+	(SortedValue
+		(DefinedPredicate "greater-dedupe")
+		(Name "item-list")))
 
-; Access the stream.
-(cog-value->list gt-stream)
-(cog-value->list gt-stream)
-(cog-value->list gt-stream)
-(cog-value->list gt-stream)
+; Print the list
+(cog-value->list gt-dedupe)
 
 ; ----------------------------------------------------------
 
@@ -165,15 +166,15 @@
 ; For the present case, it can be constructed using the LinkSignature.
 
 (define link-sig
-	(LinkSignature (Type 'SortedStream) not-less-relation item-list))
+	(LinkSignature
+		(Type 'SortedValue)
+		(DefinedPredicate "not-less")
+		(Name "item-list")))
 
 ; Construct it.
 (define cnlt (cog-execute! link-sig))
 
 ; It works as before.
-(cog-value->list cnlt)
-(cog-value->list cnlt)
-(cog-value->list cnlt)
 (cog-value->list cnlt)
 
 ; ----------------- That's all, Folks! The End! -----------------
