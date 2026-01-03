@@ -79,7 +79,19 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 	_right_shim->set_value(ValuePtr(const_cast<Value*>(&rhs), [](Value*){}));
 
 	_scratch->clear();
-	return _exout->bevaluate(_scratch.get());
+
+	// The comparison relation can fail when the the place to
+	// get data from does not exist. Although  such a case
+	// "should not happen", and "it's the user's fault", in practice
+	// it seems that the reasons are benign, and we shouldn't tank
+	// the pipeline bacause of this. So catch the access exception,
+	// and continue. It will be a SilentException; other exceptions
+	// are real and are not guarded against.
+	bool cmp = false;
+	try {
+		cmp = _exout->bevaluate(_scratch.get(), true);
+	} catch (const SilentException& ex) {}
+	return cmp;
 }
 
 // ==============================================================
