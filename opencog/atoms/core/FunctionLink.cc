@@ -49,20 +49,6 @@ FunctionLink::FunctionLink(const HandleSeq&& oset, Type t)
 	init();
 }
 
-// ===========================================================
-
-/// Generic utility -- execute the argument, and return the result
-/// of the execution.
-ValuePtr FunctionLink::get_value(AtomSpace* as, bool silent, ValuePtr vptr)
-{
-	if (not vptr->is_atom())
-		return vptr;
-
-	Handle h(HandleCast(vptr));
-	if (not h->is_executable()) return vptr;
-	return h->execute(as, silent);
-}
-
 DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);
 
 /* ===================== END OF FILE ===================== */

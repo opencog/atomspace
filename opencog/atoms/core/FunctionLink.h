@@ -76,7 +76,18 @@ public:
 
 	virtual bool is_executable(void) const { return true; }
 
-	static ValuePtr get_value(AtomSpace*, bool, ValuePtr);
+	/// Generic utility -- execute the argument, and return
+	/// the result of the execution.
+	static inline ValuePtr get_value(AtomSpace* as, bool silent, ValuePtr vptr)
+	{
+		if (not vptr->is_atom())
+			return vptr;
+
+		Handle h(HandleCast(vptr));
+		if (not h->is_executable()) return vptr;
+		return h->execute(as, silent);
+	}
+
 	static Handle factory(const Handle&);
 };
 
