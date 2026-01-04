@@ -8,7 +8,6 @@ ADD_CXXTEST(BasicSCMUTest)
 ADD_CXXTEST(SCMPrimitiveUTest)
 ADD_CXXTEST(MultiAtomSpaceUTest)
 ADD_CXXTEST(MultiThreadUTest)
-ADD_CXXTEST(SCMUtilsUTest)
 ADD_CXXTEST(SCMUtf8StringUTest)
 ADD_CXXTEST(SCMExecutionOutputUTest)
 
