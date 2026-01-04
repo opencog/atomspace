@@ -71,20 +71,52 @@
 			(IncrementValue (Variable "$typ") (Predicate "cnt") (Number 0 0 1)))
 		(Name "get-types")))
 
-; This is the end of the line: nothing else makes use of the output
-; of this stage.
-; The above
-; Must actually run this one...
-; Can we have an Atom that just runs where created?
+; This is the end of the line: nothing else makes use of the output of
+; this stage. Thus, in order to force the counting to be done, to run
+; the whole pipeline, it must be manually executed/triggered.  One word
+; of caution: this will run the pipeline each time that it is executed,
+; and so will double-count, triple-count, etc. when run more than once.
+
 (cog-execute! (Name "count-types"))
 ; ---------------------------------------------------------
+; ---------------------------------------------------------
 
+; The start of a second data-graphing pipeline. This takes the list of
+; types, and de-duplicates it, creating a set in which each Type appears
+; only once.  The CollectionOfLink is a container-rewriting tool. It
+; accepts as input, any list or set (the (Name "get-types") returns a
+; LinkValue) and places that input into a different container: here, a
+; UnisetValue, which performs deduplication on its contents.
 (Pipe
 	(Name "unique-types")
 	(CollectionOf (TypeNode 'UnisetValue)
 		(Name "get-types")))
 
+; Run the pipeline, if you are curious about what it generates.
 ; (cog-execute!  (Name "unique-types"))
+; ---------------------------------------------------------
+
+; Create a pipeline stage that will sort the set of unique types into
+; order by count, with the most frequently-occuring types first. This
+; requires creating a comparison relation that will determine the sort
+; order.
+;
+; The order relation is presumably obvious: more or less.
+; * It takes two inputs, left and right.
+; * It gets the Value attached at the key (Preicate "cnt") on each.
+; * This value was a vector, of the form (0 0 N) for some count N..
+; * The ElementOf extracts the third number, zero-based.
+; * The LessThan compares the left and right counts.
+; * The NotLink is a trick, to make suere that N <> N, so thtat two
+;   different types, having the same count, compare as not-equal.
+;   Were they treated as equal, then one of the two would have been
+;   discarded.
+; * The DefineLink is used, instead of PipeLink, because this is a
+;   function defintion, not a pipeline stage. The function has two
+;   free-floationg inputs: left and right, that are not attached to
+;   anything. The VariableNodes assign names to the inputs, and are
+;   used in the "internal wiring" of the function. The Define is used
+;   to give a name the function.
 
 (DefineLink
 	(DefinedPredicate "count-order")
@@ -97,6 +129,10 @@
 				(ElementOf (Number 2)
 					(ValueOf (Variable "right") (Predicate "cnt")))))))
 
+; A pipeline stage that converts the input set into a sorted set.
+; Previously, that conversion was done with a `CollectionOfLink`;
+; here, the `LinkSignatureLink` is used. The difference between the
+; two hinges on a technicality.
 (Pipe
 	(Name "sorted-types")
 	(LinkSignature
@@ -104,6 +140,7 @@
 		(DefinedPredicate "count-order")
 		(Name "unique-types")))
 
+; ---------------------------------------------------------
 
 ; Debug print
 (cog-execute!
