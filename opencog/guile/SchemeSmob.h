@@ -73,7 +73,6 @@ private:
 
 	// Initialization functions
 	static void init_smob_type(void);
-	static SCM ss_set_server_mode(SCM);
 	static SCM ss_version(void);
 
 	static int print_misc(SCM, SCM, scm_print_state *);
@@ -175,7 +174,6 @@ private:
 	static SCM convert_to_utf8(void *, SCM, SCM);
 	static std::string to_string(SCM);
 	static std::string protom_to_string(SCM);
-	static std::string protom_to_server_string(SCM);
 	static std::string misc_to_string(SCM);
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);

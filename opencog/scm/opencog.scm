@@ -82,7 +82,6 @@ cog-outgoing-set
 cog-pop-atomspace
 cog-push-atomspace
 cog-set-atomspace!
-cog-set-server-mode!
 cog-set-value!
 cog-set-values!
 cog-subtype?
