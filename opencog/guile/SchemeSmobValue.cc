@@ -804,7 +804,8 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 
-	else if (nameserver().isA(t, LINK))
+	else if (nameserver().isA(t, LINK) or
+	         nameserver().isA(t, FRAME))
 	{
 		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		if (index < v.size()) return handle_to_scm(v[index]);

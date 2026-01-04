@@ -455,14 +455,6 @@
        => 1
 ")
 
-(set-procedure-property! cog-outgoing-atom 'documentation
-"
- cog-outgoing-atom ATOM INDEX
-    Return the INDEX'th atom in the outgoing set of ATOM. Indexing
-    is done from a base of zero. This returns the same atom as
-    (list-ref (cog-outgoing-set ATOM) INDEX) but is faster.
-")
-
 (set-procedure-property! cog-outgoing-set 'documentation
 "
  cog-outgoing-set ATOM
@@ -827,7 +819,6 @@
     the N'th entry.
 
     If the value is a Link, this returns the N'th atom in the outgoing set.
-        That is, it returns the same atom as cog-outgoing-atom.
     If the value is a Node, and N is zero, this returns the node name.
     If the value is a StringValue, FloatValue or LinkValue, this returns
         the N'th entry in the value.

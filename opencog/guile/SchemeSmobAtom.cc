@@ -326,23 +326,6 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 
 /* ============================================================== */
 /**
- * Return the n'th atom of the outgoing set..
- */
-SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
-
-	if (not h->is_link()) return SCM_BOOL_F;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (oset.size() <= pos) return SCM_BOOL_F;
-
-	return handle_to_scm(oset[pos]);
-}
-
-/* ============================================================== */
-/**
  * Convert the incoming set of an atom into a list; return the list.
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom, SCM aspace)

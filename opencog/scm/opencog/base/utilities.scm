@@ -20,6 +20,7 @@
 ;
 ; Backwards-ompat wrappers. Deprecated; do not use in new code.
 ; -- cog-arity -- size of atoms.
+; -- cog-outgoing-atom -- list-ref for Links
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -38,7 +39,7 @@
   gar LINK - return first element of a Link atom.
   Return null if the LINK is empty.
 "
-	(cog-outgoing-atom LINK 0)
+	(cog-value-ref LINK 0)
 )
 
 (define-public (gdr LINK)
@@ -46,7 +47,7 @@
   gdr LINK - return second element of a Link atom.
   Return null if the LINK is empty or has only one element.
 "
-	(cog-outgoing-atom LINK 1)
+	(cog-value-ref LINK 1)
 )
 
 (define-public (gaar x) (gar (gar x)) )
@@ -304,7 +305,23 @@
        guile> (define l (Link x x x))
        guile> (cog-arity l)
        3
+
+  Obsolete. Do not use in new code.
 "
 	(length (cog-value->list ITEM))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cog-outgoing-atom ATOM INDEX)
+"
+ cog-outgoing-atom ATOM INDEX
+    Return the INDEX'th atom in the outgoing set of ATOM. Indexing
+    is done from a base of zero. This returns the same atom as
+    (list-ref (cog-outgoing-set ATOM) INDEX) but is faster.
+
+  Obsolete. Do not use in new code.
+"
+	(cog-value-ref ATOM INDEX)
 )
 ; ---------------------------------------------------------------------
