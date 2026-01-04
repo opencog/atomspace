@@ -492,61 +492,6 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	return set_value(atom, key, pa, satom, "cog-set-value!");
 }
 
-// Set the value at the indicated location in the vector.
-SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
-{
-	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
-	Handle key(verify_handle(skey, "cog-set-value-ref!", 2));
-	size_t index = verify_size_t(sindex, "cog-set-value-ref!", 4);
-
-	ValuePtr pa(atom->getValue(key));
-	Type t = pa->get_type();
-
-	ValuePtr nvp;
-
-	// OK. What we do next depends on the actual type of the value.
-	if (nameserver().isA(t, FLOAT32_VALUE))
-	{
-		std::vector<float> v = Float32ValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = (float) verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-	else if (nameserver().isA(t, FLOAT_VALUE))
-	{
-		std::vector<double> v = FloatValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, BOOL_VALUE))
-	{
-		std::vector<bool> v = BoolValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, STRING_VALUE))
-	{
-		std::vector<std::string> v = StringValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, LINK_VALUE))
-	{
-		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, std::move(v));
-	}
-
-	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");
-}
-
 // alist is an association-list of key-value pairs.
 Handle SchemeSmob::set_values(const Handle& h, const AtomSpacePtr& asp, SCM alist)
 {

@@ -130,7 +130,6 @@ private:
 	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
-	static SCM ss_set_value_ref(SCM, SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
