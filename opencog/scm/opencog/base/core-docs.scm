@@ -1072,16 +1072,4 @@
          cog-atomspace-readonly?,
 ")
 
-;set-procedure-property! cog-yield 'documentation
-;"
-; cog-yield
-;    The implementation uses a simple exception mechanism to allow
-;    scheme code to return to the guile prompt from anywhere. To use
-;    this, simply throw 'cog-yield from anywhere.  The catch handler
-;    will promptly return to the cogserver.  This can be used with
-;    continuations to implement some simple multi-threading.
-;
-;    Example:
-;       guile> (throw 'cog-yield \"hello world\")
-;       (hello world)
-;")
+; ---------------------- END OF FILE ------------------------

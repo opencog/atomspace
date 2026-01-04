@@ -406,14 +406,6 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 		return SCM_EOL;
 	}
 
-	// Check for a simple flow-control directive: i.e. just return to
-	// the C code from anywhere within the scheme code.
-	if (0 == strcmp(restr, "cog-yield"))
-	{
-		free(restr);
-		return SCM_CAR(throw_args);
-	}
-
 	// If the user types (quit) or (exit) at the cogserver shell, we will
 	// end up here. That's because (quit) (exit) and (exit 42) all get
 	// converted into (throw 'quit (list 42)). We have two choices:
