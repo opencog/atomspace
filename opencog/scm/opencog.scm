@@ -40,7 +40,6 @@
 ; as otherwise guile generates warnings about "possibly unbound variable"
 ; when these are touched in the various scm files.
 (export
-cog-arity
 cog-atom
 cog-atom?
 cog-atom-less?

@@ -249,18 +249,6 @@ Example:
    guile> (eq? 'ConceptNode (cog-type x))
    #t
 
-=== cog-arity atom ===
-Return the arity of the atom.
-
-Example:
-   guile> (define x (ConceptNode "abc"))
-   guile> (cog-arity x)
-   0
-   guile> (define l (Link x x x))
-   guile> (cog-arity l)
-   3
-
-
 === cog-incoming-set atom ===
 === cog-outgoing-set atom ===
 Return the incoming and outgoing sets, respectively, of the atom.

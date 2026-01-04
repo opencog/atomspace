@@ -232,12 +232,6 @@ SCM SchemeSmob::ss_name (SCM satom)
 	return str;
 }
 
-SCM SchemeSmob::ss_arity (SCM svalue)
-{
-	ValuePtr pa(verify_protom(svalue, "cog-arity"));
-	return scm_from_size_t(pa->size());
-}
-
 /* ============================================================== */
 /// Atomic increment the count of some generic FloatValue.
 /// key == key for value

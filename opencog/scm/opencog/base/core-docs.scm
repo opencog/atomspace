@@ -317,20 +317,6 @@
         cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
-(set-procedure-property! cog-arity 'documentation
-"
- cog-arity ATOM
-    Return the arity of ATOM.
-
-    Example:
-       guile> (define x (Concept \"abc\"))
-       guile> (cog-arity x)
-       0
-       guile> (define l (Link x x x))
-       guile> (cog-arity l)
-       3
-")
-
 (set-procedure-property! cog-incoming-set 'documentation
 "
  cog-incoming-set ATOM [ATOMSPACE]

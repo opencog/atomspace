@@ -18,6 +18,9 @@
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
+; Backwards-ompat wrappers. Deprecated; do not use in new code.
+; -- cog-arity -- size of atoms.
+;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -288,4 +291,20 @@
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
+; ---------------------------------------------------------------------
+(define-public (cog-arity ITEM)
+"
+ cog-arity VALUE
+    Return the size of VALUE (an Atom or Value)
+
+    Example:
+       guile> (define x (Concept \"abc\"))
+       guile> (cog-arity x)
+       1
+       guile> (define l (Link x x x))
+       guile> (cog-arity l)
+       3
+"
+	(length (cog-value->list ITEM))
+)
 ; ---------------------------------------------------------------------
