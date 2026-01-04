@@ -14,11 +14,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atoms/value/Value.h>
@@ -45,27 +40,34 @@ PythonRunner::PythonRunner(std::string s)
 /// `execute()` -- evaluate a PythonRunner with arguments.
 /// Execution happens in the scratch space.
 ///
-/// Expects "args" to be a ListLink. These arguments will be
-///     substituted into the predicate.
+/// Expects "args" to be a ListLink. These arguments
+///     will be substituted into the predicate.
 ///
 ValuePtr PythonRunner::execute(AtomSpace* as,
                                AtomSpace* scratch,
                                const ValuePtr& vargs,
                                bool silent)
 {
+	// XXX FIXME: update the python apply_v to accept LinkValue
+	// so that we can pass python functions Values, not just Atoms.
 	if (not vargs->is_atom())
 		throw SyntaxException(TRACE_INFO,
 			"PythonRunner: Expecting Handle; got %s",
 			vargs->to_string().c_str());
 
-	// If we arrive here from queries or other places, the
-	// argument will not be (in general) in any atomspace.
-	// That's because it was constructed on the fly, and
-	// we're trying to stick to lazy evaluation. But we have
-	// draw the line here: the callee necesssarily expects
-	// arguments to be in the atomspace. So we add now.
-	Handle cargs = HandleCast(vargs);
-	Handle asargs = scratch->add_atom(cargs);
+	Handle asargs = HandleCast(vargs);
+	if (asargs->is_executable())
+	{
+		ValuePtr vp(asargs->execute(scratch));
+		if (not vp->is_atom())
+			throw SyntaxException(TRACE_INFO,
+				"PythonRunner: Expecting Handle; got %s after execing %s",
+				vp->to_string().c_str(),
+				asargs->to_string().c_str());
+
+		asargs = HandleCast(vp);
+	}
+	asargs = scratch->add_atom(asargs);
 
 	PythonEval* applier = get_evaluator_for_python(scratch);
 	ValuePtr vp(applier->apply_v(scratch, _fname, asargs));

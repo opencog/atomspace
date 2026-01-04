@@ -14,11 +14,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
@@ -55,13 +50,6 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
                             bool silent)
 {
 	ValuePtr asargs = vargs;
-
-	// If we arrive here from queries or other places, the
-	// argument will not be (in general) in any atomspace.
-	// That's because it was constructed on the fly, and
-	// we're trying to stick to lazy evaluation. But we have
-	// draw the line here: the callee necessarily expects
-	// arguments to be in the atomspace. So we add now.
 	if (vargs->is_atom())
 	{
 		const Handle& hargs(HandleCast(vargs));
@@ -72,7 +60,7 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
 	}
 
 	SchemeEval* applier = get_evaluator_for_scheme(scratch);
-	ValuePtr vp = applier->apply_v(_fname, asargs);
+	ValuePtr vp(applier->apply_v(_fname, asargs));
 
 	// The Scheme evaluator uses a fluid to hold "the current
 	// atomspace", and this fluid is typically set to the scratch
