@@ -555,35 +555,6 @@ SCM SchemeSmob::ss_keys (SCM satom)
 	return rv;
 }
 
-/** Return association list of keys+values on the atom */
-SCM SchemeSmob::ss_keys_alist (SCM satom)
-{
-	Handle atom(verify_handle(satom, "cog-keys->alist"));
-	AtomSpace* as = atom->getAtomSpace();
-
-	SCM rv = SCM_EOL;
-	HandleSet keys = atom->getKeys();
-	for (const Handle& k : keys)
-	{
-		ValuePtr vp = atom->getValue(k);
-
-		// OK, this is kind-of weird and hacky, but if the keys
-		// are not in any atomspace at the time that we go to
-		// print them, they'll be converted to <undefined handle>.
-		// So we shove them into the same atomspace as the atom
-		// itself. I don't quite like this, but it seems to be
-		// needed to fit user expectations.
-		SCM pair;
-		if (as)
-			pair = scm_cons (handle_to_scm(as->add_atom(k)), protom_to_scm(vp));
-		else
-			pair = scm_cons (handle_to_scm(k), protom_to_scm(vp));
-
-		rv = scm_cons (pair, rv);
-	}
-	return rv;
-}
-
 /* ============================================================== */
 /** Return a scheme list of the values associated with the value */
 

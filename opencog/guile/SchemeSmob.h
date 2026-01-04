@@ -134,7 +134,6 @@ private:
 	static SCM from_type(const ValuePtr&);
 	static SCM ss_type(SCM);
 	static SCM ss_keys(SCM);
-	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_value_type(SCM, SCM);
 	static SCM ss_incoming_set(SCM, SCM);
