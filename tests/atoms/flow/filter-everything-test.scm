@@ -91,7 +91,7 @@
 ; The actual count will change if the above is changed, but this gets
 ; us into the general ballpark, for now. Sloppy, but whatever.
 (test-assert "num counts"
-	(equal? 24 (length (cog-value->list count-list))))
+	(equal? 25 (length (cog-value->list count-list))))
 
 ; -----------
 
