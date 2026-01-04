@@ -127,7 +127,6 @@ private:
 	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM set_value(const Handle&, const Handle&,
 	                     const ValuePtr&, SCM, const char*);
-	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
 

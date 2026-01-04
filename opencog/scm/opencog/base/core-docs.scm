@@ -675,7 +675,6 @@
     See also:
        cog-inc-value! - Increment one location in a vector.
        cog-update-value! - Perform an atomic read-modify-write
-       cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
@@ -702,48 +701,6 @@
     See also:
        cog-inc-value! -- Increment one location in a generic FloatValue
        cog-set-value! -- Set a single value.
-       cog-set-values! -- Set multiple values.
-")
-
-(set-procedure-property! cog-set-values! 'documentation
-"
- cog-set-values! ATOM ALIST
-    Set multiple values on ATOM from the key-value pairs in ALIST.
-    The ALIST must be an association list, of the form of
-    ((key1 . value1) (key2 . value2) ...)
-
-    Example:
-       guile> (cog-set-values!
-                 (Concept \"abc\")
-                 (list
-                    (cons (Predicate \"key1\") (FloatValue 1 2 3))
-                    (cons (Predicate \"key2\") (FloatValue 4 5 6))))
-       guile> (cog-keys->alist (Concept \"abc\"))
-
-    Keys can also be removed, by setting the value to #f or to '()
-
-    Example:
-       guile> (cog-set-values!
-                 (Concept \"abc\")
-                 (list
-                    (cons (Predicate \"key1\") #f)
-                    (cons (Predicate \"key2\") #f)))
-       guile> (cog-keys->alist (Concept \"abc\"))
-
-    This returns either ATOM or a copy of ATOM with the new value. If
-    the current AtomSpace is a copy-on-write (COW) AtomSpace, and ATOM
-    lies in some other space below the current space, then a copy of
-    ATOM will be made and placed in the current space.  This copy will
-    have the new VALUE, while the value on the input ATOM will be
-    unchanged.  COW spaces are commonly used with underlying read-only
-    spaces, or with long stacks (DAG's) of AtomSpaces (Frames) recording
-    a history of value changes.
-
-    See also:
-       cog-set-value! ATOM VALUE - Set a single value.
-       cog-new-atomspace - Create a new AtomSpace
-       cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
-       cog-atomspace-ro! - Mark AtomSpace as read-only.
 ")
 
 (set-procedure-property! cog-value? 'documentation
