@@ -45,6 +45,7 @@
 )
 
 ; Function that takes the square root of a numeric values
+(define (cog-number x) (cog-value-ref x 0))
 (define (eff x)
 	(NumberNode (sqrt (cog-number x)))
 )

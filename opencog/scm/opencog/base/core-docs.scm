@@ -295,22 +295,6 @@
        \"abc\"
 ")
 
-(set-procedure-property! cog-number 'documentation
-"
- cog-number NUMBER-NODE
-    Return the (list of) floating point values of NUMBER-NODE.
-    The NUMBER-NODE must be an Node of type NumberNode, else an
-    exception will be thrown.
-
-   This is the same as saying (string->number (cog-name NUMBER-NODE))
-
-    Example:
-       ; Define a node
-       guile> (define x (cog-new-node 'NumberNode 42))
-       guile> (cog-number x)
-       42.0
-")
-
 (set-procedure-property! cog-type 'documentation
 "
  cog-type EXP

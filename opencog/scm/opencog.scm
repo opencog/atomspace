@@ -79,7 +79,6 @@ cog-new-node
 cog-new-value
 cog-node
 cog-node?
-cog-number
 cog-outgoing-atom
 cog-outgoing-by-type
 cog-outgoing-set

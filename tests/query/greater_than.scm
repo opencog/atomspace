@@ -105,6 +105,7 @@
 
 ;; -----------------------------------------------------
 ;; This variant uses a hand-rolled scm compare function
+(define (cog-number x) (cog-value-ref x 0))
 (define (richer a b)
 	(> (cog-number a) (cog-number b))
 )

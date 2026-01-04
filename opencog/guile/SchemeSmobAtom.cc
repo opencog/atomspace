@@ -232,21 +232,6 @@ SCM SchemeSmob::ss_name (SCM satom)
 	return str;
 }
 
-/**
- * Return the number of the NumberNode
- */
-SCM SchemeSmob::ss_number (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-number");
-
-	NumberNodePtr nn(NumberNodeCast(h));
-	// Faster than saying if (not nameserver().isA(h->get_type(), NUMBER_NODE))
-	if (nullptr == nn)
-		scm_wrong_type_arg_msg("cog-number", 0, satom, "NumberNode");
-	SCM num = scm_from_double(nn->get_value());
-	return num;
-}
-
 SCM SchemeSmob::ss_arity (SCM svalue)
 {
 	ValuePtr pa(verify_protom(svalue, "cog-arity"));
