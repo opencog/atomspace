@@ -39,6 +39,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/atoms/value/BoolValue.h>
+#include <opencog/atoms/value/LinkValue.h>
 #include <opencog/eval/EvaluatorPool.h>
 
 #include "SchemeEval.h"
@@ -1007,10 +1008,12 @@ static SCM thunk_scm_eval(void * expr)
 }
 
 /**
- * do_apply_scm -- apply named function func to arguments in ListLink
- * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the function func
- * is applied to them. The SCM value returned by the function is returned.
+ * do_apply_scm -- apply named func to args in a ListLink or LinkValue.
+ *
+ * It is assumed that varargs is either a ListLink, containing a list
+ * of Atom Handles, or a LinkValue, containing Values. This list is
+ * unpacked, and then the function func is applied to them. The SCM
+ * value returned by the function is returned.
  */
 SCM SchemeEval::do_apply_scm(const std::string& func, const ValuePtr& varargs)
 {
@@ -1035,6 +1038,19 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const ValuePtr& varargs)
 			}
 		}
 		else
+		if (varargs->get_type() == LINK_VALUE)
+		{
+			const ValueSeq& vsq = LinkValueCast(varargs)->value();
+
+			// Iterate in reverse, because cons chains in reverse.
+			size_t sz = vsq.size();
+			for (size_t i=sz; i>0; i--)
+			{
+				SCM sh = SchemeSmob::protom_to_scm(vsq[i-1]);
+				expr = scm_cons(sh, expr);
+			}
+		}
+		else
 		{
 			SCM sh = SchemeSmob::protom_to_scm(varargs);
 			expr = scm_cons(sh, expr);
@@ -1055,12 +1071,13 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const ValuePtr& varargs)
 
 /* ============================================================== */
 /**
- * apply_v -- apply named function func to arguments in ListLink.
- * Return an OpenCog ValuePtr.
+ * apply_v -- apply named function func to arguments in a ListLink
+ * or LinkValue. Return an OpenCog ValuePtr.
  *
- * It is assumed that varargs is a ListLink, containing a list of
- * Handles. This list is unpacked, and then the function func
- * is applied to them. The function is presumed to return pointer
+ * It is assumed that varargs is either a ListLink, containing a list
+ * of Handles, or a LinkValue, containing a list of Values. This list
+ * is unpacked, and then the function func is applied to the resulting
+ * sequence of arguments. The function is presumed to return pointer
  * to a ValuePtr. If the function does not return a Valueptr, or if
  * an error occurred during evaluation, then a C++ exception is thrown.
  */
@@ -1073,8 +1090,8 @@ ValuePtr SchemeEval::apply_v(const std::string &func, ValuePtr varargs)
 		SCM smob = do_apply_scm(func, varargs);
 
 		// If error, rethrow. It would be better to just allow exceptions
-		// to pass on through, but thus breaks some unit tests.
-		// XXX FIXME -- idealy we should avoid catch-and-rethrow.
+		// to pass on through, but this breaks some unit tests.
+		// XXX FIXME -- ideally we should avoid catch-and-rethrow.
 		if (eval_error())
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
