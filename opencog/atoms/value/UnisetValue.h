@@ -67,7 +67,7 @@ protected:
 		ValueComp(UnisetValue* p) : uv(p) {}
 		bool operator()(const ValuePtr& lhs, const ValuePtr& rhs) const
 		{
-			if (!lhs) return bool(rhs);  // null < non-null
+			if (!lhs) return bool(rhs);   // null < non-null
 			if (!rhs) return false;       // non-null >= null
 			return uv->less(*lhs, *rhs);
 		}
@@ -77,7 +77,7 @@ protected:
 
 	// Data source for hoarding.
 	LinkValuePtr _source;
-	void drain(void) const;
+	void drain(void);
 	void init_src(const ValuePtr&);
 
 	UnisetValue(Type t) : ContainerValue(t), _set(ValueComp(this)), _source(nullptr) {}

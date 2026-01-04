@@ -33,7 +33,7 @@ UnisetValue::UnisetValue(const ValueSeq& vseq)
 	: ContainerValue(UNISET_VALUE), _set(ValueComp(this)), _source(nullptr)
 {
 	for (const ValuePtr& v: vseq)
-		_set.insert(v);
+		add(v);
 
 	// Since this constructor placed stuff on the queue,
 	// we also close it, to indicate we are "done" placing
@@ -165,7 +165,8 @@ ValuePtr UnisetValue::peek(void) const
 
 size_t UnisetValue::size(void) const
 {
-	drain();
+	const_cast<UnisetValue*>(this)->drain();
+	// After the drain, _value.size() should be zero ...
 	if (is_closed())
 		return _value.size() + _set.size();
 	return _set.size();
@@ -202,7 +203,7 @@ void UnisetValue::init_src(const ValuePtr& src)
 	if (src->is_type(LINK))
 	{
 		for (const Handle& h: HandleCast(src)->getOutgoingSet())
-			_set.insert(h);
+			add(h);
 		_set.close();
 		return;
 	}
@@ -213,7 +214,7 @@ void UnisetValue::init_src(const ValuePtr& src)
 	// If source is a FloatStream or StringStream ... ???
 	if (not src->is_type(LINK_VALUE))
 	{
-		_set.insert(src);
+		add(src);
 		_set.close();
 		return;
 	}
@@ -225,7 +226,7 @@ void UnisetValue::init_src(const ValuePtr& src)
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
 		for (const ValuePtr& vp: vsq)
-			_set.insert(vp);
+			add(vp);
 		_set.close();
 		return;
 	}
@@ -237,7 +238,7 @@ void UnisetValue::init_src(const ValuePtr& src)
 	{
 		ValueSeq vsq = LinkValueCast(src)->value();
 		for (const ValuePtr& vp: vsq)
-			_set.insert(vp);
+			add(vp);
 		_set.close();
 		return;
 	}
@@ -249,7 +250,7 @@ void UnisetValue::init_src(const ValuePtr& src)
 	_source = LinkValueCast(src);
 }
 
-void UnisetValue::drain(void) const
+void UnisetValue::drain(void)
 {
 	if (nullptr == _source) return;
 
@@ -271,7 +272,7 @@ void UnisetValue::drain(void) const
 
 			// !!??? We flatten here. Is this correct?
 			for (const ValuePtr& vp: vsq)
-				_set.insert(vp);
+				add(vp);
 		}
 		return;
 	}
@@ -304,7 +305,7 @@ void UnisetValue::drain(void) const
 			return;
 		}
 
-		_set.insert(vp);
+		add(vp);
 	}
 }
 
