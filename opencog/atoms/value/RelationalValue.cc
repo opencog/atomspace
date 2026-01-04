@@ -80,18 +80,8 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 
 	_scratch->clear();
 
-	// The comparison relation can fail when the the place to
-	// get data from does not exist. Although  such a case
-	// "should not happen", and "it's the user's fault", in practice
-	// it seems that the reasons are benign, and we shouldn't tank
-	// the pipeline bacause of this. So catch the access exception,
-	// and continue. It will be a SilentException; other exceptions
-	// are real and are not guarded against.
-	bool cmp = false;
-	try {
-		cmp = _exout->bevaluate(_scratch.get(), true);
-	} catch (const SilentException& ex) {}
-	return cmp;
+	// Set silent=true to catch SilentException.
+	return  _exout->bevaluate(_scratch.get(), true);
 }
 
 // ==============================================================
@@ -99,7 +89,7 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 // Clear the transient before each use. That way, the base
 // AtomSpace always provides accurate context for the schema.
 // We need to do this only once per add, and not once per
-// less(), There will be, in general log(N) calls to less for
+// less(). There will be, in general, log(N) calls to less for
 // a SortedStream of size N. Or so one would hope. But the impl
 // under the covers is std::set<> and it seems to be calling
 // 2x that, because I guess it has no operator==() to work with.
@@ -115,7 +105,21 @@ void RelationalValue::add(const ValuePtr& vp)
 	}
 
 	_scratch->clear();
-	_set.insert(vp);
+
+	// The comparison relation can fail when the place to
+	// get data from does not exist. Although  such a case
+	// "should not happen", and "it's the user's fault", in practice
+	// it seems that the reasons are benign, and we shouldn't tank
+	// the pipeline because of this. The most reasonable thing I can
+	// think of is just not add this element to the set; that is,
+	// if there is no data, then pretend it does not exist.
+	// So, catch the access exception, and skip adding it.
+	// This will be a SilentException; other exceptions are real
+	// and are not guarded against.
+	//
+	try {
+		_set.insert(vp);
+	} catch (const SilentException& ex) {}
 }
 
 void RelationalValue::add(ValuePtr&& vp)
@@ -126,8 +130,11 @@ void RelationalValue::add(ValuePtr&& vp)
 		return;
 	}
 
+	// See notes above.
 	_scratch->clear();
-	_set.insert(std::move(vp));
+	try {
+		_set.insert(std::move(vp));
+	} catch (const SilentException& ex) {}
 }
 
 // ==============================================================
