@@ -521,16 +521,6 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	return protom_to_scm(atom->getValue(key));
 }
 
-SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
-{
-	Handle atom(verify_handle(satom, "cog-value-type", 1));
-	Handle key(verify_handle(skey, "cog-value-type", 2));
-
-	ValuePtr vp = atom->getValue(key);
-	if (nullptr == vp) return SCM_BOOL_F;
-	return from_type(vp);
-}
-
 /** Return all of the keys on the atom */
 SCM SchemeSmob::ss_keys (SCM satom)
 {

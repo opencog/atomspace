@@ -18,9 +18,10 @@
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
-; Backwards-ompat wrappers. Deprecated; do not use in new code.
+; Backwards-compat wrappers. Deprecated; do not use in new code.
 ; -- cog-arity -- size of atoms.
 ; -- cog-outgoing-atom -- list-ref for Links
+; -- cog-value-type -- get type of value at key
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -312,7 +313,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
 (define-public (cog-outgoing-atom ATOM INDEX)
 "
  cog-outgoing-atom ATOM INDEX
@@ -323,5 +323,27 @@
   Obsolete. Do not use in new code.
 "
 	(cog-value-ref ATOM INDEX)
+)
+; ---------------------------------------------------------------------
+; This is used in the matrix code, in count-api
+
+(define-public (cog-value-type ATOM KEY)
+"
+ cog-value-type ATOM KEY
+    Return the type of the value of KEY for ATOM. Both ATOM and KEY
+    must be atoms. The returned type is a guile symbol.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
+       FloatValue
+
+   See also:
+       cog-value ATOM KEY -- get the value at KEY on ATOM.
+       cog-keys ATOM - return list of all keys on ATOM.
+"
+	(cog-type (cog-value ATOM KEY))
 )
 ; ---------------------------------------------------------------------

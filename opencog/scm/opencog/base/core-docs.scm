@@ -310,7 +310,6 @@
        #t
 
     See also:
-        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
         cog-subtype? TYPE SUBTYPE -- return #t if SUBTYPE is a TYPE
         cog-link-type? TYPE -- return #t if TYPE is a Link type
         cog-node-type? TYPE -- return #t if TYPE is a Node type
@@ -587,7 +586,6 @@
 
     See also:
        cog-value ATOM KEY - return a value for the given KEY
-       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-value 'documentation
@@ -604,25 +602,6 @@
 
    See also:
        cog-keys ATOM - return list of all keys on ATOM
-       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
-")
-
-(set-procedure-property! cog-value-type 'documentation
-"
- cog-value-type ATOM KEY
-    Return the type of the value of KEY for ATOM. Both ATOM and KEY
-    must be atoms. The returned type is a guile symbol.
-
-    Example:
-       guile> (cog-set-value!
-                 (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
-       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
-       FloatValue
-
-   See also:
-       cog-value ATOM KEY -- get the value at KEY on ATOM.
-       cog-keys ATOM - return list of all keys on ATOM.
 ")
 
 (set-procedure-property! cog-set-value! 'documentation
@@ -802,7 +781,6 @@
 
     See also:
         cog-type ATOM -- return the type of ATOM
-        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
         cog-link-type? TYPE -- return #t if TYPE is a Link type
         cog-node-type? TYPE -- return #t if TYPE is a Node type
         cog-value-type? TYPE -- return #t if TYPE is a Value type

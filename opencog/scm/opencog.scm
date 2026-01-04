@@ -89,7 +89,6 @@ cog-value
 cog-value?
 cog-value->list
 cog-value-ref
-cog-value-type
 
 ; Deprecated; used by the matrix code ... which itself is deprecated.
 cog-inc-value!
