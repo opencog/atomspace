@@ -83,7 +83,6 @@ cog-pop-atomspace
 cog-push-atomspace
 cog-set-atomspace!
 cog-set-value!
-cog-set-values!
 cog-subtype?
 cog-type
 cog-type->int
