@@ -64,10 +64,11 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
 	// arguments to be in the atomspace. So we add now.
 	if (vargs->is_atom())
 	{
-		if (vargs->get_type() == VALUE_SHIM_LINK)
-			asargs = HandleCast(vargs)->execute();
+		const Handle& hargs(HandleCast(vargs));
+		if (hargs->is_executable())
+			asargs = hargs->execute(scratch);
 		else
-			asargs = scratch->add_atom(HandleCast(vargs));
+			asargs = scratch->add_atom(hargs);
 	}
 
 	SchemeEval* applier = get_evaluator_for_scheme(scratch);
