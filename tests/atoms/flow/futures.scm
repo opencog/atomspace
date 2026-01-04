@@ -8,12 +8,14 @@
 ; on pairs, as well as on marginals.
 
 (define tvp (PredicateNode "*-TruthValueKey-*"))
+(define (inc-value! ATOM)
+	(cog-execute! (IncrementValue ATOM tvp (Number 0 0 1))))
 
 (define (incr-counts THING-A THING-B)
-	(cog-inc-value! (List THING-A THING-B) tvp 1.0 2)
-	(cog-inc-value! (List (AnyNode "left wildcard") THING-B) tvp 1.0 2)
-	(cog-inc-value! (List THING-A (AnyNode "right wildcard")) tvp 1.0 2)
-	(cog-inc-value! (AnyNode "grand total") tvp 1.0 2))
+	(inc-value! (List THING-A THING-B))
+	(inc-value! (List (AnyNode "left wildcard") THING-B))
+	(inc-value! (List THING-A (AnyNode "right wildcard")))
+	(inc-value! (AnyNode "grand total")))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".

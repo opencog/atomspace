@@ -63,7 +63,6 @@ cog-incoming-by-type
 cog-incoming-set
 cog-incoming-size
 cog-incoming-size-by-type
-cog-inc-value!
 cog-keys
 cog-keys->alist
 cog-link
@@ -89,12 +88,15 @@ cog-set-values!
 cog-subtype?
 cog-type
 cog-type->int
-cog-update-value!
 cog-value
 cog-value?
 cog-value->list
 cog-value-ref
 cog-value-type
+
+; Deprecated; used by the matrix code ... which itself is deprecated.
+cog-inc-value!
+cog-update-value!
 )
 
 ; Print C++ exceptions so that they are readable.

@@ -329,7 +329,8 @@ void SchemeSmob::register_procs()
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
 
-	// Value property setters on atoms
+	// Value property setters on atoms; deprecated; still used by
+	// the matrix code, but should be removed in principle.
 	register_proc("cog-inc-value!",        4, 0, 0, C(ss_inc_value));
 	register_proc("cog-update-value!",     3, 0, 0, C(ss_update_value));
 

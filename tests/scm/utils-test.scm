@@ -8,9 +8,6 @@
 (define counter (ConceptNode "asdf"))
 (define key (PredicateNode "key"))
 
-; Format: cog-inc-value! ATOM KEY CNT REF
-(define (test-incr-value) (cog-inc-value! counter key 0.5 2))
-
 (define pare (ListLink (ConceptNode "partner") counter))
 (EvaluationLink (WordNode "asdf") pare)
 (ReferenceLink (ConceptNode "asdf") (WordNode "pqrs"))

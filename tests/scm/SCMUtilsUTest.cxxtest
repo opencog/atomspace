@@ -90,25 +90,6 @@ void SCMUtilsUTest::test_utils(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test cog-inc-value! ---------------------------------
-	evaluator->eval("(test-incr-value)");
-	CHKERR;
-	evaluator->eval("(test-incr-value)");
-	CHKERR;
-	evaluator->eval("(test-incr-value)");
-	CHKERR;
-
-	Handle counter = evaluator->eval_h("counter");
-	CHKERR;
-	Handle key = evaluator->eval_h("key");
-	CHKERR;
-	ValuePtr v = counter->getValue(key);
-
-	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, v->get_type());
-	FloatValuePtr fv(FloatValueCast(v));
-	double cnt = fv->value()[2];
-	TSM_ASSERT("wrong value found", fabs(cnt-1.5) < 0.00001);
-
 	// Test cog-get-atoms -----------------------------
 	Handle cpts = evaluator->eval_h("cpts");
 	CHKERR;
