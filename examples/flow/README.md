@@ -23,8 +23,9 @@ steers the eyes towards "where to look".
 * [`flow-string.scm`](flow-string.scm)       -- Flowing strings in and out.
 * [`flow-flat.scm`](flow-flat.scm)           -- Deserializing lists into streams.
 * [`flow-drain.scm`](flow-drain.scm)         -- Run a stream until it is empty.
-* [`sorted-value.scm`](sorted-value.scm)     -- Sort items.
 * [`named-pipes.scm`](named-pipes.scm)       -- Using names to label data streams
+* [`sorted-value.scm`](sorted-value.scm)     -- Sort items.
+* [`count-pipeline.scm`](count-pipeline.scm) -- Long, multi-stage pipeline.
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
