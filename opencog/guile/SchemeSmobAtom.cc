@@ -232,12 +232,6 @@ SCM SchemeSmob::ss_name (SCM satom)
 	return str;
 }
 
-SCM SchemeSmob::ss_arity (SCM svalue)
-{
-	ValuePtr pa(verify_protom(svalue, "cog-arity"));
-	return scm_from_size_t(pa->size());
-}
-
 /* ============================================================== */
 /// Atomic increment the count of some generic FloatValue.
 /// key == key for value
@@ -281,70 +275,6 @@ SCM SchemeSmob::ss_update_value (SCM satom, SCM skey, SCM sdelta)
 	if (ha == h)
 		return satom;
 	return handle_to_scm(ha);
-}
-
-/* ============================================================== */
-/**
- * Convert the outgoing set of an atom into a list; return the list.
- */
-SCM SchemeSmob::ss_outgoing_set (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-set");
-
-	if (not h->is_link()) return SCM_EOL;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-
-	SCM list = SCM_EOL;
-	for (size_t i = oset.size(); i > 0; i--)
-	{
-		SCM smob = handle_to_scm(oset[i-1]);
-		list = scm_cons (smob, list);
-	}
-
-	return list;
-}
-
-/* ============================================================== */
-/**
- * Convert the outgoing set of an atom into a list;
- * filter-accept only type, and return the list.
- */
-SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-by-type");
-	Type t = verify_type(stype, "cog-outgoing-by-type", 2);
-
-	if (not h->is_link()) return SCM_EOL;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-
-	SCM list = SCM_EOL;
-	for (size_t i = oset.size(); i > 0; i--)
-	{
-		if (oset[i-1]->get_type() != t) continue;
-		SCM smob = handle_to_scm(oset[i-1]);
-		list = scm_cons (smob, list);
-	}
-
-	return list;
-}
-
-/* ============================================================== */
-/**
- * Return the n'th atom of the outgoing set..
- */
-SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size_t(spos, "cog-outgoing-atom", 2);
-
-	if (not h->is_link()) return SCM_BOOL_F;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-	if (oset.size() <= pos) return SCM_BOOL_F;
-
-	return handle_to_scm(oset[pos]);
 }
 
 /* ============================================================== */

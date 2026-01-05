@@ -223,63 +223,6 @@
        #t
        guile> (cog-atom y)
        #f
-
-    See also:
-       cog-atom? -- return #t if an expression is an Atom.
-")
-
-(set-procedure-property! cog-atom? 'documentation
-"
- cog-atom? EXP
-    Return #t if EXP is an atom, else return #f
-
-    Example:
-       ; Define a node.
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (+ 2 2))
-       guile> (cog-atom? x)
-       #t
-       guile> (cog-atom? y)
-       #f
-
-    See also:
-       cog-atom -- return #f if an Atom is not in the current AtomSpace.
-")
-
-(set-procedure-property! cog-node? 'documentation
-"
- cog-node? EXP
-    Return #t if EXP is an node, else return #f
-
-    See also cog-node, which will check to see if a specific node
-    already exists.
-
-    Example:
-       ; Define a node and a link
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (ListLink x))
-       guile> (cog-node? x)
-       #t
-       guile> (cog-node? y)
-       #f
-")
-
-(set-procedure-property! cog-link? 'documentation
-"
- cog-link? EXP
-    Return #t if EXP is an link, else return #f
-
-    See also cog-link, which will check to see if a specific link
-    already exists.
-
-    Example:
-       ; Define a node and a link
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (ListLink x))
-       guile> (cog-link? x)
-       #f
-       guile> (cog-link? y)
-       #t
 ")
 
 (set-procedure-property! cog-name 'documentation
@@ -300,6 +243,7 @@
  cog-type EXP
     Return the type of EXP, where EXP is a Value or an Atom.
     The returned value is a guile symbol.
+    Return #f is EXP is not a Value or Atom.
 
     Example:
        ; Define a node
@@ -310,25 +254,7 @@
        #t
 
     See also:
-        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
         cog-subtype? TYPE SUBTYPE -- return #t if SUBTYPE is a TYPE
-        cog-link-type? TYPE -- return #t if TYPE is a Link type
-        cog-node-type? TYPE -- return #t if TYPE is a Node type
-        cog-value-type? TYPE -- return #t if TYPE is a Value type
-")
-
-(set-procedure-property! cog-arity 'documentation
-"
- cog-arity ATOM
-    Return the arity of ATOM.
-
-    Example:
-       guile> (define x (Concept \"abc\"))
-       guile> (cog-arity x)
-       0
-       guile> (define l (Link x x x))
-       guile> (cog-arity l)
-       3
 ")
 
 (set-procedure-property! cog-incoming-set 'documentation
@@ -469,28 +395,6 @@
        => 1
 ")
 
-(set-procedure-property! cog-outgoing-atom 'documentation
-"
- cog-outgoing-atom ATOM INDEX
-    Return the INDEX'th atom in the outgoing set of ATOM. Indexing
-    is done from a base of zero. This returns the same atom as
-    (list-ref (cog-outgoing-set ATOM) INDEX) but is faster.
-")
-
-(set-procedure-property! cog-outgoing-set 'documentation
-"
- cog-outgoing-set ATOM
-    Return the outgoing set of ATOM.  This set is returned as an
-    ordinary scheme list.
-")
-
-(set-procedure-property! cog-outgoing-by-type 'documentation
-"
- cog-outgoing-by-type ATOM TYPE
-    Return those atoms in the outgoing set of ATOM that are of type TYPE.
-    This set is returned as an ordinary scheme list.
-")
-
 (set-procedure-property! cog-handle 'documentation
 "
  cog-handle ATOM
@@ -564,7 +468,6 @@
 
   See also:
       cog-update-value! -- A generic atomic read-modify-write.
-      cog-set-value-ref! - Set one location in a vector.
 ")
 
 ; ===================================================================
@@ -609,26 +512,7 @@
        guile> (cog-keys (Concept \"abc\"))
 
     See also:
-       cog-keys->alist ATOM - return association list of keys+values
        cog-value ATOM KEY - return a value for the given KEY
-       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
-")
-
-(set-procedure-property! cog-keys->alist 'documentation
-"
- cog-keys->alist ATOM
-    Return an association list of all key-value pairs attached to ATOM.
-
-    Example:
-       guile> (cog-set-value!
-                 (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
-       guile> (cog-keys->alist (Concept \"abc\"))
-
-    See also:
-       cog-keys ATOM - return list of all keys on ATOM
-       cog-value ATOM KEY - return a value for the given KEY
-       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
 ")
 
 (set-procedure-property! cog-value 'documentation
@@ -645,25 +529,6 @@
 
    See also:
        cog-keys ATOM - return list of all keys on ATOM
-       cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
-")
-
-(set-procedure-property! cog-value-type 'documentation
-"
- cog-value-type ATOM KEY
-    Return the type of the value of KEY for ATOM. Both ATOM and KEY
-    must be atoms. The returned type is a guile symbol.
-
-    Example:
-       guile> (cog-set-value!
-                 (Concept \"abc\") (Predicate \"key\")
-                 (FloatValue 1 2 3))
-       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
-       FloatValue
-
-   See also:
-       cog-value ATOM KEY -- get the value at KEY on ATOM.
-       cog-keys ATOM - return list of all keys on ATOM.
 ")
 
 (set-procedure-property! cog-set-value! 'documentation
@@ -696,46 +561,11 @@
        #f
 
     See also:
-       cog-set-value-ref! - Set one location in a vector.
        cog-inc-value! - Increment one location in a vector.
        cog-update-value! - Perform an atomic read-modify-write
-       cog-set-values! - Set multiple values.
        cog-new-atomspace - Create a new AtomSpace
        cog-atomspace-cow! - Mark AtomSpace as a COW space.
        cog-atomspace-ro! - Mark AtomSpace as read-only.
-")
-
-(set-procedure-property! cog-set-value-ref! 'documentation
-"
-  cog-set-value-ref! ATOM KEY VAL REF -- Set location REF of vector
-     locatated at KEY on ATOM to VAL.
-
-  The REF location of the vector Value at KEY is set to VAL. The type
-  of VAL must be appropriate for the Value stored there: for StringValue
-  vectors, VAL must be a string; for FloatValueV vectors, VAL must be a
-  float, and so on. The other locations in the  value are left untouched.
-
-  The reference is a zero-based offset from the start of the vector.
-
-  If the ATOM does not have any Value at KEY, then nothing is done.
-  If the existing Value is too short, it is extended until it is at
-  least (REF+1) in length.
-
-  Example usage:
-     (cog-set-value!
-         (Concept \"Question\")
-         (Predicate \"Answer\")
-         (StringValue \"a\" \"b\" \"c\" \"d\" \"e\"))
-     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
-     (cog-set-value-ref!
-         (Concept \"Question\")
-         (Predicate \"Answer\")
-         \"forty-two\" 3)
-     (cog-value (Concept \"Question\") (Predicate \"Answer\"))
-
-  See also:
-      cog-update-value! -- A generic atomic read-modify-write.
-      cog-set-value-ref! - Set one location in a vector.
 ")
 
 (set-procedure-property! cog-update-value! 'documentation
@@ -759,61 +589,6 @@
     See also:
        cog-inc-value! -- Increment one location in a generic FloatValue
        cog-set-value! -- Set a single value.
-       cog-set-values! -- Set multiple values.
-       cog-set-value-ref! - Set one location in a vector.
-")
-
-(set-procedure-property! cog-set-values! 'documentation
-"
- cog-set-values! ATOM ALIST
-    Set multiple values on ATOM from the key-value pairs in ALIST.
-    The ALIST must be an association list, of the form of
-    ((key1 . value1) (key2 . value2) ...)
-
-    Example:
-       guile> (cog-set-values!
-                 (Concept \"abc\")
-                 (list
-                    (cons (Predicate \"key1\") (FloatValue 1 2 3))
-                    (cons (Predicate \"key2\") (FloatValue 4 5 6))))
-       guile> (cog-keys->alist (Concept \"abc\"))
-
-    Keys can also be removed, by setting the value to #f or to '()
-
-    Example:
-       guile> (cog-set-values!
-                 (Concept \"abc\")
-                 (list
-                    (cons (Predicate \"key1\") #f)
-                    (cons (Predicate \"key2\") #f)))
-       guile> (cog-keys->alist (Concept \"abc\"))
-
-    This returns either ATOM or a copy of ATOM with the new value. If
-    the current AtomSpace is a copy-on-write (COW) AtomSpace, and ATOM
-    lies in some other space below the current space, then a copy of
-    ATOM will be made and placed in the current space.  This copy will
-    have the new VALUE, while the value on the input ATOM will be
-    unchanged.  COW spaces are commonly used with underlying read-only
-    spaces, or with long stacks (DAG's) of AtomSpaces (Frames) recording
-    a history of value changes.
-
-    See also:
-       cog-set-value! ATOM VALUE - Set a single value.
-       cog-new-atomspace - Create a new AtomSpace
-       cog-atomspace-cow! BOOL - Mark AtomSpace as a COW space.
-       cog-atomspace-ro! - Mark AtomSpace as read-only.
-")
-
-(set-procedure-property! cog-value? 'documentation
-"
- cog-value? EXP
-    Return #t if EXP is an OpenCog value, else return #f
-
-    Example:
-       guile> (cog-value? (FloatValue 42))
-       #t
-       guile> (cog-value? 42)
-       #f
 ")
 
 (set-procedure-property! cog-value->list 'documentation
@@ -841,7 +616,6 @@
     the N'th entry.
 
     If the value is a Link, this returns the N'th atom in the outgoing set.
-        That is, it returns the same atom as cog-outgoing-atom.
     If the value is a Node, and N is zero, this returns the node name.
     If the value is a StringValue, FloatValue or LinkValue, this returns
         the N'th entry in the value.
@@ -863,7 +637,6 @@
        3.0
 
 	See also:
-       cog-set-value-ref! - Set one location in a vector.
        cog-inc-value! - Increment one location in a vector.
 ")
 
@@ -923,10 +696,6 @@
 
     See also:
         cog-type ATOM -- return the type of ATOM
-        cog-value-type ATOM KEY -- get the type of the value at KEY on ATOM.
-        cog-link-type? TYPE -- return #t if TYPE is a Link type
-        cog-node-type? TYPE -- return #t if TYPE is a Node type
-        cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
 (set-procedure-property! cog-map-type 'documentation
@@ -985,12 +754,6 @@
     Warning: if the previous atomspace is not the primary atomspace
     and is not referenced anywhere, the garbage collector will delete it
     alongside its content, even if some of its content is referenced.
-")
-
-(set-procedure-property! cog-atomspace? 'documentation
-"
- cog-atomspace? ATOMSPACE
-    Return #t if ATOMSPACE is an atomspace; else return #f.
 ")
 
 (set-procedure-property! cog-new-atomspace 'documentation
@@ -1175,25 +938,4 @@
          cog-atomspace-readonly?,
 ")
 
-(set-procedure-property! cog-set-server-mode! 'documentation
-"
- cog-set-server-mode! BOOL
-     If BOOL is #t, then some server-freindly options are enabled,
-     including the high-precision printing of FloatValues. Otherwise,
-     human-friendly shell-evaluator style is used. The default is
-     false. Returns the previous setting.
-")
-
-;set-procedure-property! cog-yield 'documentation
-;"
-; cog-yield
-;    The implementation uses a simple exception mechanism to allow
-;    scheme code to return to the guile prompt from anywhere. To use
-;    this, simply throw 'cog-yield from anywhere.  The catch handler
-;    will promptly return to the cogserver.  This can be used with
-;    continuations to implement some simple multi-threading.
-;
-;    Example:
-;       guile> (throw 'cog-yield \"hello world\")
-;       (hello world)
-;")
+; ---------------------- END OF FILE ------------------------

@@ -59,6 +59,7 @@
 (for-each
 	(lambda (orphan)
 		; cog-atom? returns #f because touching orphans clobbers them.
+		; (Actually, cog-atom? calls cog-type which does this...)
 		(test-assert "expect invalid handles" (not (cog-atom? orphan))))
 	ilst)
 

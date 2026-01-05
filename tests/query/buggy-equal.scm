@@ -58,7 +58,7 @@
             ; To avoid matching (Inheritance A B) and (Inheritance B A)
             (NotLink
                 (EvaluationLink
-                    (GroundedPredicateNode "scm: cog-equal?")
+                    (GroundedPredicateNode "scm: equal?")
                     (ListLink
                         (VariableNode "$A")
                         (VariableNode "$C")
@@ -88,14 +88,6 @@
 )
 
 ; --------------------------------------------------------------------
-; Check whether two nodes are equal.
-;
-; If they are equal then it will return true else it returns false.
-;
-; --------------------------------------------------------------------
-(define (cog-equal? atom-1 atom-2)
-    (equal? atom-1 atom-2)
-)
 
 ; Do nothing except for returning the arguments wrapped in a QuoteLink
 (define (pln-xxx a b c) (QuoteLink a b c))

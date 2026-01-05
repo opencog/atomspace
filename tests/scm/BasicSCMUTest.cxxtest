@@ -472,9 +472,6 @@ void BasicSCMUTest::test_value_list(void)
 	boo = eval->eval("(equal? (cog-value->list ll) (list h k h))");
 	TSM_ASSERT("Failed ListLink equality", boo == "#t\n");
 
-	boo = eval->eval("(equal? (cog-value->list ll) (cog-outgoing-set ll))");
-	TSM_ASSERT("Failed outgoing set equality", boo == "#t\n");
-
 	boo = eval->eval("(equal? (cog-value->list h) '(\"foo\"))");
 	TSM_ASSERT("Failed name list equality", boo == "#t\n");
 

@@ -32,7 +32,7 @@
 
 (define link-key (Predicate "link key"))
 
-(cog-set-value! foo link-key (LinkValue (cog-outgoing-set sent)))
+(cog-set-value! foo link-key (LinkValue (cog-value->list sent)))
 
 ; -----------------------------------------------
 

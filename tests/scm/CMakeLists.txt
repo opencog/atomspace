@@ -8,7 +8,6 @@ ADD_CXXTEST(BasicSCMUTest)
 ADD_CXXTEST(SCMPrimitiveUTest)
 ADD_CXXTEST(MultiAtomSpaceUTest)
 ADD_CXXTEST(MultiThreadUTest)
-ADD_CXXTEST(SCMUtilsUTest)
 ADD_CXXTEST(SCMUtf8StringUTest)
 ADD_CXXTEST(SCMExecutionOutputUTest)
 
@@ -20,7 +19,6 @@ ADD_GUILE_TEST(SCMOpencogTestRunnerFail scm-opencog-test-runner-fail.scm)
 SET_PROPERTY(TEST SCMOpencogTestRunnerFail PROPERTY WILL_FAIL TRUE)
 
 ADD_GUILE_TEST(CopyAtomTest copy-atom-test.scm)
-ADD_GUILE_TEST(InlineValuesTest inline-values-test.scm)
 ADD_GUILE_TEST(BooleanPredicateTest boolean-predicate-test.scm)
 ADD_GUILE_TEST(LoggerTest logger-test.scm)
 

@@ -18,6 +18,13 @@
 ; -- cog-get-trunk -- Return all hypergraphs containing `ATOM`.
 ; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
+; Backwards-compat wrappers. Deprecated; do not use in new code.
+; -- cog-arity -- size of atoms.
+; -- cog-outgoing-atom -- list-ref for Links
+; -- cog-value-type -- get type of value at key
+; -- cog-outgoing-set -- Old, venerable utility
+; -- cog-atom? -- return #t if expression is an Atom
+;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -27,15 +34,15 @@
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
-; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
-; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
+; (define (gar x) (if (cog-atom? x) (car (cog-value->list x)) (car x)))
+; (define (gdr x) (if (cog-atom? x) (cadr (cog-value->list x)) (cdr x)))
 
 (define-public (gar LINK)
 "
   gar LINK - return first element of a Link atom.
   Return null if the LINK is empty.
 "
-	(cog-outgoing-atom LINK 0)
+	(cog-value-ref LINK 0)
 )
 
 (define-public (gdr LINK)
@@ -43,7 +50,7 @@
   gdr LINK - return second element of a Link atom.
   Return null if the LINK is empty or has only one element.
 "
-	(cog-outgoing-atom LINK 1)
+	(cog-value-ref LINK 1)
 )
 
 (define-public (gaar x) (gar (gar x)) )
@@ -62,7 +69,7 @@
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
 
 ; --------------------------------------------------------------------
-(define-public (extract-hypergraph atom)
+(define-public (extract-hypergraph ATOM)
 "
   extract-hypergraph -- extract a hypergraph and everything under it
 
@@ -71,13 +78,14 @@
   encountered.  This only removes the atoms from the atomspace, it
   does NOT remove it from the backingstore, if attached!
 "
-	(if (cog-atom? atom)     ; Make sure that atom is valid, as it may
+	(define atyp (cog-type ATOM))
+	(if (cog-subtype? atyp 'Atom) ; Make sure that atom is valid, as it may
 	                         ; already have been extracted by an outer
 	                         ; recursive call
-		(if (cog-node? atom)
-			(cog-extract! atom)
-			(let* ((oset (cog-outgoing-set atom))
-					(flg (cog-extract! atom))
+		(if (cog-subtype? atyp 'Node)
+			(cog-extract! ATOM)
+			(let* ((oset (cog-value->list ATOM))
+					(flg (cog-extract! ATOM))
 				)
 				(if flg ;; halt recursion if link was not extract-able
 					(for-each extract-hypergraph oset)
@@ -288,4 +296,86 @@
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
+; ---------------------------------------------------------------------
+(define-public (cog-arity ITEM)
+"
+ cog-arity VALUE
+    Return the size of VALUE (an Atom or Value)
+
+    Example:
+       guile> (define x (Concept \"abc\"))
+       guile> (cog-arity x)
+       1
+       guile> (define l (Link x x x))
+       guile> (cog-arity l)
+       3
+
+  Obsolete. Do not use in new code.
+"
+	(length (cog-value->list ITEM))
+)
+
+; ---------------------------------------------------------------------
+(define-public (cog-outgoing-atom ATOM INDEX)
+"
+ cog-outgoing-atom ATOM INDEX
+    Return the INDEX'th atom in the outgoing set of ATOM. Indexing
+    is done from a base of zero. This returns the same atom as
+    (list-ref (cog-outgoing-set ATOM) INDEX) but is faster.
+
+  Obsolete. Do not use in new code.
+"
+	(cog-value-ref ATOM INDEX)
+)
+; ---------------------------------------------------------------------
+; This is used in the matrix code, in count-api
+
+(define-public (cog-value-type ATOM KEY)
+"
+ cog-value-type ATOM KEY
+    Return the type of the value of KEY for ATOM. Both ATOM and KEY
+    must be atoms. The returned type is a guile symbol.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value-type (Concept \"abc\") (Predicate \"key\"))
+       FloatValue
+
+   See also:
+       cog-value ATOM KEY -- get the value at KEY on ATOM.
+       cog-keys ATOM - return list of all keys on ATOM.
+"
+	(cog-type (cog-value ATOM KEY))
+)
+; ---------------------------------------------------------------------
+(define-public (cog-outgoing-set ATOM)
+"
+ cog-outgoing-set ATOM
+    Return the outgoing set of ATOM.  This set is returned as an
+    ordinary scheme list.
+"
+	(cog-value->list ATOM)
+)
+; ---------------------------------------------------------------------
+(define-public (cog-atom? ATOM)
+"
+ cog-atom? EXP
+    Return #t if EXP is an atom, else return #f
+
+    Example:
+       ; Define a node.
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (+ 2 2))
+       guile> (cog-atom? x)
+       #t
+       guile> (cog-atom? y)
+       #f
+
+    See also:
+       cog-atom -- return #f if an Atom is not in the current AtomSpace.
+"
+	(cog-subtype? 'Atom (cog-type ATOM))
+)
 ; ---------------------------------------------------------------------

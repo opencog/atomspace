@@ -82,7 +82,7 @@
 	(filter
 		(lambda (CURSTA) (eq? 'ConceptNode (cog-type CURSTA)))
 		(map
-			(lambda (STALNK) (cog-outgoing-atom STALNK 1))
+			(lambda (STALNK) (cog-value-ref STALNK 1))
 			(cog-incoming-by-type STATE 'StateLink))))
 
 ;; Display the current UFO state

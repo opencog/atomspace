@@ -40,12 +40,9 @@
 ; as otherwise guile generates warnings about "possibly unbound variable"
 ; when these are touched in the various scm files.
 (export
-cog-arity
 cog-atom
-cog-atom?
 cog-atom-less?
 cog-atomspace
-cog-atomspace?
 cog-atomspace-clear
 cog-atomspace-cow!
 cog-atomspace-cow?
@@ -64,11 +61,8 @@ cog-incoming-by-type
 cog-incoming-set
 cog-incoming-size
 cog-incoming-size-by-type
-cog-inc-value!
 cog-keys
-cog-keys->alist
 cog-link
-cog-link?
 cog-map-type
 cog-name
 cog-new-ast
@@ -78,26 +72,20 @@ cog-new-link
 cog-new-node
 cog-new-value
 cog-node
-cog-node?
-cog-outgoing-atom
-cog-outgoing-by-type
-cog-outgoing-set
 cog-pop-atomspace
 cog-push-atomspace
 cog-set-atomspace!
-cog-set-server-mode!
 cog-set-value!
-cog-set-value-ref!
-cog-set-values!
 cog-subtype?
 cog-type
 cog-type->int
-cog-update-value!
 cog-value
-cog-value?
 cog-value->list
 cog-value-ref
-cog-value-type
+
+; Deprecated; used by the matrix code ... which itself is deprecated.
+cog-inc-value!
+cog-update-value!
 )
 
 ; Print C++ exceptions so that they are readable.

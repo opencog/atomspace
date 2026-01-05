@@ -54,23 +54,36 @@ SCM SchemeSmob::from_type (const ValuePtr& vp)
 
 SCM SchemeSmob::ss_type (SCM svalue)
 {
-	ValuePtr vp(verify_protom(svalue, "cog-type"));
-	return from_type(vp);
-}
-
-/* ============================================================== */
-/** Return true if s is a value */
-
-SCM SchemeSmob::ss_value_p (SCM s)
-{
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	ValuePtr vp(scm_to_protom(svalue));
+	if (nullptr == vp)
 		return SCM_BOOL_F;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_PROTOM == misctype)
-		return SCM_BOOL_T;
+	if (vp->is_atom())
+	{
+		Handle h(HandleCast(vp));
 
-	return SCM_BOOL_F;
+		// Clobber pointer to extracted (deleted) Atoms. These are
+		// Atoms that have been removed from an AtomSpace; they have
+		// not yet been dtored, because the std::shared_ptr<> still
+		// has a non-zero use-count. Fix that now, by calling
+		// std::shared_ptr<>::reset() to clobber it. This is used by
+		// various unit tests (including StorageNode) to verify that
+		// an Atom has been extracted from an AtomSpace.
+		//
+		// We don't do this for Values; those will just live on,
+		// until the guile gc runs and finds them; the clobber happens
+		// in SchemeSmob::free_misc()
+		if (nullptr == h->getAtomSpace() and
+		    not (ATOM_SPACE == h->get_type()))
+		{
+			SCM_SMOB_VALUE_PTR_LOC(svalue)->reset(); // std::shared_ptr<>::reset()
+			scm_remember_upto_here_1(svalue);
+			return SCM_BOOL_F;
+		}
+	}
+	scm_remember_upto_here_1(svalue);
+
+	return from_type(vp);
 }
 
 /* ============================================================== */
@@ -492,61 +505,6 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	return set_value(atom, key, pa, satom, "cog-set-value!");
 }
 
-// Set the value at the indicated location in the vector.
-SCM SchemeSmob::ss_set_value_ref (SCM satom, SCM skey, SCM svalue, SCM sindex)
-{
-	Handle atom(verify_handle(satom, "cog-set-value-ref!", 1));
-	Handle key(verify_handle(skey, "cog-set-value-ref!", 2));
-	size_t index = verify_size_t(sindex, "cog-set-value-ref!", 4);
-
-	ValuePtr pa(atom->getValue(key));
-	Type t = pa->get_type();
-
-	ValuePtr nvp;
-
-	// OK. What we do next depends on the actual type of the value.
-	if (nameserver().isA(t, FLOAT32_VALUE))
-	{
-		std::vector<float> v = Float32ValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = (float) verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-	else if (nameserver().isA(t, FLOAT_VALUE))
-	{
-		std::vector<double> v = FloatValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_real(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, BOOL_VALUE))
-	{
-		std::vector<bool> v = BoolValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_bool(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, STRING_VALUE))
-	{
-		std::vector<std::string> v = StringValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_string(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, v);
-	}
-
-	if (nameserver().isA(t, LINK_VALUE))
-	{
-		std::vector<ValuePtr> v = LinkValueCast(pa)->value();
-		if (v.size() <= index) v.resize(index+1);
-		v[index] = verify_protom(svalue, "cog-set-value-ref!", 3);
-		nvp = valueserver().create(t, std::move(v));
-	}
-
-	return set_value(atom, key, nvp, satom, "cog-set-value-ref!");
-}
-
 // alist is an association-list of key-value pairs.
 Handle SchemeSmob::set_values(const Handle& h, const AtomSpacePtr& asp, SCM alist)
 {
@@ -568,49 +526,12 @@ Handle SchemeSmob::set_values(const Handle& h, const AtomSpacePtr& asp, SCM alis
 	return atom;
 }
 
-// alist is an association-list of key-value pairs.
-SCM SchemeSmob::ss_set_values(SCM satom, SCM alist)
-{
-	const AtomSpacePtr& asp = ss_get_env_as("cog-set-values!");
-
-	Handle atom(verify_handle(satom, "cog-set-values!", 1));
-	if (not scm_is_true(scm_list_p(alist)))
-		scm_wrong_type_arg_msg("cog-set-values!", 2, alist, "list of key-value pairs");
-
-	Handle oldh = atom;
-
-	// Atomspace may be read-only. Respect that.
-	try
-	{
-		atom = set_values(atom, asp, alist);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-set-values!", satom);
-	}
-
-	// Atomspace may have given us a new atom...
-	if (oldh == atom) return satom;
-
-	return handle_to_scm(atom);
-}
-
 SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 {
 	Handle atom(verify_handle(satom, "cog-value", 1));
 	Handle key(verify_handle(skey, "cog-value", 2));
 
 	return protom_to_scm(atom->getValue(key));
-}
-
-SCM SchemeSmob::ss_value_type (SCM satom, SCM skey)
-{
-	Handle atom(verify_handle(satom, "cog-value-type", 1));
-	Handle key(verify_handle(skey, "cog-value-type", 2));
-
-	ValuePtr vp = atom->getValue(key);
-	if (nullptr == vp) return SCM_BOOL_F;
-	return from_type(vp);
 }
 
 /** Return all of the keys on the atom */
@@ -633,35 +554,6 @@ SCM SchemeSmob::ss_keys (SCM satom)
 			rv = scm_cons (handle_to_scm(as->add_atom(k)), rv);
 		else
 			rv = scm_cons (handle_to_scm(k), rv);
-	}
-	return rv;
-}
-
-/** Return association list of keys+values on the atom */
-SCM SchemeSmob::ss_keys_alist (SCM satom)
-{
-	Handle atom(verify_handle(satom, "cog-keys->alist"));
-	AtomSpace* as = atom->getAtomSpace();
-
-	SCM rv = SCM_EOL;
-	HandleSet keys = atom->getKeys();
-	for (const Handle& k : keys)
-	{
-		ValuePtr vp = atom->getValue(k);
-
-		// OK, this is kind-of weird and hacky, but if the keys
-		// are not in any atomspace at the time that we go to
-		// print them, they'll be converted to <undefined handle>.
-		// So we shove them into the same atomspace as the atom
-		// itself. I don't quite like this, but it seems to be
-		// needed to fit user expectations.
-		SCM pair;
-		if (as)
-			pair = scm_cons (handle_to_scm(as->add_atom(k)), protom_to_scm(vp));
-		else
-			pair = scm_cons (handle_to_scm(k), protom_to_scm(vp));
-
-		rv = scm_cons (pair, rv);
 	}
 	return rv;
 }
@@ -717,7 +609,8 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, protom_to_scm)
 	}
 
-	if (nameserver().isA(t, LINK))
+	if (nameserver().isA(t, LINK) or
+	    nameserver().isA(t, FRAME))
 	{
 		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		CPPL_TO_SCML(v, handle_to_scm)
@@ -804,7 +697,8 @@ SCM SchemeSmob::value_ref (const ValuePtr& pa, size_t index)
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 
-	else if (nameserver().isA(t, LINK))
+	else if (nameserver().isA(t, LINK) or
+	         nameserver().isA(t, FRAME))
 	{
 		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		if (index < v.size()) return handle_to_scm(v[index]);

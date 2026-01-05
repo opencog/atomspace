@@ -73,7 +73,6 @@ private:
 
 	// Initialization functions
 	static void init_smob_type(void);
-	static SCM ss_set_server_mode(SCM);
 	static SCM ss_version(void);
 
 	static int print_misc(SCM, SCM, scm_print_state *);
@@ -106,12 +105,6 @@ private:
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_execute(SCM);
-	static SCM ss_value_p(SCM);
-	static SCM ss_atom_p(SCM);
-	static SCM ss_node_p(SCM);
-	static SCM ss_link_p(SCM);
-	static SCM _radix_ten;
-	static SCM _alist;
 
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
@@ -127,27 +120,19 @@ private:
 	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM set_value(const Handle&, const Handle&,
 	                     const ValuePtr&, SCM, const char*);
-	static SCM ss_set_values(SCM, SCM);
 	static SCM ss_inc_value(SCM, SCM, SCM, SCM);
 	static SCM ss_update_value(SCM, SCM, SCM);
-	static SCM ss_set_value_ref(SCM, SCM, SCM, SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
 	static SCM from_type(const ValuePtr&);
 	static SCM ss_type(SCM);
-	static SCM ss_arity(SCM);
 	static SCM ss_keys(SCM);
-	static SCM ss_keys_alist(SCM);
 	static SCM ss_value(SCM, SCM);
-	static SCM ss_value_type(SCM, SCM);
 	static SCM ss_incoming_set(SCM, SCM);
 	static SCM ss_incoming_size(SCM, SCM);
 	static SCM ss_incoming_by_type(SCM, SCM, SCM);
 	static SCM ss_incoming_size_by_type(SCM, SCM, SCM);
-	static SCM ss_outgoing_set(SCM);
-	static SCM ss_outgoing_by_type(SCM, SCM);
-	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
 	static SCM ss_map_type(SCM, SCM, SCM);
@@ -179,7 +164,6 @@ private:
 	static SCM convert_to_utf8(void *, SCM, SCM);
 	static std::string to_string(SCM);
 	static std::string protom_to_string(SCM);
-	static std::string protom_to_server_string(SCM);
 	static std::string misc_to_string(SCM);
 	static const AtomSpacePtr& get_as_from_list(SCM);
 	static Handle set_values(const Handle&, const AtomSpacePtr&, SCM);

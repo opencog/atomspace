@@ -54,12 +54,12 @@
 	(define top-space (cog-atomspace))
 
 	; Grab references into the inheritance hierarchy
-	(define mid5-space (cog-outgoing-atom top-space 0))
-	(define mid4-space (cog-outgoing-atom mid5-space 0))
-	(define mid3-space (cog-outgoing-atom mid4-space 0))
-	(define mid2-space (cog-outgoing-atom mid3-space 0))
-	(define mid1-space (cog-outgoing-atom mid2-space 0))
-	(define base-space (cog-outgoing-atom mid1-space 0))
+	(define mid5-space (cog-value-ref top-space 0))
+	(define mid4-space (cog-value-ref mid5-space 0))
+	(define mid3-space (cog-value-ref mid4-space 0))
+	(define mid2-space (cog-value-ref mid3-space 0))
+	(define mid1-space (cog-value-ref mid2-space 0))
+	(define base-space (cog-value-ref mid1-space 0))
 
 	; Verify that atoms appear and disappear properly.
 	(cog-set-atomspace! base-space)

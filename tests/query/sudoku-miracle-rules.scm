@@ -49,7 +49,7 @@
 ; Wrapper for use as GroundedPredicate
 ; Takes a ListLink of two ConceptNodes
 (define (not-consecutive? LIST)
-  (let* ((outgoing (cog-outgoing-set LIST))
+  (let* ((outgoing (cog-value->list LIST))
          (a (car outgoing))
          (b (cadr outgoing))
          (a-name (cog-name a))

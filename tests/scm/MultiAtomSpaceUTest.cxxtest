@@ -57,7 +57,6 @@ public:
 
 	void test_two_scm(void);
 	void test_three(void);
-	void test_load(void);
 	void test_nest(void);
 	void test_nest_scm(void);
 	void test_pm_scm(void);
@@ -195,86 +194,6 @@ void MultiAtomSpace::test_three(void)
 	Handle h9 = ev2->eval_h("(cog-node 'ConceptNode \"solitary\")");
 	CHKEV(ev2);
 	TSM_ASSERT("Expect to find atom", h5 == h9);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void MultiAtomSpace::test_load(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	AtomSpacePtr as1 = createAtomSpace();
-	AtomSpacePtr as2 = createAtomSpace();
-
-	SchemeEval* ev1 = SchemeEval::get_scheme_evaluator(as1);
-	SchemeEval* ev2 = SchemeEval::get_scheme_evaluator(as2);
-	ev1->eval("(load-from-path \"tests/scm/utils-test.scm\")");
-	ev2->eval("(load-from-path \"tests/scm/utils-test.scm\")");
-
-	printf("as1 is %s\n", as1->get_name().c_str());
-	printf("as2 is %s\n", as2->get_name().c_str());
-
-	// The below is a complicated multi-atom-space version of part of
-	// the SCMUtilsUTest suite.  Different atoms in different spaces...
-	// Increment a count tv in atomspace 1 ---------------------------------
-	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
-	Handle counter1 = ev1->eval_h("counter");
-	CHKEV(ev1);
-	printf ("counter1 = %s\n", counter1->to_string().c_str());
-
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
-
-	ev1->eval("(test-incr-value)");
-	CHKEV(ev1);
-	ev1->eval("(test-incr-value)");
-	CHKEV(ev1);
-	ev1->eval("(test-incr-value)");
-	CHKEV(ev1);
-	ev1->eval("(test-incr-value)");
-	CHKEV(ev1);
-	ValuePtr tv1 = counter1->getValue(createNode(PREDICATE_NODE, "key"));
-	FloatValuePtr fvp1 = FloatValueCast(tv1);
-
-	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, tv1->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 2, (int)(fvp1->value()[2]));
-
-	// Count tv in atomspace2 should be unscathed. ----------------------------
-	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
-	Handle counter2 = ev2->eval_h("counter");
-	CHKEV(ev2);
-	printf ("counter2 = %s\n", counter2->to_string().c_str());
-
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->get_type());
-
-	TSM_ASSERT("Atoms fail to differ", counter1 != counter2);
-
-	ev2->eval("(test-incr-value)");
-	CHKEV(ev2);
-
-	ValuePtr tv2 = counter2->getValue(createNode(PREDICATE_NODE, "key"));
-	FloatValuePtr fvp2 = FloatValueCast(tv2);
-
-	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, tv2->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 0.5, (fvp2->value()[2]));
-
-	// Count tv in atomspace1 should be unscathed. ----------------------------
-	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
-	Handle counter3 = ev1->eval_h("counter");
-	CHKEV(ev1);
-	printf ("counter3 = %s\n", counter3->to_string().c_str());
-
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->get_type());
-
-	TSM_ASSERT("Atoms should be same", counter1 == counter3);
-
-	ValuePtr tv3 = counter3->getValue(createNode(PREDICATE_NODE, "key"));
-	FloatValuePtr fvp3 = FloatValueCast(tv3);
-
-	TSM_ASSERT_EQUALS("Wrong value type", FLOAT_VALUE, tv3->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 2, (int)(fvp3->value()[2]));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -48,14 +48,12 @@ using namespace opencog;
  *
  * XXX TODO:
  * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
- * should have a separate tag for handles, tv's, etc.) This would
+ * should have a separate tag for handles, values's, etc.) This would
  * simplify that code, and probably improve performance just a bit.
  */
 
 scm_t_bits SchemeSmob::cog_misc_tag;
 std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
-SCM SchemeSmob::_radix_ten;
-SCM SchemeSmob::_alist;
 
 void SchemeSmob::init()
 {
@@ -86,8 +84,6 @@ void SchemeSmob::init()
 
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
-	_radix_ten = scm_from_int8(10);
-	_alist = scm_from_utf8_symbol("alist");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
@@ -298,7 +294,6 @@ void SchemeSmob::register_procs()
 	// optional arg: thus, 0,1,0.
 	//
 	register_proc("cog-version",           0, 0, 0, C(ss_version));
-	register_proc("cog-set-server-mode!",  1, 0, 0, C(ss_set_server_mode));
 
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-atom",          1, 0, 1, C(ss_new_atom));
@@ -312,11 +307,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
 	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
-	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
-	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
-	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
-	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
-
 	// hash-value of the atom
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
 	register_proc("cog-atom-less?",        2, 0, 0, C(ss_atom_less_p));
@@ -328,28 +318,21 @@ void SchemeSmob::register_procs()
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
-	register_proc("cog-set-values!",       2, 0, 0, C(ss_set_values));
-	register_proc("cog-set-value-ref!",    4, 0, 0, C(ss_set_value_ref));
 
-	// Value property setters on atoms
+	// Value property setters on atoms; deprecated; still used by
+	// the matrix code, but should be removed in principle.
 	register_proc("cog-inc-value!",        4, 0, 0, C(ss_inc_value));
 	register_proc("cog-update-value!",     3, 0, 0, C(ss_update_value));
 
 	// Property getters on atoms
 	register_proc("cog-name",              1, 0, 0, C(ss_name));
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
-	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 1, 0, C(ss_incoming_set));
 	register_proc("cog-incoming-size",     1, 1, 0, C(ss_incoming_size));
 	register_proc("cog-incoming-by-type",  2, 1, 0, C(ss_incoming_by_type));
 	register_proc("cog-incoming-size-by-type", 2, 1, 0, C(ss_incoming_size_by_type));
-	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
-	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
-	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
-	register_proc("cog-keys->alist",       1, 0, 0, C(ss_keys_alist));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
-	register_proc("cog-value-type",        2, 0, 0, C(ss_value_type));
 	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));
 	register_proc("cog-as",                0, 1, 0, C(ss_as));
 

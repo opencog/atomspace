@@ -195,38 +195,6 @@ Example:
    #f
 
 
-=== cog-node? exp ===
-Return #t if exp is an node, else return #f
-
-See also cog-node, which will check to see if a specific node
-already exists.
-
-Example:
-   ; Define a node and a link
-   guile> (define x (ConceptNode "abc"))
-   guile> (define y (ListLink x))
-   guile> (cog-node? x)
-   #t
-   guile> (cog-node? y)
-   #f
-
-
-=== cog-link? exp ===
-Return #t if exp is an link, else return #f
-
-See also cog-link, which will check to see if a specific link
-already exists.
-
-Example:
-   ; Define a node and a link
-   guile> (define x (ConceptNode "abc"))
-   guile> (define y (ListLink x))
-   guile> (cog-link? x)
-   #f
-   guile> (cog-link? y)
-   #t
-
-
 === cog-name atom ===
 Return the name of the node. If the atom is not a node,
 returns NIL.
@@ -249,22 +217,9 @@ Example:
    guile> (eq? 'ConceptNode (cog-type x))
    #t
 
-=== cog-arity atom ===
-Return the arity of the atom.
-
-Example:
-   guile> (define x (ConceptNode "abc"))
-   guile> (cog-arity x)
-   0
-   guile> (define l (Link x x x))
-   guile> (cog-arity l)
-   3
-
-
 === cog-incoming-set atom ===
-=== cog-outgoing-set atom ===
-Return the incoming and outgoing sets, respectively, of the atom.
-These sets are returned as ordinary scheme lists.
+Return the incoming set of the atom.
+Returned as ordinary scheme list.
 
 Example:
    ; Define two nodes and a link between them:
@@ -324,38 +279,6 @@ Return a list of all of the atom types in the system.
 
 Example:
     guile> (cog-get-types)
-
-=== cog-type? symbol ===
-Return #t if the symbol names an atom type, else return #f
-
-Example:
-    guile> (cog-type? 'ConceptNode)
-    #t
-    guile> (cog-type? 'FlorgleBarf)
-    #f
-
-=== cog-node-type? symbol ===
-Return #t if the symbol names an node type, else return #f
-
-Example:
-    guile> (cog-node-type? 'ConceptNode)
-    #t
-    guile> (cog-node-type? 'ListLink)
-    #f
-    guile> (cog-node-type? 'FlorgleBarf)
-    #f
-
-
-=== cog-link-type? ===
-Return #t if the symbol names a link type, else return #f
-
-Example:
-    guile> (cog-link-type? 'ConceptNode)
-    #f
-    guile> (cog-link-type? 'ListLink)
-    #t
-    guile> (cog-link-type? 'FlorgleBarf)
-    #f
 
 === cog-get-subtypes type ===
 Return a list of the subtypes of the given type.  Only the
