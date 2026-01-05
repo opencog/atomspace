@@ -22,6 +22,7 @@
 ; -- cog-arity -- size of atoms.
 ; -- cog-outgoing-atom -- list-ref for Links
 ; -- cog-value-type -- get type of value at key
+; -- cog-outgoing-set -- Old, venerable utility
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -345,5 +346,14 @@
        cog-keys ATOM - return list of all keys on ATOM.
 "
 	(cog-type (cog-value ATOM KEY))
+)
+; ---------------------------------------------------------------------
+(define-public (cog-outgoing-set ATOM)
+"
+ cog-outgoing-set ATOM
+    Return the outgoing set of ATOM.  This set is returned as an
+    ordinary scheme list.
+"
+	(cog-value->list ATOM)
 )
 ; ---------------------------------------------------------------------

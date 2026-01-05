@@ -250,9 +250,8 @@ Example:
    #t
 
 === cog-incoming-set atom ===
-=== cog-outgoing-set atom ===
-Return the incoming and outgoing sets, respectively, of the atom.
-These sets are returned as ordinary scheme lists.
+Return the incoming set of the atom.
+Returned as ordinary scheme list.
 
 Example:
    ; Define two nodes and a link between them:

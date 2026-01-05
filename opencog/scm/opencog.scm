@@ -77,7 +77,6 @@ cog-new-value
 cog-node
 cog-node?
 cog-outgoing-by-type
-cog-outgoing-set
 cog-pop-atomspace
 cog-push-atomspace
 cog-set-atomspace!

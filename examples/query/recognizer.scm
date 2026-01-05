@@ -228,12 +228,12 @@
 ; unwrapped. You can see this wrapping in the "Try it!" result, above.
 ;
 
-; ruleset is the unwrapped rules.  Use cog-outgoing-set to unwrap them.
+; ruleset is the unwrapped rules.  Use cog-value->list to unwrap them.
 (define (unwrap-rules RULES)
    (fold
-		(lambda (s li) (cons (car (cog-outgoing-set s)) li))
+		(lambda (s li) (cons (car (cog-value->list s)) li))
 		'()
-		(cog-outgoing-set RULES)))
+		(cog-value->list RULES)))
 
 (define ruleset
 	(unwrap-rules
@@ -437,7 +437,7 @@
 		(fold-right
 			(lambda (s li) (cons (string-append (cog-name s) " ") li))
 			'()
-			(cog-outgoing-set NODELIST)))
+			(cog-value->list NODELIST)))
 
 	; Concatenate a list of strings into one string.
 	(define (make-sent NODELIST)
@@ -447,7 +447,7 @@
 	; Example: (make-reply "I love you")
 	(define (make-reply SENT)
 		(map make-sent
-			(cog-outgoing-set (car (get-aiml-response SENT)))))
+			(cog-value->list (car (get-aiml-response SENT)))))
 
 	; Now, actually do stuff.  Push and pop the AtomSpace, to avoid
 	; polluting it with sentences.  The push and pop here is a hack;

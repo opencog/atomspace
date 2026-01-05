@@ -279,28 +279,6 @@ SCM SchemeSmob::ss_update_value (SCM satom, SCM skey, SCM sdelta)
 
 /* ============================================================== */
 /**
- * Convert the outgoing set of an atom into a list; return the list.
- */
-SCM SchemeSmob::ss_outgoing_set (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-set");
-
-	if (not h->is_link()) return SCM_EOL;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-
-	SCM list = SCM_EOL;
-	for (size_t i = oset.size(); i > 0; i--)
-	{
-		SCM smob = handle_to_scm(oset[i-1]);
-		list = scm_cons (smob, list);
-	}
-
-	return list;
-}
-
-/* ============================================================== */
-/**
  * Convert the outgoing set of an atom into a list;
  * filter-accept only type, and return the list.
  */

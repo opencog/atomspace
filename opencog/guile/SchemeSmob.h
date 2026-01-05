@@ -139,7 +139,6 @@ private:
 	static SCM ss_incoming_size(SCM, SCM);
 	static SCM ss_incoming_by_type(SCM, SCM, SCM);
 	static SCM ss_incoming_size_by_type(SCM, SCM, SCM);
-	static SCM ss_outgoing_set(SCM);
 	static SCM ss_outgoing_by_type(SCM, SCM);
 
 	// Type query functions
