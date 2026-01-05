@@ -311,11 +311,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-extract-recursive!",1, 0, 1, C(ss_extract_recursive));
 	register_proc("cog-execute!",          1, 0, 0, C(ss_execute));
 
-	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
-	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
-	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
-	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
-
 	// hash-value of the atom
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
 	register_proc("cog-atom-less?",        2, 0, 0, C(ss_atom_less_p));

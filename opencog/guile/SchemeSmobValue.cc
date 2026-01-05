@@ -54,23 +54,15 @@ SCM SchemeSmob::from_type (const ValuePtr& vp)
 
 SCM SchemeSmob::ss_type (SCM svalue)
 {
-	ValuePtr vp(verify_protom(svalue, "cog-type"));
-	return from_type(vp);
-}
-
-/* ============================================================== */
-/** Return true if s is a value */
-
-SCM SchemeSmob::ss_value_p (SCM s)
-{
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, svalue))
 		return SCM_BOOL_F;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_PROTOM == misctype)
-		return SCM_BOOL_T;
+	scm_t_bits misctype = SCM_SMOB_FLAGS(svalue);
+	if (COG_PROTOM != misctype)
+		return SCM_BOOL_F;
 
-	return SCM_BOOL_F;
+	ValuePtr vp(scm_to_protom(svalue));
+	return from_type(vp);
 }
 
 /* ============================================================== */
@@ -596,7 +588,8 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, protom_to_scm)
 	}
 
-	if (nameserver().isA(t, LINK))
+	if (nameserver().isA(t, LINK) or
+	    nameserver().isA(t, FRAME))
 	{
 		const HandleSeq& v = HandleCast(pa)->getOutgoingSet();
 		CPPL_TO_SCML(v, handle_to_scm)

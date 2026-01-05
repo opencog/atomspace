@@ -81,7 +81,7 @@
 (define words-result (cog-execute! (Name "words")))
 
 ; Verify it returns a LinkValue with 3 elements
-(test-assert "words-is-linkvalue" (cog-value? words-result))
+(test-assert "words-is-linkvalue" (cog-type words-result))
 (define words-list (cog-value->list words-result))
 (test-assert "words-count" (equal? 3 (length words-list)))
 
@@ -104,7 +104,7 @@
 ; Verify TransposeColumn can be applied to the named source
 
 (define transposed (cog-execute! (TransposeColumn (Name "words"))))
-(test-assert "transpose-exists" (cog-value? transposed))
+(test-assert "transpose-exists" (cog-type transposed))
 
 ; TransposeColumn should produce a single StringValue with concatenated results
 (define trans-list (cog-value->list transposed))

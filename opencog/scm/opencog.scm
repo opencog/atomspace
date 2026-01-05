@@ -41,10 +41,8 @@
 ; when these are touched in the various scm files.
 (export
 cog-atom
-cog-atom?
 cog-atom-less?
 cog-atomspace
-cog-atomspace?
 cog-atomspace-clear
 cog-atomspace-cow!
 cog-atomspace-cow?
@@ -65,7 +63,6 @@ cog-incoming-size
 cog-incoming-size-by-type
 cog-keys
 cog-link
-cog-link?
 cog-map-type
 cog-name
 cog-new-ast
@@ -75,7 +72,6 @@ cog-new-link
 cog-new-node
 cog-new-value
 cog-node
-cog-node?
 cog-pop-atomspace
 cog-push-atomspace
 cog-set-atomspace!
@@ -84,7 +80,6 @@ cog-subtype?
 cog-type
 cog-type->int
 cog-value
-cog-value?
 cog-value->list
 cog-value-ref
 

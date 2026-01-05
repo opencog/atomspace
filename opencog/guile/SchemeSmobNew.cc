@@ -174,45 +174,6 @@ SCM SchemeSmob::ss_equal_p (SCM sleft, SCM sright)
 }
 
 /* ============================================================== */
-/** Return true if s is an atom. Invalid handles are not atoms. */
-
-SCM SchemeSmob::ss_atom_p (SCM s)
-{
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
-		return SCM_BOOL_F;
-
-	return SCM_BOOL_T;
-}
-
-/* ============================================================== */
-/** Return true if s is a node */
-
-SCM SchemeSmob::ss_node_p (SCM s)
-{
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
-		return SCM_BOOL_F;
-
-	if (h->is_node()) return SCM_BOOL_T;
-
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
-/** Return true if s is a link */
-
-SCM SchemeSmob::ss_link_p (SCM s)
-{
-	Handle h(scm_to_handle(s));
-	if (nullptr == h)
-		return SCM_BOOL_F;
-
-	if (h->is_link()) return SCM_BOOL_T;
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
 /**
  * Check that the argument is the string or symbol name of an atom,
  * else throw errors.

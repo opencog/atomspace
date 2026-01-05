@@ -223,63 +223,6 @@
        #t
        guile> (cog-atom y)
        #f
-
-    See also:
-       cog-atom? -- return #t if an expression is an Atom.
-")
-
-(set-procedure-property! cog-atom? 'documentation
-"
- cog-atom? EXP
-    Return #t if EXP is an atom, else return #f
-
-    Example:
-       ; Define a node.
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (+ 2 2))
-       guile> (cog-atom? x)
-       #t
-       guile> (cog-atom? y)
-       #f
-
-    See also:
-       cog-atom -- return #f if an Atom is not in the current AtomSpace.
-")
-
-(set-procedure-property! cog-node? 'documentation
-"
- cog-node? EXP
-    Return #t if EXP is an node, else return #f
-
-    See also cog-node, which will check to see if a specific node
-    already exists.
-
-    Example:
-       ; Define a node and a link
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (ListLink x))
-       guile> (cog-node? x)
-       #t
-       guile> (cog-node? y)
-       #f
-")
-
-(set-procedure-property! cog-link? 'documentation
-"
- cog-link? EXP
-    Return #t if EXP is an link, else return #f
-
-    See also cog-link, which will check to see if a specific link
-    already exists.
-
-    Example:
-       ; Define a node and a link
-       guile> (define x (Concept \"abc\"))
-       guile> (define y (ListLink x))
-       guile> (cog-link? x)
-       #f
-       guile> (cog-link? y)
-       #t
 ")
 
 (set-procedure-property! cog-name 'documentation
@@ -300,6 +243,7 @@
  cog-type EXP
     Return the type of EXP, where EXP is a Value or an Atom.
     The returned value is a guile symbol.
+    Return #f is EXP is not a Value or Atom.
 
     Example:
        ; Define a node
@@ -311,9 +255,6 @@
 
     See also:
         cog-subtype? TYPE SUBTYPE -- return #t if SUBTYPE is a TYPE
-        cog-link-type? TYPE -- return #t if TYPE is a Link type
-        cog-node-type? TYPE -- return #t if TYPE is a Node type
-        cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
 (set-procedure-property! cog-incoming-set 'documentation
@@ -650,18 +591,6 @@
        cog-set-value! -- Set a single value.
 ")
 
-(set-procedure-property! cog-value? 'documentation
-"
- cog-value? EXP
-    Return #t if EXP is an OpenCog value, else return #f
-
-    Example:
-       guile> (cog-value? (FloatValue 42))
-       #t
-       guile> (cog-value? 42)
-       #f
-")
-
 (set-procedure-property! cog-value->list 'documentation
 "
  cog-value->list VALUE
@@ -767,9 +696,6 @@
 
     See also:
         cog-type ATOM -- return the type of ATOM
-        cog-link-type? TYPE -- return #t if TYPE is a Link type
-        cog-node-type? TYPE -- return #t if TYPE is a Node type
-        cog-value-type? TYPE -- return #t if TYPE is a Value type
 ")
 
 (set-procedure-property! cog-map-type 'documentation
@@ -828,12 +754,6 @@
     Warning: if the previous atomspace is not the primary atomspace
     and is not referenced anywhere, the garbage collector will delete it
     alongside its content, even if some of its content is referenced.
-")
-
-(set-procedure-property! cog-atomspace? 'documentation
-"
- cog-atomspace? ATOMSPACE
-    Return #t if ATOMSPACE is an atomspace; else return #f.
 ")
 
 (set-procedure-property! cog-new-atomspace 'documentation

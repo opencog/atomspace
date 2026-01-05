@@ -105,10 +105,6 @@ private:
 	static SCM ss_extract(SCM, SCM);
 	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_execute(SCM);
-	static SCM ss_value_p(SCM);
-	static SCM ss_atom_p(SCM);
-	static SCM ss_node_p(SCM);
-	static SCM ss_link_p(SCM);
 	static SCM _radix_ten;
 	static SCM _alist;
 

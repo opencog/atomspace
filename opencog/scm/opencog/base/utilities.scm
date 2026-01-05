@@ -23,6 +23,7 @@
 ; -- cog-outgoing-atom -- list-ref for Links
 ; -- cog-value-type -- get type of value at key
 ; -- cog-outgoing-set -- Old, venerable utility
+; -- cog-atom? -- return #t if expression is an Atom
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -68,7 +69,7 @@
 (define-public (gdddr x) (gdr (gdr (gdr x))) )
 
 ; --------------------------------------------------------------------
-(define-public (extract-hypergraph atom)
+(define-public (extract-hypergraph ATOM)
 "
   extract-hypergraph -- extract a hypergraph and everything under it
 
@@ -77,13 +78,14 @@
   encountered.  This only removes the atoms from the atomspace, it
   does NOT remove it from the backingstore, if attached!
 "
-	(if (cog-atom? atom)     ; Make sure that atom is valid, as it may
+	(define atyp (cog-type ATOM))
+	(if (cog-subtype? atyp 'Atom) ; Make sure that atom is valid, as it may
 	                         ; already have been extracted by an outer
 	                         ; recursive call
-		(if (cog-node? atom)
-			(cog-extract! atom)
-			(let* ((oset (cog-value->list atom))
-					(flg (cog-extract! atom))
+		(if (cog-subtype? atyp 'Node)
+			(cog-extract! ATOM)
+			(let* ((oset (cog-value->list ATOM))
+					(flg (cog-extract! ATOM))
 				)
 				(if flg ;; halt recursion if link was not extract-able
 					(for-each extract-hypergraph oset)
@@ -355,5 +357,25 @@
     ordinary scheme list.
 "
 	(cog-value->list ATOM)
+)
+; ---------------------------------------------------------------------
+(define-public (cog-atom? ATOM)
+"
+ cog-atom? EXP
+    Return #t if EXP is an atom, else return #f
+
+    Example:
+       ; Define a node.
+       guile> (define x (Concept \"abc\"))
+       guile> (define y (+ 2 2))
+       guile> (cog-atom? x)
+       #t
+       guile> (cog-atom? y)
+       #f
+
+    See also:
+       cog-atom -- return #f if an Atom is not in the current AtomSpace.
+"
+	(cog-subtype? 'Atom (cog-type ATOM))
 )
 ; ---------------------------------------------------------------------

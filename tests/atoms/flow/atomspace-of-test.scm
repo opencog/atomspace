@@ -24,9 +24,6 @@
 (define as-result (cog-execute! (AtomSpaceOf test-atom)))
 
 ; Verify the result is an AtomSpace
-(test-assert "result-is-atomspace"
-	(cog-atom? as-result))
-
 (test-assert "result-type-is-atomspace"
 	(equal? (cog-type as-result) 'AtomSpace))
 
