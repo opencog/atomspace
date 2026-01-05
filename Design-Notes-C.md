@@ -131,7 +131,56 @@ code base, which does a fine job of "backward interence", matching the
 connectors/disjuncts to words in a sentence. Any of these different
 algos can be implemented to work with jigsaw pieces.
 
-variables are needed for internal wiring
+### Critique of Connectors/Sections
+The concept of sheafs, sections and connectors appears to be ideal for
+capturing the notion of a jigsaw piece: the connectors carry a type
+marking, which, together with the connector sex, determines how
+connectors can be mated.
+
+This is fine for a connectionist description of semantic relationships
+between symbols or semiotic signifiers. The connector types tell us what
+can be related to what. As I write this, I imagine its not hard to
+generalize connector mating to some kind of probabilistic strengths,
+rather than a strict boolean true/false will-mate or won't-mate
+determination. This probabilistic re-interpretation is defered for some
+future project. ("Not hard" is an understatement: its probably quite
+the adventure to do this, opening new vistas. Which is why it cannot be
+attempted right here, just yet.)
+
+This connectionist approach is lacking when the jigsaw pieces themselves
+perform some sort of internal processing, e.g. when they are lambdas of
+some sort, or functions, or relations. Here, variables are needed and
+used so that the "wiring" on the inside of the lambda can be specified.
+For example, in C++, java, python, scheme, the names of the variables
+that appear as the inputs to functions are used in the body of the
+function to connect into whatever algorithm or process is coded up
+inside that function. Inputs that are named variables are ciritical to
+convetional programming (for both the functional and procedural styles.)
+
+But the jigsaw connectors, as currently defined in Atomese, do not
+include Variable names. This is an unresolved design tension in Atomese.
+To be explicit: we have
+```
+   (TypedVariable (VariableNode "$x") (TypeNode 'Concept))
+```
+or, with deep types:
+```
+   (TypedVariable (VariableNode "$x") (Signature ...)
+```
+What we want is
+```
+	(Connector
+		(TypeNode 'Concept) ; or perhaps Signature, ...
+		(SexNode "input")   ; the mating constraint
+		(VariableNode "$x") ; the name assigned to the connector.
+	)
+```
+The `TypedVariable` used in lambdas dispenses with the `SexNode`, such
+connectors are always implcitly inputs to functions.
+
+The constraint satisfaction solvers (cahiners, ASP, etc.) ignore the
+name of the connector, as it is irrelevant for determining the typing
+constraints.
 
 
 rewrite
@@ -140,3 +189,5 @@ output type
 PatternLink
 GuardLink
 
+### TODO
+* Fix Connectors so that they can be named and types as expected.
