@@ -54,14 +54,35 @@ SCM SchemeSmob::from_type (const ValuePtr& vp)
 
 SCM SchemeSmob::ss_type (SCM svalue)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, svalue))
-		return SCM_BOOL_F;
-
-	scm_t_bits misctype = SCM_SMOB_FLAGS(svalue);
-	if (COG_PROTOM != misctype)
-		return SCM_BOOL_F;
-
 	ValuePtr vp(scm_to_protom(svalue));
+	if (nullptr == vp)
+		return SCM_BOOL_F;
+
+	if (vp->is_atom())
+	{
+		Handle h(HandleCast(vp));
+
+		// Clobber pointer to extracted (deleted) Atoms. These are
+		// Atoms that have been removed from an AtomSpace; they have
+		// not yet been dtored, because the std::shared_ptr<> still
+		// has a non-zero use-count. Fix that now, by calling
+		// std::shared_ptr<>::reset() to clobber it. This is used by
+		// various unit tests (including StorageNode) to verify that
+		// an Atom has been extracted from an AtomSpace.
+		//
+		// We don't do this for Values; those will just live on,
+		// until the guile gc runs and finds them; the clobber happens
+		// in SchemeSmob::free_misc()
+		if (nullptr == h->getAtomSpace() and
+		    not (ATOM_SPACE == h->get_type()))
+		{
+			SCM_SMOB_VALUE_PTR_LOC(svalue)->reset(); // std::shared_ptr<>::reset()
+			scm_remember_upto_here_1(svalue);
+			return SCM_BOOL_F;
+		}
+	}
+	scm_remember_upto_here_1(svalue);
+
 	return from_type(vp);
 }
 

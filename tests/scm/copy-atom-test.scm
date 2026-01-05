@@ -58,12 +58,9 @@
 
 (for-each
 	(lambda (orphan)
-		; cog-name throws because touching orphans clobbers them.
-		(define threw #f)
-		(catch #t
-			(lambda () (cog-name orphan))
-			(lambda (key . parameters) (set! threw #t)))
-		(test-assert "expect invalid handles" threw))
+		; cog-atom? returns #f because touching orphans clobbers them.
+		; (Actually, cog-atom? calls cog-type which does this...)
+		(test-assert "expect invalid handles" (not (cog-atom? orphan))))
 	ilst)
 
 (for-each
