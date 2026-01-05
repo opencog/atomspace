@@ -141,15 +141,36 @@
 		(Name "unique-types")))
 
 ; ---------------------------------------------------------
+; Print (output) the counts in a format such that some graphing
+; system can graph them.
+;
+; Interfaces to the external world; the word outside of Atomese,
+; presents practical difficulties. For this demo, a short snippet
+; of scheme code will be used to print the counts into a string.
+; A fancier demo would use string manipulations to assemble the
+; the appropriate strings, followed by the use of a FileNode from
+; (a SensoryNode) from the sensory subsystem that would then
+; write those strings to a file. This is beyond the scope of the
+; current demo, so we stick to a simple scheme shim to do this.
 
-; Debug print
+(define (data-printer NAME COUNT)
+	(StringValue
+		(format #f "Usage count of type: ~A ~A"
+			(cog-value-ref COUNT 2)
+			(cog-name NAME))))
+
+; Invoke the printer above.
 (cog-execute!
 	(Filter
 		(Rule
 			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
 			(Variable "$typ") ; body - accept everything
-			(LinkSignature (Type 'LinkValue)
-				(Variable "$typ")
-				(ValueOf (Variable "$typ") (Predicate "cnt"))))
+			(ExecutionOutput
+				(GroundedSchema "scm:data-printer")
+				(LinkSignature (Type 'LinkValue)
+					(Variable "$typ")
+					(ValueOf (Variable "$typ") (Predicate "cnt")))))
 		(Name "sorted-types")))
 
+; The End! That's All, Folks!
+; -------------------------------------------------------------
