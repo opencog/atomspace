@@ -47,6 +47,7 @@ technical reason why these two could not be merged into one common Link.
   `FilterLink` that can apply rules for type re-writting. Is it really
   needed as a distinct function?
 
+### Base Questions
 So the following questions arise:
 * Are there technical constraints that prevent the merger of these
   three?
@@ -75,4 +76,67 @@ these differences.
   needs to be an input processor/unformizer that can take any source,
   and present items one-at-a-time.
 
+### RuleLink
+Lets review the current situation, and compare it to some notion of
+desirable basics. The idea of mapping and filtering is somehow primal
+to the processing of streams, and the `RuleLink` provides a basic frame
+for defining a rewrite rule that can be applied to one item at a time.
+But this is not how things started, and there are some cross-pressures.
+So lets review `RuleLink` and its uses.
+
+* The `RuleLink` was originally developed with an eye towards applying
+  it in axiomatic reasoning, in the style of predicate logic, and of
+  proof theory. Thus, as currently designed, it captures the form of
+  `P(x)->Q(x)` or "if P(x) then Q(x)".
+* The variable `x` is typed; the type decalaration follows the general
+  Atomese conventions for typed variables.
+
+### Critique of the URE
+The `RuleLink` was developed for an intended use in the (now failed)
+URE. A very very short review of the failure mode is in order. At first,
+one imagines that it is easy to do inference and deduction: One writes
+meta-rules that define how to combine rules. In practice, it is learned
+that the proof-theoretic predicate-logic notation for rules is awful for
+chaining. Outputs and inputs need to be compared for type agreement. If
+inputs have variables, the variables must be quoted, as one does not
+want to bind them, but merely check that the types are in agreement.
+Quoting turns into a giant mess, as its a bit context dependent.
+
+Another fundamental issue with the URE is the collision between
+forward-chaining, backward-chaining and constraint satisfaction. When
+using the proof-theoretic predicate-logic notation for rules,
+forward-chaining is fairly easy: one uses an odometer-style generator,
+and just exhaustively enumerates all possible inferences that satisfy
+the type constraints. Backward chaining should be just as easy, except
+for the assymmetry of rule specifications: viz the rules specify the
+input type, but do not specify the output type.
+
+The idea of chaining implies an odometer-style algorithm: one attempts
+all possibilities. This is seen in Prolog; the `cut` is used to control
+the explored paths. There are also constraint-satisfaction algos, such
+as Answer Set Programming, which elevate the `cut` to a higher level.
+The DPLL algo takes a "global" view of the collection of assertions,
+then trims off trees, leaving behind a kernel which must then be
+exhaustively explored (perhaps diagonalized, even, as kernels often
+are.) The determination and location of cuts is autmated, reducing the
+overall size of the satisfaction issue.
+
+The idea of the Link Grammar jigsaw pieces is to remove the asymmetry of
+the predicate-logic inference rules, and replace the notion of inputs
+and outputs by typed connectors, and to completely remove variables from
+the connector descriptions, thus providing a symmetrized jigsaw piece
+that algos can work with: either the odometer aglo, or the ASP/DPLL
+algo, or Viterbi algos, or the current LG algo implemented in the LG
+code base, which does a fine job of "backward interence", matching the
+connectors/disjuncts to words in a sentence. Any of these different
+algos can be implemented to work with jigsaw pieces.
+
+variables are needed for internal wiring
+
+
+rewrite
+output type
+
+PatternLink
+GuardLink
 
