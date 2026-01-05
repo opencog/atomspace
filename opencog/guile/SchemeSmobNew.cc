@@ -318,7 +318,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
 /**
  * Copy an existing atom into a new atomspace.
  */
-SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_new_atom (SCM satom, SCM opt_as)
 {
 	ValuePtr pa(verify_protom(satom, "cog-new-atom"));
 	if (not pa->is_atom())
@@ -326,7 +326,7 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
 
 	Handle h(HandleCast(pa));
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asg = get_as_from_list(opt_as);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-new-atom");
 
@@ -336,10 +336,10 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-atom", scm_cons(satom, kv_pairs));
+		throw_exception(ex, "cog-new-atom", scm_cons(satom, opt_as));
 	}
 
-	scm_remember_upto_here_1(kv_pairs);
+	scm_remember_upto_here_1(opt_as);
 	return SCM_EOL;
 }
 
@@ -347,7 +347,7 @@ SCM SchemeSmob::ss_new_atom (SCM satom, SCM kv_pairs)
  * Return the indicated atom, if a version of it exists in this
  * atomspace; else return nil if it does not exist.
  */
-SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_atom (SCM satom, SCM opt_as)
 {
 	ValuePtr pa(verify_protom(satom, "cog-atom"));
 	if (not pa->is_atom())
@@ -355,7 +355,7 @@ SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 
 	Handle h(HandleCast(pa));
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asg = get_as_from_list(opt_as);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-atom");
 
@@ -365,10 +365,10 @@ SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-atom", scm_cons(satom, kv_pairs));
+		throw_exception(ex, "cog-atom", scm_cons(satom, opt_as));
 	}
 
-	scm_remember_upto_here_1(kv_pairs);
+	scm_remember_upto_here_1(opt_as);
 	return SCM_EOL;
 }
 
@@ -376,7 +376,7 @@ SCM SchemeSmob::ss_atom (SCM satom, SCM kv_pairs)
 /**
  * Create a new node, of named type stype, and string name sname
  */
-SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
+SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM opt_numlist)
 {
 	Type t = verify_type(stype, "cog-new-node", 1);
 
@@ -388,7 +388,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		SCM slist = SCM_EOL;
 		if (scm_is_number(sname))
 		{
-			slist = scm_cons(sname, kv_pairs);
+			slist = scm_cons(sname, opt_numlist);
 		}
 		else
 		if (scm_is_true(scm_list_p(sname)))
@@ -429,10 +429,10 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-node", scm_cons(sname, kv_pairs));
+		throw_exception(ex, "cog-new-node", scm_cons(sname, opt_numlist));
 	}
 
-	scm_remember_upto_here_1(kv_pairs);
+	scm_remember_upto_here_1(opt_numlist);
 	return SCM_EOL;
 }
 
@@ -442,7 +442,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
  * If the node exists, *and* a truth value was specified, then change
  * the truth value.
  */
-SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
+SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM opt_as)
 {
 	Type t = verify_type(stype, "cog-node", 1);
 
@@ -452,7 +452,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	std::string name = verify_string (sname, "cog-node", 2,
 									"string name for the node");
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asg = get_as_from_list(opt_as);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-node");
 
@@ -460,7 +460,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	Handle h(asp->get_node(t, std::string(name)));
 	if (nullptr == h) return SCM_BOOL_F;
 
-	scm_remember_upto_here_1(kv_pairs);
+	scm_remember_upto_here_1(opt_as);
 	return handle_to_scm (h);
 }
 
@@ -695,7 +695,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
  * attached backing store/persistent storage, only from the (local,
  * in-RAM) atomspace.
  */
-SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_extract (SCM satom, SCM opt_as)
 {
 	// Don't use scm_to_handle here, because it clobbers handles
 	// that point at atoms that are in no space at all. Such a
@@ -708,7 +708,7 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
 	if (nullptr == h)
 		scm_wrong_type_arg_msg("cog-extract!", 1, satom, "opencog atom");
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asg = get_as_from_list(opt_as);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-extract!");
 
@@ -732,11 +732,11 @@ SCM SchemeSmob::ss_extract (SCM satom, SCM kv_pairs)
  * This does NOT remove the atom from any attached backing store, only
  * from the atomspace.
  */
-SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
+SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM opt_as)
 {
 	Handle h = verify_handle(satom, "cog-extract-recursive!");
 
-	const AtomSpacePtr& asg = get_as_from_list(kv_pairs);
+	const AtomSpacePtr& asg = get_as_from_list(opt_as);
 	const AtomSpacePtr& asp = asg ? asg :
 		ss_get_env_as("cog-extract-recursive!");
 
