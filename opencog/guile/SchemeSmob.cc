@@ -48,14 +48,12 @@ using namespace opencog;
  *
  * XXX TODO:
  * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
- * should have a separate tag for handles, tv's, etc.) This would
+ * should have a separate tag for handles, values's, etc.) This would
  * simplify that code, and probably improve performance just a bit.
  */
 
 scm_t_bits SchemeSmob::cog_misc_tag;
 std::atomic_flag SchemeSmob::is_inited = ATOMIC_FLAG_INIT;
-SCM SchemeSmob::_radix_ten;
-SCM SchemeSmob::_alist;
 
 void SchemeSmob::init()
 {
@@ -86,8 +84,6 @@ void SchemeSmob::init()
 
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
-	_radix_ten = scm_from_int8(10);
-	_alist = scm_from_utf8_symbol("alist");
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");

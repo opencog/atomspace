@@ -425,25 +425,6 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		// Now, create the actual node... in the actual atom space.
 		// This is a try-catch block, in case the AtomSpace is read-only.
 		Handle h(asp->add_node(t, std::move(name)));
-
-		if (nullptr == h) return handle_to_scm(h);
-
-		// Are there any keys?
-		// Expecting an association list of key-value pairs, e.g.
-		//    (list (cons (Predicate "p") (FloatValue 1 2 3)))
-		// which we will staple onto the atom.
-		// Oddly, though, it shows up as a list inside a list.
-		while (scm_is_pair(kv_pairs))
-		{
-			SCM slist = SCM_CAR(kv_pairs);
-			if (scm_is_pair(slist) and
-			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
-			{
-				set_values(h, asp, SCM_CADR(slist));
-			}
-			kv_pairs = SCM_CDR(kv_pairs);
-		}
-
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
@@ -617,21 +598,15 @@ SchemeSmob::verify_handle_list_msg(SCM satom_list,
 		else if (scm_is_pair(satom) and
 		         not scm_is_null(satom_list))
 		{
-			// Ignore alists of key-value pairs. For example
-			//   (List (Concept "foo")
-			//      (alist (cons (Predicate "key") (StringValue "bar"))))
-			if (not scm_to_bool(scm_equal_p(_alist, SCM_CAR(satom))))
-			{
-				// Allow lists to be specified: e.g.
-				// (cog-new-link 'ListLink (list x y z))
-				// Do this via a recursive call, flattening nested lists
-				// as we go along. The URE does this a lot.
-				const HandleSeq &oset =
-					verify_handle_list(satom, subrname, pos);
-				HandleSeq::const_iterator it;
-				for (it = oset.begin(); it != oset.end(); ++it) {
-					outgoing_set.emplace_back(*it);
-				}
+			// Allow lists to be specified: e.g.
+			// (cog-new-link 'ListLink (list x y z))
+			// Do this via a recursive call, flattening nested lists
+			// as we go along. The URE does this a lot.
+			const HandleSeq &oset =
+				verify_handle_list(satom, subrname, pos);
+			HandleSeq::const_iterator it;
+			for (it = oset.begin(); it != oset.end(); ++it) {
+				outgoing_set.emplace_back(*it);
 			}
 		}
 		else if (scm_is_null(satom))
@@ -678,26 +653,6 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	{
 		// Now, create the actual link... in the actual atom space.
 		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
-
-		if (nullptr == h) return handle_to_scm(h);
-
-		// Are there any keys?
-		// Expecting an association list of key-value pairs, e.g.
-		//    (alist (cons (Predicate "p") (FloatValue 1 2 3)))
-		// which we will staple onto the atom.
-		// Oddly, though, it shows up as a list inside a list.
-		SCM kv_pairs = satom_list;
-		while (scm_is_pair(kv_pairs))
-		{
-			SCM slist = SCM_CAR(kv_pairs);
-			if (scm_is_pair(slist) and
-			    scm_to_bool(scm_equal_p(_alist, SCM_CAR(slist))))
-			{
-				set_values(h, atomspace, SCM_CADR(slist));
-			}
-			kv_pairs = SCM_CDR(kv_pairs);
-		}
-
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
