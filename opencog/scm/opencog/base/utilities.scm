@@ -33,8 +33,8 @@
 
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
-; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
-; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
+; (define (gar x) (if (cog-atom? x) (car (cog-value->list x)) (car x)))
+; (define (gdr x) (if (cog-atom? x) (cadr (cog-value->list x)) (cdr x)))
 
 (define-public (gar LINK)
 "
@@ -82,7 +82,7 @@
 	                         ; recursive call
 		(if (cog-node? atom)
 			(cog-extract! atom)
-			(let* ((oset (cog-outgoing-set atom))
+			(let* ((oset (cog-value->list atom))
 					(flg (cog-extract! atom))
 				)
 				(if flg ;; halt recursion if link was not extract-able

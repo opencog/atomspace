@@ -340,7 +340,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-incoming-size",     1, 1, 0, C(ss_incoming_size));
 	register_proc("cog-incoming-by-type",  2, 1, 0, C(ss_incoming_by_type));
 	register_proc("cog-incoming-size-by-type", 2, 1, 0, C(ss_incoming_size_by_type));
-	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-atomspace",         0, 1, 0, C(ss_as));

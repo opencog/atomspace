@@ -279,31 +279,6 @@ SCM SchemeSmob::ss_update_value (SCM satom, SCM skey, SCM sdelta)
 
 /* ============================================================== */
 /**
- * Convert the outgoing set of an atom into a list;
- * filter-accept only type, and return the list.
- */
-SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
-{
-	Handle h = verify_handle(satom, "cog-outgoing-by-type");
-	Type t = verify_type(stype, "cog-outgoing-by-type", 2);
-
-	if (not h->is_link()) return SCM_EOL;
-
-	const HandleSeq& oset = h->getOutgoingSet();
-
-	SCM list = SCM_EOL;
-	for (size_t i = oset.size(); i > 0; i--)
-	{
-		if (oset[i-1]->get_type() != t) continue;
-		SCM smob = handle_to_scm(oset[i-1]);
-		list = scm_cons (smob, list);
-	}
-
-	return list;
-}
-
-/* ============================================================== */
-/**
  * Convert the incoming set of an atom into a list; return the list.
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom, SCM aspace)

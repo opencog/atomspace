@@ -15,7 +15,7 @@
 (DatalogAst "likes(john, mary).")
 
 ; Take a look at how the above was converted into Atomese
-(cog-outgoing-atom (DatalogAst "likes(john, mary).") 0)
+(cog-value-ref (DatalogAst "likes(john, mary).") 0)
 
 ; Various other types of expressions.
 ; Horn clause: Sue is a girl if she is the daughter of Mary.

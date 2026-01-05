@@ -454,13 +454,6 @@
        => 1
 ")
 
-(set-procedure-property! cog-outgoing-by-type 'documentation
-"
- cog-outgoing-by-type ATOM TYPE
-    Return those atoms in the outgoing set of ATOM that are of type TYPE.
-    This set is returned as an ordinary scheme list.
-")
-
 (set-procedure-property! cog-handle 'documentation
 "
  cog-handle ATOM
