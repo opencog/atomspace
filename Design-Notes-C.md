@@ -10,7 +10,7 @@ different eras, intended to solve different problems, using dramatically
 different mechanisms to do so.  In retrospect, they seem to have more
 in common, than they have differences, and so the question arises:
 should the be merged into a grand one-size-fits all super-link that
-does everything for everyone? Or is it easier to keep them distinct?
+does everything for everyone? Or is it better to keep them distinct?
 
 A short history.
 * The `ExecutionOutputLink` was designed specifically to call external
@@ -55,16 +55,24 @@ So the following questions arise:
 * Are there usability issues that would make previously easy expressions
   pointlessly more complicated?
 
-I suspect that the above three do not prsent any serious difficulties.
-However, I think there is a huge stumbling block that does need to be
-dealt with, already started in Design-Notes-A: this is the issue of
-streams vs. lists vs. sets, represented as Atoms or as Values, streaming,
-or not, blocking, or not.   Applying functions is easy. Untangling the
-intended semantics of different kinds of data streams is hard.
+The above questions reveal complexities that have to be dealt with; on
+closer examination, these links types are seen to be quite different
+from one-another, and there's a fair amount of work needed to reconsile
+these differences.
 
-### Comments
-Maybe some of the above is wrong.
+* `CollectionOf` wants to rewrite the *type* of collections.
+* `FilterLink` defines a defacto guard, having the form of a pattern
+  with 'variable' regions. These are not VariableNodes; they are
+  anonymous and un-named. Thus, they cannot be bound for later
+  rewriting.
+* The `RuleLink`, when used with the `FilterLink`, does provide the
+  rewriting.
 * The `GroundedProcedureNode` is "by definition" without any type
-  declarations.  The `ExecutionOutputLink` has no issue with this:
-  it just applies whatever arguments are given. The FilterLink could
-  do this too, but its less interesting, less compelling.
+  declarations.  The `ExecutionOutputLink` has no issue with this,
+  but this presents a challenge for integration with `RuleLink`.
+* What's the input? A static list? A stream? A container? Functions,
+  guards, rewrites all tend to want to work one-item-at-a-time; there
+  needs to be an input processor/unformizer that can take any source,
+  and present items one-at-a-time.
+
+
