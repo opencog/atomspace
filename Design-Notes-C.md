@@ -586,25 +586,24 @@ final form is a prenex `(fg)(x,z,w)`. The `PrenexLink` deals with this.
 To summarize: `RuleLink` inherits from `PrenexLink`. `Prenex` inherits
 from `RewriteLink`; this inherits from `ScopeLink`.
 
-### Gentzen notation
-Above, we wrote the inference rule for function composition using
-Gentzen notation:
+### Executable conclusions
+One more example is in order. Consider the inference rule for function
+composition.  In Gentzen notation, this is:
 ```
-    P(x)->Q(x) ,  x=A(y)
-    --------------------
-           Q(A(y))
+    Q(x) ,  x=A(y)
+    --------------
+       Q(A(y))
 ```
-How is this to be represented in Atomese? Well, apparently as
+This inference rule is represented in Atomese as follows:
 ```
 	(RuleLink
 		(VariableList
-			(Variable "$vardecl-x") (Variable "$P") (Variable "$Q")
+			(Variable "$vardecl-x") (Variable "$Q")
 			(Variable "$vardecl-y") (Variable "$A"))
 		(And
 			(LocalQuote
-				(Rule
+				(Lambda
 					(Variable "$vardecl-x")
-					(Variable "$P")
 					(Variable "$Q")))
 			(LocalQuote
 				(Lambda
@@ -618,25 +617,87 @@ How is this to be represented in Atomese? Well, apparently as
 					(Variable "$Q")
 					(Variable "$A")))))
 ```
-The `AndLink` says that there are two premises, to be combined. The
-`LocalQuoteLink` says that each part is a literal, and not to be
-interpreted. The deluge of `Variables` are used to decompose the inputs
-into thier component parts. The `PutLink` is used to perform the actual
-beta-reduction: Whatever it was that was `A` is substituted for `x` in
-the body of `Q`. None of these are quoted: we want the `PutLink` to run,
-and do it's work.
+As before, the `AndLink` says that there are two premises, to be
+combined. The `LocalQuoteLink` says that each each `Lambda` is a
+literal, and not to be interpreted, run or executed.
 
-Note the dual use of `RuleLink`. In one place, it is used to represent
-the inference rule `Q(A(y)) |- P(x)->Q(x),x=A(y)` and in the other place
-to represent the axiom schema `P(x)->Q(x)`. One representation for two
-somewhat distinct concepts in proof theory.  This risks muddle.
+The `PutLink` is interesting: it is used to perform the actual
+beta-reduction required by function composition. Whatever it was that
+was `A` is substituted for `x` in the body of `Q`.  The `PutLink` is
+*not* quoted: it is assembled (by the `RuleLink`) and then executed
+(so that it plugs `A` into `Q`.)
 
-Note that beta reduction appears twice in the above. The "obvious" one
-is the use of `PutLink` to assemble `Q(A(y))`. But before `PutLink` can
-be executed, it itself needs to be assembled. That is, all three
-variables "$vardecl-x", "$Q", "$A" have to be plugged in beforehand.
-This plugging is done by the `RewriteLink` base class. Adjustments made
-by `PrenexLink`, as needed.
+Note that there are two distinct beta reductions in the above. The
+first plugs in for the variables "$vardecl-x", "$Q", "$A" to assemble
+the `PutLink`, and the second one is done by executing the `PutLink`
+itself.
+
+This is meant to illustrate that conclusions can be executable, in
+general. For example, for arithmetic, the inference rules might be for
+addition, subtraction, multiplication, division. The role of `PutLink`
+above is then taken by `PlusLink`, `MinusLink`, `TimesLink`,
+`DivideLink`. These are not just declarative elements, but are
+exectuable; executing `(Plus (Plus x 2) (Plus y 3))` results in the
+delta-reduction of the constants: `(Plus x y 5)`
+
+### Algebra as an axiomatic system
+The above presents one more recursive puzzle. How did we know that
+`(Plus (Plus x 2) (Plus y 3))` can be rewritten into `(Plus x y 5)`?
+Ah, well... five answers.
+
+The first answer is that the c++ class `PlusLink` actually implements
+c++ code to actually do this. It works, at least for simple expressions.
+
+The second answer is that, instead, we "should have" written some
+inference rules that capture the rules of delta-reduction on arithmetic
+expressions.
+
+The third answer was to write down the Peano arithmetic axioms in
+Atomese. This is an interesting theoretical distraction, but becomes a
+non-starter, if one also wants the reduction to be high-performance.
+
+The fourth answer is that "we could have" selected some Computer Algebra
+System (CAS) and wrapped it up in Atomese, so that whenever we called
+the c++ method `PlusLink::reduct()`, it would call into this CAS system
+to do its magic. These arguments promptly go sideways. One person says
+"oh use Maxima", and the next person makes a bold leap and says "use HOL
+or use Agda", the problem here being that HOL and Agda are not CAS
+systems, but are rather proof theoretic inference engines. The
+head-scratcher then turns into a question of how to discard the URE and
+plug Agda into it's place. This was discussed in an idle fashion, but
+not acted upon. A different suggestions that circulated was to use to
+turn the URE into a wrapper around the Uni Potsdam ASP solver.
+
+The fifth answer, the one I'm currently pursing, is to create
+sensorimotor agents capable of perceiving algebraic structures (seeing
+or sensing them), and then acting on them (the motor or manipulative
+part, which grabs a hold of axioms and rules, and manipulates them in a
+purposeful way.) Its an agent, because it distinguishes it's own self
+from the external world. The agent holds a model of the external world,
+representing what is "out there", and then manipulates the external
+world in conformance to inferences obtained by acting on it's world
+model.
+
+The current test case for this fifth answer is the `atomese-simd`
+project. Here, the "external world" is a GPU, and the design goal for
+the agent is to be able to take algebraic expressions like `(Plus x 2)`
+and have them run on the GPU.
+
+Don't be mislead: of course, one can just hard-code some code that does
+arithmetic on GPU's. That's easy. You can do that. You can ask Claude or
+ChatGPT to do it for you. They'll do it. The issue here is that you
+would then have to do this again for each new axiomatic system. First,
+for all kinds of different areas in mathematics. Next, for accounting
+and purchase order requistions. Finally for factory blue prints and
+excutive org charts. Yes, currently humans are asking LLM's to design
+each of these, but the designs are always human-guided. The goal of
+designing an axiomatic shape-rotator is to have the shape rotator
+perceive and manipulate any kind of axiomatic system, and not just the
+one for arithmetic ported to GPU's.
+
+But I digress...
+
+
 
 
 
