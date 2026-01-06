@@ -453,6 +453,91 @@ this for English a/an phonemes.) Again, there seem to be equivariant
 representations. Sex and Bond are the most conveniant for the simple
 cases, but don't generalize (easily).
 
+### Rewriting
+The use of RuleLink for filtering might be a mis-feature. It was
+designed for beta-reducing lambda bodies, not for filtering. Perhaps
+mashing up these two distinct concepts is bad design.
+
+The URE was an attempt to implement an engine for realizing PLN (it was
+to be usable for general rewriting, too, but that never materialized).
+The original definition of PLN was reimagined to be a probilistic form
+of [natural deduction](https://en.wikipedia.org/wiki/Natural_deduction).
+
+For reasons unclear to me as I write this, the implementation required
+function composition as a basic inference rule. It was realized as beta
+reduction, with all the trimmings.  For example, using Gentzen tree
+notation, one might have an expression of the form
+```
+    P(x)->Q(x) ,  x=A(y)
+    -----------------------
+           Q(A(y))
+```
+The representation of `P(x)->Q(x)` is as written earlier.
+```
+	(RuleLink
+		(VariableList ... x ....)
+		(P ... x ...)
+		(Q ... x ...))
+```
+This is already written in prenex form, so that the vardecls come first,
+and any other variables that appear in `P` or `Q` are "block scope", and
+are not externalized as the "input connectors" of the rule.
+
+The `A(y)` has the representation
+```
+	(Lambda
+		(VariableList ... y ...)
+		(A ... y ...))
+```
+and the trick is to create `Q(A(y))` also having this lambda form. That
+means disassembling `Q(x)` into its vardecls and body, and also
+disassembling `A(y)`, plugging the body of `A` into the slots `x` of
+`Q` (i.e. "beta-reducing"), then performing any additional reducts that
+might be available to the combined expression, then re-assembling a
+brand-new lambda, having `y` as the vardecls, and the `QA` reduction as
+the body. The vardecls for `x` are discarded.
+
+The vardecls are managed by `ScopeLink`; this is the base class for both
+`LambdaLink` and others. The distinction is that `ScopeLink` only deals
+with variable binding, while `LambdaLink` is reserved for functions. For
+example, the expression "`forall x, P(x)`" binds the variable `x`, but
+it is not a function, and thus not a lambda. So, `ForAllLink` inherits
+from `ScopeLink`, not `LambdaLink`.
+
+The dis-assembly/re-assembly of `Q` and `A` is managed by `RewriteLink`;
+it inherits from `ScopeLink` since the management of the vardecls is an
+intimate part of the rewriting.
+
+Some rewrites have the form
+```
+    P(x)->Q(x,y) ,  x=A(z)
+    -----------------------
+           QA(z,y))
+```
+This requires disassmebling the vardecl for `Q(x,y)`, and pulling out
+the vardecl for `z` out of `A(z)`, and then assembling a new vardecl
+`(z,y)`. This disassembly-reassembly brings the final expression back
+into prenex form.
+
+The original `RewriteLink` is not sophisticated enough to perform the
+required re-assembly (rewrite) of the vardecls; the `PrenexLink`
+provides this.
+
+Note the complex recursive nature of the explanations above. We start by
+imaginging Gentzen tree notation to be an "inference rule", but are
+promptly lead to discussions of re-writes applied to vardecls. Worse,
+these re-writes are ad-hoc, implemented in c++ code, and are NOT overtly
+expressed in Atomese.
+
+
+Ugh
+
+
+RuleLink inherits from PrenexLink. Prenex does rewriting, keeping things
+in prenex form. Which inherits from RewriteLink.
+
+ScopeLink handles vardecl only. GuardLink can inherit from Scope.
+Rewrite can inherit from Guard.
 
 
 
@@ -467,11 +552,9 @@ complexity. ..
 guards as connection
 rules as rewrite
 as flows
-rewrite
-output type
 
-PatternLink
 GuardLink
+Prenex, rule fro guard
 
 ### TODO
 * Fix Connectors so that they can be named and typed as expected.
