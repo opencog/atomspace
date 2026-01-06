@@ -292,7 +292,98 @@ bundle of subclauses against which the pattern is compared. (As written
 it has to be a `SetLink`, the `LinkValue` is ordered, and we don't
 currently have an `UnorderedValue` that would be required here.)
 
-... above is complicated ...
+The wiki page for [RuleLink](https://wiki.opencog.org/w/RuleLink) does
+give the form
+```
+	(RuleLink
+		(VariableList ...)
+		(And
+			(premises 1)
+			...
+			(premise K))
+		(conclusion 1)
+		...
+		(conclusion N))
+```
+so perhaps we should accept that the `GuardLink` can be just the first
+half of that, and that, in practice, when used for filtering, only one
+of the premises will be a `PresentLink`, and the rest will be
+evaluatables.
+
+### Typing Equivariance
+Historically, typing constraints were designed to be part of the
+vardecl, specified with `TypedVariableLink`. Why? Because that is
+how C++ and Java do it: they langs put thier type constraints in the
+function declaration. But here, in Atomese, we can move the type
+constraints into the body, as predicates: e.g.
+```
+	(Rule
+		(Variable "$x")
+		(And
+			(Equal (TypeOf (Variable "$x") (Type 'Concept)))
+			(Present ...))
+		(conclusion ...))
+```
+is semantically identical to
+```
+	(Rule
+		(TypedVariable (Variable "$x") (Type 'Concept))
+		(Present ...)
+		(conclusion ...))
+```
+These two forms are equivariant(?). Either will do.
+
+There is no rewrite rule that will rewrite one into the other!
+
+... but also patterns can be signatures ...
+
+### Connectivity
+The `RuleLink` as specified above presents a challenge to the
+connectionist approach to constraint satifaction. The sheaf design
+expects the form
+```
+	(ConnectorSeq
+		(Connector
+			(Variable "$x")
+			(Type 'Concept)
+			(Sex "input"))
+		...
+		(Connector
+			(Type ...)
+			(Sex "output")))
+```
+The `VariableList` is obviously a `ConnectorSeq` with implicit input
+`SexNode`s. What's missing in the `RuleLink` is any description of the
+output connector. That because in most applications we don't care; just
+run the filter, and whatever comes out, comes out. That is, there is an
+implicit
+```
+	(Connector
+		(Type 'Value)
+		(Sex "output"))
+```
+present in every `RuleLink`. This connector is anonymous. Now comes
+something to trip across. If we want to name it, should we write
+```
+	(Connector
+		(NameNode "my favorite output port")
+		(Type 'Value)
+		(Sex "output"))
+```
+or
+```
+	(Connector
+		(VariableNode "my favorite output port")
+		(Type 'Value)
+		(Sex "output"))
+```
+As explained earlier, the intent of `NameNode` is to name specific data
+streams, and not to name output ports ...
+```
+	(RuleLink
+```
+
+
 simplest derevied classes from RuleLink so to be modular design ...
 
 The need to evaluate guard when doing connectionist rules.
