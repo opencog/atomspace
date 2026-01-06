@@ -254,11 +254,54 @@ one-at-a-time, arriving via `FilterLink`.
 
 ### GuardLink
 The current `FilterLink` does not avail itself of this analysis. Or
-rather,
+rather, the analysis provided by `PatternLink` is custom-tailored for
+graph walks of the entire AtomSpace, and not for element processing.
 
+The current `RuleLink` does do this, but (in it's current form) is
+minimalist: It will accept arbitrary `VariableList` variable
+declarations, but effectively has only a single `PresentLink` as the
+stand-in for the premise `P(x)`.
+
+In analogy to `MeetLink`, I think we want to define a `GuardLink`, of
+the form
+```
+	(GuardLink
+		(VariableList ...)
+		(Present ...) ; only one is possible; or a ChoiceLink
+		(And
+			(... zero or more evaluatable predicates...)))
+```
+such that, when executed, it indicates whether the `PresentLink` is
+satisfiable by the provided "input" item (thus acting as a filter),
+then evaluating the predicates (which must all evaluate to true). The
+result of execution must be not only the true/false of satisfiability,
+but also the specific groundings of the variables, so that these can be
+used in the rewrite (instantiation) `x->Q(x)` part of the rule.
+
+Note that (very unlike `PatternLink`) the above can only have *one*
+`PresentLink`, as the input item is presumed to be a specific tree.
+(viz just one `Link` or `Value`) Of course, the `ChoiceLink` can stand
+in the place of the `PresentLink`, to provide a choice of clauses to
+match against. The point is there must be only one clause, in the end.
+
+With some squinting, though, the multi-clause structure of the
+`PatternLink` can be thought of as a single clause, the unordered set
+`AndLink` of sub-clauses, all of which must appear in the input stream,
+where each element of the input stream is a `SetLink` that holds a
+bundle of subclauses against which the pattern is compared. (As written
+it has to be a `SetLink`, the `LinkValue` is ordered, and we don't
+currently have an `UnorderedValue` that would be required here.)
+
+... above is complicated ...
+simplest derevied classes from RuleLink so to be modular design ...
+
+The need to evaluate guard when doing connectionist rules.
+
+The fact that guard looks like a connectorSeq with lots of extra
+complexity. ..
 
 guards as connection
-rules as rewrte
+rules as rewrite
 as flows
 rewrite
 output type
