@@ -454,12 +454,19 @@ representations. Sex and Bond are the most conveniant for the simple
 cases, but don't generalize (easily).
 
 ### Rewriting
-The use of RuleLink for filtering might be a mis-feature. It was
-designed for beta-reducing lambda bodies, not for filtering. Perhaps
-mashing up these two distinct concepts is bad design.
+A short review of the history of the `RuleLink` is in order.
 
-The URE was an attempt to implement an engine for realizing PLN (it was
-to be usable for general rewriting, too, but that never materialized).
+The URE was an attempt to implement an inference engine for realizing
+PLN. It was hoped that the URE would be usable for general rewriting,
+too, but that never materialized. Part of the issue is driven by
+confusion as to what a rule is, and what a rewrite is. Additional
+confusion is driven by the demands of various different users and thier
+expectations for what the API would be. The rule engine needed to
+implement purchase orders for office-chair requistions routed through
+accounting, management, shipping&receiving has broad similarities to the
+rule engine inside of the RelEx relationship extractor; inventing an API
+suitable for both requires serious work that was never undertaken.
+
 The original definition of PLN was reimagined to be a probilistic form
 of [natural deduction](https://en.wikipedia.org/wiki/Natural_deduction).
 
@@ -523,18 +530,55 @@ The original `RewriteLink` is not sophisticated enough to perform the
 required re-assembly (rewrite) of the vardecls; the `PrenexLink`
 provides this.
 
+To summarize: `RuleLink` inherits from `PrenexLink`. `Prenex` inherits
+from `RewriteLink`; this inherits from `ScopeLink`.
+
+### Proof-theoretic muddle
 Note the complex recursive nature of the explanations above. We start by
 imaginging Gentzen tree notation to be an "inference rule", but are
 promptly lead to discussions of re-writes applied to vardecls. Worse,
 these re-writes are ad-hoc, implemented in c++ code, and are NOT overtly
 expressed in Atomese.
 
+More generally, we have a muddle, partly intentional, and partly
+accidental, as to what a "rule" is, in the first place. Is it an
+inference rule? Well, yes. Is it an axiom schema? Well, that too.
 
-Ugh
+This has consequences. Using RuleLinks for both axiom schemas and also
+for inference rules requires `QuoteLink` to be conjured up. Why? When an
+inference rule is applied to an axiom schema, the schema is necessaily
+an un-evaluated literal, a constant expression; only the inference rule
+itself is being evaluated. But since these both "look alike", one must
+be quoted to prevent it's evaluation.  This is a valid way of going
+about things, but dramaitcally increases the complexity of the inference
+rules.
+
+The rewrite of vardecls provides a concrete example. If we have, as
+above, the expressions
+```
+	(Fiddle
+		(VariableList (Variable "x") (Variable "y"))
+		(Stuff))
+```
+and
+```
+	(Faddle
+		(Variable "z")
+		(Glop))
+```
+and desire the above to be rewritten into
+```
+	(VariableList (Variable "z") (Variable "y"))
+```
+then how, exactly, do we write the `RuleLink` that specifies this
+rewrite? It can be done, but I don't want to even try; its complicated.
+
+To the extent that it turns into a mess will indicate a failure of the
+Atomese infrastructure for graph rewriting. This is an exercise that
+must be eventually undertaken, but ... not yet.
 
 
-RuleLink inherits from PrenexLink. Prenex does rewriting, keeping things
-in prenex form. Which inherits from RewriteLink.
+
 
 ScopeLink handles vardecl only. GuardLink can inherit from Scope.
 Rewrite can inherit from Guard.
