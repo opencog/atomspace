@@ -313,9 +313,10 @@ evaluatables.
 ### Typing Equivariance
 Historically, typing constraints were designed to be part of the
 vardecl, specified with `TypedVariableLink`. Why? Because that is
-how C++ and Java do it: they langs put thier type constraints in the
-function declaration. But here, in Atomese, we can move the type
-constraints into the body, as predicates: e.g.
+how C++ and Java do it: these languages put thier type constraints
+in the function declaration. But here, in Atomese, we have more
+freedom, and can move the type constraints into the body, as
+predicates: e.g.
 ```
 	(Rule
 		(Variable "$x")
@@ -324,14 +325,46 @@ constraints into the body, as predicates: e.g.
 			(Present ...))
 		(conclusion ...))
 ```
-is semantically identical to
+The above appears to have the same meaning as the below:
 ```
 	(Rule
 		(TypedVariable (Variable "$x") (Type 'Concept))
 		(Present ...)
 		(conclusion ...))
 ```
-These two forms are equivariant. Either will do.
+These two forms are equivariant. Are they "semantically equivalent",
+and in what sense? They seem to be very nearly equivalent from the
+stream processing point of view. The second form might be slightly more
+efficient for the algo doing the processing, maybe. If there is some
+pattern analysis to be applied "at compile time", the second form has
+clear advantages (see the implementation of `PatternLink` as a concrete
+example.)
+
+However, from the connectionist form, where some rule engine will be
+determining how connectors can mate, the second form has huge
+advantages. It clearly cannot be mated to any output connector that does
+generate ConceptNodes, or a super-type of Concepts. The first form will
+mate to any type. If we are building up data processing networks with
+a rule engine, this would be useless, if this input was connected to
+something that produces e.g. only Predicates.
+
+This is why e.g. c++ and java have type restrictions in the function
+declarations; they can be analyzed at compile time. CaML is the extreme
+case. Python claims "lazy typing", making it easier for the human, at
+some runtime penalty. Python was inspired by Lisp, which attempted to
+avoid typing, but finds it impossible to evade, in the end. For Atomese,
+we can have it both ways, it would seem. And since they are equivariant,
+we can even hoist EqualLinks out of the body and into type declarations.
+
+But this is very hand-wavey. In the above example, the `EqualLink` has a
+very specific form. How much, exactly, can be hoisted? Is this like the
+duality between lambdas and combinators, which are in one-to-one
+correspondence? Or is the collection of possible rewrites much more
+limited?
+
+Combinators were rewriting lambda function bodies, whole-sale. Here. we
+are rewriting into types. Can we rewrite function bodies whole-sale,
+into types? This seems impossible. I'm confused. Wtf.
 
 Defining a rewrite rule that will transform the one into the other would
 be an interesting challenge, as it would stress the ability to perform
