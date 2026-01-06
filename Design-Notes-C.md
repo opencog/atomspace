@@ -331,11 +331,38 @@ is semantically identical to
 		(Present ...)
 		(conclusion ...))
 ```
-These two forms are equivariant(?). Either will do.
+These two forms are equivariant. Either will do.
 
-There is no rewrite rule that will rewrite one into the other!
+Defining a rewrite rule that will transform the one into the other would
+be an interesting challenge, as it would stress the ability to perform
+such homotopic rewrites. The syntactic issues needed to specify the
+rewrite would pose considerable challanges. The URE used QuoteLinks
+extensively to do this; I doubt that this was the correct or wise way
+of doing this.
 
-... but also patterns can be signatures ...
+This extends to more complex Signature types. So, for example:
+```
+	(Rule
+		(VariableList (Variable "$x") (Variable "$y"))
+		(Present (Variable "$y"))
+		(Equal
+			(Variable "$y")
+			(Edge (Predicate "foo")
+				(List (Variable "$x") (Concpet "bar"))))
+		...)
+```
+can be written as
+```
+	(Rule
+		(TypedVariable (Variable "$y")
+			(Signature
+				(Edge (Predicate "foo")
+					(List (TypeNode 'Atom) (Concpet "bar")))))
+		(Present (Variable "$y"))
+		...)
+```
+where the named but unused `(Variable "$x")` is replaced by the
+anonymous `(TypeNode 'Atom)`.
 
 ### Connectivity
 The `RuleLink` as specified above presents a challenge to the
@@ -378,10 +405,23 @@ or
 		(Sex "output"))
 ```
 As explained earlier, the intent of `NameNode` is to name specific data
-streams, and not to name output ports ...
-```
-	(RuleLink
-```
+streams, and not to name output ports. But it is handy to have the
+`NameNode` be distinct, because it serves the "opposite" purpose: the
+named variables are used to hook up internal wiring diagrams, inside of
+lambdas, while `NameNodes` can then be used exclusively for the external
+wiring, between lambdas.
+
+This seems to make sense and to be intuitive, as long as there are two
+sexes, "input" and "output". More than two (e.g. left/right, by
+head/dependent, vowel/consonant, etc.) start to create issues, which we
+avoid for now. Suffice to say that some sexes, e.g. vowel/consonant, can
+also be encoded by bond subtypes (i.e. how Link Grammar currently does
+this for English a/an phonemes.) Again, there seem to be equivariant
+representations. Sex and Bond are the most conveniant for the simple
+cases, but don't generalize (easily).
+
+
+
 
 
 simplest derevied classes from RuleLink so to be modular design ...
