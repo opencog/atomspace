@@ -470,65 +470,118 @@ suitable for both requires serious work that was never undertaken.
 The original definition of PLN was reimagined to be a probilistic form
 of [natural deduction](https://en.wikipedia.org/wiki/Natural_deduction).
 
-For reasons unclear to me as I write this, the implementation required
-function composition as a basic inference rule. It was realized as beta
-reduction, with all the trimmings.  For example, using Gentzen tree
-notation, one might have an expression of the form
+Consider the following inference rule, written in Gentzen notation:
 ```
-    P(x)->Q(x) ,  x=A(y)
-    --------------------
-           Q(A(y))
+    P(x)->Q(x) ,  Q(y)->R(y)
+    ------------------------
+           P(z)->R(z)
 ```
-The representation of `P(x)->Q(x)` is as written earlier.
+Using sequent calculus notation, it would be written as
+```
+	P(z)->R(z) |- P(x)->Q(x) ,  Q(y)->R(y);
+```
+This is more-or-less Prolog notation or ASP (answer set programming)
+notation.  The variables `x`, `y`, `z` might be single variables, or
+they might be sets of many variables.
+
+For the present discussion, it is useful to write the implication using
+the `ImplicationLink`. Thus, the representation of `P(x)->Q(x)` is now
+written much like before, but we use a different link type:
+```
+	(ImplicationLink
+		(VariableList ... (Variable "x") ....)
+		(P ... (Variable "x") ...)
+		(Q ... (Variable "x") ...))
+```
+Notice that this is in prenex form, so that the vardecls come first. If
+there are any other variables that appear in `P` or `Q`, they are "block
+scope", and are not externalized as the "input connectors" of the link.
+
+How is this to be represented in Atomese? Well, apparently as
 ```
 	(RuleLink
-		(VariableList ... x ....)
-		(P ... x ...)
-		(Q ... x ...))
+		(VariableList
+			(Variable "$vardecl-x")
+			(Variable "$vardecl-y")
+			(Variable "$P")
+			(Variable "$Q")
+			(Variable "$R"))
+		(And
+			(LocalQuote
+				(Implication
+					(Variable "$vardecl-x")
+					(Variable "$P")
+					(Variable "$Q")))
+			(LocalQuote
+				(Implication
+					(Variable "$vardecl-y")
+					(Variable "$Q")
+					(Variable "$R"))))
+		(LocalQuote
+			(Implication
+				(Variable "$vardecl-x")
+				(Variable "$P")
+				(Variable "$R"))))
 ```
-This is already written in prenex form, so that the vardecls come first,
-and any other variables that appear in `P` or `Q` are "block scope", and
-are not externalized as the "input connectors" of the rule.
+The `AndLink` says that there are two premises, to be combined. The
+`LocalQuoteLink` says that each part is a literal, and not to be
+interpreted.  The deluge of `Variables` are used to decompose the
+inputs into thier component parts.
 
-The `A(y)` has the representation
+In the above, it might have been more correct to use `PresentLink`
+instead of `LocalQuote`, but historically, the `LocalQuote` got used.
+
+The variable declarations probably should have been written as
 ```
-	(Lambda
-		(VariableList ... y ...)
-		(A ... y ...))
+	(RuleLink
+		(VariableList
+			(TypedVariable (Variable "$vardecl-x")
+				(TypeChoice
+					(Type 'Variable)
+					(Type 'TypedVariable)
+					(Type 'VariableList)))
+
+			(TypedVariable (Variable "$vardecl-y")
+				(TypeChoice
+					(Type 'Variable)
+					(Type 'TypedVariable)
+					(Type 'VariableList)))
+
+			(TypedVariable (Variable "$P") (Type 'Link))
+			(TypedVariable (Variable "$Q") (Type 'Link))
+			(TypedVariable (Variable "$R") (Type 'Atom)))
+	...)
 ```
-and the trick is to create `Q(A(y))` also having this lambda form. That
-means disassembling `Q(x)` into its vardecls and body, and also
-disassembling `A(y)`, plugging the body of `A` into the slots `x` of
-`Q` (i.e. "beta-reducing"), then performing any additional reducts that
-might be available to the combined expression, then re-assembling a
-brand-new lambda, having `y` as the vardecls, and the `QA` reduction as
-the body. The vardecls for `x` are discarded.
+This asserts that in the decomposition into parts, the vardecls really
+are vardecls, and not just blobs. The `TypeChoice` just says that we
+can match vardecls in any of several forms.
 
-The vardecls are managed by `ScopeLink`; this is the base class for both
-`LambdaLink` and others. The distinction is that `ScopeLink` only deals
-with variable binding, while `LambdaLink` is reserved for functions. For
-example, the expression "`forall x, P(x)`" binds the variable `x`, but
-it is not a function, and thus not a lambda. So, `ForAllLink` inherits
-from `ScopeLink`, not `LambdaLink`.
+Note that the above acts as a guard: if the expression does not match,
+then the rule cannot be applied. This motivates the development of the
+`GuardLink` as a base class. (The `GuardLink` does not exist yet... but
+it will, soon(?).)
 
-The dis-assembly/re-assembly of `Q` and `A` is managed by `RewriteLink`;
-it inherits from `ScopeLink` since the management of the vardecls is an
-intimate part of the rewriting.
+The vardecls are managed by `ScopeLink`; this is the base class for
+`RuleLink`, `LambdaLink` and several others. The `ScopeLink` only deals
+with variable binding in a general setting. Th `LambdaLink` is reserved
+for functions. For example, the expression "`forall x, P(x)`" binds the
+variable `x`, but it is not a function, and thus not a lambda. We
+conclude that `ForAllLink` would need to inherit from `ScopeLink`, and
+not `LambdaLink`, even though they are syntactically identical.
 
-Some rewrites have the form
-```
-    P(x)->Q(x,y) ,  x=A(z)
-    ----------------------
-           QA(z,y))
-```
-This requires disassmebling the vardecl for `Q(x,y)`, and pulling out
-the vardecl for `z` out of `A(z)`, and then assembling a new vardecl
-`(z,y)`. This disassembly-reassembly brings the final expression back
-into prenex form.
+The dis-assembly/re-assembly of the `ImplicationLink`s into parts is
+managed by `RewriteLink`; it inherits from (builds on) `ScopeLink`; the
+vardecls are managed by `Scope`, the rewriting by `Rewrite`.
 
-The original `RewriteLink` is not sophisticated enough to perform the
-required re-assembly (rewrite) of the vardecls; the `PrenexLink`
-provides this.
+Some rewrites are not of the direct form shown above, but can leave
+vardecls stranded inside of function bodies. This is fixed with the
+`PrenexLink`, which inherits from `RewriteLink`, and provides some
+additional code to move variables out, and create a final expression
+that is in prenex form. This typpically is triggered by inference rules
+for function composition. For example, suppose we have functions
+(lambdas) `f(x,y)` and `g(z,w)` and we wish to create `f(x,g(z,w))`
+This requires moving the embedded vars `z,w` to the left, so that the
+final form is a prenex `(fg)(x,z,w)`. The `PrenexLink` deals with this.
 
 To summarize: `RuleLink` inherits from `PrenexLink`. `Prenex` inherits
 from `RewriteLink`; this inherits from `ScopeLink`.
