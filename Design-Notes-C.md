@@ -476,7 +476,7 @@ reduction, with all the trimmings.  For example, using Gentzen tree
 notation, one might have an expression of the form
 ```
     P(x)->Q(x) ,  x=A(y)
-    -----------------------
+    --------------------
            Q(A(y))
 ```
 The representation of `P(x)->Q(x)` is as written earlier.
@@ -518,7 +518,7 @@ intimate part of the rewriting.
 Some rewrites have the form
 ```
     P(x)->Q(x,y) ,  x=A(z)
-    -----------------------
+    ----------------------
            QA(z,y))
 ```
 This requires disassmebling the vardecl for `Q(x,y)`, and pulling out
@@ -533,50 +533,57 @@ provides this.
 To summarize: `RuleLink` inherits from `PrenexLink`. `Prenex` inherits
 from `RewriteLink`; this inherits from `ScopeLink`.
 
-### Proof-theoretic muddle
-Note the complex recursive nature of the explanations above. We start by
-imaginging Gentzen tree notation to be an "inference rule", but are
-promptly lead to discussions of re-writes applied to vardecls. Worse,
-these re-writes are ad-hoc, implemented in c++ code, and are NOT overtly
-expressed in Atomese.
+### Gentzen notation
+Above, we wrote the inference rule for function composition using
+Gentzen notation:
+```
+    P(x)->Q(x) ,  x=A(y)
+    --------------------
+           Q(A(y))
+```
+How is this to be represented in Atomese? Well, apparently as
+```
+	(RuleLink
+		(VariableList
+			(Variable "$vardecl-x") (Variable "$P") (Variable "$Q")
+			(Variable "$vardecl-y") (Variable "$A"))
+		(And
+			(LocalQuote
+				(Rule
+					(Variable "$vardecl-x")
+					(Variable "$P")
+					(Variable "$Q")))
+			(LocalQuote
+				(Lambda
+					(Variable "$vardecl-y")
+					(Variable "$A"))))
+		(LocalQuote
+			(Lambda
+				(Variable "$vardecl-y")
+				(PutLink
+					(Variable "$vardecl-x")
+					(Variable "$Q")
+					(Variable "$A")))))
+```
+The `AndLink` says that there are two premises, to be combined. The
+`LocalQuoteLink` says that each part is a literal, and not to be
+interpreted. The deluge of `Variables` are used to decompose the inputs
+into thier component parts. The `PutLink` is used to perform the actual
+beta-reduction: Whatever it was that was `A` is substituted for `x` in
+the body of `Q`. None of these are quoted: we want the `PutLink` to run,
+and do it's work.
 
-More generally, we have a muddle, partly intentional, and partly
-accidental, as to what a "rule" is, in the first place. Is it an
-inference rule? Well, yes. Is it an axiom schema? Well, that too.
+Note the dual use of `RuleLink`. In one place, it is used to represent
+the inference rule `Q(A(y)) |- P(x)->Q(x),x=A(y)` and in the other place
+to represent the axiom schema `P(x)->Q(x)`. One representation for two
+somewhat distinct concepts in proof theory.  This risks muddle.
 
-This has consequences. Using RuleLinks for both axiom schemas and also
-for inference rules requires `QuoteLink` to be conjured up. Why? When an
-inference rule is applied to an axiom schema, the schema is necessaily
-an un-evaluated literal, a constant expression; only the inference rule
-itself is being evaluated. But since these both "look alike", one must
-be quoted to prevent it's evaluation.  This is a valid way of going
-about things, but dramaitcally increases the complexity of the inference
-rules.
-
-The rewrite of vardecls provides a concrete example. If we have, as
-above, the expressions
-```
-	(Fiddle
-		(VariableList (Variable "x") (Variable "y"))
-		(Stuff))
-```
-and
-```
-	(Faddle
-		(Variable "z")
-		(Glop))
-```
-and desire the above to be rewritten into
-```
-	(VariableList (Variable "z") (Variable "y"))
-```
-then how, exactly, do we write the `RuleLink` that specifies this
-rewrite? It can be done, but I don't want to even try; its complicated.
-
-To the extent that it turns into a mess will indicate a failure of the
-Atomese infrastructure for graph rewriting. This is an exercise that
-must be eventually undertaken, but ... not yet.
-
+Note that beta reduction appears twice in the above. The "obvious" one
+is the use of `PutLink` to assemble `Q(A(y))`. But before `PutLink` can
+be executed, it itself needs to be assembled. That is, all three
+variables "$vardecl-x", "$Q", "$A" have to be plugged in beforehand.
+This plugging is done by the `RewriteLink` base class. Adjustments made
+by `PrenexLink`, as needed.
 
 
 
