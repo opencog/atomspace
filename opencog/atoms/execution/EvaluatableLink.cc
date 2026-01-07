@@ -94,8 +94,6 @@ static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
 		return fv->value()[0];
 	}
 
-	if (silent)
-		throw NotEvaluatableException();
 	throw SyntaxException(TRACE_INFO,
 		"Don't know how to do arithmetic with this: %s",
 		pap->to_string().c_str());
