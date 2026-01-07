@@ -66,22 +66,22 @@ void FilterLink::init(void)
 	// type-guarding with GuardLink.
 	if (nameserver().isA(tscope, GUARD_LINK))
 	{
-		_pattern = GuardLinkCast(termpat);
+		_guard_ptrn = GuardLinkCast(termpat);
 	}
 	else
 	{
 		FreeVariables fv;
 		fv.find_variables(termpat);
 		Handle decl(createVariableSet(std::move(fv.varseq)));
-		_pattern = createGuardLink(HandleSeq{decl, termpat});
+		_guard_ptrn = createGuardLink(HandleSeq{decl, termpat});
 	}
-	_mvars = &_pattern->get_variables();
+	_mvars = &_guard_ptrn->get_variables();
 
 	// RuleLinks are a special type of ScopeLink.  They specify a
 	// re-write that should be performed.  Viz, RuleLinks are
 	// of the form P(x)->Q(x).  Here, the `_rewrite` is the Q(x)
 	if (nameserver().isA(tscope, RULE_LINK))
-		_rewrite = RuleLinkCast(HandleCast(_pattern))->get_implicand();
+		_rewrite = RuleLinkCast(HandleCast(_guard_ptrn))->get_implicand();
 }
 
 FilterLink::FilterLink(const Handle& pattern, const Handle& term)
@@ -121,12 +121,12 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	ValueMap valmap;
-	if (not _pattern->guard(vterm, valmap, scratch, silent))
+	if (not _guard_ptrn->guard(vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
 	// Special case for signatures. The extract already rejected
 	// mis-matches, if any. Thus, we are done, here.
-	const Handle& body(_pattern->get_body());
+	const Handle& body(_guard_ptrn->get_body());
 	if (body->is_type(TYPE_NODE) or
 	    (body->is_type(TYPE_OUTPUT_SIG) and
 	       (not body->is_type(LINK_SIGNATURE_LINK))))

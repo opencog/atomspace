@@ -42,7 +42,8 @@ namespace opencog
 class FilterLink : public FunctionLink
 {
 protected:
-	GuardLinkPtr _pattern;
+	// Guard that does the actual filtering part of the work.
+	GuardLinkPtr _guard_ptrn;
 	const Variables* _mvars;
 
 	// Rules will have a rewrite
