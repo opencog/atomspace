@@ -100,11 +100,12 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			// Inside of loop is cut-n-paste of that below.
 			std::vector<double> dvec;
 			dvec.reserve(vpe->size());
-			for (const ValuePtr& v : LinkValueCast(vpe)->value())
+			for (ValuePtr vp : LinkValueCast(vpe)->value())
 			{
 				// Execute, if its a handle. Is that overkill, or is
 				// it needed? When would a vector of functions arise?
-				ValuePtr vp(exec_for_value(as, silent, v));
+				if (vp->is_atom())
+					vp = HandleCast(vp)->execute(as, silent);
 
 				// Expecting exactly one float per item. That's because
 				// I don't know what it means if there is more than one,

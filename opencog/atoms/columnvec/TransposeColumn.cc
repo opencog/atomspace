@@ -93,8 +93,8 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	ValueSeq vcols;
 	for (ValuePtr vp: vrows)
 	{
-		if (vp->is_atom() and HandleCast(vp)->is_executable())
-			vp = exec_for_value(as, silent, vp);
+		if (vp->is_atom())
+			vp = HandleCast(vp)->execute(as, silent);
 
 		if (0 == ncols)
 		{
