@@ -63,19 +63,21 @@ void FilterLink::init(void)
 		tscope = termpat->get_type();
 	}
 
-	// First argument must be a function of some kind.  All functions
-	// are specified using a ScopeLink, to bind the input-variables.
-	if (nameserver().isA(tscope, SCOPE_LINK))
+	// First argument must be a function of some kind.
+	// We convert all functions to guarded functions,
+	// first, to manage the input-variables and the beta
+	// reduction with ScopeLink, and second, to do
+	// type-guarding with GuardLink.
+	if (nameserver().isA(tscope, GUARD_LINK))
 	{
-		_pattern = ScopeLinkCast(termpat);
+		_pattern = GuardLinkCast(termpat);
 	}
 	else
 	{
-		const Handle& body = termpat;
 		FreeVariables fv;
-		fv.find_variables(body);
+		fv.find_variables(termpat);
 		Handle decl(createVariableSet(std::move(fv.varseq)));
-		_pattern = createScopeLink(std::move(decl), body);
+		_pattern = createGuardLink(HandleSeq{decl, termpat});
 	}
 	_mvars = &_pattern->get_variables();
 	_varset = &_mvars->varset;
