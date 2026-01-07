@@ -59,6 +59,14 @@ bool GuardLink::eval_guard(const ValueMap& varmap, AtomSpace*, bool) const
 	return true;
 }
 
+bool GuardLink::guard(const ValuePtr& gnd, ValueMap& valmap,
+                      AtomSpace* scratch, bool silent) const
+{
+	bool ok = extract(_body, gnd, valmap, scratch, silent);
+	if (not ok) return false;
+	return eval_guard(valmap, scratch, silent);
+}
+
 // ===============================================================
 
 /// Recursive tree-compare-and-extract grounding values.

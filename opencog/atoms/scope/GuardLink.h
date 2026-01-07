@@ -53,19 +53,13 @@ public:
 	GuardLink(const GuardLink &) = delete;
 	GuardLink& operator=(const GuardLink &) = delete;
 
-
 	/// Determine if the proposed grounding `gnd` is compatible with
 	/// the variable declarations of this ScopeLink. If it is, then
 	/// extract groundings for the bound variables (by pattern matching.)
 	/// Returns true if a grounding is possible; with groundings returned
 	/// in `valmap`.
 	bool guard(const ValuePtr& gnd, ValueMap& valmap,
-	           AtomSpace* scratch, bool silent=false) const
-	{
-		bool ok = extract(_body, gnd, valmap, scratch, silent);
-		if (not ok) return false;
-		return eval_guard(valmap, scratch, silent);
-	}
+	           AtomSpace* scratch, bool silent=false) const;
 
 	static Handle factory(const Handle&);
 };
