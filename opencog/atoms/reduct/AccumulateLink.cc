@@ -44,7 +44,7 @@ void AccumulateLink::init(void)
 
 ValuePtr AccumulateLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vi(exec_for_value(as, silent, _outgoing[0]));
+	ValuePtr vi(_outgoing[0]->execute(as, silent));
 	Type vitype = vi->get_type();
 
 	// If its a plain number, assume it's a vector, and sum.

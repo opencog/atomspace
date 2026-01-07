@@ -105,7 +105,7 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
                            double (*fun)(double),
                            ValuePtr& vx)
 {
-	vx = exec_for_value(as, silent, arg);
+	vx = arg->execute(as, silent);
 
 	// get_vector gets numeric values, if possible.
 	Type vxtype;
@@ -139,8 +139,8 @@ NumericFunctionLink::apply_func(AtomSpace* as, bool silent,
                            double (*fun)(double, double),
                            ValueSeq& reduction)
 {
-	ValuePtr vx(exec_for_value(as, silent, args[0]));
-	ValuePtr vy(exec_for_value(as, silent, args[1]));
+	ValuePtr vx(args[0]->execute(as, silent));
+	ValuePtr vy(args[1]->execute(as, silent));
 
 	// get_vector gets numeric values, if possible.
 	Type vxtype;

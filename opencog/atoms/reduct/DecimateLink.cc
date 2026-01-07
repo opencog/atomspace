@@ -48,12 +48,12 @@ void DecimateLink::init(void)
 ValuePtr DecimateLink::execute(AtomSpace* as, bool silent)
 {
 	// The vector we're planning on cutting down.
-	ValuePtr vi(exec_for_value(as, silent, _outgoing[1]));
+	ValuePtr vi(_outgoing[1]->execute(as, silent));
 
 	// Lets see what kind of mask this is. We accept three kinds:
 	// A BoolValue, NumberNode and FloatValue
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vm(exec_for_value(as, silent, _outgoing[0]));
+	ValuePtr vm(_outgoing[0]->execute(as, silent));
 	Type mtype = vm->get_type();
 	if (BOOL_VALUE == mtype)
 	{

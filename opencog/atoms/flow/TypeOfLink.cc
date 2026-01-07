@@ -49,7 +49,7 @@ ValuePtr TypeOfLink::execute(AtomSpace* as, bool silent)
 	HandleSeq tipes;
 	for (const Handle& h : _outgoing)
 	{
-		ValuePtr vi(exec_for_value(as, silent, h));
+		ValuePtr vi(h->execute(as, silent));
 		Type t = vi->get_type();
 		tipes.emplace_back(as->add_atom(HandleCast(createTypeNode(t))));
 	}

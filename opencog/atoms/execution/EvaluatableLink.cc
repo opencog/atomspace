@@ -69,9 +69,9 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 /// Extract a single floating-point double out of an atom, that,
 /// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
-static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
+static double get_numeric_value(AtomSpace* as, bool silent, const Handle& h)
 {
-	ValuePtr pap(exec_for_value(as, silent, h));
+	ValuePtr pap(h->execute(as, silent));
 	Type t = pap->get_type();
 
 	if (nameserver().isA(t, LINK_VALUE))
