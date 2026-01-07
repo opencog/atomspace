@@ -50,13 +50,13 @@ void RewriteLink::init(void)
 }
 
 RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
-	: ScopeLink(HandleSeq({vars, body}), REWRITE_LINK), _silent(false)
+	: GuardLink(HandleSeq({vars, body}), REWRITE_LINK), _silent(false)
 {
 	init();
 }
 
 RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
-	: ScopeLink(std::move(oset), t), _silent(false)
+	: GuardLink(std::move(oset), t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();

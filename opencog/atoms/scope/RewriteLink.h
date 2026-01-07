@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_REWRITE_LINK_H
 #define _OPENCOG_REWRITE_LINK_H
 
-#include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/scope/GuardLink.h>
 
 namespace opencog
 {
@@ -43,7 +43,7 @@ namespace opencog
 /// edit and create PatternLinks on the fly, thus allowing different
 /// kinds of queries to be generated and run as chaining proceeds.
 ///
-class RewriteLink : public ScopeLink
+class RewriteLink : public GuardLink
 {
 protected:
 	bool _silent;
