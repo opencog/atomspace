@@ -374,8 +374,8 @@ const GlobInterval Variables::get_interval(const Handle& var) const
  *
  * The resulting tree is NOT placed into any atomspace. If you want
  * that, you must do it yourself.  If you want evaluation or execution
- * to happen during substitution, then use either the EvaluationLink,
- * the ExecutionOutputLink, or the Instantiator.
+ * to happen during substitution, then use either the EvaluationLink or
+ * the ExecutionOutputLink.
  *
  * So, for example, if this VariableList contains:
  *

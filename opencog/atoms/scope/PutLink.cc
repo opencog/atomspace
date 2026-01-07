@@ -311,8 +311,7 @@ static inline Handle expand(const Handle& arg, bool silent)
  * GetLink, which always returns SetLinks, sometimes uneccesarily.
  *
  * Users who need a more complete apply-like environment should
- * look to the EvaluationLink, the ExecutionOutputLink, or the
- * Instantiator.
+ * look to the EvaluationLink or the ExecutionOutputLink.
  *
  * So, for example, if the PutLink looks like this:
  *

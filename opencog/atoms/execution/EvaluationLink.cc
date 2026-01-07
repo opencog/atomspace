@@ -51,11 +51,10 @@ EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
 /// offered a way to automate this in the catch-block, so that the
 /// pesky "silent" flag was not needed.)
 ///
-/// DefaultPatternMatchCB.cc and also Instantiator.cc both catch
-/// the NotEvaluatableException thrown here.  Basically, these
-/// know that they might be sending non-evaluatable atoms here, and
-/// don't want to garbage up the log files with bogus errors.
-/// (??? Don't know that this is true any more...)
+/// DefaultPatternMatchCB.cc catches the NotEvaluatableException thrown
+/// here.  Basically, it knows that it might be sending non-evaluatable
+/// atoms here, and doesn't want to garbage up the log files with bogus
+/// errors. (??? Don't know that this is true any more...)
 ///
 static void throwSyntaxException(bool silent, const char* message...)
 {
