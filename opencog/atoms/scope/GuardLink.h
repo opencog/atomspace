@@ -62,7 +62,7 @@ public:
 	bool guard(const ValuePtr& gnd, ValueMap& valmap,
 	           AtomSpace* scratch, bool silent=false) const
 	{
-		bool ok = extract(get_body(), gnd, valmap, scratch, silent);
+		bool ok = extract(_body, gnd, valmap, scratch, silent);
 		if (not ok) return false;
 		return eval_guard(valmap, scratch, silent);
 	}

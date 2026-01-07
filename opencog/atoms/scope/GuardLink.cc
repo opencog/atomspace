@@ -32,12 +32,12 @@ void GuardLink::init_globby_terms(void)
 {
 	_recursive_glob = false;
 
-	// Locate all GlobNodes in the pattern body
-	const Handle& body = get_body();
-	if (nullptr == body) return;
+	// Curiously, there might not be a _body...
+	if (nullptr == _body) return;
 
+	// Locate all GlobNodes in the pattern body
 	FindAtoms fgn(GLOB_NODE, true);
-	fgn.search_set(body);
+	fgn.search_set(_body);
 	for (const Handle& sh : fgn.least_holders)
 		_globby_terms.insert(sh);
 }
