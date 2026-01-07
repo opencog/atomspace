@@ -14,11 +14,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_LINK_H
@@ -117,10 +112,6 @@ public:
     virtual bool is_node() const { return false; }
     virtual bool is_link() const { return true; }
 
-    virtual Arity get_arity() const {
-        return _outgoing.size();
-    }
-
     virtual size_t size() const {
         return _outgoing.size();
     }
@@ -142,7 +133,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    virtual Handle getOutgoingAtom(Arity pos) const
+    virtual Handle getOutgoingAtom(size_t pos) const
     {
         return _outgoing.at(pos);
     }

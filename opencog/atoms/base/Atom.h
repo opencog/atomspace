@@ -17,11 +17,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_ATOM_H
@@ -523,13 +518,13 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual Arity get_arity() const { return size(); }
+    virtual size_t get_arity() const { return size(); }
 
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
-    virtual Handle getOutgoingAtom(Arity) const {
+    virtual Handle getOutgoingAtom(size_t) const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
