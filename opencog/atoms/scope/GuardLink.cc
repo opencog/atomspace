@@ -16,6 +16,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/flow/LinkSignatureLink.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/signature/TypeUtils.h>
@@ -24,9 +25,6 @@
 
 #include "GuardLink.h"
 #include "GlobMatch.h"
-
-// Needed for LinkSignatureLink handling in extract()
-#include <opencog/atoms/flow/LinkSignatureLink.h>
 
 using namespace opencog;
 
