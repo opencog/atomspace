@@ -518,7 +518,7 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual size_t get_arity() const { return size(); }
+    inline size_t get_arity() const { return size(); }
 
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
