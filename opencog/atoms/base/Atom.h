@@ -540,8 +540,7 @@ public:
     virtual bool is_evaluatable() const { return false; }
 
     virtual ValuePtr execute(AtomSpace*, bool silent=false) {
-        throw RuntimeException(TRACE_INFO,
-            "Not executable! %s", to_string().c_str());
+        return std::dynamic_pointer_cast<Atom>(shared_from_this());
     }
     virtual ValuePtr execute(void) { return execute(_atom_space, false); }
     virtual bool is_executable() const { return false; }
@@ -695,7 +694,6 @@ const Handle& truth_key(void);
 /// This is a strangely popular idiom. But it's homeless, unhoused.
 static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, const Handle& h)
 {
-	if (not h->is_executable()) return h;
 	return h->execute(as, silent);
 }
 static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, const ValuePtr& vptr)
