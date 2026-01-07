@@ -693,7 +693,12 @@ const Handle& truth_key(void);
 
 /// Execute the argument, and return the result of the execution.
 /// This is a strangely popular idiom. But it's homeless, unhoused.
-static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, ValuePtr vptr)
+static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, const Handle& h)
+{
+	if (not h->is_executable()) return h;
+	return h->execute(as, silent);
+}
+static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, const ValuePtr& vptr)
 {
 	if (not vptr->is_atom())
 		return vptr;
