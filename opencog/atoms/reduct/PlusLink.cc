@@ -10,7 +10,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
-#include "NumericFunctionLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 

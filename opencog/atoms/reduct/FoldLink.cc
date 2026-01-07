@@ -24,7 +24,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include "FoldLink.h"
 

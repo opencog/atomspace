@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atoms/signature/TypeNode.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 

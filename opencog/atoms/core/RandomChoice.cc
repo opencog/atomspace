@@ -24,7 +24,6 @@
 #include <opencog/util/mt19937ar.h>
 
 #include <opencog/atoms/value/LinkValue.h>
-#include "FunctionLink.h"
 #include "NumberNode.h"
 #include "RandomChoice.h"
 
