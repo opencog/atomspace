@@ -51,6 +51,8 @@ void GuardLink::init(void)
 	// AndLink is treated not as a literal, but as a wrapper
 	// of all required pattern-matching clasues. Just like
 	// how PatternLink does it.
+	// The `can_evaluate()` is taken from PatternUtils, and
+	// provides consistent behavior.
 	// XXX TODO Need to deal with ChoiceLink and other stuffs.
 	if (AND_LINK == _body->get_type())
 	{
