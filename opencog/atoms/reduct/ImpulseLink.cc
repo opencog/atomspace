@@ -47,8 +47,7 @@ void ImpulseLink::init(void)
 /// Convert a BoolValue into a FloatValue.
 ValuePtr ImpulseLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vptr = exec_for_value(as, silent,
-		_outgoing[0]);
+	ValuePtr vptr(_outgoing[0]->execute(as, silent));
 
 	if (nameserver().isA(vptr->get_type(), BOOL_VALUE))
 	{

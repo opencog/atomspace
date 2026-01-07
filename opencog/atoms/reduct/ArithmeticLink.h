@@ -43,6 +43,13 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
+	// Execute the argument, and return the result of the execution.
+	static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, const ValuePtr& vptr)
+	{
+		if (not vptr->is_atom())
+			return vptr;
+		return HandleCast(vptr)->execute(as, silent);
+	}
 
 public:
 	ArithmeticLink(const HandleSeq&&, Type);
