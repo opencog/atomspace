@@ -205,7 +205,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// beta-reduction; we've already done that, during matching.
 	for (const Handle& impl : _rewrite)
 	{
-		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, false, true));
+		ValuePtr red(_mvars->substitute_nocheck(impl, valseq, true));
 		if (red->is_atom())
 		{
 			const Handle& hred(HandleCast(red));
