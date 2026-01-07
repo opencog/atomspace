@@ -440,6 +440,11 @@ Handle Variables::substitute(const Handle& func,
 	// if that argument is never actually used.  Fixing this requires a
 	// cut-n-paste of the substitute_nocheck code. I'm too lazy to do
 	// this ... no one wants this whizzy-ness just right yet.
+	//
+	// The silent flag is currently set, and used by PutLink. It is
+	// tested in PutLinkUTest::test_filtering() which uses PutLink
+	// to filter args which fail the type-check below. This needs to
+	// be fixed with a proper guard in PutLink itself.
 	if (not is_type(args))
 	{
 		if (silent) throw TypeCheckException();

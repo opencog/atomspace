@@ -332,10 +332,12 @@ static inline Handle expand(const Handle& arg, bool silent)
  *         ConceptNode "hot patootie"
  *
  * Type checking is performed during substitution; if the arguments fail
- * to have the desired types, no substitution is performed.  In this case,
- * an undefined handle is returned (?? XXX really? or is it a throw?).
+ * to have the desired types, no substitution is performed, and a
+ * TypeCheckException is thrown (from Variables::substitute() circa
+ * line 440.) This is a SilentException; it is not logged.
+ *
  * For set substitutions, this acts as a filter, removing (filtering out)
- * the mismatched types.
+ * the mismatched types. Tested in PutLinkUTest::test_filtering()
  *
  * Note that the resulting tree is NOT placed into any atomspace!
  */
