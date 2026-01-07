@@ -155,50 +155,38 @@ bool RewriteMixin::propose_grounding(const GroundingMap& var_soln,
 	// Record marginals for variables.
 	record_marginals(var_soln);
 
-	// Catch and ignore SilentExceptions. This arises when
-	// running with the URE, which creates ill-formed links
-	// (due to rules producing nothing). Ideally this should
-	// be treated as a user error, that is, the user should
-	// design rule pre-conditions to prevent them from producing
-	// nothing.  In practice it is difficult to insure, so
-	// meanwhile this try-catch is used.
-	// See issue #950 and pull req #962. XXX FIXME later.
-	// Tested by BuggyBindLinkUTest and NoExceptionUTest.
-	// Well, given that URE is dead meat, maybe we can remove this?
-	try {
-		if (1 == _implicand.size())
+	if (1 == _implicand.size())
+	{
+		ValuePtr v(instantiate(_as, var_soln, _implicand[0], true));
+		// AbsentLinks can result in nullptr v's
+		if (nullptr != v)
 		{
-			ValuePtr v(instantiate(_as, var_soln, _implicand[0], true));
-			// AbsentLinks can result in nullptr v's
+			if (v->is_atom())
+				v = _as->add_atom(HandleCast(v));
+			auto it = _implicand_grnds.find(_implicand[0]);
+			if (_implicand_grnds.end() != it)
+				(*it).second->add(v);
+			insert_result(v);
+		}
+	}
+	else
+	{
+		ValueSeq vs;
+		for (const Handle& himp: _implicand)
+		{
+			ValuePtr v(instantiate(_as, var_soln, himp, true));
 			if (nullptr != v)
 			{
 				if (v->is_atom())
 					v = _as->add_atom(HandleCast(v));
-				auto it = _implicand_grnds.find(_implicand[0]);
+				auto it = _implicand_grnds.find(himp);
 				if (_implicand_grnds.end() != it)
 					(*it).second->add(v);
-				insert_result(v);
+				vs.emplace_back(v);
 			}
 		}
-		else
-		{
-			ValueSeq vs;
-			for (const Handle& himp: _implicand)
-			{
-				ValuePtr v(instantiate(_as, var_soln, himp, true));
-				if (nullptr != v)
-				{
-					if (v->is_atom())
-						v = _as->add_atom(HandleCast(v));
-					auto it = _implicand_grnds.find(himp);
-					if (_implicand_grnds.end() != it)
-						(*it).second->add(v);
-					vs.emplace_back(v);
-				}
-			}
-			insert_result(createLinkValue(std::move(vs)));
-		}
-	} catch (const SilentException& ex) {}
+		insert_result(createLinkValue(std::move(vs)));
+	}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_num_results >= max_results);
