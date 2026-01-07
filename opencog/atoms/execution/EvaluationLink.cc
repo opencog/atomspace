@@ -51,10 +51,9 @@ EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
 /// offered a way to automate this in the catch-block, so that the
 /// pesky "silent" flag was not needed.)
 ///
-/// DefaultPatternMatchCB.cc catches the NotEvaluatableException thrown
-/// here.  Basically, it knows that it might be sending non-evaluatable
-/// atoms here, and doesn't want to garbage up the log files with bogus
-/// errors. (??? Don't know that this is true any more...)
+/// FIXME: I am not sure teh silent flag is used anywhere, for anything
+/// any more. This idea made sense in earlier versions of the code, but
+/// I think it is currently dead.
 ///
 static void throwSyntaxException(bool silent, const char* message...)
 {
