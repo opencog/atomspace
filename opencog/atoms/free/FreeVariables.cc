@@ -25,9 +25,10 @@
 
 #include <opencog/util/oc_assert.h>
 
+#include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/atom_types/NameServer.h>
+#include <opencog/atoms/flow/ValueShimLink.h>
 #include <opencog/atoms/free/Context.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include "FreeVariables.h"
@@ -482,6 +483,25 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          bool do_exec) const
 {
 	return substitute_scoped(term, make_sequence(vm), index, do_exec, false);
+}
+
+Handle FreeVariables::substitute_nocheck(const Handle& term,
+                                         const ValueMap& varmap,
+                                         bool silent) const
+{
+	HandleSeq args;
+	for (const Handle& var : varseq)
+	{
+		ValueMap::const_iterator it = varmap.find(var);
+		if (it == varmap.end())
+			args.push_back(var);
+		else
+		if (it->second->is_atom())
+			args.emplace_back(HandleCast(it->second));
+		else
+			args.emplace_back(createValueShimLink(it->second));
+	}
+	return substitute_scoped(term, args, index, false, false);
 }
 
 bool FreeVariables::operator<(const FreeVariables& other) const

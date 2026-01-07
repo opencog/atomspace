@@ -141,6 +141,11 @@ struct FreeVariables : Replacement
 	                          bool silent=false,
 	                          bool do_exec=false) const;
 
+	/// Like the above, but already executed.
+	Handle substitute_nocheck(const Handle&,
+	                          const ValueMap&,
+	                          bool silent=false) const;
+
 	/// Comparison operator. Used to enable containers holding
 	/// this class.
 	bool operator<(const FreeVariables& other) const;
