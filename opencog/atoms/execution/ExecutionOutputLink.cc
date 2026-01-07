@@ -199,24 +199,16 @@ ValuePtr ExecutionOutputLink::execute_once(AtomSpace* as, AtomSpace* scratch, bo
 
 	if (sn->is_type(FUNCTION_LINK))
 	{
-		FunctionLinkPtr flp = FunctionLinkCast(sn);
-		const FreeVariables& vars = flp->get_vars();
 		const HandleSeq& oset(LIST_LINK == args->get_type() ?
 			args->getOutgoingSet(): HandleSeq{args});
 
-		Handle reduct;
-		if (0 < vars.size())
-			reduct = vars.substitute_nocheck(sn, oset, silent);
-		else
-		{
-			HandleSeq vfun = sn->getOutgoingSet();
-			vfun.insert(vfun.end(), oset.begin(), oset.end());
+		HandleSeq vfun = sn->getOutgoingSet();
+		vfun.insert(vfun.end(), oset.begin(), oset.end());
 
-			// Do NOT put this in the scratch space! It might
-			// contain ValueShimLinks, which would be deadly.
-			reduct = createLink(std::move(vfun), sn->get_type());
-		}
-		ValuePtr vp = reduct->execute(scratch, silent);
+		// Do NOT put this in the scratch space! It might
+		// contain ValueShimLinks, which would be deadly.
+		Handle reduct(createLink(std::move(vfun), sn->get_type()));
+		ValuePtr vp(reduct->execute(scratch, silent));
 		return vp;
 	}
 
