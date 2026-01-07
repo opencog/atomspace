@@ -19,6 +19,7 @@
 #define _OPENCOG_GUARD_LINK_H
 
 #include <opencog/atoms/scope/ScopeLink.h>
+#include <opencog/atoms/free/Quotation.h>
 
 namespace opencog
 {
@@ -26,12 +27,22 @@ namespace opencog
  *  @{
  */
 
-/// The GuardLink provides methods to determine if a proposed 
+/// The GuardLink provides methods to determine if a proposed
 /// beta reduction is compatible with the argument types and
-/// function body.
+/// function body. It also provides pattern-matching extraction
+/// of variable groundings from input data.
 ///
 class GuardLink : public ScopeLink
 {
+protected:
+	// Globby terms are terms that contain a GlobNode
+	HandleSet _globby_terms;
+
+	// Flag for recursive glob matching state
+	mutable bool _recursive_glob;
+
+	void init_globby_terms(void);
+
 public:
 	GuardLink(const HandleSeq&&, Type=GUARD_LINK);
 	GuardLink(const GuardLink &) = delete;
@@ -39,6 +50,13 @@ public:
 
 	bool guard(const HandleMap&) const;
 	bool guard(const HandleSeq&) const;
+
+	/// Extract variable groundings by pattern matching.
+	/// Compare the pattern tree `termpat` with the grounding `gnd`.
+	/// Returns true if they match, with groundings in `valmap`.
+	bool extract(const Handle& termpat, const ValuePtr& gnd,
+	             ValueMap& valmap, AtomSpace* scratch, bool silent,
+	             const Quotation& quotation = Quotation()) const;
 
 	static Handle factory(const Handle&);
 };

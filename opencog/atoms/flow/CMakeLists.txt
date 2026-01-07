@@ -8,7 +8,6 @@ ADD_LIBRARY (atomflow
 	ConcatenateLink.cc
 	DrainLink.cc
 	FilterLink.cc
-	GlobMatch.cc
 	IncomingOfLink.cc
 	IncrementValueLink.cc
 	JsonSplitLink.cc
@@ -45,7 +44,6 @@ INSTALL (FILES
 	ConcatenateLink.h
 	DrainLink.h
 	FilterLink.h
-	GlobMatch.h
 	IncomingOfLink.h
 	IncrementValueLink.h
 	JsonSplitLink.h
