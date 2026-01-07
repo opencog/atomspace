@@ -40,6 +40,8 @@ void GuardLink::init_globby_terms(void)
 
 void GuardLink::init(void)
 {
+	init_globby_terms();
+
 	// Unwrap PresentLink
 	// XXX TODO We will need to handle AbsentLink and other stuffs.
 	auto unwrap_present = [](const Handle& h) -> Handle {
@@ -89,7 +91,10 @@ GuardLink::GuardLink(const HandleSeq&& oset, Type t)
 	}
 	// Curiously, there might not be a _body...
 	if (nullptr == _body) return;
-	init_globby_terms();
+
+	// LambdaLinks inherit from us, but do NOT want/need this init.
+	if (t != GUARD_LINK)
+		return;
 	init();
 }
 
