@@ -13,17 +13,12 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_FUNCTION_LINK_H
 #define _OPENCOG_FUNCTION_LINK_H
 
-#include <opencog/atoms/free/FreeLink.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
@@ -60,12 +55,8 @@ namespace opencog
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
  */
-class FunctionLink : public FreeLink
+class FunctionLink : public Link
 {
-protected:
-	static void check_type(Type t);
-	void init(void);
-
 public:
 	// Sadly, need to make this public, else the factory code fails.
 	FunctionLink(const HandleSeq&&, Type = FUNCTION_LINK);

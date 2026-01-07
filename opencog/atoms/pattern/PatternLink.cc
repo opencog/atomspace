@@ -1041,6 +1041,7 @@ bool PatternLink::add_unaries(const PatternTermPtr& ptm)
 	if (not nameserver().isA(t, NODE) and
 	    1 < h->get_arity() and
 	    not nameserver().isA(t, EVALUATABLE_LINK) and
+	    not nameserver().isA(t, FUNCTION_LINK) and
 	    not nameserver().isA(t, FREE_LINK) and
 	    1 == num_unquoted_unscoped_in_tree(h, _variables.varset))
 	{
