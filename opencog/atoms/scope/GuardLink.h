@@ -43,6 +43,10 @@ protected:
 
 	void init_globby_terms(void);
 
+	bool extract(const Handle& termpat, const ValuePtr& gnd,
+	             ValueMap& valmap, AtomSpace* scratch, bool silent,
+	             const Quotation& quotation = Quotation()) const;
+
 public:
 	GuardLink(const HandleSeq&&, Type=GUARD_LINK);
 	GuardLink(const GuardLink &) = delete;
@@ -51,12 +55,16 @@ public:
 	bool guard(const HandleMap&) const;
 	bool guard(const HandleSeq&) const;
 
-	/// Extract variable groundings by pattern matching.
-	/// Compare the pattern tree `termpat` with the grounding `gnd`.
-	/// Returns true if they match, with groundings in `valmap`.
-	bool extract(const Handle& termpat, const ValuePtr& gnd,
-	             ValueMap& valmap, AtomSpace* scratch, bool silent,
-	             const Quotation& quotation = Quotation()) const;
+	/// Determine if the proposed grounding `gnd` is compatible with
+	/// the variable declarations of this ScopeLink. If it is, then
+	/// extract groundings for the bound variables (by pattern matching.)
+	/// Returns true if a grounding is possible; with groundings returned
+	/// in `valmap`.
+	bool guard(const ValuePtr& gnd, ValueMap& valmap,
+	           AtomSpace* scratch, bool silent=false) const
+	{
+		return extract(get_body(), gnd, valmap, scratch, silent);
+	}
 
 	static Handle factory(const Handle&);
 };

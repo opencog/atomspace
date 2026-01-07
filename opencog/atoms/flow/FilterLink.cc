@@ -121,7 +121,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 	// See if the term passes pattern matching. If it does, the
 	// side effect is that we get a grounding map as output.
 	ValueMap valmap;
-	if (not _pattern->extract(_pattern->get_body(), vterm, valmap, scratch, silent))
+	if (not _pattern->guard(vterm, valmap, scratch, silent))
 		return Handle::UNDEFINED;
 
 	// Special case for signatures. The extract already rejected
