@@ -18,6 +18,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/flow/LinkSignatureLink.h>
 #include <opencog/atoms/free/FindUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 #include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -30,11 +31,6 @@ using namespace opencog;
 
 void GuardLink::init_globby_terms(void)
 {
-	_recursive_glob = false;
-
-	// Curiously, there might not be a _body...
-	if (nullptr == _body) return;
-
 	// Locate all GlobNodes in the pattern body
 	FindAtoms fgn(GLOB_NODE, true);
 	fgn.search_set(_body);
@@ -42,8 +38,46 @@ void GuardLink::init_globby_terms(void)
 		_globby_terms.insert(sh);
 }
 
+void GuardLink::init(void)
+{
+	// Unwrap PresentLink
+	// XXX TODO We will need to handle AbsentLink and other stuffs.
+	auto unwrap_present = [](const Handle& h) -> Handle {
+		if (PRESENT_LINK == h->get_type() and 1 == h->get_arity())
+			return h->getOutgoingAtom(0);
+		return h;
+	};
+
+	// AndLink is treated not as a literal, but as a wrapper
+	// of all required pattern-matching clasues. Just like
+	// how PatternLink does it.
+	// XXX TODO Need to deal with ChoiceLink and other stuffs.
+	if (AND_LINK == _body->get_type())
+	{
+		for (const Handle& clause : _body->getOutgoingSet())
+		{
+			if (can_evaluate(clause))
+				_guard_clauses.push_back(clause);
+			else
+			{
+				if (_match_pattern)
+					throw SyntaxException(TRACE_INFO,
+						"GuardLink body can have only one pattern term, got multiple");
+				_match_pattern = unwrap_present(clause);
+			}
+		}
+		return;
+	}
+
+	// Single clause body
+	if (can_evaluate(_body))
+		_guard_clauses.push_back(_body);
+	else
+		_match_pattern = unwrap_present(_body);
+}
+
 GuardLink::GuardLink(const HandleSeq&& oset, Type t)
-	: ScopeLink(std::move(oset), t)
+	: ScopeLink(std::move(oset), t), _recursive_glob(false)
 {
 	if (not nameserver().isA(t, GUARD_LINK))
 	{
@@ -51,19 +85,35 @@ GuardLink::GuardLink(const HandleSeq&& oset, Type t)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a GuardLink, got %s", tname.c_str());
 	}
+	// Curiously, there might not be a _body...
+	if (nullptr == _body) return;
 	init_globby_terms();
+	init();
 }
 
-bool GuardLink::eval_guard(const ValueMap& varmap, AtomSpace*, bool) const
+bool GuardLink::eval_guard(const ValueMap& valmap,
+                           AtomSpace* scratch, bool silent) const
 {
+	// Evaluate each guard clause
+	for (const Handle& clause : _guard_clauses)
+	{
+		Handle grounded = _variables.substitute_nocheck(clause, valmap);
+		if (not grounded->bevaluate(scratch, silent))
+			return false;
+	}
 	return true;
 }
 
 bool GuardLink::guard(const ValuePtr& gnd, ValueMap& valmap,
                       AtomSpace* scratch, bool silent) const
 {
-	bool ok = extract(_body, gnd, valmap, scratch, silent);
-	if (not ok) return false;
+	// Extract groundings from the pattern term
+	if (_match_pattern)
+	{
+		bool ok = extract(_match_pattern, gnd, valmap, scratch, silent);
+		if (not ok) return false;
+	}
+	if (_guard_clauses.empty()) return true;
 	return eval_guard(valmap, scratch, silent);
 }
 

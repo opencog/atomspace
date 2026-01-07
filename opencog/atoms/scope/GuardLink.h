@@ -35,12 +35,20 @@ namespace opencog
 class GuardLink : public ScopeLink
 {
 protected:
+	// Pattern clause to match against.
+	// Might be null if there are only guards.
+	Handle _match_pattern;
+
+	// Evaluatable terms to check after extraction
+	HandleSeq _guard_clauses;
+
 	// Globby terms are terms that contain a GlobNode
 	HandleSet _globby_terms;
 
 	// Flag for recursive glob matching state
 	mutable bool _recursive_glob;
 
+	void init(void);
 	void init_globby_terms(void);
 
 	bool extract(const Handle& termpattern, const ValuePtr& gnd,
