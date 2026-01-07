@@ -15,6 +15,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/util/oc_assert.h>
 
 #include "GuardLink.h"
 
@@ -31,14 +32,24 @@ GuardLink::GuardLink(const HandleSeq&& oset, Type t)
 	}
 }
 
-bool GuardLink::guard(const HandleSeq& varmap) const
+bool GuardLink::guard(const HandleSeq& args) const
 {
+	const HandleSeq& vars = _variables.varseq;
+	OC_ASSERT(args.size() == vars.size(),
+		"Argument count mismatch: expected %zu, got %zu",
+		vars.size(), args.size());
+
+	for (size_t i = 0; i < args.size(); i++)
+	{
+		if (not _variables.is_type(vars[i], args[i]))
+			return false;
+	}
 	return true;
 }
 
 bool GuardLink::guard(const HandleMap& varmap) const
 {
-	return true;
+	return guard(_variables.make_sequence(varmap));
 }
 
 DEFINE_LINK_FACTORY(GuardLink, GUARD_LINK)
