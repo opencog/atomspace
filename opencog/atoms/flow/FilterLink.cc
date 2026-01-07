@@ -193,11 +193,7 @@ ValuePtr FilterLink::rewrite_one(const ValuePtr& vterm,
 		if (gnding->is_atom())
 			valseq.emplace_back(HandleCast(gnding));
 		else
-		{
-			ValueShimLinkPtr wrap(createValueShimLink());
-			wrap->set_value(gnding);
-			valseq.emplace_back(wrap);
-		}
+			valseq.emplace_back(createValueShimLink(gnding));
 	}
 
 	ValueSeq rew;
