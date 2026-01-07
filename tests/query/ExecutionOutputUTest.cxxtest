@@ -412,10 +412,12 @@ void ExecutionOutputUTest::test_function(void)
 
 	al(DEFINE_LINK,
 		an(DEFINED_PROCEDURE_NODE, "remainder"),
-		al(MINUS_LINK,
+		al(LAMBDA_LINK,
 			an(VARIABLE_NODE, "X"),
-			al(FLOOR_LINK,
-				an(VARIABLE_NODE, "X"))));
+			al(MINUS_LINK,
+				an(VARIABLE_NODE, "X"),
+				al(FLOOR_LINK,
+					an(VARIABLE_NODE, "X")))));
 
 	Handle exout =
 	al(EXECUTION_OUTPUT_LINK, {

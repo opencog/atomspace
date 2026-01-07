@@ -39,7 +39,7 @@ ValuePtr MinLink::execute(AtomSpace* as, bool silent)
 
 	for (const Handle& arg: _outgoing)
 	{
-		ValuePtr vi(FunctionLink::get_value(as, silent, arg));
+		ValuePtr vi(arg->execute(as, silent));
 		Type vitype = vi->get_type();
 
 		if (NUMBER_NODE == vitype)

@@ -1065,7 +1065,7 @@ SATISFACTION_LINK <- SATISFYING_LINK,VIRTUAL_LINK
 // The FunctionLink is meant to be a base type for links that define
 // functions.  It is NOT meant to be used as a base type for
 // user-defined structures; users should use the LambdaLink for that.
-FUNCTION_LINK <- FREE_LINK,EXECUTABLE_LINK
+FUNCTION_LINK <- EXECUTABLE_LINK
 
 // XXX TODO-FIXME: Many of the link types below are derived from
 // FunctionLink, but the gains are marginal. Here's the tradeoff:

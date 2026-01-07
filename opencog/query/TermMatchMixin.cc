@@ -513,22 +513,11 @@ bool TermMatchMixin::eval_term(const Handle& virt,
 	              << gvirt->to_short_string() << std::endl;})
 
 	_temp_aspace->clear();
-	try
-	{
-		bool crispy = gvirt->bevaluate(_temp_aspace.get(), true);
-		DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
-		                      << crispy << std::endl;})
-		return crispy;
-	}
-	catch (const SilentException& ex)
-	{
-		// The do_evaluate()/do_eval_scratch() above can throw if
-		// it is given ungrounded expressions. It can be given
-		// ungrounded expressions if no grounding was found, and
-		// a final pass, run by the search_finished() callback,
-		// puts us here. So handle this case gracefully.
-		return false;
-	}
+
+	bool crispy = gvirt->bevaluate(_temp_aspace.get(), true);
+	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yielded crisp-tv="
+	                      << crispy << std::endl;})
+	return crispy;
 }
 
 /* ======================================================== */

@@ -15,11 +15,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_ATOMSPACE_H
@@ -204,8 +199,7 @@ public:
 
     /* AtomSpaces are Atoms; provide virtual methods of base class. */
     virtual const std::string& get_name() const;
-    virtual Arity get_arity() const { return _environ.size(); }
-    virtual size_t size() const { return get_arity(); }
+    virtual size_t size() const { return _environ.size(); }
     virtual const HandleSeq& getOutgoingSet() const { return _outgoing; }
     virtual Handle getOutgoingAtom(Arity) const;
 

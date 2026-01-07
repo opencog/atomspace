@@ -24,7 +24,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include "FoldLink.h"
 
@@ -77,7 +76,7 @@ ValuePtr FoldLink::delta_reduce(AtomSpace* as, bool silent) const
 		// So we undo that with this if-statement.
 		if (unpack and (0 == i) and content_eq(_outgoing[0], knil)) break;
 
-		ValuePtr vi(FunctionLink::get_value(as, silent,  _outgoing[i]));
+		ValuePtr vi(_outgoing[i]->execute(as, silent));
 		if (not vi->is_type(LINK_VALUE))
 		{
 			expr = kons(as, silent, vi, expr);

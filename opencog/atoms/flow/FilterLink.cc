@@ -91,10 +91,6 @@ void FilterLink::init(void)
 	fgn.search_set(_pattern->get_body());
 	for (const Handle& sh : fgn.least_holders)
 		_globby_terms.insert(sh);
-
-	// FunctionLink::init() will extract free variables. But we don't
-	// really need this for anything, so don't run it.
-	// FunctionLink::init();
 }
 
 FilterLink::FilterLink(const Handle& pattern, const Handle& term)

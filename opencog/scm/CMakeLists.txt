@@ -3,8 +3,6 @@ ADD_GUILE_MODULE (FILES
 	opencog.scm
 	opencog/base/atom-cache.scm
 	opencog/base/core-docs.scm
-	opencog/base/repl-shell.scm
-	opencog/base/types.scm
 	opencog/base/utilities.scm
 	DEPENDS opencog_atom_types smob
 	COMPILE

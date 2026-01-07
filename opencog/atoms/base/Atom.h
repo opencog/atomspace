@@ -17,11 +17,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _OPENCOG_ATOM_H
@@ -523,13 +518,13 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual Arity get_arity() const { return size(); }
+    inline size_t get_arity() const { return size(); }
 
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
-    virtual Handle getOutgoingAtom(Arity) const {
+    virtual Handle getOutgoingAtom(size_t) const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
@@ -545,8 +540,7 @@ public:
     virtual bool is_evaluatable() const { return false; }
 
     virtual ValuePtr execute(AtomSpace*, bool silent=false) {
-        throw RuntimeException(TRACE_INFO,
-            "Not executable! %s", to_string().c_str());
+        return std::dynamic_pointer_cast<Atom>(shared_from_this());
     }
     virtual ValuePtr execute(void) { return execute(_atom_space, false); }
     virtual bool is_executable() const { return false; }
@@ -693,6 +687,7 @@ static inline Handle HandleCast(const ValuePtr& pa)
 static inline ValuePtr ValueCast(const Handle& h)
     { return std::dynamic_pointer_cast<Value>(h); }
 
+// Old backwards-compat function. Should be removed someday.
 const Handle& truth_key(void);
 
 // Debugging helpers see

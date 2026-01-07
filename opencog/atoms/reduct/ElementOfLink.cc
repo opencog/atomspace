@@ -8,7 +8,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -48,12 +47,12 @@ void ElementOfLink::init(void)
 ValuePtr ElementOfLink::execute(AtomSpace* as, bool silent)
 {
 	// The vector we're planning on cutting down.
-	ValuePtr vi(FunctionLink::get_value(as, silent, _outgoing[1]));
+	ValuePtr vi(_outgoing[1]->execute(as, silent));
 
 	// Lets see what kind of index list this is. We accept two kinds:
 	// A NumberNode and a FloatValue.
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vm(FunctionLink::get_value(as, silent, _outgoing[0]));
+	ValuePtr vm(_outgoing[0]->execute(as, silent));
 	Type mtype = vm->get_type();
 
 	// Perhaps its a NumberNode?

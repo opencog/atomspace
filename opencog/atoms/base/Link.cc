@@ -14,21 +14,12 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdio.h>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/util/Logger.h>
-
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/base/Node.h>
-
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -104,12 +95,12 @@ bool Link::operator==(const Atom& other) const
     if (get_hash() != other.get_hash()) return false;
     if (get_type() != other.get_type()) return false;
 
-    Arity sz = get_arity();
-    if (sz != other.get_arity()) return false;
+    size_t sz = size();
+    if (sz != other.size()) return false;
 
     // Perform a content-compare on the outgoing set.
     const HandleSeq& rhs = other.getOutgoingSet();
-    for (Arity i = 0; i < sz; i++)
+    for (size_t i = 0; i < sz; i++)
     {
         if (*(_outgoing[i]) != *(rhs[i]))
             return false;
@@ -134,8 +125,8 @@ bool Link::operator<(const Atom& other) const
 
     const HandleSeq& outgoing = getOutgoingSet();
     const HandleSeq& other_outgoing = other.getOutgoingSet();
-    Arity arity = outgoing.size();
-    Arity other_arity = other_outgoing.size();
+    size_t arity = outgoing.size();
+    size_t other_arity = other_outgoing.size();
     if (arity != other_arity)
         return arity < other_arity;
 
@@ -145,7 +136,7 @@ bool Link::operator<(const Atom& other) const
     if (operator==(other))
 	    return false;
 
-    for (Arity i=0; i < arity; i++)
+    for (size_t i=0; i < arity; i++)
     {
         const Handle& ll(outgoing[i]);
         const Handle& rl(other_outgoing[i]);

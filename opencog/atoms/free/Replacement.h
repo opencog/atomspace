@@ -48,14 +48,8 @@ class Context;
 /// If the `do_exec` flag is set, and the grounding Atom is executable,
 /// while the wrapping Link is not, then the groudning Atom is executed,
 /// with the resulting Atom used for the substitution. This allows
-/// streams to be terminated in ordinary non-executable Links. Doing
-/// execution this way seems to be a bit cleaner and more precise than
-/// what `class Instantiator` does: it just executes everything it finds
-/// rather indiscriminantly, which is perhaps (??) not a good idea.
+/// streams to be terminated in ordinary non-executable Links.
 ///
-/// See also `class Instantiator`, which does a similar replacement,
-/// except that it also executes any executable links that it encounters
-/// along the way, and places the results into an AtomSpace.
 struct Replacement
 {
 	typedef std::map<Handle, unsigned int> IndexMap;

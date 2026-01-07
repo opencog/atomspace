@@ -42,18 +42,6 @@ LibraryRunner::LibraryRunner(std::string s)
 
 // ----------------------------------------------------------
 
-static void throwSyntaxEx(bool silent, const char* message...)
-{
-	if (silent)
-		throw NotEvaluatableException();
-	va_list args;
-	va_start(args, message);
-	throw SyntaxException(TRACE_INFO, message, args);
-	va_end(args);
-}
-
-// ----------------------------------------------------------
-
 /// `execute()` -- evaluate a LibraryRunner with arguments.
 /// Execution happens in the provided scratch space.
 ///
@@ -90,7 +78,7 @@ ValuePtr LibraryRunner::execute(AtomSpace* as,
 	}
 
 	if (nullptr == result)
-		throwSyntaxEx(silent,
+		throw SyntaxException(TRACE_INFO,
 	        "Invalid return value from grounded schema %s\nArgs: %s",
 		        _fname.c_str(),
 		        cargs->to_short_string().c_str());

@@ -22,7 +22,6 @@
 
 #include <opencog/atoms/atom_types/atom_types.h>
 #include <opencog/atoms/atom_types/NameServer.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/BoolValue.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include "ImpulseLink.h"
@@ -47,8 +46,7 @@ void ImpulseLink::init(void)
 /// Convert a BoolValue into a FloatValue.
 ValuePtr ImpulseLink::execute(AtomSpace* as, bool silent)
 {
-	ValuePtr vptr = FunctionLink::get_value(as, silent,
-		_outgoing[0]);
+	ValuePtr vptr(_outgoing[0]->execute(as, silent));
 
 	if (nameserver().isA(vptr->get_type(), BOOL_VALUE))
 	{

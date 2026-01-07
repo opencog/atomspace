@@ -267,7 +267,6 @@ void SchemeSmob::module_init(void*)
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/types.scm"));
 }
 
 #if defined(HAVE_GUILE2) || defined(HAVE_GUILE3)

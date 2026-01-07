@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atoms/signature/TypeNode.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -49,7 +48,7 @@ ValuePtr TypeOfLink::execute(AtomSpace* as, bool silent)
 	HandleSeq tipes;
 	for (const Handle& h : _outgoing)
 	{
-		ValuePtr vi(FunctionLink::get_value(as, silent, h));
+		ValuePtr vi(h->execute(as, silent));
 		Type t = vi->get_type();
 		tipes.emplace_back(as->add_atom(HandleCast(createTypeNode(t))));
 	}

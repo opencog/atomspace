@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
@@ -93,8 +92,8 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	ValueSeq vcols;
 	for (ValuePtr vp: vrows)
 	{
-		if (vp->is_atom() and HandleCast(vp)->is_executable())
-			vp = FunctionLink::get_value(as, silent, vp);
+		if (vp->is_atom())
+			vp = HandleCast(vp)->execute(as, silent);
 
 		if (0 == ncols)
 		{

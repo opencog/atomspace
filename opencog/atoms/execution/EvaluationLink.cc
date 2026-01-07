@@ -40,33 +40,6 @@ EvaluationLink::EvaluationLink(const HandleSeq&& oset, Type t)
 		    "Expecting an EvaluationLink or an inherited type thereof");
 }
 
-/// We get exceptions in two differet ways: (a) due to user error,
-/// in which case we need to report the error to the user, and
-/// (b) occasionally expected errors, which might occur during normal
-/// processing, and should be ignored. The "normal" errors should not
-/// be reported to the user; nor should they be printed to the log-file.
-/// Using a try-catch block is enough to prevent them from being passed
-/// to the user; but it is not enough to prevent them from printing.
-/// Thus, we use a bool flag to not print. (It would be nice if C++
-/// offered a way to automate this in the catch-block, so that the
-/// pesky "silent" flag was not needed.)
-///
-/// DefaultPatternMatchCB.cc and also Instantiator.cc both catch
-/// the NotEvaluatableException thrown here.  Basically, these
-/// know that they might be sending non-evaluatable atoms here, and
-/// don't want to garbage up the log files with bogus errors.
-/// (??? Don't know that this is true any more...)
-///
-static void throwSyntaxException(bool silent, const char* message...)
-{
-	if (silent)
-		throw NotEvaluatableException();
-	va_list args;
-	va_start(args, message);
-	throw SyntaxException(TRACE_INFO, message, args);
-	va_end(args);
-}
-
 /// Evaluate a PredicateNode with arguments, returning boolean result.
 /// The canonical form is
 ///
@@ -139,7 +112,8 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 			return bvals[0];
 		}
 		if (result->is_type(VOID_VALUE))
-			throwSyntaxException(silent, "GroundedPredicate returned VoidValue");
+			throw SyntaxException(TRACE_INFO,
+				"GroundedPredicate returned VoidValue");
 
 		throw RuntimeException(TRACE_INFO,
 			"GroundedPredicates MUST return BoolValue or VoidValue; got %s",
@@ -174,7 +148,7 @@ bool EvaluationLink::bevaluate(AtomSpace* as, bool silent)
 		return reduct->bevaluate(as, silent);
 	}
 
-	throwSyntaxException(silent,
+	throw SyntaxException(TRACE_INFO,
 		"Not evaluatable: %s", to_string().c_str());
 	return false;
 }

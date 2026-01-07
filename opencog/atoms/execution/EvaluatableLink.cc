@@ -21,7 +21,6 @@
  */
 
 #include <opencog/atoms/atom_types/atom_types.h>
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/free/FindUtils.h>
 #include <opencog/atoms/grant/DefineLink.h>
@@ -69,9 +68,9 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 /// Extract a single floating-point double out of an atom, that,
 /// when executed, should yield a value containing a number.
 /// Viz, either a NumberNode, or a FloatValue.
-static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
+static double get_numeric_value(AtomSpace* as, bool silent, const Handle& h)
 {
-	ValuePtr pap(FunctionLink::get_value(as, silent, h));
+	ValuePtr pap(h->execute(as, silent));
 	Type t = pap->get_type();
 
 	if (nameserver().isA(t, LINK_VALUE))
@@ -94,8 +93,6 @@ static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
 		return fv->value()[0];
 	}
 
-	if (silent)
-		throw NotEvaluatableException();
 	throw SyntaxException(TRACE_INFO,
 		"Don't know how to do arithmetic with this: %s",
 		pap->to_string().c_str());

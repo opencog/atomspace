@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/FloatValue.h>
@@ -51,7 +50,7 @@ ValuePtr FloatColumn::do_handle_loop(AtomSpace* as, bool silent,
 	dvec.reserve(hseq.size());
 	for (const Handle& h : hseq)
 	{
-		ValuePtr vp(FunctionLink::get_value(as, silent, h));
+		ValuePtr vp(h->execute(as, silent));
 
 		// Expecting exactly one float per item. That's because
 		// I don't know what it means if there is more than one,
@@ -100,12 +99,12 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			// Inside of loop is cut-n-paste of that below.
 			std::vector<double> dvec;
 			dvec.reserve(vpe->size());
-			for (const ValuePtr& v : LinkValueCast(vpe)->value())
+			for (ValuePtr vp : LinkValueCast(vpe)->value())
 			{
-				// FunctionLink::get_value() tries to execute the value,
-				// if it's executable. Is that overkill, or is that
-				// needed? When would a vector of functions arise?
-				ValuePtr vp(FunctionLink::get_value(as, silent, v));
+				// Execute, if its a handle. Is that overkill, or is
+				// it needed? When would a vector of functions arise?
+				if (vp->is_atom())
+					vp = HandleCast(vp)->execute(as, silent);
 
 				// Expecting exactly one float per item. That's because
 				// I don't know what it means if there is more than one,

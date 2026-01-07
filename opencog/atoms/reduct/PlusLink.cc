@@ -10,7 +10,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
-#include "NumericFunctionLink.h"
 #include "PlusLink.h"
 #include "TimesLink.h"
 
@@ -48,10 +47,10 @@ ValuePtr PlusLink::kons(AtomSpace* as, bool silent,
                         const ValuePtr& fi, const ValuePtr& fj) const
 {
 	if (fj == knil)
-		return FunctionLink::get_value(as, silent, fi);
+		return exec_for_value(as, silent, fi);
 
 	// Try to yank out values, if possible.
-	ValuePtr vi(FunctionLink::get_value(as, silent, fi));
+	ValuePtr vi(exec_for_value(as, silent, fi));
 	Type vitype = vi->get_type();
 
 	ValuePtr vj(fj);
