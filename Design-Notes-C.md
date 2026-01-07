@@ -697,29 +697,40 @@ one for arithmetic ported to GPU's.
 
 But I digress...
 
+### GuardLink redux
+The review above indicates the implementation for the `GuardLink`,
+and where it needs to be in the inheritance hierarchy.  It needs to
+inherit from `ScopeLink`, and `RewriteLink` needs to inherit from
+`GuardLink`.
+
+Neither the `Rewrite` nor the `Prenex` are executable. Both provide
+various different beta reduction methods. The method
+`PrenexLink::beta_reduce()` takes a `HandleMap` holding a grounding,
+and performs beta reduction with the provided grounding.
+
+The `GuardLink` needs to provide a `guard()` method that takes either
+a `HandleMap` or `HandleSeq` as an arugment, and returns a bool
+true/false, indicating if the guard will allow this grounding to pass.
+
+`GuardLink` probably needs to be executable, in analogy to `RuleLink`,
+so as to reduce it's own body. Ivix move that code out of `RuleLink`.
+
+get_variables().substitute(body, vm, _silent);
+Variables::substitute throws when guard fails.
+Replacement::substitute_scoped
 
 
+### Guarded connections
+There is also another, distinct idea of guarding the connectionist
+rules. So, in the basic sheaf-theoretic conception of establishing
+connections, the connectors are examined, and the mating rules are
+compared, generating a go/no-go answer to the possibility of mating.
+A guard clause would be an additional evaluatable predict that is
+invoked at mating time, performing some additinal algorithmic check,
+allowing or disallowing the connection to go foreward.
 
+How would this work? Where would tehse guard terms be stored?
 
-ScopeLink handles vardecl only. GuardLink can inherit from Scope.
-Rewrite can inherit from Guard.
-
-
-
-
-simplest derevied classes from RuleLink so to be modular design ...
-
-The need to evaluate guard when doing connectionist rules.
-
-The fact that guard looks like a connectorSeq with lots of extra
-complexity. ..
-
-guards as connection
-rules as rewrite
-as flows
-
-GuardLink
-Prenex, rule fro guard
 
 ### TODO
 * Fix Connectors so that they can be named and typed as expected.
