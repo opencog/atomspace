@@ -12,8 +12,5 @@ But this is easier said than done, so some minor utilities follow.
                     collections of Atoms attached to a given Atom; 
                     remove collections of Atoms.
 
-* repl-shell.scm -- A network server for scheme. Use the REPL shell
-                    at port 18001.
-
 * atom-cache.scm -- A scheme cache that implements an association list
                     between Atoms and arbitrary scheme code.
