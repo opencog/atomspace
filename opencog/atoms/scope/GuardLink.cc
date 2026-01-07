@@ -54,24 +54,9 @@ GuardLink::GuardLink(const HandleSeq&& oset, Type t)
 	init_globby_terms();
 }
 
-bool GuardLink::guard(const HandleSeq& args) const
+bool GuardLink::eval_guard(const ValueMap& varmap, AtomSpace*, bool) const
 {
-	const HandleSeq& vars = _variables.varseq;
-	OC_ASSERT(args.size() == vars.size(),
-		"Argument count mismatch: expected %zu, got %zu",
-		vars.size(), args.size());
-
-	for (size_t i = 0; i < args.size(); i++)
-	{
-		if (not _variables.is_type(vars[i], args[i]))
-			return false;
-	}
 	return true;
-}
-
-bool GuardLink::guard(const HandleMap& varmap) const
-{
-	return guard(_variables.make_sequence(varmap));
 }
 
 // ===============================================================

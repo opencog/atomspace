@@ -43,17 +43,16 @@ protected:
 
 	void init_globby_terms(void);
 
-	bool extract(const Handle& termpat, const ValuePtr& gnd,
+	bool extract(const Handle& termpattern, const ValuePtr& gnd,
 	             ValueMap& valmap, AtomSpace* scratch, bool silent,
 	             const Quotation& quotation = Quotation()) const;
+	bool eval_guard(const ValueMap&, AtomSpace*, bool) const;
 
 public:
 	GuardLink(const HandleSeq&&, Type=GUARD_LINK);
 	GuardLink(const GuardLink &) = delete;
 	GuardLink& operator=(const GuardLink &) = delete;
 
-	bool guard(const HandleMap&) const;
-	bool guard(const HandleSeq&) const;
 
 	/// Determine if the proposed grounding `gnd` is compatible with
 	/// the variable declarations of this ScopeLink. If it is, then
@@ -63,7 +62,9 @@ public:
 	bool guard(const ValuePtr& gnd, ValueMap& valmap,
 	           AtomSpace* scratch, bool silent=false) const
 	{
-		return extract(get_body(), gnd, valmap, scratch, silent);
+		bool ok = extract(get_body(), gnd, valmap, scratch, silent);
+		if (not ok) return false;
+		return eval_guard(valmap, scratch, silent);
 	}
 
 	static Handle factory(const Handle&);
