@@ -31,6 +31,9 @@ namespace opencog
  *
  * This class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
+ *
+ * It is currently a stub; it used to do more, but those things were
+ * either not needed, or were moved closer to where they were needed.
  */
 class FunctionLink : public Link
 {
