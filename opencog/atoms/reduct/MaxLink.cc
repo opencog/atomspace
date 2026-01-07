@@ -39,7 +39,7 @@ ValuePtr MaxLink::execute(AtomSpace* as, bool silent)
 
 	for (const Handle& arg: _outgoing)
 	{
-		ValuePtr vi(get_value(as, silent, arg));
+		ValuePtr vi(exec_for_value(as, silent, arg));
 		Type vitype = vi->get_type();
 
 		if (NUMBER_NODE == vitype)

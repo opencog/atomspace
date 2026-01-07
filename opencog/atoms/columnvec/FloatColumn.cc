@@ -51,7 +51,7 @@ ValuePtr FloatColumn::do_handle_loop(AtomSpace* as, bool silent,
 	dvec.reserve(hseq.size());
 	for (const Handle& h : hseq)
 	{
-		ValuePtr vp(FunctionLink::get_value(as, silent, h));
+		ValuePtr vp(exec_for_value(as, silent, h));
 
 		// Expecting exactly one float per item. That's because
 		// I don't know what it means if there is more than one,
@@ -102,10 +102,10 @@ ValuePtr FloatColumn::do_execute(AtomSpace* as, bool silent)
 			dvec.reserve(vpe->size());
 			for (const ValuePtr& v : LinkValueCast(vpe)->value())
 			{
-				// FunctionLink::get_value() tries to execute the value,
+				// exec_for_value() tries to execute the value,
 				// if it's executable. Is that overkill, or is that
 				// needed? When would a vector of functions arise?
-				ValuePtr vp(FunctionLink::get_value(as, silent, v));
+				ValuePtr vp(exec_for_value(as, silent, v));
 
 				// Expecting exactly one float per item. That's because
 				// I don't know what it means if there is more than one,

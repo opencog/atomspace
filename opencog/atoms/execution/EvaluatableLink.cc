@@ -71,7 +71,7 @@ EvaluatableLink::EvaluatableLink(const HandleSeq&& oset, Type t)
 /// Viz, either a NumberNode, or a FloatValue.
 static double get_numeric_value(AtomSpace* as, bool silent, Handle h)
 {
-	ValuePtr pap(FunctionLink::get_value(as, silent, h));
+	ValuePtr pap(exec_for_value(as, silent, h));
 	Type t = pap->get_type();
 
 	if (nameserver().isA(t, LINK_VALUE))

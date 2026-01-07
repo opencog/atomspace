@@ -69,7 +69,7 @@ void VardeclOfLink::init(void)
 // The second arg is a NumberNode, it's an index into termlist.
 const Handle& VardeclOfLink::term_at(const HandleSeq& termlist)
 {
-	// TBD call FunctionLink::get_value() ...
+	// TBD call exec_for_value() ...
 	const Handle& nu = _outgoing[1];
 	if (not nu->is_type(NUMBER_NODE))
 		throw SyntaxException(TRACE_INFO, "Expecting a NumberNode!");

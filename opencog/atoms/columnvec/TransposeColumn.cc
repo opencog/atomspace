@@ -94,7 +94,7 @@ ValuePtr TransposeColumn::do_value_loop(AtomSpace* as, bool silent,
 	for (ValuePtr vp: vrows)
 	{
 		if (vp->is_atom() and HandleCast(vp)->is_executable())
-			vp = FunctionLink::get_value(as, silent, vp);
+			vp = exec_for_value(as, silent, vp);
 
 		if (0 == ncols)
 		{

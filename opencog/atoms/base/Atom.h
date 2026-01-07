@@ -688,7 +688,20 @@ static inline Handle HandleCast(const ValuePtr& pa)
 static inline ValuePtr ValueCast(const Handle& h)
     { return std::dynamic_pointer_cast<Value>(h); }
 
+// Old backwards-compat function. Should be removed someday.
 const Handle& truth_key(void);
+
+/// Execute the argument, and return the result of the execution.
+/// This is a strangely popular idiom. But it's homeless, unhoused.
+static inline ValuePtr exec_for_value(AtomSpace* as, bool silent, ValuePtr vptr)
+{
+	if (not vptr->is_atom())
+		return vptr;
+
+	Handle h(HandleCast(vptr));
+	if (not h->is_executable()) return vptr;
+	return h->execute(as, silent);
+}
 
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

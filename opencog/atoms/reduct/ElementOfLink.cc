@@ -48,12 +48,12 @@ void ElementOfLink::init(void)
 ValuePtr ElementOfLink::execute(AtomSpace* as, bool silent)
 {
 	// The vector we're planning on cutting down.
-	ValuePtr vi(FunctionLink::get_value(as, silent, _outgoing[1]));
+	ValuePtr vi(exec_for_value(as, silent, _outgoing[1]));
 
 	// Lets see what kind of index list this is. We accept two kinds:
 	// A NumberNode and a FloatValue.
 	// get_value() causes execution to happen on the arguments
-	ValuePtr vm(FunctionLink::get_value(as, silent, _outgoing[0]));
+	ValuePtr vm(exec_for_value(as, silent, _outgoing[0]));
 	Type mtype = vm->get_type();
 
 	// Perhaps its a NumberNode?
