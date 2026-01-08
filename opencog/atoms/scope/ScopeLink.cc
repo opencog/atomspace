@@ -43,12 +43,12 @@ void ScopeLink::init(void)
 	// _quoted is true, that means we are inside a quote,
 	// and so nothing to be done. Skip variable extraction.
 	if (_quoted) return;
-	extract_variables();
+	extract_variables(true);
 	if (_body) extract_shadowed_terms(_body);
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
-	: Link({vars, body}, SCOPE_LINK)
+	: Link({vars, body}, SCOPE_LINK), _vardecl(nullptr)
 {
 	_quoted = unquoted_below(_outgoing);
 	init();
@@ -84,7 +84,7 @@ bool ScopeLink::skip_init(Type t)
 }
 
 ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
-	: Link(std::move(oset), t)
+	: Link(std::move(oset), t), _vardecl(nullptr)
 {
 	if (skip_init(t)) return;
 	init();
@@ -95,7 +95,7 @@ ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-void ScopeLink::extract_variables(void)
+size_t ScopeLink::extract_variables(bool promote_lambda)
 {
 	size_t sz = _outgoing.size();
 	if (0 == sz)
@@ -110,7 +110,7 @@ void ScopeLink::extract_variables(void)
 	// treated as an ordinary ScopeLink in any way ... halt all further
 	// initialization now.
 	if (UNQUOTE_LINK == decls)
-		return;
+		return 0;
 
 	// If the first atom is not explicitly a variable declaration, then
 	// there are no prenex-order variable declarations. (There might
@@ -129,7 +129,8 @@ void ScopeLink::extract_variables(void)
 	{
 		_body = _outgoing[0];
 
-		if (nameserver().isA(_body->get_type(), LAMBDA_LINK))
+		if (promote_lambda and
+		    nameserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
 			_variables = lam->get_variables();
@@ -139,7 +140,7 @@ void ScopeLink::extract_variables(void)
 		{
 			_variables.find_variables(_outgoing[0]);
 		}
-		return;
+		return 0;
 	}
 
 
@@ -156,12 +157,13 @@ void ScopeLink::extract_variables(void)
 		if (ANCHOR_NODE == decls)
 		{
 			_variables.find_variables(_body);
-			return;
+			return 1;
 		}
 	}
 
 	// Initialize _variables with the scoped variables
 	init_scoped_variables(_vardecl);
+	return 1;
 }
 
 /* ================================================================= */

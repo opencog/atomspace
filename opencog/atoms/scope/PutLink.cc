@@ -82,7 +82,7 @@ void PutLink::init(void)
 			"Expecting an outgoing set size of two or three, got %d; %s",
 			sz, to_string().c_str());
 
-	ScopeLink::extract_variables();
+	ScopeLink::extract_variables(true);
 
 	if (2 == sz)
 	{

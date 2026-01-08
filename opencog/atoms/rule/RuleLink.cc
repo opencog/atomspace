@@ -85,42 +85,9 @@ RuleLink::RuleLink(const HandleSeq&& hseq, Type t)
 ///
 void RuleLink::extract_variables(void)
 {
-	size_t sz = _outgoing.size();
-	if (sz < 1)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a non-empty outgoing set");
+	size_t boff = ScopeLink::extract_variables(false);
 
-	// Old-style declarations have variables in the first
-	// slot. If they are there, then respect that.
-	// Otherwise, the first slot holds the body.
-	size_t boff = 0;
-	Type vt = _outgoing[0]->get_type();
-	if (VARIABLE_LIST == vt or
-	    VARIABLE_SET == vt or
-	    TYPED_VARIABLE_LINK == vt or
-	    VARIABLE_NODE == vt or
-	    GLOB_NODE == vt)
-	{
-		_vardecl = _outgoing[0];
-		ScopeLink::init_scoped_variables(_vardecl);
-		boff = 1;
-	}
-	else
-	{
-		// Hunt for variables in the main body, only.
-		// Do not hunt for them in the implicand clauses that follow.
-		// This is because those implicands might hold other free
-		// variables not appearing in the body.
-		_variables.find_variables(_outgoing[0]);
-	}
-
-	// We already know that sz==1 or greater, so if boff is that oh no
-	if (sz == boff)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a declaration of a body/premise!");
-
-	_body = _outgoing[boff];
-	for (size_t i=boff+1; i < sz; i++)
+	for (size_t i=boff+1; i < _outgoing.size(); i++)
 		_implicand.push_back(_outgoing[i]);
 
 	// Remove any declared variables that are NOT in the body!
