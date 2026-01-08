@@ -310,7 +310,7 @@ void PatternLink::init(void)
 	if (_quoted) return;
 
 	_pat.redex_name = "anonymous PatternLink";
-	ScopeLink::extract_variables(_outgoing);
+	ScopeLink::extract_variables(true);
 
 	// If the _body has not been initialized by ScopeLink, that's
 	// because the PatternLink itself was quoted, and thus not
@@ -321,7 +321,7 @@ void PatternLink::init(void)
 	// The root cause is that Nil used PatternLink instead of
 	// RuleLink in URE, which made his code run slow and introduced
 	// crazy-making into the patterns. We should ditch this, given
-	// that teh URE is dead meat anyway.
+	// that the URE is dead meat anyway.
 	if (nullptr == _body) return;
 
 	if (2 < _outgoing.size() or

@@ -52,7 +52,7 @@ void QueryLink::init(void)
 			"Expecting an outgoing set size of at least two, got %d", sz);
 
 	_pat.redex_name = "anonymous QueryLink";
-	RuleLink::extract_variables(_outgoing);
+	RuleLink::extract_variables();
 
 	init_bottom();
 

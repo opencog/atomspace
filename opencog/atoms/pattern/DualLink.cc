@@ -51,7 +51,7 @@ void DualLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"DualLinks with variables are currently not supported.\n");
 
-	// ScopeLink::extract_variables(_outgoing);
+	// ScopeLink::extract_variables();
 	_body = _outgoing[0];
 
 	PatternTermPtr root_term(make_term_tree(_body));
