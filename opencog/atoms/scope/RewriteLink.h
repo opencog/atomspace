@@ -63,24 +63,6 @@ protected:
 	                                 const HandleMap& vm);
 
 	/**
-	 * Perform "substitution" on all of the "bodies" in the link.
-	 * (There may be more than two atoms in the outgoing set; this
-	 * performs the substitution on all atoms that are not initial
-	 * variable declaration).
-	 *
-	 * The substitution performs either a beta-reduction, or an
-	 * alpha-conversion, depending on the map. If the map specifies
-	 * variable->argument, then a normal beta reduction is done. If
-	 * the maps specifies variable->variable, then an alpha renaming
-	 * is done.
-	 *
-	 * If there are any poorly-formed (ill-formed) quotations,
-	 * these are removed.
-	 */
-	HandleSeq substitute_bodies(const Handle& nvardecl,
-	                            const HandleMap& vm) const;
-
-	/**
 	 * Like above but uses a mapping from variables to arguments instead
 	 * of a sequence of arguments.
 	 */

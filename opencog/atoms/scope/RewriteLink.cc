@@ -70,7 +70,7 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 	Handle nvardecl = substitute_vardecl(vm);
 
 	// Perform substitution over the bodies
-	HandleSeq hs = substitute_bodies(nvardecl, vm);
+	HandleSeq hs = beta_reduce_bodies(nvardecl, vm);
 
 	// Filter vardecl
 	nvardecl = filter_vardecl(nvardecl, hs);
@@ -143,12 +143,6 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 
 	// Call the possibly-overloaded map-based reduction function.
 	return beta_reduce(vm);
-}
-
-HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
-                                         const HandleMap& vm) const
-{
-	return beta_reduce_bodies(nvardecl, vm);
 }
 
 HandleSeq RewriteLink::beta_reduce_bodies(const Handle& nvardecl,
