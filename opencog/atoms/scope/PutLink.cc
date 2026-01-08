@@ -206,10 +206,6 @@ void PutLink::static_typecheck_arguments(void)
 		return;
 	}
 
-	// GetLinks (and the like) are evaluated dynamically, later.
-	if (nameserver().isA(vtype, SATISFYING_LINK))
-		return;
-
 	// If its part of a signature, there is nothing to do.
 	if (TYPE_NODE == vtype or TYPE_CHOICE == vtype)
 		return;
