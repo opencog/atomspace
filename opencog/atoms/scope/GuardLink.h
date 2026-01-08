@@ -35,10 +35,18 @@ namespace opencog
 ///
 class GuardLink : public ScopeLink
 {
-protected:
-	// Flag for lazy, thread-safe initialization
+private:
 	mutable std::once_flag _init_flag;
+	void do_init(void) const;
 
+	// Flag for recursive glob matching state
+	mutable bool _recursive_glob;
+	void init_globby_terms(void) const;
+
+	// Globby terms are terms that contain a GlobNode
+	mutable HandleSet _globby_terms;
+
+protected:
 	// Pattern clause to match against.
 	// Might be null if there are only guards.
 	mutable Handle _match_pattern;
@@ -46,14 +54,7 @@ protected:
 	// Evaluatable terms to check after extraction
 	mutable HandleSeq _guard_clauses;
 
-	// Globby terms are terms that contain a GlobNode
-	mutable HandleSet _globby_terms;
-
-	// Flag for recursive glob matching state
-	mutable bool _recursive_glob;
-
 	void init(void) const;
-	void init_globby_terms(void) const;
 
 	bool extract(const Handle& termpattern, const ValuePtr& gnd,
 	             ValueMap& valmap, AtomSpace* scratch, bool silent,

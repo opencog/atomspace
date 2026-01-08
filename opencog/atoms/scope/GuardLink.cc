@@ -51,7 +51,7 @@ void GuardLink::init_globby_terms(void) const
 		_globby_terms.insert(sh);
 }
 
-void GuardLink::init(void) const
+void GuardLink::do_init(void) const
 {
 	init_globby_terms();
 
@@ -93,6 +93,12 @@ void GuardLink::init(void) const
 		_match_pattern = unwrap_present(_body);
 }
 
+void GuardLink::init(void) const
+{
+	// Lazy, thread-safe initialization
+	std::call_once(_init_flag, [this]() { this->do_init(); });
+}
+
 // ===============================================================
 
 bool GuardLink::eval_guard(const ValueMap& valmap,
@@ -111,8 +117,7 @@ bool GuardLink::eval_guard(const ValueMap& valmap,
 bool GuardLink::guard(const ValuePtr& gnd, ValueMap& valmap,
                       AtomSpace* scratch, bool silent) const
 {
-	// Lazy, thread-safe initialization
-	std::call_once(_init_flag, [this]() { this->init(); });
+	init();
 
 	// Extract groundings from the pattern term
 	if (_match_pattern)
