@@ -63,7 +63,7 @@ protected:
 	bool _quoted;
 
 	void init(void);
-	void extract_variables(const HandleSeq& oset);
+	void extract_variables(void);
 	void init_scoped_variables(const Handle& vardecl);
 	bool extract_shadowed_terms(const Handle&);
 

@@ -37,8 +37,8 @@ protected:
 	/// The rewrite term
 	HandleSeq _implicand;
 
-	/// Grab variables, wherever they may be.
-	void extract_variables(const HandleSeq& oset);
+	/// Alternative initializtion to what ScopeLink does.
+	void extract_variables(void);
 
 public:
 	RuleLink(const HandleSeq&&, Type=RULE_LINK);

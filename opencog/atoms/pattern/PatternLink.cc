@@ -310,7 +310,7 @@ void PatternLink::init(void)
 	if (_quoted) return;
 
 	_pat.redex_name = "anonymous PatternLink";
-	ScopeLink::extract_variables(_outgoing);
+	ScopeLink::extract_variables();
 
 	// If the _body has not been initialized by ScopeLink, that's
 	// because the PatternLink itself was quoted, and thus not

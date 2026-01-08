@@ -43,7 +43,7 @@ void ScopeLink::init(void)
 	// _quoted is true, that means we are inside a quote,
 	// and so nothing to be done. Skip variable extraction.
 	if (_quoted) return;
-	extract_variables(_outgoing);
+	extract_variables();
 	if (_body) extract_shadowed_terms(_body);
 }
 
@@ -95,15 +95,15 @@ ScopeLink::ScopeLink(const HandleSeq&& oset, Type t)
 /// Find and unpack variable declarations, if any; otherwise, just
 /// find all free variables.
 ///
-void ScopeLink::extract_variables(const HandleSeq& oset)
+void ScopeLink::extract_variables(void)
 {
-	size_t sz = oset.size();
+	size_t sz = _outgoing.size();
 	if (0 == sz)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting an outgoing set size of at least one; got %s",
 			to_short_string().c_str());
 
-	Type decls = oset.at(0)->get_type();
+	Type decls = _outgoing.at(0)->get_type();
 
 	// If we trip over an unquote immediately, then we can assume that
 	// the whole link appears in some quote context. This cannot be
@@ -122,12 +122,12 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	if (VARIABLE_LIST != decls and VARIABLE_SET != decls and
 	    // A VariableNode could a be valid body, if it has no variable
 	    // declaration, that is if the Scope has only one argument.
-	    (VARIABLE_NODE != decls or oset.size() == 1) and
+	    (VARIABLE_NODE != decls or _outgoing.size() == 1) and
 	    TYPED_VARIABLE_LINK != decls and
 	    ANCHOR_NODE != decls and
 	    GLOB_NODE != decls)
 	{
-		_body = oset[0];
+		_body = _outgoing[0];
 
 		if (nameserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
@@ -137,7 +137,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		}
 		else
 		{
-			_variables.find_variables(oset[0]);
+			_variables.find_variables(_outgoing[0]);
 		}
 		return;
 	}
@@ -145,11 +145,11 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration. JoinLinks need not have a body.
-	_vardecl = oset[0];
+	_vardecl = _outgoing[0];
 
 	if (2 <= sz)
 	{
-		_body = oset[1];
+		_body = _outgoing[1];
 
 		// If the user is using an AnchorNode, but not otherwise specifying
 		// variables, we have to fish them out of the body.
