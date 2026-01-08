@@ -186,24 +186,24 @@
 ; TEST 6: Count using pure Atomese.
 
 (Pipe
-   (Name "grand-total")
-   (Filter
-      (Rule
-         (TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
+	(Name "grand-total")
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
 			(And
 				(Variable "$typ") ; body - accept everything
-				(Equal            ; evaluatable guard
+				(Equal				; evaluatable guard
 					(Type 'FloatValue)
 					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
-         (IncrementValue
-            (AnyNode "totals")
-            (Predicate "tot-counts")
-            (ValueOf (Variable "$typ") (Predicate "cnt")))
-         (IncrementValue
-            (AnyNode "totals")
-            (Predicate "tot-types")
-            (Number 0 0 1)))
-      (Name "unique-types")))
+			(IncrementValue
+				(AnyNode "totals")
+				(Predicate "tot-counts")
+				(ValueOf (Variable "$typ") (Predicate "cnt")))
+			(IncrementValue
+				(AnyNode "totals")
+				(Predicate "tot-types")
+				(Number 0 0 1)))
+		(Name "unique-types")))
 
 (cog-execute! (Name "grand-total"))
 
@@ -212,6 +212,39 @@
 
 (define tot-counts (cog-value-ref (Any "totals") (Predicate "tot-counts") 2))
 (test-assert "tot-counts" (= 182 tot-counts))
+
+; ------------------------------------------------------------
+; TEST 7: Count derefernced value
+
+(Pipe
+	(Name "deref grand-total")
+	(Filter
+		(Rule
+			(VariableList
+				(TypedVariable (Variable "$typ") (Type 'Type))
+				(TypedVariable (Variable "$count") (Type 'FloatValue))) ; vardecl
+			(And
+				(Variable "$typ") ; body - accept everything
+				(Equal				; evaluatable guard
+					(Variable "$count")
+					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
+			(IncrementValue
+				(AnyNode "deref totals")
+				(Predicate "tot-counts")
+				(Variable "$count"))
+			(IncrementValue
+				(AnyNode "deref totals")
+				(Predicate "tot-types")
+				(Number 0 0 1)))
+		(Name "unique-types")))
+
+(cog-execute! (Name "deref grand-total"))
+
+(define tot-types (cog-value-ref (Any "deref totals") (Predicate "tot-types") 2))
+(test-assert "deref tot-types" (= 27 tot-types))
+
+(define tot-counts (cog-value-ref (Any "deref totals") (Predicate "tot-counts") 2))
+(test-assert "deref tot-counts" (= 182 tot-counts))
 
 ; ------------------------------------------------------------
 (test-end tname)
