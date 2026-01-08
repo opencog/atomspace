@@ -93,6 +93,9 @@ static double get_numeric_value(AtomSpace* as, bool silent, const Handle& h)
 		return fv->value()[0];
 	}
 
+	// Typical case is a VoidValue for `pap`.
+	if (silent) throw SilentException();
+
 	throw SyntaxException(TRACE_INFO,
 		"Don't know how to do arithmetic with this: %s",
 		pap->to_string().c_str());
