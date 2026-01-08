@@ -144,14 +144,10 @@
 ; Print (output) the counts in a format such that some graphing
 ; system can graph them.
 ;
-; Interfaces to the external world; the word outside of Atomese,
-; presents practical difficulties. For this demo, a short snippet
-; of scheme code will be used to print the counts into a string.
-; A fancier demo would use string manipulations to assemble the
-; the appropriate strings, followed by the use of a FileNode from
-; (a SensoryNode) from the sensory subsystem that would then
-; write those strings to a file. This is beyond the scope of the
-; current demo, so we stick to a simple scheme shim to do this.
+; Interfaces to the external world; the world outside of Atomese,
+; presents practical difficulties. We will jump through some hoops,
+; to demo. For starters, do it the "olde-fashioned" way: use a short
+; snippet of scheme code to print the counts into a string.
 
 (define (data-printer NAME COUNT)
 	(StringValue
@@ -159,7 +155,15 @@
 			(cog-value-ref COUNT 2)
 			(cog-name NAME))))
 
-; Define a simple but inadequate printer
+; Define a simple but inadequate printer. It should be easy to
+; understand how this printer works, which is why it is presented
+; in this demo. However: it fails, as not all TypeNodes will have
+; a count on them, an an exception will be thrown, when attempting
+; to access the count. The reason that not everything has a count
+; yet is because we ran `(cog-execute! (Name "count-types"))` a long
+; long time ago, and added many new types to the AtomSpace since then.
+; We could fix this by running the counter again. But there's also
+; another way.
 (define simple-printer
 	(Filter
 		(Rule
@@ -172,10 +176,12 @@
 					(ValueOf (Variable "$typ") (Predicate "cnt")))))
 		(Name "sorted-types")))
 
-; Invoke the printer above.
+; Invoke the printer above. Watch it throw.
 ; (cog-execute! simple-printer)
 
-; Define a fancier printer that guards against absent counts
+; Define a fancier printer that guards against absent counts.
+; This uses a predicate -- the EqualLink, to validate the
+; expected signature.
 (define guarded-printer
 	(Filter
 		(Rule
@@ -193,7 +199,40 @@
 					(ValueOf (Variable "$typ") (Predicate "cnt")))))
 		(Name "sorted-types")))
 
+; This one works fine.
 (cog-execute! guarded-printer)
 
+; -------------------------------------------------------------
+; A fancier way to arrive at the above is to do the string
+; manipulations entirely in Atomese. This is shown below.
+
+(Pipe
+	(Name "list of structures")
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
+			; Specify a body that rejects types without counts.
+			(And
+				(Present (Variable "$typ"))
+				(Equal
+					(Type 'FloatValue)
+					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
+			(LinkSignature (Type 'LinkValue)
+				(Node "Usage count of type: ")
+				(Variable "$typ")
+				(Node " is equal to ")
+				(ElementOf (Number 2)
+					(ValueOf (Variable "$typ") (Predicate "cnt")))))
+		(Name "sorted-types")))
+
+; Run this pipeline.
+(cog-execute! (Name "list of structures"))
+
+; -------------------------------------------------------------
+; the appropriate strings, followed by the use of a FileNode from
+; (a SensoryNode) from the sensory subsystem that would then
+; write those strings to a file. This is beyond the scope of the
+; current demo, so we stick to a simple scheme shim to do this.
+;
 ; The End! That's All, Folks!
 ; -------------------------------------------------------------
