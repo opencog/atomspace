@@ -127,20 +127,32 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 
 	// Hmm. If there's no value, it might be because it was deleted,
 	// or maybe it was never set. There are many reasons for that.
-	// So, instead of throwing, we're going to return a VoidValue
-	// instead. This is better than returning a nullptr, which has
-	// a way of making upstream callers do a null pointer deref.
-#if 0
+	//
+	// We have two design choices here: return nullptr or VoidValue
+	// or throw an exception. Neither is fun. If we return VoidValue,
+	// then downstream code has to explicitly check for it, and
+	// usually/typically pass it on to the caller. Yuck. This requires
+	// lots of if-tests in the codebase. If we throw an exception,
+	// then critical blocks will need try-catch blocks. But maybe
+	// fewer of these blocks are needed.
+	//
+	// The historical choice was to throw exceptions, and the various
+	// flavors of SilentException in particular. But an audit of the
+	// code shows that these are infrequently used: Modern Atomese
+	// seems to require SilentExceptions only very rarely. But the
+	// few places they are used, they really are needed. So ...
+	//
+	// The right answer here seems to be "throw", as this will
+	// typically be deep inside some processing pipeline, and we
+	// want to avoid error checks up and down the call chain.
 	if (silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
 	   "No value at key %s on atom %s",
 	   ak->to_string().c_str(), ah->to_string().c_str());
-#endif
 
 	return createVoidValue();
-	// return nullptr;
 }
 
 /// When executed, this will return the value at the indicated key.
