@@ -238,13 +238,20 @@
 				(Number 0 0 1)))
 		(Name "unique-types")))
 
-(cog-execute! (Name "deref grand-total"))
-
-(define tot-types (cog-value-ref (Any "deref totals") (Predicate "tot-types") 2))
-(test-assert "deref tot-types" (= 27 tot-types))
-
-(define tot-counts (cog-value-ref (Any "deref totals") (Predicate "tot-counts") 2))
-(test-assert "deref tot-counts" (= 182 tot-counts))
+;;; Stub out, for now. Using the Equal predicate, like the above,
+;;; seems like a cool idea ... kind-of. But I want to draw the line
+;;; at this kind of ... nonsense. The Equal above starts to look a
+;;; whole lot like olde-fashioned procedural programming, and we know
+;;; what lies down that path. I have no desire to create a Sinclair
+;;; Z80 in Minecraft. We're not emulating to emulate badly and
+;;; inefficiently. ... at least not yet ... :-/
+;;; (cog-execute! (Name "deref grand-total"))
+;;;
+;;; (define tot-types (cog-value-ref (Any "deref totals") (Predicate "tot-types") 2))
+;;; (test-assert "deref tot-types" (= 27 tot-types))
+;;;
+;;; (define tot-counts (cog-value-ref (Any "deref totals") (Predicate "tot-counts") 2))
+;;; (test-assert "deref tot-counts" (= 182 tot-counts))
 
 ; ------------------------------------------------------------
 (test-end tname)
