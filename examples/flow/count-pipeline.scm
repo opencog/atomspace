@@ -159,8 +159,8 @@
 			(cog-value-ref COUNT 2)
 			(cog-name NAME))))
 
-; Invoke the printer above.
-(cog-execute!
+; Define a simple but inadequate printer
+(define simple-printer
 	(Filter
 		(Rule
 			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
@@ -171,6 +171,29 @@
 					(Variable "$typ")
 					(ValueOf (Variable "$typ") (Predicate "cnt")))))
 		(Name "sorted-types")))
+
+; Invoke the printer above.
+; (cog-execute! simple-printer)
+
+; Define a fancier printer that guards against absent counts
+(define guarded-printer
+	(Filter
+		(Rule
+			(TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
+			(And
+				(Variable "$typ") ; body - accept everything
+				(Equal            ; evaluatable guard
+					(Type 'FloatValue)
+					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
+
+			(ExecutionOutput
+				(GroundedSchema "scm:data-printer")
+				(LinkSignature (Type 'LinkValue)
+					(Variable "$typ")
+					(ValueOf (Variable "$typ") (Predicate "cnt")))))
+		(Name "sorted-types")))
+
+(cog-execute! guarded-printer)
 
 ; The End! That's All, Folks!
 ; -------------------------------------------------------------
