@@ -183,5 +183,36 @@
 	type-count-1 type-count-2 type-count-3)
 
 ; ------------------------------------------------------------
+; TEST 6: Count using pure Atomese.
+
+(Pipe
+   (Name "grand-total")
+   (Filter
+      (Rule
+         (TypedVariable (Variable "$typ") (Type 'Type)) ; vardecl
+			(And
+				(Variable "$typ") ; body - accept everything
+				(Equal            ; evaluatable guard
+					(Type 'FloatValue)
+					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
+         (IncrementValue
+            (AnyNode "totals")
+            (Predicate "tot-counts")
+            (ValueOf (Variable "$typ") (Predicate "cnt")))
+         (IncrementValue
+            (AnyNode "totals")
+            (Predicate "tot-types")
+            (Number 0 0 1)))
+      (Name "unique-types")))
+
+(cog-execute! (Name "grand-total"))
+
+(define tot-types (cog-value-ref (Any "totals") (Predicate "tot-types") 2))
+(test-assert "tot-types" (= 27 tot-types))
+
+(define tot-counts (cog-value-ref (Any "totals") (Predicate "tot-counts") 2))
+(test-assert "tot-counts" (= 182 tot-counts))
+
+; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)
