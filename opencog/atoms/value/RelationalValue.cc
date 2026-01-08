@@ -81,7 +81,7 @@ bool RelationalValue::compare(const Value& lhs, const Value& rhs) const
 	_scratch->clear();
 
 	// Set silent=true to catch SilentException.
-	return  _exout->bevaluate(_scratch.get(), true);
+	return _exout->bevaluate(_scratch.get(), true);
 }
 
 // ==============================================================
@@ -117,6 +117,20 @@ void RelationalValue::add(const ValuePtr& vp)
 	// This will be a SilentException; other exceptions are real
 	// and are not guarded against.
 	//
+	// Do above for *any* insertion, but also special-case the very
+	// first insertion.  If the very first elt to be added is unchecked,
+	// and we are so unlucky that it's the one that trips the exception,
+	// then all subsequent adds will fail. So hand-check it.
+	//
+	if (0 == _set.size())
+	{
+		try {
+			compare(*vp, *vp);
+		} catch (const SilentException& ex) {
+			return;
+		}
+	}
+
 	try {
 		_set.insert(vp);
 	} catch (const SilentException& ex) {}
@@ -132,6 +146,14 @@ void RelationalValue::add(ValuePtr&& vp)
 
 	// See notes above.
 	_scratch->clear();
+	if (0 == _set.size())
+	{
+		try {
+			compare(*vp, *vp);
+		} catch (const SilentException& ex) {
+			return;
+		}
+	}
 	try {
 		_set.insert(std::move(vp));
 	} catch (const SilentException& ex) {}
