@@ -67,7 +67,10 @@ RewriteLink::RewriteLink(const HandleSeq&& oset, Type t)
 Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 {
 	// Perform substitution over the variable declaration
-	Handle nvardecl = substitute_vardecl(vm);
+	Handle nvardecl(get_vardecl());
+
+	if (nvardecl)
+		nvardecl = substitute_vardecl(nvardecl, vm);
 
 	// Perform substitution over the bodies
 	HandleSeq hs = beta_reduce_bodies(nvardecl, vm);
@@ -168,14 +171,6 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
 	nbody = consume_quotations(vars, nbody, Quotation(),
 	                           needless_quotation, true);
 	return nbody;
-}
-
-Handle RewriteLink::substitute_vardecl(const HandleMap& vm) const
-{
-	if (not get_vardecl())
-		return Handle::UNDEFINED;
-
-	return substitute_vardecl(get_vardecl(), vm);
 }
 
 Handle RewriteLink::substitute_vardecl(const Handle& vardecl,

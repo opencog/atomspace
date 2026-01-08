@@ -58,7 +58,6 @@ protected:
 	 * return the invalid handle, if all variables were reduced by
 	 * constants.
 	 */
-	Handle substitute_vardecl(const HandleMap& vm) const;
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& vm);
 
