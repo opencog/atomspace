@@ -50,6 +50,7 @@ void RuleLink::init(void)
 	if (_quoted) return;
 
 	extract_variables();
+	if (_body) extract_shadowed_terms(_body);
 }
 
 RuleLink::RuleLink(const Handle& vardecl,

@@ -79,7 +79,7 @@ bool ScopeLink::skip_init(Type t)
 	// sequence. We can't use virtual init() in the ctor, so just
 	// do an if-statement here.
 	if (PUT_LINK == t) return true;
-	if (nameserver().isA(t, PATTERN_LINK)) return true;
+	if (nameserver().isA(t, RULE_LINK)) return true;
 	return false;
 }
 
