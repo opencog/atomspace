@@ -29,6 +29,19 @@
 
 using namespace opencog;
 
+GuardLink::GuardLink(const HandleSeq&& oset, Type t)
+	: ScopeLink(std::move(oset), t), _recursive_glob(false)
+{
+	if (not nameserver().isA(t, GUARD_LINK))
+	{
+		const std::string& tname = nameserver().getTypeName(t);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a GuardLink, got %s", tname.c_str());
+	}
+}
+
+// ===============================================================
+
 void GuardLink::init_globby_terms(void)
 {
 	// Locate all GlobNodes in the pattern body
@@ -80,23 +93,7 @@ void GuardLink::init(void)
 		_match_pattern = unwrap_present(_body);
 }
 
-GuardLink::GuardLink(const HandleSeq&& oset, Type t)
-	: ScopeLink(std::move(oset), t), _recursive_glob(false)
-{
-	if (not nameserver().isA(t, GUARD_LINK))
-	{
-		const std::string& tname = nameserver().getTypeName(t);
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a GuardLink, got %s", tname.c_str());
-	}
-	// Curiously, there might not be a _body...
-	if (nullptr == _body) return;
-
-	// LambdaLinks inherit from us, but do NOT want/need this init.
-	if (t != GUARD_LINK)
-		return;
-	init();
-}
+// ===============================================================
 
 bool GuardLink::eval_guard(const ValueMap& valmap,
                            AtomSpace* scratch, bool silent) const
