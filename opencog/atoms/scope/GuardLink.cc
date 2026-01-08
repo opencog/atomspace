@@ -22,6 +22,7 @@
 #include <opencog/atoms/signature/TypeNode.h>
 #include <opencog/atoms/signature/TypeUtils.h>
 #include <opencog/atoms/value/LinkValue.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
 
 #include "GuardLink.h"
@@ -119,14 +120,22 @@ bool GuardLink::guard(const ValuePtr& gnd, ValueMap& valmap,
 {
 	init();
 
-	// Extract groundings from the pattern term
-	if (_match_pattern)
+	// If there are silent exceptions, then clearly the guard fails.
+	try
 	{
-		bool ok = extract(_match_pattern, gnd, valmap, scratch, silent);
-		if (not ok) return false;
+		// Extract groundings from the pattern term
+		if (_match_pattern)
+		{
+			bool ok = extract(_match_pattern, gnd, valmap, scratch, true);
+			if (not ok) return false;
+		}
+		if (_guard_clauses.empty()) return true;
+		return eval_guard(valmap, scratch, true);
 	}
-	if (_guard_clauses.empty()) return true;
-	return eval_guard(valmap, scratch, silent);
+	catch (const SilentException&)
+	{
+		return false;
+	}
 }
 
 // ===============================================================
