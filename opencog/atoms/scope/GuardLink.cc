@@ -42,7 +42,7 @@ GuardLink::GuardLink(const HandleSeq&& oset, Type t)
 
 // ===============================================================
 
-void GuardLink::init_globby_terms(void)
+void GuardLink::init_globby_terms(void) const
 {
 	// Locate all GlobNodes in the pattern body
 	FindAtoms fgn(GLOB_NODE, true);
@@ -51,7 +51,7 @@ void GuardLink::init_globby_terms(void)
 		_globby_terms.insert(sh);
 }
 
-void GuardLink::init(void)
+void GuardLink::init(void) const
 {
 	init_globby_terms();
 
@@ -111,6 +111,9 @@ bool GuardLink::eval_guard(const ValueMap& valmap,
 bool GuardLink::guard(const ValuePtr& gnd, ValueMap& valmap,
                       AtomSpace* scratch, bool silent) const
 {
+	// Lazy, thread-safe initialization
+	std::call_once(_init_flag, [this]() { this->init(); });
+
 	// Extract groundings from the pattern term
 	if (_match_pattern)
 	{

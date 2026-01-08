@@ -18,6 +18,7 @@
 #ifndef _OPENCOG_GUARD_LINK_H
 #define _OPENCOG_GUARD_LINK_H
 
+#include <mutex>
 #include <opencog/atoms/scope/ScopeLink.h>
 #include <opencog/atoms/free/Quotation.h>
 
@@ -35,21 +36,24 @@ namespace opencog
 class GuardLink : public ScopeLink
 {
 protected:
+	// Flag for lazy, thread-safe initialization
+	mutable std::once_flag _init_flag;
+
 	// Pattern clause to match against.
 	// Might be null if there are only guards.
-	Handle _match_pattern;
+	mutable Handle _match_pattern;
 
 	// Evaluatable terms to check after extraction
-	HandleSeq _guard_clauses;
+	mutable HandleSeq _guard_clauses;
 
 	// Globby terms are terms that contain a GlobNode
-	HandleSet _globby_terms;
+	mutable HandleSet _globby_terms;
 
 	// Flag for recursive glob matching state
 	mutable bool _recursive_glob;
 
-	void init(void);
-	void init_globby_terms(void);
+	void init(void) const;
+	void init_globby_terms(void) const;
 
 	bool extract(const Handle& termpattern, const ValuePtr& gnd,
 	             ValueMap& valmap, AtomSpace* scratch, bool silent,
