@@ -104,11 +104,28 @@ void PutLink::init(void)
 	static_typecheck_arguments();
 }
 
-
 /// Check that the arguments in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
 /// since the arguments may be dynamically obtained at run-time, we cannot
 /// check these here.
+///
+/// Why bother? I'm not sure. The primary use case for PutLink is that
+/// either it is constructed on the fly, as a part of rule reduction,
+/// or it has dynamically evaluatable terms. The latter case cannot be
+/// be static-typechecked. The former case is incoherent: if some
+/// subsystem is constructing these PutLinks on the fly, it it is
+/// constructing them so badly that an exception triggers on the static
+/// typecheck, what's the point? It says the rule that built this is
+/// broken. But automated systems can only handle silent exceptions...
+/// and not the ones below. So the ones below, who are they for? The
+/// human who is writing broken rules, and needs debugging help?
+///
+/// This kind of stati typechecking made sense in the early days of
+/// Atomese. But now it's inappropriate ... the whole idea needs to
+/// be replaced by some sheaf/connector system that can assemble
+/// processing pipelines correctly, instead of throwing exceptions
+/// when subsystems are mis-connected.
+///
 void PutLink::static_typecheck_arguments(void)
 {
 	// Cannot typecheck at this point in time, because the schema
