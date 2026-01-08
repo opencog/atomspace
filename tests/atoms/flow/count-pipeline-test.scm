@@ -121,33 +121,19 @@
 (test-assert "first-result-is-link-value"
 	(equal? 'LinkValue (cog-type first-result)))
 
-; Should have roughly 10-20 types with counts (the exact number depends
-; on how many atoms existed before the first count-types ran)
-(test-assert "first-type-count-reasonable"
-	(and (>= *type-count* 8) (<= *type-count* 25)))
+; Should have exactly 13 types with counts
+(test-assert "first-type-count" (= *type-count* 13))
+(test-assert "first-total-count" (= *total-count* 22))
 
-; Save first run values for comparison
-(define first-type-count *type-count*)
-(define first-total-count *total-count*)
-
-(format #t "First run: ~A types, total count ~A\n" first-type-count first-total-count)
-
-; Verify that the total count is reasonable (should be at least as many
-; atoms as types, since each type represents at least one atom)
-(test-assert "first-total-count-reasonable"
-	(>= first-total-count first-type-count))
+(format #t "First run: ~A types, total count ~A\n"
+	*type-count* *total-count*)
 
 ; ------------------------------------------------------------
 ; TEST 2: Verify specific types have counts
 ; TypeNode should definitely have a count since TypeNodes are used heavily
-(define type-type (Type 'TypeNode))
-(define type-count-val (cog-value type-type (Predicate "cnt")))
+(define type-count-1 (cog-value-ref (Type 'TypeNode) (Predicate "cnt") 2))
 
-(test-assert "type-node-has-count"
-	(not (equal? #f type-count-val)))
-
-(test-assert "type-node-count-positive"
-	(> (cog-value-ref type-count-val 2) 0))
+(test-assert "type-node-count-is-two" (= type-count-1 2))
 
 ; ------------------------------------------------------------
 ; TEST 3: Run count-types again - this will add to existing counts
@@ -156,40 +142,24 @@
 (cog-execute! (Name "count-types"))
 
 (reset-counters)
-(define second-result (cog-execute! guarded-counter))
+(cog-execute! guarded-counter)
 
-(define second-type-count *type-count*)
-(define second-total-count *total-count*)
-
-(format #t "Second run: ~A types, total count ~A\n" second-type-count second-total-count)
+(format #t "Second run: ~A types, total count ~A\n"
+	*type-count* *total-count*)
 
 ; After the second run, more types should have counts
-; (types created between first and second count-types runs)
-(test-assert "second-type-count-at-least-first"
-	(>= second-type-count first-type-count))
+; Twenty-seven, in fact.
+(test-assert "second-type-count" (= *type-count* 27))
 
-; The total count should be significantly higher after the second run
-; because each type's count was incremented again
-(test-assert "second-total-count-higher"
-	(> second-total-count first-total-count))
-
-; The increase should be substantial - at least double the original count
-; because each atom gets counted again, plus new atoms
-(test-assert "second-count-substantially-higher"
-	(>= second-total-count (* 2 first-total-count)))
+; Oh what the heck. It has to be 102, eactly.
+(test-assert "second-total-count" (= *total-count* 102))
 
 ; ------------------------------------------------------------
 ; TEST 4: Verify counts are cumulative
 ; The TypeNode count should have increased from the second run
 
-(define type-count-val-2 (cog-value type-type (Predicate "cnt")))
-(define type-count-1 (cog-value-ref type-count-val 2))
-(define type-count-2 (cog-value-ref type-count-val-2 2))
-
-(format #t "TypeNode count: first=~A second=~A\n" type-count-1 type-count-2)
-
-(test-assert "type-node-count-increased"
-	(> type-count-2 type-count-1))
+(define type-count-2 (cog-value-ref (Type 'TypeNode) (Predicate "cnt") 2))
+(test-assert "type-node-count" (= 34 type-count-2))
 
 ; ------------------------------------------------------------
 ; TEST 5: Run count-types a third time and verify continued accumulation
@@ -197,23 +167,17 @@
 (cog-execute! (Name "count-types"))
 
 (reset-counters)
-(define third-result (cog-execute! guarded-counter))
+(cog-execute! guarded-counter)
 
-(define third-type-count *type-count*)
-(define third-total-count *total-count*)
-
-(format #t "Third run: ~A types, total count ~A\n" third-type-count third-total-count)
+(format #t "Third run: ~A types, total count ~A\n"
+	*type-count* *total-count*)
 
 ; Total count should continue to increase
-(test-assert "third-total-count-higher-than-second"
-	(> third-total-count second-total-count))
+(test-assert "third-total-count" (= 182 *total-count*))
 
 ; Verify TypeNode count increased again
-(define type-count-val-3 (cog-value type-type (Predicate "cnt")))
-(define type-count-3 (cog-value-ref type-count-val-3 2))
-
-(test-assert "type-node-count-increased-again"
-	(> type-count-3 type-count-2))
+(define type-count-3 (cog-value-ref (Type 'TypeNode) (Predicate "cnt") 2))
+(test-assert "type-node-count-3" (= 66 type-count-3))
 
 (format #t "TypeNode count progression: ~A -> ~A -> ~A\n"
 	type-count-1 type-count-2 type-count-3)
