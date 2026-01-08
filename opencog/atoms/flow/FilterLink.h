@@ -24,9 +24,7 @@
 #define _OPENCOG_FILTER_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
-#include <opencog/atoms/scope/ScopeLink.h>
-#include <opencog/atoms/free/Quotation.h>
-#include "GlobMatch.h"
+#include <opencog/atoms/scope/GuardLink.h>
 
 namespace opencog
 {
@@ -44,29 +42,21 @@ namespace opencog
 class FilterLink : public FunctionLink
 {
 protected:
-	ScopeLinkPtr _pattern;
+	// Guard that does the actual filtering part of the work.
+	GuardLinkPtr _guard_ptrn;
 	const Variables* _mvars;
-	const HandleSet* _varset;
-
-	// Globby terms are terms that contain a GlobNode
-	HandleSet _globby_terms;     // Smallest term that has a glob.
 
 	// Rules will have a rewrite
 	HandleSeq _rewrite;
 
-	// FIXME: these flags should be per-instance AND per-thread, so
+	// FIXME: this flag should be per-instance AND per-thread, so
 	// that multiple threads can run this instance without collision.
 	// But for now, this is rare, so punt.
-	mutable bool _recursive_glob;
 	mutable bool _recursive_exec;
 
 	void init(void);
 
 	FilterLink(Type, const Handle&);
-
-	bool extract(const Handle&, const ValuePtr&, ValueMap&,
-	             AtomSpace*, bool,
-	             const Quotation& = Quotation()) const;
 
 	ValuePtr rewrite_one(const ValuePtr&, AtomSpace*, bool) const;
 	ValuePtr do_execute(AtomSpace*, bool) const;

@@ -703,12 +703,19 @@ REPLACEMENT_LINK <- ORDERED_LINK
 // connector declarations.
 SCOPE_LINK <- SECTION,ALPHA_CONVERTIBLE_SIG
 
+// The GuardLink is a ScopeLink with extra methods to perform type
+// checking and validation/filtering of arguments prior to
+// beta-reduction. That is, a beta-reduction against a proposed
+// grounding can only be done if the types of the proposal agree,
+// and any evaluatable clauses in the body evaluate to true.
+GUARD_LINK <- SCOPE_LINK
+
 // The RewriteLink is a ScopeLink with extra methods that perform
 // alpha conversion and beta reduction on the ScopeLink. It is a base
 // class for many kinds of Atom types, most of which CANNOT be treated
 // as if they were lambdas!  So user beware: although RewriteLink feels
 // like LambdaLink ... it isn't.  Not everything is a Lambda.
-REWRITE_LINK <- SCOPE_LINK
+REWRITE_LINK <- GUARD_LINK
 
 // The PrenexLink is a RewriteLink that maintains prenex normal form.
 // It serves as a base class for the various pattern-matching links,

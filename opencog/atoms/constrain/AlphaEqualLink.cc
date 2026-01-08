@@ -67,7 +67,7 @@ void AlphaEqualLink::setAtomSpace(AtomSpace* as)
 				to_string().c_str());
 
 		// Actually alpha-convert, and compare.
-		Handle ha = v.substitute_nocheck(h, vid.varseq, false);
+		Handle ha = v.substitute_nocheck(h, vid.varseq);
 		if (not (*hid == *ha))
 			throw SyntaxException(TRACE_INFO,
 				"Cannot place AlphaEqualLink with non-alpha-convertible elements in the AtomSpace! Got %s",
@@ -115,7 +115,7 @@ bool AlphaEqualLink::bevaluate(AtomSpace* as, bool silent)
 			return false;
 
 		// Actually alpha-convert, and compare.
-		Handle ha = v.substitute_nocheck(h, vid.varseq, silent);
+		Handle ha = v.substitute_nocheck(h, vid.varseq);
 		if (not (*hid == *ha))
 			return false;
 	}
