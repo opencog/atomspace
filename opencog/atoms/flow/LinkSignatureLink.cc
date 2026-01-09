@@ -64,7 +64,7 @@ LinkSignatureLink::LinkSignatureLink(const HandleSeq&& oset, Type t)
 /// Rewrite the provided input into the desired type. This will rewrite
 /// between Links and LinkValues, going in eitehr direction, and between
 /// Nodes and StringValues, going in either direction, and between
-/// NumberNodes and FloatValues, going in eitehr direction.
+/// NumberNodes and FloatValues, going in either direction.
 //
 ValuePtr LinkSignatureLink::do_construct(const ValueSeq&& newset) const
 {
@@ -121,17 +121,26 @@ ValuePtr LinkSignatureLink::do_construct(const ValueSeq&& newset) const
 				"Expecting Node or String Value of size one, got size %lu\n",
 				newset.size());
 
+		if (0 == newset[0]->size())
+			throw RuntimeException(TRACE_INFO,
+				"Expecting non-empty Node or Value\n");
+
 		std::string name;
 		if (newset[0]->is_type(NODE))
 			name = NodeCast(newset[0])->get_name();
 
 		else if (newset[0]->is_type(STRING_VALUE))
 		{
-			if (0 == newset[0]->size())
-				throw RuntimeException(TRACE_INFO,
-					"Expecting non-empty StringValue\n");
-
 			name = StringValueCast(newset[0])->value()[0];
+		}
+		// Yuck. String printing of floats. Bad idea.
+		// But, well NumberNode already does this, so that's
+		// a precedent. The ugliness of this says that this
+		// really is not the right solution.
+		else if (newset[0]->is_type(FLOAT_VALUE))
+		{
+			name = NumberNode::vector_to_plain(
+				FloatValueCast(newset[0])->value());
 		}
 		else
 			throw RuntimeException(TRACE_INFO,

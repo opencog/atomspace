@@ -718,6 +718,10 @@ so as to reduce it's own body. Ivix move that code out of `RuleLink`.
 get_variables().substitute(body, vm, _silent);
 Variables::substitute throws when guard fails.
 Replacement::substitute_scoped
+Variables::is_type() vs atoms/signature/TypeUtils.cc type_match()
+move FilterLink::extract to GuardLink!?!!
+
+Done. GuardLink has been implemented.
 
 
 ### Guarded connections
