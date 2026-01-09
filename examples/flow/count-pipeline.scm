@@ -225,7 +225,8 @@
 				(Variable "$typ")
 				(Node " is equal to ")
 				(ElementOf (Number 2)
-					(ValueOf (Variable "$typ") (Predicate "cnt")))))
+					(ValueOf (Variable "$typ") (Predicate "cnt")))
+				(Node "\n")))
 		(Name "sorted-types")))
 
 ; Run this pipeline.
@@ -244,18 +245,21 @@
 				(Variable "$a")
 				(Variable "$b")
 				(Variable "$c")
-				(Variable "$d"))
+				(Variable "$d")
+				(Variable "$e"))
 			(LinkSignature (Type 'LinkValue)
 				(Variable "$a")
 				(Variable "$b")
 				(Variable "$c")
-				(Variable "$d"))
+				(Variable "$d")
+				(Variable "$e"))
 			(TransposeColumn
 				(LinkSignature (Type 'LinkValue)
 					(LinkSignature (Type 'StringValue) (Variable "$a"))
 					(LinkSignature (Type 'StringValue) (Variable "$b"))
 					(LinkSignature (Type 'StringValue) (Variable "$c"))
-					(LinkSignature (Type 'StringValue) (Variable "$d")))))
+					(LinkSignature (Type 'StringValue) (Variable "$d"))
+					(LinkSignature (Type 'StringValue) (Variable "$e")))))
 		(Name "list of structures")))
 
 (cog-execute! (Name "string repr"))
@@ -264,13 +268,24 @@
 (cog-execute! (Concatenate (Name "string repr")))
 
 ; -------------------------------------------------------------
-; The final step is to use the a FileNode from the sensory subsystem
-; to write the above out to a file. This part of the demo requires
-; the sensory subsystem to be installed.
+; Use the TextFileNode from the sensory subsystem to write the above
+; out to a file. This part of the demo requires the sensory subsystem
+; to be installed.
 
 (use-modules (opencog sensory))
 
-; Unfinished ...
+(define outfile (TextFile "file:///tmp/count-pipeline.txt"))
+
+(cog-execute!
+	(SetValue outfile (Predicate "*-open-*") (Type 'StringValue)))
+
+(cog-execute!
+	(SetValue outfile (Predicate "*-write-*") (Name "string repr")))
+
+(cog-execute!
+	(SetValue outfile (Predicate "*-close-*") (Node "")))
+
+; Take a look: cat /tmp/count-pipeline.txt
 ;
 ; The End! That's All, Folks!
 ; -------------------------------------------------------------
