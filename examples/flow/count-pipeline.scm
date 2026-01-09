@@ -217,6 +217,9 @@
 				(Equal
 					(Type 'FloatValue)
 					(TypeOf (ValueOf (Variable "$typ") (Predicate "cnt")))))
+			; Package up the results into a "structure" consisting
+			; Values of various types -- some strings interleaved
+			; with some numbers.
 			(LinkSignature (Type 'LinkValue)
 				(Node "Usage count of type: ")
 				(Variable "$typ")
@@ -229,10 +232,10 @@
 (cog-execute! (Name "list of structures"))
 
 ; -------------------------------------------------------------
+; Convert to strings ...
 ; the appropriate strings, followed by the use of a FileNode from
 ; (a SensoryNode) from the sensory subsystem that would then
-; write those strings to a file. This is beyond the scope of the
-; current demo, so we stick to a simple scheme shim to do this.
+; write those strings to a file. Unfinished ...
 ;
 ; The End! That's All, Folks!
 ; -------------------------------------------------------------
