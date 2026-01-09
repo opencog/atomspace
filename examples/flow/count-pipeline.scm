@@ -232,10 +232,45 @@
 (cog-execute! (Name "list of structures"))
 
 ; -------------------------------------------------------------
-; Convert to strings ...
-; the appropriate strings, followed by the use of a FileNode from
-; (a SensoryNode) from the sensory subsystem that would then
-; write those strings to a file. Unfinished ...
+; The above needs to be converted to pure strings. Below is a very
+; ugly way to do this conversion.  It ... works. Something better
+; would be better.
+
+(Pipe
+	(Name "string repr")
+	(Filter
+		(Rule
+			(VariableList
+				(Variable "$a")
+				(Variable "$b")
+				(Variable "$c")
+				(Variable "$d"))
+			(LinkSignature (Type 'LinkValue)
+				(Variable "$a")
+				(Variable "$b")
+				(Variable "$c")
+				(Variable "$d"))
+			(TransposeColumn
+				(LinkSignature (Type 'LinkValue)
+					(LinkSignature (Type 'StringValue) (Variable "$a"))
+					(LinkSignature (Type 'StringValue) (Variable "$b"))
+					(LinkSignature (Type 'StringValue) (Variable "$c"))
+					(LinkSignature (Type 'StringValue) (Variable "$d")))))
+		(Name "list of structures")))
+
+(cog-execute! (Name "string repr"))
+
+; Flatten the structure above
+(cog-execute! (Concatenate (Name "string repr")))
+
+; -------------------------------------------------------------
+; The final step is to use the a FileNode from the sensory subsystem
+; to write the above out to a file. This part of the demo requires
+; the sensory subsystem to be installed.
+
+(use-modules (opencog sensory))
+
+; Unfinished ...
 ;
 ; The End! That's All, Folks!
 ; -------------------------------------------------------------
