@@ -90,6 +90,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	// Values
 	void test_values(void);
 	void test_value_list(void);
+	void test_multi_values(void);
 
 	// TVs
 	void check_truth_value(const ValuePtr& tv);
@@ -477,6 +478,76 @@ void BasicSCMUTest::test_value_list(void)
 
 	boo = eval->eval("(equal? (cog-value->list k) '(\"key\"))");
 	TSM_ASSERT("Failed key name equality", boo == "#t\n");
+}
+
+// ============================================================
+// Test the extended cog-set-value! syntax:
+// - Key removal with #f
+// - Two-argument form (defaults to VoidValue)
+// - Four+ argument form (auto-wraps in LinkValue)
+
+void BasicSCMUTest::test_multi_values(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(define h (Concept \"multi-test\"))");
+	TSM_ASSERT("Failed to create atom", not eval->eval_error());
+	eval->eval("(define k (Predicate \"multi-key\"))");
+	TSM_ASSERT("Failed to create key", not eval->eval_error());
+
+	// -------
+	// Test key removal with #f
+	eval->eval("(cog-set-value! h k (FloatValue 1 2 3))");
+	TSM_ASSERT("Failed to set value", not eval->eval_error());
+
+	ValuePtr v1 = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Failed to get value", not eval->eval_error());
+	TSM_ASSERT("Value should not be null", v1 != nullptr);
+
+	// Now remove the key with #f
+	eval->eval("(cog-set-value! h k #f)");
+	TSM_ASSERT("Failed to remove key", not eval->eval_error());
+
+	ValuePtr v2 = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Key should be removed", v2 == nullptr);
+
+	// -------
+	// Test two-argument form (defaults to VoidValue)
+	eval->eval("(cog-set-value! h k)");
+	TSM_ASSERT("Failed to set VoidValue", not eval->eval_error());
+
+	std::string typestr = eval->eval("(cog-type (cog-value h k))");
+	TSM_ASSERT("Should be VoidValue", typestr == "VoidValue\n");
+
+	// -------
+	// Test four+ argument form (auto-wraps in LinkValue)
+	eval->eval("(define a (Concept \"aaa\"))");
+	eval->eval("(define b (Concept \"bbb\"))");
+	eval->eval("(define c (Concept \"ccc\"))");
+	TSM_ASSERT("Failed to create atoms", not eval->eval_error());
+
+	eval->eval("(cog-set-value! h k a b c)");
+	TSM_ASSERT("Failed to set multi-value", not eval->eval_error());
+
+	typestr = eval->eval("(cog-type (cog-value h k))");
+	TSM_ASSERT("Should be LinkValue", typestr == "LinkValue\n");
+
+	std::string boo = eval->eval("(equal? (cog-value->list (cog-value h k)) (list a b c))");
+	TSM_ASSERT("LinkValue contents mismatch", boo == "#t\n");
+
+	// Test with mixed value types
+	eval->eval("(define fv (FloatValue 1.5 2.5))");
+	eval->eval("(define sv (StringValue \"x\" \"y\"))");
+	TSM_ASSERT("Failed to create values", not eval->eval_error());
+
+	eval->eval("(cog-set-value! h k fv sv a)");
+	TSM_ASSERT("Failed to set mixed multi-value", not eval->eval_error());
+
+	typestr = eval->eval("(cog-type (cog-value h k))");
+	TSM_ASSERT("Should be LinkValue", typestr == "LinkValue\n");
+
+	boo = eval->eval("(equal? (cog-value->list (cog-value h k)) (list fv sv a))");
+	TSM_ASSERT("Mixed LinkValue contents mismatch", boo == "#t\n");
 }
 
 // ============================================================
