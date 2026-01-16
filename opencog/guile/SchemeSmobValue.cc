@@ -14,11 +14,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <cstddef>
@@ -30,6 +25,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -444,10 +440,24 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
 	Handle key(verify_handle(skey, "cog-set-value!", 2));
 
+	// If no args, use VoidValue
+	if (scm_is_null(svalue))
+	{
+		ValuePtr pa(createVoidValue());
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	// If it is a list, assume its a list of values.
+	if (not scm_is_null(SCM_CDR(svalue)))
+	{
+		std::vector<ValuePtr> vals = scm_to_protom_list(svalue);
+		ValuePtr pa(createLinkValue(std::move(vals)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
 	svalue = SCM_CAR(svalue);
 
 	// If svalue is actually a value, just use it.
-	// If it is a list, assume its a list of values.
 	ValuePtr pa;
 	if (scm_is_pair(svalue)) {
 		SCM sitem = SCM_CAR(svalue);
