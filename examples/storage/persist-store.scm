@@ -40,17 +40,17 @@
 (cog-set-value! fsn (*-open-*) (VoidValue))
 
 ; Store just one Atom.
-(store-atom a fsn)
+(cog-set-value! fsn (*-store-atom-*) a)
 
 ; Store just one value on an Atom. Store it three times;
 ; it will show up in the file three times.
-(store-value a (Predicate "num") fsn)
-(store-value a (Predicate "num") fsn)
-(store-value a (Predicate "num") fsn)
+(cog-set-value! fsn (*-store-value-*) (LinkValue a (Predicate "num")))
+(cog-set-value! fsn (*-store-value-*) (LinkValue a (Predicate "num")))
+(cog-set-value! fsn (*-store-value-*) (LinkValue a (Predicate "num")))
 
 ; The file write might not occur until after the `barrier` call.
 ; File writes are buffered by the operating system.
-(barrier fsn)
+(cog-set-value! fsn (*-barrier-*) (cog-atomspace))
 
 ; Now store everything. This will appear after the writes above,
 ; and will duplicate some of the earlier data.  During file read,

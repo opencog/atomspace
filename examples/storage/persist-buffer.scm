@@ -44,12 +44,13 @@
 (for-each
 	(lambda (N)
 		(cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 N))
-		(store-value (Concept "foo") (Predicate "bar")))
+		(cog-set-value! (WriteBufferProxy "write buffer") (*-store-value-*)
+			(LinkValue (Concept "foo") (Predicate "bar"))))
 	(iota 10))
 
 ; The buffer will drain itself, eventually. The drain can be forced with
-; the (barrier) command. For example:
-(barrier)
+; the (*-barrier-*) message. For example:
+(cog-set-value! (WriteBufferProxy "write buffer") (*-barrier-*) (cog-atomspace))
 
 ; View performance stats. (But these will be zero, because 42 seconds
 ; haven't passed by yet. The average rate is also rounded to the nearest
@@ -66,7 +67,7 @@
 	(lambda (N)
 		(cog-set-value! (Concept "foo") (Predicate "fizz")
 			(FloatValue 4 (* 5 N) (+ N 6)))
-		(store-atom (Concept "foo")))
+		(cog-set-value! (WriteBufferProxy "write buffer") (*-store-atom-*) (Concept "foo")))
 	(iota 10))
 
 ; Close the connection. This will automatically flush the buffer,
@@ -87,9 +88,9 @@
 		(WriteBufferProxy "write buffer")))         ;; target for writes
 
 (cog-set-value! (ReadWriteProxy "read w/write buffer") (*-open-*) (VoidValue))
-(fetch-atom (Concept "foo"))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-fetch-atom-*) (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Concept "oh hi"))
-(store-atom (Concept "foo"))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-store-atom-*) (Concept "foo"))
 (cog-set-value! (ReadWriteProxy "read w/write buffer") (*-close-*) (VoidValue))
 
 ; One can get fancier: the reader always goes to the target to read
@@ -109,9 +110,9 @@
 		(WriteBufferProxy "write buffer")))   ;; target for writes
 
 (cog-set-value! (ReadWriteProxy "full cache") (*-open-*) (VoidValue))
-(fetch-atom (Concept "foo"))
+(cog-set-value! (ReadWriteProxy "full cache") (*-fetch-atom-*) (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
-(store-atom (Concept "foo"))
+(cog-set-value! (ReadWriteProxy "full cache") (*-store-atom-*) (Concept "foo"))
 
 ; Look at the cache statistics:
 (show-stats (ReadWriteProxy "full cache"))

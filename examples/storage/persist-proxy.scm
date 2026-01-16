@@ -127,15 +127,15 @@ scheme@(guile-user)>
 ;
 ; Store the whole Atom
 (cog-set-value! (Concept "foo") (Predicate "my key") (FloatValue 0.3 0.6))
-(store-atom (Concept "foo"))
+(cog-set-value! sto (*-store-atom-*) (Concept "foo"))
 
 ; Store a single Value.
 (cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 3))
-(store-value (Concept "foo") (Predicate "bar"))
+(cog-set-value! sto (*-store-value-*) (LinkValue (Concept "foo") (Predicate "bar")))
 
 ; Store the whole Atom
 (cog-set-value! (Concept "foo") (Predicate "fizz") (FloatValue 4 5 6))
-(store-atom (Concept "foo"))
+(cog-set-value! sto (*-store-atom-*) (Concept "foo"))
 
 ; Close the connection.
 (cog-set-value! sto (*-close-*) (VoidValue))
@@ -190,7 +190,7 @@ scheme@(guile-user)>
 ; Lets retrieve the Atom we wrote above.
 ;
 ; Fetch the entire Atom.
-(fetch-atom (Concept "foo"));
+(cog-set-value! sto (*-fetch-atom-*) (Concept "foo"))
 
 ; Take a look
 (cog-prt-atomspace)

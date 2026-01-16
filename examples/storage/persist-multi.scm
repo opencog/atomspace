@@ -43,10 +43,9 @@
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Open postgres, store one atom, and close it.
-; Since only one backend is open, it will be used as the default
 (cog-set-value! psn (*-open-*) (VoidValue))
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.318 0.367))
-(store-atom (Concept "asdf"))
+(cog-set-value! psn (*-store-atom-*) (Concept "asdf"))
 (cog-set-value! psn (*-close-*) (VoidValue))
 
 ; Delete this atom.
@@ -87,7 +86,7 @@
 ; Value attached to it.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.25 0.75))
 (cog-set-value! rsn (*-open-*) (VoidValue))
-(store-atom (Concept "asdf"))
+(cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
 (cog-set-value! rsn (*-close-*) (VoidValue))
 
 ; Open both.
@@ -95,27 +94,27 @@
 (cog-set-value! rsn (*-open-*) (VoidValue))
 
 ; Fetch the same atom from each backend. Note how the TV toggles
-; between what has bee stored in each.
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+; between what has been stored in each.
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-; Just like the above, all fetch/store directives can take an optional
-; StorageNode argument, to indicate where they should be applied.
+; Just like the above, all fetch/store messages take a StorageNode
+; as the first argument, to indicate where they should be applied.
 
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.1 0.8))
-(store-atom (Concept "asdf") psn)
+(cog-set-value! psn (*-store-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") rsn)
-(fetch-atom (Concept "asdf") psn)
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") rsn)
-(fetch-atom (Concept "asdf") psn)
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
 
 ; We're done.
 (cog-set-value! psn (*-close-*) (VoidValue))
