@@ -458,62 +458,58 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	svalue = SCM_CAR(svalue);
 
 	// If svalue is actually a value, just use it.
-	ValuePtr pa;
-	if (scm_is_pair(svalue)) {
-		SCM sitem = SCM_CAR(svalue);
-
-		if (scm_is_number(sitem))
-		{
-			std::vector<double> fl = scm_to_float_list(svalue);
-			pa = createFloatValue(fl);
-		}
-		else if (scm_is_string(sitem))
-		{
-			std::vector<std::string> fl = scm_to_string_list(svalue);
-			pa = createStringValue(fl);
-		}
-		else if (scm_is_symbol(sitem))
-		{
-			// The code below allows the following to be evaluated:
-			// (define x 0.44) (define y 0.55)
-			// (cog-set-value! (Concept "foo") (Predicate "bar") '(x y))
-			// Here, x and y are symbols, the symbol lookup gives
-			// variables, and the variable deref gives 0.44, 0.55.
-			SCM sl = svalue;
-			SCM newl = SCM_EOL;
-			while (scm_is_pair(sl)) {
-				SCM sym = SCM_CAR(sl);
-				if (scm_is_symbol(sym))
-					newl = scm_cons(scm_variable_ref(scm_lookup(sym)), newl);
-				else if (scm_is_true(scm_variable_p(sym)))
-					newl = scm_cons(scm_variable_ref(sym), newl);
-				else
-					newl = scm_cons(sym, newl);
-				sl = SCM_CDR(sl);
-			}
-			newl = scm_reverse(newl);
-			return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
-		}
-		else if (scm_is_true(scm_list_p(svalue)))
-		{
-			verify_protom(sitem, "cog-set-value!", 3);
-			std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
-			pa = createLinkValue(std::move(fl));
-		}
-		else
-		{
-			scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
-				"a list of protoatom values");
-		}
-	}
-	// Strange! According to my reading of the guile source code,
-	// scm_is_true() should return 0 if svalue is null, but strangely
-	// it doesn't actually do that, so we need to explicitly test.
-	else if (scm_is_true(svalue) and scm_is_false(scm_null_p(svalue)))
+	if (not scm_is_pair(svalue))
 	{
-		pa = verify_protom(svalue, "cog-set-value!", 3);
+		ValuePtr pa(verify_protom(svalue, "cog-set-value!", 3));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
 
+	ValuePtr pa;
+	SCM sitem = SCM_CAR(svalue);
+
+	if (scm_is_number(sitem))
+	{
+		std::vector<double> fl = scm_to_float_list(svalue);
+		pa = createFloatValue(fl);
+	}
+	else if (scm_is_string(sitem))
+	{
+		std::vector<std::string> fl = scm_to_string_list(svalue);
+		pa = createStringValue(fl);
+	}
+	else if (scm_is_symbol(sitem))
+	{
+		// The code below allows the following to be evaluated:
+		// (define x 0.44) (define y 0.55)
+		// (cog-set-value! (Concept "foo") (Predicate "bar") '(x y))
+		// Here, x and y are symbols, the symbol lookup gives
+		// variables, and the variable deref gives 0.44, 0.55.
+		SCM sl = svalue;
+		SCM newl = SCM_EOL;
+		while (scm_is_pair(sl)) {
+			SCM sym = SCM_CAR(sl);
+			if (scm_is_symbol(sym))
+				newl = scm_cons(scm_variable_ref(scm_lookup(sym)), newl);
+			else if (scm_is_true(scm_variable_p(sym)))
+				newl = scm_cons(scm_variable_ref(sym), newl);
+			else
+				newl = scm_cons(sym, newl);
+			sl = SCM_CDR(sl);
+		}
+		newl = scm_reverse(newl);
+		return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
+	}
+	else if (scm_is_true(scm_list_p(svalue)))
+	{
+		verify_protom(sitem, "cog-set-value!", 3);
+		std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
+		pa = createLinkValue(std::move(fl));
+	}
+	else
+	{
+		scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
+			"a list of protoatom values");
+	}
 	return set_value(atom, key, pa, satom, "cog-set-value!");
 }
 
