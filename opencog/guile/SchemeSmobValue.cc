@@ -502,6 +502,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
 	}
 
+	// Hmm. Could be a list in a list. Tested in BasicSCMUTest
 	if (scm_is_true(scm_list_p(svalue)))
 	{
 		verify_protom(sitem, "cog-set-value!", 3);
