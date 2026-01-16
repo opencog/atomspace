@@ -43,10 +43,10 @@
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Open postgres, store one atom, and close it.
-(cog-set-value! psn (*-open-*) (VoidValue))
+(cog-set-value! psn (*-open-*))
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.318 0.367))
 (cog-set-value! psn (*-store-atom-*) (Concept "asdf"))
-(cog-set-value! psn (*-close-*) (VoidValue))
+(cog-set-value! psn (*-close-*))
 
 ; Delete this atom.
 (cog-extract! (Concept "asdf"))
@@ -55,9 +55,9 @@
 (cog-prt-atomspace)
 
 ; Open all of them.
-(cog-set-value! psn (*-open-*) (VoidValue))
-(cog-set-value! rsn (*-open-*) (VoidValue))
-; (cog-set-value! csn (*-open-*) (VoidValue))
+(cog-set-value! psn (*-open-*))
+(cog-set-value! rsn (*-open-*))
+; (cog-set-value! csn (*-open-*))
 
 ; Load everything from Postgres (Attention: this might load garbage
 ; from the unit tests, since we're using the unit-test db for this
@@ -68,30 +68,30 @@
 (cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
 
 ; Close all of them.
-(cog-set-value! psn (*-close-*) (VoidValue))
-(cog-set-value! rsn (*-close-*) (VoidValue))
-; (cog-set-value! csn (*-close-*) (VoidValue))
+(cog-set-value! psn (*-close-*))
+(cog-set-value! rsn (*-close-*))
+; (cog-set-value! csn (*-close-*))
 
 ; Delete this atom (again).
 (cog-extract! (Concept "asdf"))
 (cog-prt-atomspace)
 
 ; Open just Rocks, load everything, and take a look.
-(cog-set-value! rsn (*-open-*) (VoidValue))
+(cog-set-value! rsn (*-open-*))
 (cog-set-value! rsn (*-load-atomspace-*) (cog-atomspace))
-(cog-set-value! rsn (*-close-*) (VoidValue))
+(cog-set-value! rsn (*-close-*))
 (cog-prt-atomspace)
 
 ; And now for some fun. Put "asdf" into rocks, but with a different
 ; Value attached to it.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.25 0.75))
-(cog-set-value! rsn (*-open-*) (VoidValue))
+(cog-set-value! rsn (*-open-*))
 (cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
-(cog-set-value! rsn (*-close-*) (VoidValue))
+(cog-set-value! rsn (*-close-*))
 
 ; Open both.
-(cog-set-value! psn (*-open-*) (VoidValue))
-(cog-set-value! rsn (*-open-*) (VoidValue))
+(cog-set-value! psn (*-open-*))
+(cog-set-value! rsn (*-open-*))
 
 ; Fetch the same atom from each backend. Note how the TV toggles
 ; between what has been stored in each.
@@ -117,7 +117,7 @@
 (cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
 
 ; We're done.
-(cog-set-value! psn (*-close-*) (VoidValue))
-(cog-set-value! rsn (*-close-*) (VoidValue))
+(cog-set-value! psn (*-close-*))
+(cog-set-value! rsn (*-close-*))
 
 ; That's all for now.

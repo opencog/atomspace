@@ -38,14 +38,14 @@
 	(WriteBufferProxy "write buffer") (*-decay-const-*)
 	(Number 42))
 
-(cog-set-value! (WriteBufferProxy "write buffer") (*-open-*) (VoidValue))
+(cog-set-value! (WriteBufferProxy "write buffer") (*-open-*))
 
 ; Store a bunch of values in rapid succession.
 (for-each
 	(lambda (N)
 		(cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 N))
 		(cog-set-value! (WriteBufferProxy "write buffer") (*-store-value-*)
-			(LinkValue (Concept "foo") (Predicate "bar"))))
+			(Concept "foo") (Predicate "bar"))))
 	(iota 10))
 
 ; The buffer will drain itself, eventually. The drain can be forced with
@@ -72,7 +72,7 @@
 
 ; Close the connection. This will automatically flush the buffer,
 ; before returning.
-(cog-set-value! (WriteBufferProxy "write buffer") (*-close-*) (VoidValue))
+(cog-set-value! (WriteBufferProxy "write buffer") (*-close-*))
 
 ; ---------------------------------------------------------------------
 ; The WriteBuffer only buffers writes. It completely ignores reads.
@@ -87,11 +87,11 @@
 		(RocksStorageNode "rocks:///tmp/foo.rdb")   ;; target for reads
 		(WriteBufferProxy "write buffer")))         ;; target for writes
 
-(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-open-*) (VoidValue))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-open-*))
 (cog-set-value! (ReadWriteProxy "read w/write buffer") (*-fetch-atom-*) (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Concept "oh hi"))
 (cog-set-value! (ReadWriteProxy "read w/write buffer") (*-store-atom-*) (Concept "foo"))
-(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-close-*) (VoidValue))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-close-*))
 
 ; One can get fancier: the reader always goes to the target to read
 ; Atoms and Values. The CachingProxy will cache reads, avoiding a
@@ -109,7 +109,7 @@
 		(CachingProxy "read cache")           ;; target for reads
 		(WriteBufferProxy "write buffer")))   ;; target for writes
 
-(cog-set-value! (ReadWriteProxy "full cache") (*-open-*) (VoidValue))
+(cog-set-value! (ReadWriteProxy "full cache") (*-open-*))
 (cog-set-value! (ReadWriteProxy "full cache") (*-fetch-atom-*) (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
 (cog-set-value! (ReadWriteProxy "full cache") (*-store-atom-*) (Concept "foo"))
@@ -117,7 +117,7 @@
 ; Look at the cache statistics:
 (show-stats (ReadWriteProxy "full cache"))
 
-(cog-set-value! (ReadWriteProxy "full cache") (*-close-*) (VoidValue))
+(cog-set-value! (ReadWriteProxy "full cache") (*-close-*))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------

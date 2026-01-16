@@ -33,14 +33,14 @@
 ; If you are using the RocksDB backend, do this:
 (use-modules (opencog persist-rocks))
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
-(cog-set-value! rsn (*-open-*) (VoidValue))
+(cog-set-value! rsn (*-open-*))
 
 ; If you are using the PostgreSql backend, do this:
 ; XXX At this time, the PostgreSql backend is obsolete and unmaintained.
 ; It could be brought back to life, for for now, don't use it. XXX
 (use-modules (opencog persist-sql))
 (define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
-(cog-set-value! psn (*-open-*) (VoidValue))
+(cog-set-value! psn (*-open-*))
 
 ; -----------------------
 ; Populate the Atomspace.
@@ -77,7 +77,7 @@
 (define results-key (Predicate "results"))
 
 ; Find and fetch all tails at the remote server.
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue get-tail results-key))
+(cog-set-value! rsn (*-fetch-query-*) get-tail results-key)
 
 ; Take a look at what was found.
 (cog-value get-tail results-key)
@@ -107,7 +107,7 @@
 (cog-get-all-roots)
 
 ; Re-run the query
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue get-tail results-key))
+(cog-set-value! rsn (*-fetch-query-*) get-tail results-key)
 
 ; Take a look at what was found. ... oh no, its the old cached result!
 (cog-value get-tail results-key)
@@ -117,10 +117,10 @@
 (cog-set-value! get-tail results-key #f)
 
 ; Now brute-force kill it in the server:
-(cog-set-value! rsn (*-store-value-*) (LinkValue get-tail results-key))
+(cog-set-value! rsn (*-store-value-*) get-tail results-key)
 
 ; ... and rerun the query. This time, we expect all the results.
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue get-tail results-key))
+(cog-set-value! rsn (*-fetch-query-*) get-tail results-key)
 (cog-value get-tail results-key)
 
 ; --------------
@@ -145,18 +145,18 @@
 (cog-extract-recursive! (Concept "G"))
 
 ; Oh no! The cache is stale! Missing (Concept "G")!
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue get-tail results-key))
+(cog-set-value! rsn (*-fetch-query-*) get-tail results-key)
 (cog-value get-tail results-key)
 
 ; We want meta-data, and we want a fresh re-computation.
 (define metadata (Predicate "my metadata"))
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue get-tail results-key metadata (BoolValue #t)))
+(cog-set-value! rsn (*-fetch-query-*) get-tail results-key metadata (BoolValue #t))
 
 ; Yay! it worked!
 (cog-value get-tail results-key)
 
 ; Tell us more!
-(cog-set-value! rsn (*-fetch-value-*) (LinkValue get-tail metadata))
+(cog-set-value! rsn (*-fetch-value-*) get-tail metadata)
 (cog-value get-tail metadata)
 
 ; Currently, the above returns seconds since January 1, 1970
@@ -179,7 +179,7 @@
 (define b-holders (MaximalJoin (Present (Concept "B"))))
 
 ; Just like before...
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue b-holders results-key))
+(cog-set-value! rsn (*-fetch-query-*) b-holders results-key)
 (cog-value b-holders results-key)
 
 ; Verify that everything landed in the AtomSpace.
@@ -200,7 +200,7 @@
 	(OrderedLink (Variable "tail") (Concept "by") (Variable "tail"))
 ))
 
-(cog-set-value! rsn (*-fetch-query-*) (LinkValue tail-by-tail results-key))
+(cog-set-value! rsn (*-fetch-query-*) tail-by-tail results-key)
 (cog-value tail-by-tail results-key)
 
 ; That's all! Thanks for paying attention!
