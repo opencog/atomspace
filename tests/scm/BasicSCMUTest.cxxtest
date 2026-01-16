@@ -150,6 +150,8 @@ void BasicSCMUTest::test_utf8(void)
 	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -353,6 +355,8 @@ void BasicSCMUTest::test_truth_value(void)
 	check_truth_value(createFloatValue(std::vector<double>({0.5, 0.5})));
 	check_truth_value(createFloatValue(std::vector<double>({0.2, 0.7})));
 	// @todo : add more
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -435,6 +439,8 @@ void BasicSCMUTest::test_values(void)
 	ValuePtr lv3 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *l == *lv3);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -478,6 +484,8 @@ void BasicSCMUTest::test_value_list(void)
 
 	boo = eval->eval("(equal? (cog-value->list k) '(\"key\"))");
 	TSM_ASSERT("Failed key name equality", boo == "#t\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -548,6 +556,8 @@ void BasicSCMUTest::test_multi_values(void)
 
 	boo = eval->eval("(equal? (cog-value->list (cog-value h k)) (list fv sv a))");
 	TSM_ASSERT("Mixed LinkValue contents mismatch", boo == "#t\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
