@@ -450,12 +450,18 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	// If it is a list, assume its a list of values.
 	if (not scm_is_null(SCM_CDR(svalue)))
 	{
-		std::vector<ValuePtr> vals = scm_to_protom_list(svalue);
-		ValuePtr pa(createLinkValue(std::move(vals)));
+		ValuePtr pa(createLinkValue(scm_to_protom_list(svalue)));
 		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
 
 	svalue = SCM_CAR(svalue);
+
+	// If svalue is #f or empty list, erase the key.
+	if (scm_is_false(svalue) or scm_is_null(svalue))
+	{
+		ValuePtr pa; // explicit nullptr
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
 
 	// If svalue is actually a value, just use it.
 	if (not scm_is_pair(svalue))
