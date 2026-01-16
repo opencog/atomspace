@@ -124,9 +124,9 @@
 ; We'll store to a file in the temp directory.
 ; Open it, save, and close
 (define fsn (FileStorageNode "/tmp/foo"))
-(cog-open fsn)
-(store-atomspace)
-(cog-close fsn)
+(cog-set-value! fsn (*-open-*))
+(cog-set-value! fsn (*-store-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*))
 
 ; Now, edit `/tmp/foo` with your favorite file editor. Notice that
 ; it contains the contents of the main space, but NOT of the episodic
@@ -141,14 +141,12 @@
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 (define fsa (FileStorageNode "/tmp/foo-one"))
 (define fsb (FileStorageNode "/tmp/foo-two"))
-(cog-open fsa)
-(cog-open fsb)
-(cog-set-atomspace! as-one)
-(store-atomspace fsa)
-(cog-close fsa)
-(cog-set-atomspace! as-two)
-(store-atomspace fsb)
-(cog-close fsb)
+(cog-set-value! fsa (*-open-*))
+(cog-set-value! fsb (*-open-*))
+(cog-set-value! fsa (*-store-atomspace-*) as-one)
+(cog-set-value! fsa (*-close-*))
+(cog-set-value! fsb (*-store-atomspace-*) as-two)
+(cog-set-value! fsb (*-close-*))
 
 ; Return to home base.
 (cog-set-atomspace! base-space)
@@ -172,9 +170,9 @@
 
 (define fsn (FileStorageNode "/tmp/foo"))
 
-(cog-open fsn)
-(load-atomspace)
-(cog-close fsn)
+(cog-set-value! fsn (*-open-*))
+(cog-set-value! fsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*))
 
 ; Verify that the contents are as expected.
 (cog-prt-atomspace)
@@ -186,14 +184,12 @@
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 (define fsa (FileStorageNode "/tmp/foo-one"))
 (define fsb (FileStorageNode "/tmp/foo-two"))
-(cog-open fsa)
-(cog-open fsb)
-(cog-set-atomspace! as-one)
-(load-atomspace fsa)
-(cog-close fsa)
-(cog-set-atomspace! as-two)
-(load-atomspace fsb)
-(cog-close fsb)
+(cog-set-value! fsa (*-open-*))
+(cog-set-value! fsb (*-open-*))
+(cog-set-value! fsa (*-load-atomspace-*) as-one)
+(cog-set-value! fsa (*-close-*))
+(cog-set-value! fsb (*-load-atomspace-*) as-two)
+(cog-set-value! fsb (*-close-*))
 
 ; Return to home base.
 (cog-set-atomspace! base-space)
@@ -210,16 +206,16 @@
 
 (define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
-(cog-open rsn)
-(store-atomspace)
-; The store-atomspace function will accept an AtomSpace as an optional
+(cog-set-value! rsn (*-open-*))
+(cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
+; The *-store-atomspace-* message will accept an AtomSpace as an
 ; argument, in which case it will be stored, instead of the current
 ; AtomSpace. So, for example:
-(store-atomspace (AtomSpace "happy thoughts"))
+(cog-set-value! rsn (*-store-atomspace-*) (AtomSpace "happy thoughts"))
 
 ; This also works:
-(store-atomspace (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
-(cog-close rsn)
+(cog-set-value! rsn (*-store-atomspace-*) (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
+(cog-set-value! rsn (*-close-*))
 
 ; ------------------------------------------------------
 ; As above, exit guile, and then restart from scratch. The below will
@@ -231,27 +227,27 @@
 (define base-space (cog-atomspace))
 (define rsn (RocksStorageNode "rocks:///tmp/blob"))
 
-(cog-open rsn)
-(load-atomspace)
-(cog-close rsn)
+(cog-set-value! rsn (*-open-*))
+(cog-set-value! rsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! rsn (*-close-*))
 (cog-prt-atomspace)
 
-; Don't need to actually call `(cog-close rsn)` above, but it does show
-; that it's harmles to close & reopen the database.
+; Don't need to actually call `(cog-set-value! rsn (*-close-*))` above,
+; but it does show that it's harmless to close & reopen the database.
 
 ; Some short-hand, convenient defines.
 (define as-one (cog-value (ConceptNode "foo") (Predicate "real life")))
 (define as-two (cog-value (ConceptNode "foo") (Predicate "repressed mem")))
 
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*))
 ; Here's one way to restore:
-(load-atomspace as-one)
+(cog-set-value! rsn (*-load-atomspace-*) as-one)
 
 ; Here's another way. It results in the same thing.
 (cog-set-atomspace! as-two)
-(load-atomspace)
+(cog-set-value! rsn (*-load-atomspace-*) (cog-atomspace))
 (cog-set-atomspace! base-space)
-(cog-close rsn)
+(cog-set-value! rsn (*-close-*))
 
 ; Verify that everything looks as expected.
 (cog-prt-atomspace as-one)
