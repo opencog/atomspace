@@ -14,17 +14,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public
- * License along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/value/FormulaStream.h>
 #include <opencog/atoms/value/FutureStream.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include "SetValueLink.h"
 
 using namespace opencog;
@@ -40,8 +36,8 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 	}
 
 	size_t ary = _outgoing.size();
-	if (SET_VALUE_LINK == t and 3 != ary and 4 != ary)
-		throw SyntaxException(TRACE_INFO, "Expecting three or four atoms!");
+	if (3 > ary or 4 < ary)
+		throw SyntaxException(TRACE_INFO, "Expecting two, three or four atoms!");
 }
 
 // ---------------------------------------------------------------
@@ -52,6 +48,16 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 /// The SetValueOn link returns the Atom, not the Value.
 ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 {
+	// Default VoidValue
+	if (2 == _outgoing.size())
+	{
+		ValuePtr pap(createVoidValue());
+		as->set_value(_outgoing[0], _outgoing[1], pap);
+		if (SET_VALUE_ON_LINK == get_type())
+			return _outgoing[0];
+		return pap;
+	}
+
 	// Simple case: just set the Value. Obtain it, as needed.
 	if (3 == _outgoing.size())
 	{
@@ -67,6 +73,13 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 			return _outgoing[0];
 		return pap;
 	}
+
+	// XXX Fixme Is this used anywhere ???
+	// Its a vaguely spiffy idea, and it is tested in a unit test,
+	// but is it actually used in any realistic scenario?
+	// It would be coolear to just auto-wrap four or more args in
+	// a LinkValue ... then again, this is easy for the user to do,
+	// so not that big a deal, either way, I guess ...
 
 	// Complicated Case: There are four arguments. The first two are
 	// Atom and key, as before. Then comes a lambda or function in
