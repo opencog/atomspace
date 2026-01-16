@@ -172,13 +172,13 @@
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Lets use Rocks, for now.
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*) (VoidValue))
 
 ; Try storing again.
 (store-atom (Concept "asdf"))
 
 ; Close the database.
-(cog-close rsn)
+(cog-set-value! rsn (*-close-*) (VoidValue))
 
 ; Try fetching the atom. The database is closed -- this should fail!
 (fetch-atom (Concept "asdf"))
@@ -188,7 +188,7 @@
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue -1 0 -2 0))
 
 ; Reopen the database.
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*) (VoidValue))
 
 ; Try fetching the atom. This time it should work.
 (fetch-atom (Concept "asdf"))
@@ -201,7 +201,7 @@
 	(StringValue "Humpty" "Dumpty"))
 
 (store-atom (Concept "asdf"))
-(cog-close rsn)
+(cog-set-value! rsn (*-close-*) (VoidValue))
 
 ; The database is closed. Let's mess with the values.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 6 9))
@@ -212,7 +212,7 @@
 	(Predicate "my other key")
 	(StringValue "sat" "on" "a" "wall"))
 
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*) (VoidValue))
 
 (fetch-atom (Concept "asdf"))
 

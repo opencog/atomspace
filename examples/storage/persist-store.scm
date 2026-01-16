@@ -37,7 +37,7 @@
 
 ; Store some individual Atoms, and then store everything.
 (define fsn (FileStorageNode "/tmp/foo.scm"))
-(cog-open fsn)
+(cog-set-value! fsn (*-open-*) (VoidValue))
 
 ; Store just one Atom.
 (store-atom a fsn)
@@ -55,8 +55,8 @@
 ; Now store everything. This will appear after the writes above,
 ; and will duplicate some of the earlier data.  During file read,
 ; later data in the file will take precedence over earlier data.
-(store-atomspace fsn)
-(cog-close fsn)
+(cog-set-value! fsn (*-store-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*) (VoidValue))
 
 ; ---------------------------------------------------------------------
 ; At this point of the demo, it would be best to exit guile, and take
@@ -68,9 +68,9 @@
 
 ; Load everything from the file.
 (define fsn (FileStorageNode "/tmp/foo.scm"))
-(cog-open fsn)
-(load-atomspace fsn)
-(cog-close fsn)
+(cog-set-value! fsn (*-open-*) (VoidValue))
+(cog-set-value! fsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*) (VoidValue))
 
 ; Verify the load
 (cog-prt-atomspace)

@@ -38,7 +38,7 @@
 	(WriteBufferProxy "write buffer") (*-decay-const-*)
 	(Number 42))
 
-(cog-open (WriteBufferProxy "write buffer"))
+(cog-set-value! (WriteBufferProxy "write buffer") (*-open-*) (VoidValue))
 
 ; Store a bunch of values in rapid succession.
 (for-each
@@ -71,7 +71,7 @@
 
 ; Close the connection. This will automatically flush the buffer,
 ; before returning.
-(cog-close (WriteBufferProxy "write buffer"))
+(cog-set-value! (WriteBufferProxy "write buffer") (*-close-*) (VoidValue))
 
 ; ---------------------------------------------------------------------
 ; The WriteBuffer only buffers writes. It completely ignores reads.
@@ -86,11 +86,11 @@
 		(RocksStorageNode "rocks:///tmp/foo.rdb")   ;; target for reads
 		(WriteBufferProxy "write buffer")))         ;; target for writes
 
-(cog-open (ReadWriteProxy "read w/write buffer"))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-open-*) (VoidValue))
 (fetch-atom (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Concept "oh hi"))
 (store-atom (Concept "foo"))
-(cog-close (ReadWriteProxy "read w/write buffer"))
+(cog-set-value! (ReadWriteProxy "read w/write buffer") (*-close-*) (VoidValue))
 
 ; One can get fancier: the reader always goes to the target to read
 ; Atoms and Values. The CachingProxy will cache reads, avoiding a
@@ -108,7 +108,7 @@
 		(CachingProxy "read cache")           ;; target for reads
 		(WriteBufferProxy "write buffer")))   ;; target for writes
 
-(cog-open (ReadWriteProxy "full cache"))
+(cog-set-value! (ReadWriteProxy "full cache") (*-open-*) (VoidValue))
 (fetch-atom (Concept "foo"))
 (cog-set-value! (Concept "foo") (Predicate "fizz") (Number 42))
 (store-atom (Concept "foo"))
@@ -116,7 +116,7 @@
 ; Look at the cache statistics:
 (show-stats (ReadWriteProxy "full cache"))
 
-(cog-close (ReadWriteProxy "full cache"))
+(cog-set-value! (ReadWriteProxy "full cache") (*-close-*) (VoidValue))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------

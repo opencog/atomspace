@@ -99,7 +99,7 @@ scheme@(guile-user)>
 (define sto (CogStorageNode "cog://localhost:17001"))
 
 ; Open a connection to the CogServer
-(cog-open sto)
+(cog-set-value! sto (*-open-*) (VoidValue))
 
 ; Configure the proxy. If the List contains more than one StorageNode,
 ; writing will be done to all of them. We set up two, just for fun.
@@ -138,7 +138,7 @@ scheme@(guile-user)>
 (store-atom (Concept "foo"))
 
 ; Close the connection.
-(cog-close sto)
+(cog-set-value! sto (*-close-*) (VoidValue))
 
 ; That's it. Now we'll repeat the process, this time reading back what
 ; was written above. It will illustrate the ReadThruProxy.
@@ -166,7 +166,7 @@ scheme@(guile-user)>
 (define sto (CogStorageNode "cog://localhost:17001"))
 
 ; Open a connection to the CogServer
-(cog-open sto)
+(cog-set-value! sto (*-open-*) (VoidValue))
 
 ; Configure the proxy. This time, we configure a reader. Two StorageNodes
 ; will be given; read requests will round-robin between them. Only one
@@ -198,7 +198,7 @@ scheme@(guile-user)>
 (cog-value (Concept "foo") (Predicate "fizz"))
 
 ; Close the connection.
-(cog-close sto)
+(cog-set-value! sto (*-close-*) (VoidValue))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------

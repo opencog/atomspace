@@ -33,14 +33,14 @@
 ; If you are using the RocksDB backend, do this:
 (use-modules (opencog persist-rocks))
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*) (VoidValue))
 
 ; If you are using the PostgreSql backend, do this:
 ; XXX At this time, the PostgreSql backend is obsolete and unmaintained.
 ; It could be brought back to life, for for now, don't use it. XXX
 (use-modules (opencog persist-sql))
 (define psn (PostgresStorageNode "postgres://opencog_tester:cheese@localhost/opencog_test"))
-(cog-open psn)
+(cog-set-value! psn (*-open-*) (VoidValue))
 
 ; -----------------------
 ; Populate the Atomspace.
@@ -54,7 +54,8 @@
 	(List (Concept "B") (Concept "C") (Concept "oh boy!")))
 
 ; Push the entire atomspace out to disk.
-(store-atomspace)
+; Use whichever storage node you opened above (rsn for Rocks, psn for Postgres)
+(cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
 
 ; Clear the local AtomSpace (the Atoms remain on disk, just not in RAM).
 (cog-atomspace-clear)
@@ -99,7 +100,7 @@
 ;
 ; Add some more data, push it out to the server, and delete it locally.
 (List (Concept "A") (Concept "F"))
-(store-atomspace)
+(cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
 (cog-extract-recursive! (Concept "F"))
 
 ; Verify that (Concept "F") is gone
@@ -140,7 +141,7 @@
 ;
 ; Let's repeat some of the above.
 (List (Concept "A") (Concept "G"))
-(store-atomspace)
+(cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
 (cog-extract-recursive! (Concept "G"))
 
 ; Oh no! The cache is stale! Missing (Concept "G")!
