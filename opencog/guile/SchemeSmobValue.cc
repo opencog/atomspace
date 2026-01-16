@@ -464,20 +464,22 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
 
-	ValuePtr pa;
+	// Single argument that is not a Value. Convert.
 	SCM sitem = SCM_CAR(svalue);
 
 	if (scm_is_number(sitem))
 	{
-		std::vector<double> fl = scm_to_float_list(svalue);
-		pa = createFloatValue(fl);
+		ValuePtr pa(createFloatValue(scm_to_float_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
-	else if (scm_is_string(sitem))
+
+	if (scm_is_string(sitem))
 	{
-		std::vector<std::string> fl = scm_to_string_list(svalue);
-		pa = createStringValue(fl);
+		ValuePtr pa(createStringValue(scm_to_string_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
-	else if (scm_is_symbol(sitem))
+
+	if (scm_is_symbol(sitem))
 	{
 		// The code below allows the following to be evaluated:
 		// (define x 0.44) (define y 0.55)
@@ -499,18 +501,16 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		newl = scm_reverse(newl);
 		return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
 	}
-	else if (scm_is_true(scm_list_p(svalue)))
+
+	if (scm_is_true(scm_list_p(svalue)))
 	{
 		verify_protom(sitem, "cog-set-value!", 3);
-		std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
-		pa = createLinkValue(std::move(fl));
+		ValuePtr pa(createLinkValue(scm_to_protom_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
-	else
-	{
-		scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
-			"a list of protoatom values");
-	}
-	return set_value(atom, key, pa, satom, "cog-set-value!");
+
+	scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
+		"zero or more Values");
 }
 
 // alist is an association-list of key-value pairs.
