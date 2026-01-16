@@ -137,12 +137,6 @@
 
 (use-modules (opencog) (opencog persist))
 
-; Lets hop right in. Create an Atom, and put a Value on it:
-(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 1 2 3 4))
-
-; The below should throw an exception, since no StorageNode is open yet.
-(store-atom (Concept "asdf"))
-
 ; To run the demo with RocksDB, load the rocks module. This will fail,
 ; if the module is not installed.
 (use-modules (opencog persist-rocks))
@@ -156,6 +150,12 @@
 
 ; The RocksDB requires no configuration. Just use it.
 (define rsn (RocksStorageNode "rocks:///tmp/atomspace-rocks-demo"))
+
+; Lets hop right in. Create an Atom, and put a Value on it:
+(cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 1 2 3 4))
+
+; The below should throw an exception, since the StorageNode is not open yet.
+(cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
 
 ; For Postgres, use the test database credentials. These are the
 ; in the form of "user:password@example.com". The below uses the
@@ -172,26 +172,26 @@
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Lets use Rocks, for now.
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*))
 
 ; Try storing again.
-(store-atom (Concept "asdf"))
+(cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
 
 ; Close the database.
-(cog-close rsn)
+(cog-set-value! rsn (*-close-*))
 
 ; Try fetching the atom. The database is closed -- this should fail!
-(fetch-atom (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
 ; Let's clobber the value; we do this so that we can prove that the
 ; previous value, stored to disk, is retrieved.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue -1 0 -2 0))
 
 ; Reopen the database.
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*))
 
 ; Try fetching the atom. This time it should work.
-(fetch-atom (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 (cog-value (Concept "asdf") (Predicate "my key"))
 
 ; One can save generic Values, as well.
@@ -200,8 +200,8 @@
 	(Predicate "my other key")
 	(StringValue "Humpty" "Dumpty"))
 
-(store-atom (Concept "asdf"))
-(cog-close rsn)
+(cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-close-*))
 
 ; The database is closed. Let's mess with the values.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 6 9))
@@ -212,9 +212,9 @@
 	(Predicate "my other key")
 	(StringValue "sat" "on" "a" "wall"))
 
-(cog-open rsn)
+(cog-set-value! rsn (*-open-*))
 
-(fetch-atom (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
 ; Look at all the keys attached to the atom:
 (cog-keys (Concept "asdf"))
@@ -222,15 +222,15 @@
 ; Make sure the the current values are those restored from the database:
 (cog-value (Concept "asdf") (Predicate "my other key"))
 
-; Other useful commands are:
+; Other useful messages are:
 ;
-; * `load-atomspace` and `store-atomspace` for bulk fetch and restore.
+; * `*-load-atomspace-*` and `*-store-atomspace-*` for bulk fetch and restore.
 ;   For large datasets, these can be slow. Extremely large datasets
-;   might not fit in RAM, which is why `fetch-atom` is so handy!
+;   might not fit in RAM, which is why `*-fetch-atom-*` is so handy!
 ;
-; * `fetch-incoming-set` and `fetch-incoming-by-type` are extremely
+; * `*-fetch-incoming-set-*` and `*-fetch-incoming-by-type-*` are extremely
 ;   useful for fetching all graphs that an atom belongs to. These
-;   two are possibly the single most-important storage calls in
+;   two are possibly the single most-important storage messages in
 ;   the system. They really make the whole idea usable and easy-to-use.
 ;
 ; That's all for now.

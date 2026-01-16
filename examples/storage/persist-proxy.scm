@@ -99,7 +99,7 @@ scheme@(guile-user)>
 (define sto (CogStorageNode "cog://localhost:17001"))
 
 ; Open a connection to the CogServer
-(cog-open sto)
+(cog-set-value! sto (*-open-*))
 
 ; Configure the proxy. If the List contains more than one StorageNode,
 ; writing will be done to all of them. We set up two, just for fun.
@@ -120,25 +120,25 @@ scheme@(guile-user)>
 ; set to anything.
 ;
 ; Now, tell the Cogserver to start using this proxy.
-(cog-set-value! sto (*-proxy-open-*) (VoidValue))
+(cog-set-value! sto (*-proxy-open-*))
 
 ; Now store some stuff. You might want to do a `(cog-prt-atomspace)`
 ; back at the CogServer, just to see what's going on there.
 ;
 ; Store the whole Atom
 (cog-set-value! (Concept "foo") (Predicate "my key") (FloatValue 0.3 0.6))
-(store-atom (Concept "foo"))
+(cog-set-value! sto (*-store-atom-*) (Concept "foo"))
 
 ; Store a single Value.
 (cog-set-value! (Concept "foo") (Predicate "bar") (FloatValue 1 2 3))
-(store-value (Concept "foo") (Predicate "bar"))
+(cog-set-value! sto (*-store-value-*) (Concept "foo") (Predicate "bar"))
 
 ; Store the whole Atom
 (cog-set-value! (Concept "foo") (Predicate "fizz") (FloatValue 4 5 6))
-(store-atom (Concept "foo"))
+(cog-set-value! sto (*-store-atom-*) (Concept "foo"))
 
 ; Close the connection.
-(cog-close sto)
+(cog-set-value! sto (*-close-*))
 
 ; That's it. Now we'll repeat the process, this time reading back what
 ; was written above. It will illustrate the ReadThruProxy.
@@ -166,7 +166,7 @@ scheme@(guile-user)>
 (define sto (CogStorageNode "cog://localhost:17001"))
 
 ; Open a connection to the CogServer
-(cog-open sto)
+(cog-set-value! sto (*-open-*))
 
 ; Configure the proxy. This time, we configure a reader. Two StorageNodes
 ; will be given; read requests will round-robin between them. Only one
@@ -185,12 +185,12 @@ scheme@(guile-user)>
 (cog-set-value! sto (*-set-proxy-*) (ReadThruProxy "rthru balance"))
 
 ; Now, tell the Cogserver to start using this proxy.
-(cog-set-value! sto (*-proxy-open-*) (VoidValue))
+(cog-set-value! sto (*-proxy-open-*))
 
 ; Lets retrieve the Atom we wrote above.
 ;
 ; Fetch the entire Atom.
-(fetch-atom (Concept "foo"));
+(cog-set-value! sto (*-fetch-atom-*) (Concept "foo"))
 
 ; Take a look
 (cog-prt-atomspace)
@@ -198,7 +198,7 @@ scheme@(guile-user)>
 (cog-value (Concept "foo") (Predicate "fizz"))
 
 ; Close the connection.
-(cog-close sto)
+(cog-set-value! sto (*-close-*))
 
 ; That's All, Folks!
 ; ---------------------------------------------------------------------

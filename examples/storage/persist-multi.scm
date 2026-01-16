@@ -43,11 +43,10 @@
 (define csn (CogStorageNode "cog://localhost:17001"))
 
 ; Open postgres, store one atom, and close it.
-; Since only one backend is open, it will be used as the default
-(cog-open psn)
+(cog-set-value! psn (*-open-*))
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.318 0.367))
-(store-atom (Concept "asdf"))
-(cog-close psn)
+(cog-set-value! psn (*-store-atom-*) (Concept "asdf"))
+(cog-set-value! psn (*-close-*))
 
 ; Delete this atom.
 (cog-extract! (Concept "asdf"))
@@ -56,69 +55,69 @@
 (cog-prt-atomspace)
 
 ; Open all of them.
-(cog-open psn)
-(cog-open rsn)
-; (cog-open csn)
+(cog-set-value! psn (*-open-*))
+(cog-set-value! rsn (*-open-*))
+; (cog-set-value! csn (*-open-*))
 
 ; Load everything from Postgres (Attention: this might load garbage
 ; from the unit tests, since we're using the unit-test db for this
 ; demo.)
-(load-atomspace psn)
+(cog-set-value! psn (*-load-atomspace-*) (cog-atomspace))
 
 ; Store everything to Rocks
-(store-atomspace rsn)
+(cog-set-value! rsn (*-store-atomspace-*) (cog-atomspace))
 
 ; Close all of them.
-(cog-close psn)
-(cog-close rsn)
-; (cog-close csn)
+(cog-set-value! psn (*-close-*))
+(cog-set-value! rsn (*-close-*))
+; (cog-set-value! csn (*-close-*))
 
 ; Delete this atom (again).
 (cog-extract! (Concept "asdf"))
 (cog-prt-atomspace)
 
 ; Open just Rocks, load everything, and take a look.
-(cog-open rsn)
-(load-atomspace)
-(cog-close rsn)
+(cog-set-value! rsn (*-open-*))
+(cog-set-value! rsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! rsn (*-close-*))
 (cog-prt-atomspace)
 
 ; And now for some fun. Put "asdf" into rocks, but with a different
 ; Value attached to it.
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.25 0.75))
-(cog-open rsn)
-(store-atom (Concept "asdf"))
-(cog-close rsn)
+(cog-set-value! rsn (*-open-*))
+(cog-set-value! rsn (*-store-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-close-*))
 
 ; Open both.
-(cog-open psn)
-(cog-open rsn)
+(cog-set-value! psn (*-open-*))
+(cog-set-value! rsn (*-open-*))
 
 ; Fetch the same atom from each backend. Note how the TV toggles
-; between what has bee stored in each.
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+; between what has been stored in each.
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") psn)
-(fetch-atom (Concept "asdf") rsn)
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
 
-; Just like the above, all fetch/store directives can take an optional
-; StorageNode argument, to indicate where they should be applied.
+; Just like the above, all fetch/store messages take a StorageNode
+; as the first argument, to indicate where they should be applied.
 
 (cog-set-value! (Concept "asdf") (Predicate "my key") (FloatValue 0.1 0.8))
-(store-atom (Concept "asdf") psn)
+(cog-set-value! psn (*-store-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") rsn)
-(fetch-atom (Concept "asdf") psn)
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
 
-(fetch-atom (Concept "asdf") rsn)
-(fetch-atom (Concept "asdf") psn)
+(cog-set-value! rsn (*-fetch-atom-*) (Concept "asdf"))
+(cog-set-value! psn (*-fetch-atom-*) (Concept "asdf"))
 
 ; We're done.
-(cog-close psn)
-(cog-close rsn)
+(cog-set-value! psn (*-close-*))
+(cog-set-value! rsn (*-close-*))
 
 ; That's all for now.

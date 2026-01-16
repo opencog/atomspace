@@ -37,26 +37,26 @@
 
 ; Store some individual Atoms, and then store everything.
 (define fsn (FileStorageNode "/tmp/foo.scm"))
-(cog-open fsn)
+(cog-set-value! fsn (*-open-*))
 
 ; Store just one Atom.
-(store-atom a fsn)
+(cog-set-value! fsn (*-store-atom-*) a)
 
 ; Store just one value on an Atom. Store it three times;
 ; it will show up in the file three times.
-(store-value a (Predicate "num") fsn)
-(store-value a (Predicate "num") fsn)
-(store-value a (Predicate "num") fsn)
+(cog-set-value! fsn (*-store-value-*) a (Predicate "num"))
+(cog-set-value! fsn (*-store-value-*) a (Predicate "num"))
+(cog-set-value! fsn (*-store-value-*) a (Predicate "num"))
 
 ; The file write might not occur until after the `barrier` call.
 ; File writes are buffered by the operating system.
-(barrier fsn)
+(cog-set-value! fsn (*-barrier-*) (cog-atomspace))
 
 ; Now store everything. This will appear after the writes above,
 ; and will duplicate some of the earlier data.  During file read,
 ; later data in the file will take precedence over earlier data.
-(store-atomspace fsn)
-(cog-close fsn)
+(cog-set-value! fsn (*-store-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*))
 
 ; ---------------------------------------------------------------------
 ; At this point of the demo, it would be best to exit guile, and take
@@ -68,9 +68,9 @@
 
 ; Load everything from the file.
 (define fsn (FileStorageNode "/tmp/foo.scm"))
-(cog-open fsn)
-(load-atomspace fsn)
-(cog-close fsn)
+(cog-set-value! fsn (*-open-*))
+(cog-set-value! fsn (*-load-atomspace-*) (cog-atomspace))
+(cog-set-value! fsn (*-close-*))
 
 ; Verify the load
 (cog-prt-atomspace)
