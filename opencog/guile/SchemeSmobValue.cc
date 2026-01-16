@@ -14,11 +14,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <cstddef>
@@ -30,6 +25,7 @@
 #include <opencog/atoms/value/FloatValue.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/atom_types/NameServer.h>
@@ -444,65 +440,78 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
 	Handle key(verify_handle(skey, "cog-set-value!", 2));
 
-	// If svalue is actually a value, just use it.
-	// If it is a list, assume its a list of values.
-	ValuePtr pa;
-	if (scm_is_pair(svalue)) {
-		SCM sitem = SCM_CAR(svalue);
-
-		if (scm_is_number(sitem))
-		{
-			std::vector<double> fl = scm_to_float_list(svalue);
-			pa = createFloatValue(fl);
-		}
-		else if (scm_is_string(sitem))
-		{
-			std::vector<std::string> fl = scm_to_string_list(svalue);
-			pa = createStringValue(fl);
-		}
-		else if (scm_is_symbol(sitem))
-		{
-			// The code below allows the following to be evaluated:
-			// (define x 0.44) (define y 0.55)
-			// (cog-set-value! (Concept "foo") (Predicate "bar") '(x y))
-			// Here, x and y are symbols, the symbol lookup gives
-			// variables, and the variable deref gives 0.44, 0.55.
-			SCM sl = svalue;
-			SCM newl = SCM_EOL;
-			while (scm_is_pair(sl)) {
-				SCM sym = SCM_CAR(sl);
-				if (scm_is_symbol(sym))
-					newl = scm_cons(scm_variable_ref(scm_lookup(sym)), newl);
-				else if (scm_is_true(scm_variable_p(sym)))
-					newl = scm_cons(scm_variable_ref(sym), newl);
-				else
-					newl = scm_cons(sym, newl);
-				sl = SCM_CDR(sl);
-			}
-			newl = scm_reverse(newl);
-			return ss_set_value(satom, skey, newl);
-		}
-		else if (scm_is_true(scm_list_p(svalue)))
-		{
-			verify_protom(sitem, "cog-set-value!", 3);
-			std::vector<ValuePtr> fl = scm_to_protom_list(svalue);
-			pa = createLinkValue(std::move(fl));
-		}
-		else
-		{
-			scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
-				"a list of protoatom values");
-		}
-	}
-	// Strange! According to my reading of the guile source code,
-	// scm_is_true() should return 0 if svalue is null, but strangely
-	// it doesn't actually do that, so we need to explicitly test.
-	else if (scm_is_true(svalue) and scm_is_false(scm_null_p(svalue)))
+	// If no args, use VoidValue
+	if (scm_is_null(svalue))
 	{
-		pa = verify_protom(svalue, "cog-set-value!", 3);
+		ValuePtr pa(createVoidValue());
+		return set_value(atom, key, pa, satom, "cog-set-value!");
 	}
 
-	return set_value(atom, key, pa, satom, "cog-set-value!");
+	// If it is a list, assume its a list of values.
+	if (not scm_is_null(SCM_CDR(svalue)))
+	{
+		std::vector<ValuePtr> vals = scm_to_protom_list(svalue);
+		ValuePtr pa(createLinkValue(std::move(vals)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	svalue = SCM_CAR(svalue);
+
+	// If svalue is actually a value, just use it.
+	if (not scm_is_pair(svalue))
+	{
+		ValuePtr pa(verify_protom(svalue, "cog-set-value!", 3));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	// Single argument that is not a Value. Convert.
+	SCM sitem = SCM_CAR(svalue);
+
+	if (scm_is_number(sitem))
+	{
+		ValuePtr pa(createFloatValue(scm_to_float_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	if (scm_is_string(sitem))
+	{
+		ValuePtr pa(createStringValue(scm_to_string_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	if (scm_is_symbol(sitem))
+	{
+		// The code below allows the following to be evaluated:
+		// (define x 0.44) (define y 0.55)
+		// (cog-set-value! (Concept "foo") (Predicate "bar") '(x y))
+		// Here, x and y are symbols, the symbol lookup gives
+		// variables, and the variable deref gives 0.44, 0.55.
+		SCM sl = svalue;
+		SCM newl = SCM_EOL;
+		while (scm_is_pair(sl)) {
+			SCM sym = SCM_CAR(sl);
+			if (scm_is_symbol(sym))
+				newl = scm_cons(scm_variable_ref(scm_lookup(sym)), newl);
+			else if (scm_is_true(scm_variable_p(sym)))
+				newl = scm_cons(scm_variable_ref(sym), newl);
+			else
+				newl = scm_cons(sym, newl);
+			sl = SCM_CDR(sl);
+		}
+		newl = scm_reverse(newl);
+		return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
+	}
+
+	// Hmm. Could be a list in a list. Tested in BasicSCMUTest
+	if (scm_is_true(scm_list_p(svalue)))
+	{
+		verify_protom(sitem, "cog-set-value!", 3);
+		ValuePtr pa(createLinkValue(scm_to_protom_list(svalue)));
+		return set_value(atom, key, pa, satom, "cog-set-value!");
+	}
+
+	scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
+		"zero or more Values");
 }
 
 // alist is an association-list of key-value pairs.
