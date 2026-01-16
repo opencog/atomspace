@@ -444,6 +444,8 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
 	Handle key(verify_handle(skey, "cog-set-value!", 2));
 
+	svalue = SCM_CAR(svalue);
+
 	// If svalue is actually a value, just use it.
 	// If it is a list, assume its a list of values.
 	ValuePtr pa;
@@ -480,7 +482,7 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 				sl = SCM_CDR(sl);
 			}
 			newl = scm_reverse(newl);
-			return ss_set_value(satom, skey, newl);
+			return ss_set_value(satom, skey, scm_cons(newl, SCM_EOL));
 		}
 		else if (scm_is_true(scm_list_p(svalue)))
 		{
