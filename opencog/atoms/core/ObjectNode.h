@@ -24,6 +24,7 @@
 #define _OPENCOG_OBJECT_NODE_H
 
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <string>
 
@@ -49,7 +50,41 @@ public:
 
 	virtual void setValue(const Handle& key, const ValuePtr& value);
 	virtual ValuePtr getValue(const Handle& key) const;
+
+	virtual HandleSeq getMessages() const = 0;
+	virtual bool usesMessage(const Handle&) const = 0;
 };
+
+/// Curiously Recurring Template Pattern -- CRTP
+///
+template <typename Derived>
+class ObjectCRTP : public ObjectNode
+{
+protected:
+	static std::unordered_set<uint32_t> msgset;
+	static HandleSeq preds;
+
+public:
+	virtual HandleSeq getMessages() const override
+	{
+		// Copy list above into the local AtomSpace.
+		HandleSeq lms;
+		for (const Handle& m : preds)
+			lms.emplace_back(_atom_space->add_atom(m));
+		return lms;
+	}
+
+	virtual bool usesMessage(const Handle& key) const override
+	{
+		if (PREDICATE_NODE != key->get_type()) return false;
+
+		const std::string& pred = key->get_name();
+		uint32_t dhsh = dispatch_hash(pred.c_str());
+		if (msgset.find(dhsh) != msgset.end()) return true;
+		return false;
+	}
+};
+
 
 /** @}*/
 } // namespace opencog
