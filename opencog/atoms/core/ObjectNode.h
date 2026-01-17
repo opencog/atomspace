@@ -35,7 +35,12 @@ namespace opencog
  *  @{
  */
 
-// Dispatcher for setValue, getValue.
+/// Provide some basic management for Object messages.
+/// This will sort-of-ish, kind-of reduce some cut-n-paste now
+/// prolferating across various projects that derive from this class.
+/// Seems like an OK base class to have, as I write this, but the c++
+/// "Curiously Recurring Template Pattern" (CRTP) is new to me, and
+/// I don't know if I like it. Experimental. We shall see what happens.
 class ObjectNode : public Node
 {
 protected:
