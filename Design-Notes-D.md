@@ -155,3 +155,11 @@ started. How does this work? The requirements seem to be these:
 
 So ...the `SensoryNode` ... how does it interop with the CogServer to
 get started?
+
+Should it be a `SensoryNode`? A `StorageNode`? Something else,
+subclassing from `ObjectNode`? The `StorageNode` backend does have a
+remote-execution callback. Lets figure out what it needs to do, and
+what the methods on it need to be.
+
+What does SensoryNode provide? Some c++ virtual methods: open, close,
+read, write, barrier. ... 
