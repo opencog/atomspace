@@ -14,7 +14,7 @@ does everything for everyone? Or is it better to keep them distinct?
 
 A short history.
 * The `ExecutionOutputLink` was designed specifically to call external
-  functions (written in python, scheme, haskell or c++).  It was
+  functions (written in python, scheme, Haskell or c++).  It was
   originally called `ExecutionLink`; the name was unilaterally changed,
   for the worse, I think.  It was a form of glue code: it unwrapped
   Atoms and presented argument lists in the format required by the
@@ -34,8 +34,8 @@ A short history.
   a rewrite to the selected items.
 
 The `FilterLink` mostly accepts most of the same kinds of functions
-that `ExecutationOutput` does; except it does not (currently) handle
-the `GroundedSchemaNode`s. As I write this, I cannot thiink of any
+that `ExecutionOutput` does; except it does not (currently) handle
+the `GroundedSchemaNode`s. As I write this, I cannot think of any
 technical reason why these two could not be merged into one common Link.
 
 * The `CollectionOfLink` is very recent; it was born of the idea that
@@ -44,21 +44,21 @@ technical reason why these two could not be merged into one common Link.
   to be a quick cheesy hack utility, but has proven to be remarkably
   versatile, usable in situations outside its originally envisioned
   utility. But, as I write this, it begins to feel a bit like a
-  `FilterLink` that can apply rules for type re-writting. Is it really
+  `FilterLink` that can apply rules for type re-writing. Is it really
   needed as a distinct function?
 
 ### Base Questions
 So the following questions arise:
 * Are there technical constraints that prevent the merger of these
   three?
-* Are there subtle semntic issues that blur the intended meaning of
+* Are there subtle semantic issues that blur the intended meaning of
   certain constructions?
 * Are there usability issues that would make previously easy expressions
   pointlessly more complicated?
 
 The above questions reveal complexities that have to be dealt with; on
 closer examination, these links types are seen to be quite different
-from one-another, and there's a fair amount of work needed to reconsile
+from one-another, and there's a fair amount of work needed to reconcile
 these differences.
 
 * `CollectionOf` wants to rewrite the *type* of collections.
@@ -73,7 +73,7 @@ these differences.
   but this presents a challenge for integration with `RuleLink`.
 * What's the input? A static list? A stream? A container? Functions,
   guards, rewrites all tend to want to work one-item-at-a-time; there
-  needs to be an input processor/unformizer that can take any source,
+  needs to be an input processor/uniformizer that can take any source,
   and present items one-at-a-time.
 
 ### RuleLink
@@ -127,7 +127,7 @@ and outputs by typed connectors, and to completely remove variables from
 the connector descriptions, thus providing a symmetrized jigsaw piece
 that algos can work with: either the odometer aglo, or the ASP/DPLL
 algo, or Viterbi algos, or the current LG algo implemented in the LG
-code base, which does a fine job of "backward interence", matching the
+code base, which does a fine job of "backward inference", matching the
 connectors/disjuncts to words in a sentence. Any of these different
 algos can be implemented to work with jigsaw pieces.
 
@@ -178,7 +178,7 @@ What we want is
 The `TypedVariable` used in lambdas dispenses with the `SexNode`, such
 connectors are always implicitly inputs to functions.
 
-The constraint satisfaction solvers (cahiners, ASP, etc.) ignore the
+The constraint satisfaction solvers (chainers, ASP, etc.) ignore the
 name of the connector, as it is irrelevant for determining the typing
 constraints.
 
@@ -208,7 +208,7 @@ relations between the integers, and they cannot all be stored in the
 AtomSpace. The `GreaterThanLink` is a stand-in for a relation on
 infinite sets. The set itself is constrained by the type definitions
 on the "input" variables: `greater(x,y)` treats `x` and `y` as "inputs",
-consrained as (for example)
+constrained as (for example)
 ```
 	(TypedVariable (Variable "$x") (TypeNode 'Number))
 ```
@@ -222,7 +222,7 @@ Such virtual links can be any generic relation:
 		(body that evaluates to a BoolValue))
 ```
 There are two basic link types in the query engine: the `QueryLink`,
-which corresponds to the implcation aka rewrite `P(x)->Q(x)` and the
+which corresponds to the implication aka rewrite `P(x)->Q(x)` and the
 `MeetLink`, which corresponds to `P(x)->x`. Although one can think of
 `x` as a special case of `Q(x)` it is more convenient to just have a
 post-processing rewrite `x->Q(x)` that, given a grounding `x:=g` will
@@ -238,8 +238,8 @@ the query engine: it is of the form
 	(AndLink
 		(PresentLink (tree with x,y,z.. in it))
 		(PresentLink (different tree with x,y,z.. in it))
-		(predicate relation that evaluatoes to true/false)
-		(another predicate relation that evaluatoes to true/false)
+		(predicate relation that evaluates to true/false)
+		(another predicate relation that evaluates to true/false)
 		... etc.)
 ```
 The `PatternLink` performs query analysis on the above form, extracting
@@ -381,7 +381,7 @@ This extends to more complex Signature types. So, for example:
 		(Equal
 			(Variable "$y")
 			(Edge (Predicate "foo")
-				(List (Variable "$x") (Concpet "bar"))))
+				(List (Variable "$x") (Concept "bar"))))
 		...)
 ```
 can be written as
@@ -390,7 +390,7 @@ can be written as
 		(TypedVariable (Variable "$y")
 			(Signature
 				(Edge (Predicate "foo")
-					(List (TypeNode 'Atom) (Concpet "bar")))))
+					(List (TypeNode 'Atom) (Concept "bar")))))
 		(Present (Variable "$y"))
 		...)
 ```
@@ -462,12 +462,12 @@ too, but that never materialized. Part of the issue is driven by
 confusion as to what a rule is, and what a rewrite is. Additional
 confusion is driven by the demands of various different users and their
 expectations for what the API would be. The rule engine needed to
-implement purchase orders for office-chair requistions routed through
+implement purchase orders for office-chair requisitions routed through
 accounting, management, shipping&receiving has broad similarities to the
 rule engine inside of the RelEx relationship extractor; inventing an API
 suitable for both requires serious work that was never undertaken.
 
-The original definition of PLN was reimagined to be a probabilistic form
+The original definition of PLN was re-imagined to be a probabilistic form
 of [natural deduction](https://en.wikipedia.org/wiki/Natural_deduction).
 
 Consider the following inference rule, written in Gentzen notation:
@@ -688,8 +688,8 @@ arithmetic on GPU's. That's easy. You can do that. You can ask Claude or
 ChatGPT to do it for you. They'll do it. The issue here is that you
 would then have to do this again for each new axiomatic system. First,
 for all kinds of different areas in mathematics. Next, for accounting
-and purchase order requistions. Finally for factory blue prints and
-excutive org charts. Yes, currently humans are asking LLM's to design
+and purchase order requisitions. Finally for factory blue prints and
+executive org charts. Yes, currently humans are asking LLM's to design
 each of these, but the designs are always human-guided. The goal of
 designing an axiomatic shape-rotator is to have the shape rotator
 perceive and manipulate any kind of axiomatic system, and not just the
@@ -713,7 +713,7 @@ a `HandleMap` or `HandleSeq` as an argument, and returns a bool
 true/false, indicating if the guard will allow this grounding to pass.
 
 `GuardLink` probably needs to be executable, in analogy to `RuleLink`,
-so as to reduce it's own body. Ivix move that code out of `RuleLink`.
+so as to reduce it's own body. Viz move that code out of `RuleLink`.
 
 get_variables().substitute(body, vm, _silent);
 Variables::substitute throws when guard fails.
