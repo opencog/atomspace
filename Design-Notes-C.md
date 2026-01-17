@@ -88,7 +88,7 @@ So lets review `RuleLink` and its uses.
   it in axiomatic reasoning, in the style of predicate logic, and of
   proof theory. Thus, as currently designed, it captures the form of
   `P(x)->Q(x)` or "if P(x) then Q(x)".
-* The variable `x` is typed; the type decalaration follows the general
+* The variable `x` is typed; the type declaration follows the general
   Atomese conventions for typed variables.
 
 ### Critique of the URE
@@ -108,7 +108,7 @@ using the proof-theoretic predicate-logic notation for rules,
 forward-chaining is fairly easy: one uses an odometer-style generator,
 and just exhaustively enumerates all possible inferences that satisfy
 the type constraints. Backward chaining should be just as easy, except
-for the assymmetry of rule specifications: viz the rules specify the
+for the asymmetry of rule specifications: viz the rules specify the
 input type, but do not specify the output type.
 
 The idea of chaining implies an odometer-style algorithm: one attempts
@@ -118,7 +118,7 @@ as Answer Set Programming, which elevate the `cut` to a higher level.
 The DPLL algo takes a "global" view of the collection of assertions,
 then trims off trees, leaving behind a kernel which must then be
 exhaustively explored (perhaps diagonalized, even, as kernels often
-are.) The determination and location of cuts is autmated, reducing the
+are.) The determination and location of cuts is automated, reducing the
 overall size of the satisfaction issue.
 
 The idea of the Link Grammar jigsaw pieces is to remove the asymmetry of
@@ -142,7 +142,7 @@ between symbols or semiotic signifiers. The connector types tell us what
 can be related to what. As I write this, I imagine its not hard to
 generalize connector mating to some kind of probabilistic strengths,
 rather than a strict boolean true/false will-mate or won't-mate
-determination. This probabilistic re-interpretation is defered for some
+determination. This probabilistic re-interpretation is deferred for some
 future project. ("Not hard" is an understatement: its probably quite
 the adventure to do this, opening new vistas. Which is why it cannot be
 attempted right here, just yet.)
@@ -154,8 +154,8 @@ used so that the "wiring" on the inside of the lambda can be specified.
 For example, in C++, java, python, scheme, the names of the variables
 that appear as the inputs to functions are used in the body of the
 function to connect into whatever algorithm or process is coded up
-inside that function. Inputs that are named variables are ciritical to
-convetional programming (for both the functional and procedural styles.)
+inside that function. Inputs that are named variables are critical to
+conventional programming (for both the functional and procedural styles.)
 
 But the jigsaw connectors, as currently defined in Atomese, do not
 include Variable names. This is an unresolved design tension in Atomese.
@@ -176,7 +176,7 @@ What we want is
 	)
 ```
 The `TypedVariable` used in lambdas dispenses with the `SexNode`, such
-connectors are always implcitly inputs to functions.
+connectors are always implicitly inputs to functions.
 
 The constraint satisfaction solvers (cahiners, ASP, etc.) ignore the
 name of the connector, as it is irrelevant for determining the typing
@@ -195,7 +195,7 @@ the context `P(x)`, it is plugged into the context `Q(x)`.
 The premise `P(x)` in its simplest form is just a pattern: a graph, with
 some variable region identified as `x`. In the query engine, the
 `PresentLink` is used to denote the pattern to be matched. The
-`PresentLink` is itself an evaluatable predicate, evaluting to
+`PresentLink` is itself an evaluatable predicate, evaluating to
 true/false, depending on whether `P(a)` is present in the AtomSpace for
 constant `a`. The invention of the PresentLink was spurred by the need
 for the pattern matcher to also include other evaluatable terms;
@@ -206,7 +206,7 @@ The `GreaterThanLink` was called "virtual" because it was not "actually"
 present in the AtomSpace: there is an infinite number of greater-than
 relations between the integers, and they cannot all be stored in the
 AtomSpace. The `GreaterThanLink` is a stand-in for a relation on
-infinite sets. The set itself is constrained by the type defintions
+infinite sets. The set itself is constrained by the type definitions
 on the "input" variables: `greater(x,y)` treats `x` and `y` as "inputs",
 consrained as (for example)
 ```
@@ -313,7 +313,7 @@ evaluatables.
 ### Typing Equivariance
 Historically, typing constraints were designed to be part of the
 vardecl, specified with `TypedVariableLink`. Why? Because that is
-how C++ and Java do it: these languages put thier type constraints
+how C++ and Java do it: these languages put their type constraints
 in the function declaration. But here, in Atomese, we have more
 freedom, and can move the type constraints into the body, as
 predicates: e.g.
@@ -369,7 +369,7 @@ into types? This seems impossible. I'm confused. Wtf.
 Defining a rewrite rule that will transform the one into the other would
 be an interesting challenge, as it would stress the ability to perform
 such homotopic rewrites. The syntactic issues needed to specify the
-rewrite would pose considerable challanges. The URE used QuoteLinks
+rewrite would pose considerable challenges. The URE used QuoteLinks
 extensively to do this; I doubt that this was the correct or wise way
 of doing this.
 
@@ -399,7 +399,7 @@ anonymous `(TypeNode 'Atom)`.
 
 ### Connectivity
 The `RuleLink` as specified above presents a challenge to the
-connectionist approach to constraint satifaction. The sheaf design
+connectionist approach to constraint satisfaction. The sheaf design
 expects the form
 ```
 	(ConnectorSeq
@@ -450,7 +450,7 @@ head/dependent, vowel/consonant, etc.) start to create issues, which we
 avoid for now. Suffice to say that some sexes, e.g. vowel/consonant, can
 also be encoded by bond subtypes (i.e. how Link Grammar currently does
 this for English a/an phonemes.) Again, there seem to be equivariant
-representations. Sex and Bond are the most conveniant for the simple
+representations. Sex and Bond are the most convenient for the simple
 cases, but don't generalize (easily).
 
 ### Rewriting
@@ -460,14 +460,14 @@ The URE was an attempt to implement an inference engine for realizing
 PLN. It was hoped that the URE would be usable for general rewriting,
 too, but that never materialized. Part of the issue is driven by
 confusion as to what a rule is, and what a rewrite is. Additional
-confusion is driven by the demands of various different users and thier
+confusion is driven by the demands of various different users and their
 expectations for what the API would be. The rule engine needed to
 implement purchase orders for office-chair requistions routed through
 accounting, management, shipping&receiving has broad similarities to the
 rule engine inside of the RelEx relationship extractor; inventing an API
 suitable for both requires serious work that was never undertaken.
 
-The original definition of PLN was reimagined to be a probilistic form
+The original definition of PLN was reimagined to be a probabilistic form
 of [natural deduction](https://en.wikipedia.org/wiki/Natural_deduction).
 
 Consider the following inference rule, written in Gentzen notation:
@@ -526,7 +526,7 @@ How is this to be represented in Atomese? Well, apparently as
 The `AndLink` says that there are two premises, to be combined. The
 `LocalQuoteLink` says that each part is a literal, and not to be
 interpreted.  The deluge of `Variables` are used to decompose the
-inputs into thier component parts.
+inputs into their component parts.
 
 In the above, it might have been more correct to use `PresentLink`
 instead of `LocalQuote`, but historically, the `LocalQuote` got used.
@@ -577,7 +577,7 @@ Some rewrites are not of the direct form shown above, but can leave
 vardecls stranded inside of function bodies. This is fixed with the
 `PrenexLink`, which inherits from `RewriteLink`, and provides some
 additional code to move variables out, and create a final expression
-that is in prenex form. This typpically is triggered by inference rules
+that is in prenex form. This typically is triggered by inference rules
 for function composition. For example, suppose we have functions
 (lambdas) `f(x,y)` and `g(z,w)` and we wish to create `f(x,g(z,w))`
 This requires moving the embedded vars `z,w` to the left, so that the
@@ -637,7 +637,7 @@ general. For example, for arithmetic, the inference rules might be for
 addition, subtraction, multiplication, division. The role of `PutLink`
 above is then taken by `PlusLink`, `MinusLink`, `TimesLink`,
 `DivideLink`. These are not just declarative elements, but are
-exectuable; executing `(Plus (Plus x 2) (Plus y 3))` results in the
+executable; executing `(Plus (Plus x 2) (Plus y 3))` results in the
 delta-reduction of the constants: `(Plus x y 5)`
 
 ### Algebra as an axiomatic system
@@ -709,7 +709,7 @@ various different beta reduction methods. The method
 and performs beta reduction with the provided grounding.
 
 The `GuardLink` needs to provide a `guard()` method that takes either
-a `HandleMap` or `HandleSeq` as an arugment, and returns a bool
+a `HandleMap` or `HandleSeq` as an argument, and returns a bool
 true/false, indicating if the guard will allow this grounding to pass.
 
 `GuardLink` probably needs to be executable, in analogy to `RuleLink`,
@@ -730,14 +730,14 @@ rules. So, in the basic sheaf-theoretic conception of establishing
 connections, the connectors are examined, and the mating rules are
 compared, generating a go/no-go answer to the possibility of mating.
 A guard clause would be an additional evaluatable predict that is
-invoked at mating time, performing some additinal algorithmic check,
-allowing or disallowing the connection to go foreward.
+invoked at mating time, performing some additional algorithmic check,
+allowing or disallowing the connection to go forward.
 
-How would this work? Where would tehse guard terms be stored?
+How would this work? Where would these guard terms be stored?
 
 
 ### TODO
 * Fix Connectors so that they can be named and typed as expected.
   (Fix?? Where? What?)
-* Should COnnectors be Unordered??
+* Should Connectors be Unordered??
 * Should we formalize the idea of a BoolLambda?
