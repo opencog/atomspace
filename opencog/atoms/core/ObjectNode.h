@@ -70,6 +70,10 @@ protected:
 	static std::unordered_set<uint32_t> msgset;
 	static HandleSeq preds;
 
+	ObjectCRTP(Type t, const std::string&& name) :
+		ObjectNode(t, std::move(name))
+	{}
+
 	virtual void addMessage(const char* str) const override
 	{
 		msgset.insert(dispatch_hash(str));

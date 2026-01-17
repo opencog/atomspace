@@ -288,6 +288,7 @@ class Atom
     friend class StateLink;       // Needs to call swap_atom()
     friend class StorageNode;     // Needs to call isAbsent()
     friend class CogServerNode;   // Needs to call markIsMessage()
+    template <typename T> friend class ObjectCRTP; // Needs to call markIsMessage()
 
 protected:
 
