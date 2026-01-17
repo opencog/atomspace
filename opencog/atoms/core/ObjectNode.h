@@ -61,7 +61,6 @@ protected:
 	}
 
 	ObjectNode(Type, const std::string&&);
-	virtual void addMessage(const char*) const = 0;
 
 	/**
 	 * Return debug diagnostics and/or performance monitoring stats.
@@ -81,19 +80,21 @@ template <typename Derived>
 class ObjectCRTP : public ObjectNode
 {
 protected:
-	static std::unordered_set<uint32_t> msgset;
-	static HandleSeq preds;
+	static std::unordered_set<uint32_t> _msgset;
+	static HandleSeq _preds;
+	static bool _init;
+	static bool do_init(void) { return true; }
 
 	ObjectCRTP(Type t, const std::string&& name) :
 		ObjectNode(t, std::move(name))
 	{}
 
-	virtual void addMessage(const char* str) const override
+	static void addMessage(const char* str)
 	{
-		msgset.insert(dispatch_hash(str));
+		_msgset.insert(dispatch_hash(str));
 		Handle h(createNode(PREDICATE_NODE, str));
 		h->markIsMessage();
-		preds.emplace_back(std::move(h));
+		_preds.emplace_back(std::move(h));
 	}
 
 public:
@@ -102,7 +103,7 @@ public:
 	{
 		// Copy list above into the local AtomSpace.
 		HandleSeq lms;
-		for (const Handle& m : preds)
+		for (const Handle& m : _preds)
 			lms.emplace_back(_atom_space->add_atom(m));
 		return lms;
 	}
@@ -113,16 +114,19 @@ public:
 
 		const std::string& pred = key->get_name();
 		uint32_t dhsh = dispatch_hash(pred.c_str());
-		if (msgset.find(dhsh) != msgset.end()) return true;
+		if (_msgset.find(dhsh) != _msgset.end()) return true;
 		return false;
 	}
 };
 
 template <typename Derived>
-std::unordered_set<uint32_t> ObjectCRTP<Derived>::msgset;
+std::unordered_set<uint32_t> ObjectCRTP<Derived>::_msgset;
 
 template <typename Derived>
-HandleSeq ObjectCRTP<Derived>::preds;
+HandleSeq ObjectCRTP<Derived>::_preds;
+
+template <typename Derived>
+bool ObjectCRTP<Derived>::_init = ObjectCRTP<Derived>::do_init();
 
 /** @}*/
 } // namespace opencog
