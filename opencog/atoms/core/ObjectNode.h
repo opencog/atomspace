@@ -118,6 +118,11 @@ public:
 	}
 };
 
+template <typename Derived>
+std::unordered_set<uint32_t> ObjectCRTP<Derived>::msgset;
+
+template <typename Derived>
+HandleSeq ObjectCRTP<Derived>::preds;
 
 /** @}*/
 } // namespace opencog
