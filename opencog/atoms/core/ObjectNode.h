@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <string>
+#include <unordered_set>
 
 namespace opencog
 {
@@ -39,6 +40,7 @@ class ObjectNode : public Node
 {
 protected:
 	static uint32_t constexpr dispatch_hash(const char*);
+	virtual void addMessage(const char*) const = 0;
 
 	/**
 	 * Return debug diagnostics and/or performance monitoring stats.
@@ -46,7 +48,7 @@ protected:
    virtual std::string monitor(void) const;
 
 public:
-	virtual ~ObjectNode();
+	virtual ~ObjectNode() = default;
 
 	virtual void setValue(const Handle& key, const ValuePtr& value);
 	virtual ValuePtr getValue(const Handle& key) const;
@@ -64,7 +66,16 @@ protected:
 	static std::unordered_set<uint32_t> msgset;
 	static HandleSeq preds;
 
+	virtual void addMessage(const char* str) const override
+	{
+		msgset.insert(dispatch_hash(str));
+		Handle h(createNode(PREDICATE_NODE, str));
+		h->markIsMessage();
+		preds.emplace_back(std::move(h));
+	}
+
 public:
+
 	virtual HandleSeq getMessages() const override
 	{
 		// Copy list above into the local AtomSpace.
