@@ -1,6 +1,13 @@
-Design Notes D - Analytics
-==========================
+Design Notes D - Analytics (Introspection)
+==========================================
 Continuation of [Design Notes A](Design-Notes-A.md). January 2026
+
+Analytics is when one has a pile of data, and want to know "what is in
+there". Introspection is when that pile of data is "yourself". I need to
+perform analytics on large jumbles of Atomese data, and this analytics
+needs to be written in Atomese, thus opening the door for recursive
+introspection. (e.g. solving quotidian issues like "where the heck did
+I put my analytics tools?" by using uhh, analytics tools to find them.)
 
 Analyzing AtomSpace Contents
 ----------------------------
@@ -35,7 +42,7 @@ viewer/crawler, an IRC chat API, and a text terminal API. These are all
 obviously "external" unix subsystems, with conventional API's that only
 need to be mapped to the Atomese `ObjectNode` API.
 
-Here, by contrast, I wish to "observe" AtomApace contents. Since the
+Here, by contrast, I wish to "observe" AtomSpace contents. Since the
 contents can be "anythying", a big part of observation will be figuring
 out what it is that is being looked at.  This has some of the flavor of
 both the old "learn" project, and of the old pattern-mining project. The
@@ -57,3 +64,58 @@ introspection work?  In the past, I was observing word counts. In the
 past, I sketched several reasonable designs for observing audio and
 pictures. But now I want to observe Atomese. How?
 
+### Persistance
+Where does this analytics code "live"? The simple answer is "wherever
+`make install` installs it. This is the super-conventional answer, and
+reinforces the traditional file-system vs. OS kernel split. The OS
+kernel manages the "live", executing threads; the file system stores
+both "dead" data and non-executing code. The barrier between the two is
+managed by linker-loader runtimes: glibc/binutils, java, python, guile,
+etc. All systems that I know of use files; none store binaries in
+databases (except possibly Microsoft...)
+
+Files are "human friendly", and are easy to understand and navigate.
+Just keep in mind `cd` and `ls` and you're done. Maybe `pwd` rarely.
+Unsophisticated users has the MacOS Finder; Linux has the Midnight
+Commander.  Android and iPhone users are unaware that file systems
+exist; they navigate screens of apps which hide & abstract away the
+storage structure.
+
+So, to resolve version 0.1 of this crisis, I can `make install` some
+flat `*.scm` files into the install dir. When the CogServer powers up,
+and the user aims the browser at it, those files are loaded as-needed
+by cogserver infrastructure (below). This is adequate for
+boot-strapping.
+
+Long-term, the analytics code should be stored in a `RocksStorageNode`
+(which is built on RocksDB, which stores contents in ... a directory
+filed with files. But the RocksDB provides its own loader and file
+management system, so I do not have to deal with any of that.) So why
+store in `RocksSorageNode`? Because that allows a more sophisticated
+data management infrastructure to kick in. I can go meta-meta on the
+data analytics. I can ask "what is inside of there?" and something can
+look, and figure it out.
+
+This is a non-trivial point, so I will canoodle on it for a while.
+Conventional flat files are "opaque", in that `cd` and `ls` only tell
+you about location, time-stamp and size, but not contents. To know the
+contents, you have to open and read it, using whatever format reader is
+appropriate. These readers are all highly specialized: reading java
+bytecode is very different than reading an MP3 file. Both file formats
+come with directory info: Java uses jar which is a tar file plus some
+extras stuff, while glibc uses `ar`. MP3 files include metadata, I'm not
+sure how.
+
+If I just dump a bunch of `*.scm` files into a directory, there is almost
+no knowledge retained of what they contain. I could ask Claude to open
+them, and read them, and tell me. I am *this close* (holds fingers
+together) to letting Claude be my file-system manager, except that
+Claude can't remember for shit, so I need to create a memory subsystem
+that is something more than a tumble-down jumble of text-file prompts.
+
+And this is why I should not store Atomese as scm files. Store them in
+`RocksStorageNode` and then build up the needed infrastructure to
+introspect the contents.
+
+### Runtime loading
+The above 
