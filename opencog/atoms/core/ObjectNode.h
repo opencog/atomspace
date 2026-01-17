@@ -83,7 +83,12 @@ protected:
 	static std::unordered_set<uint32_t> _msgset;
 	static HandleSeq _preds;
 	static bool _init;
-	static bool do_init(void) { return true; }
+	static bool do_init(void)
+	{
+		for (const char* msg : Derived::_messages)
+			addMessage(msg);
+		return true;
+	}
 
 	ObjectCRTP(Type t, const std::string&& name) :
 		ObjectNode(t, std::move(name))
