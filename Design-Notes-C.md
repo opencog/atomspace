@@ -1,5 +1,5 @@
-Design Notes C
-==============
+Design Notes C - GuardLink
+==========================
 Continuation of [Design Notes A](Design-Notes-A.md). January 2026
 
 Applying functions to data
