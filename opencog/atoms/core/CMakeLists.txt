@@ -7,6 +7,7 @@ ADD_LIBRARY (atomcore
 	CondLink.cc
 	FunctionLink.cc
 	NumberNode.cc
+	ObjectNode.cc
 	RandomChoice.cc
 	TimeLink.cc
 	UnorderedLink.cc
@@ -29,6 +30,7 @@ INSTALL (FILES
 	CondLink.h
 	FunctionLink.h
 	NumberNode.h
+	ObjectNode.h
 	RandomChoice.h
 	TimeLink.h
 	UnorderedLink.h

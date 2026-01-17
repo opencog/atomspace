@@ -23,32 +23,36 @@
 #ifndef _OPENCOG_OBJECT_NODE_H
 #define _OPENCOG_OBJECT_NODE_H
 
+#include <opencog/atoms/base/Node.h>
+#include <opencog/sensory/types/atom_types.h>
+
 #include <string>
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-/// Implement Jenkins' One-at-a-Time hash.
-/// For these very short strings, I cannot think of a faster hash.
-/// The 4-byte-at-a-time hashes require knowng the string length :-(
-static constexpr uint32_t dispatch_hash(const char* s)
+// Dispatcher for setValue, getValue.
+class ObjectNode : public Node
 {
-	uint32_t hash = 0;
+protected:
+	static uint32_t dispatch_hash(const char*);
 
-	for(; *s; ++s)
-	{
-		hash += *s;
-		hash += (hash << 10);
-		hash ^= (hash >> 6);
-	}
+	/**
+	 * Return debug diagnostics and/or performance monitoring stats.
+	 */
+   virtual std::string monitor(void) const;
 
-	hash += (hash << 3);
-	hash ^= (hash >> 11);
-	hash += (hash << 15);
+public:
+	virtual ~ObjectNode();
 
-	return hash;
-}
+	virtual void setValue(const Handle& key, const ValuePtr& value);
+	virtual ValuePtr getValue(const Handle& key) const;
+};
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_OBJECT_NODE_H

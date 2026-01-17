@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ObjectNode.h
+ * opencog/atoms/core/ObjectNode.cc
  *
  * Copyright (C) 2025 Linas Vepstas
  * All Rights Reserved
@@ -20,18 +20,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_OBJECT_NODE_H
-#define _OPENCOG_OBJECT_NODE_H
+#include "ObjectNode.h"
 
-#include <string>
-
-namespace opencog
-{
+using namespace opencog;
 
 /// Implement Jenkins' One-at-a-Time hash.
 /// For these very short strings, I cannot think of a faster hash.
 /// The 4-byte-at-a-time hashes require knowng the string length :-(
-static constexpr uint32_t dispatch_hash(const char* s)
+static constexpr uint32_t ObjectNode::dispatch_hash(const char* s)
 {
 	uint32_t hash = 0;
 
