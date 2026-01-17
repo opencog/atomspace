@@ -45,4 +45,16 @@ uint32_t constexpr ObjectNode::dispatch_hash(const char* s)
 	return hash;
 }
 
+ObjectNode::ObjectNode(Type t, const std::string&& uri) :
+   Node(t, std::move(uri))
+{
+   if (not nameserver().isA(t, OBJECT_NODE))
+      throw RuntimeException(TRACE_INFO, "Bad inheritance!");
+}
+
+std::string ObjectNode::monitor(void) const
+{
+	return "This ObjectNode does not implement a monitor.";
+}
+
 // ============================== END OF FILE =========================

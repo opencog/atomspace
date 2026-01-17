@@ -40,6 +40,8 @@ class ObjectNode : public Node
 {
 protected:
 	static uint32_t constexpr dispatch_hash(const char*);
+
+	ObjectNode(Type, const std::string&&);
 	virtual void addMessage(const char*) const = 0;
 
 	/**
@@ -49,9 +51,6 @@ protected:
 
 public:
 	virtual ~ObjectNode() = default;
-
-	virtual void setValue(const Handle& key, const ValuePtr& value);
-	virtual ValuePtr getValue(const Handle& key) const;
 
 	virtual HandleSeq getMessages() const = 0;
 	virtual bool usesMessage(const Handle&) const = 0;
