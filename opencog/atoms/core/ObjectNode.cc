@@ -27,7 +27,7 @@ using namespace opencog;
 /// Implement Jenkins' One-at-a-Time hash.
 /// For these very short strings, I cannot think of a faster hash.
 /// The 4-byte-at-a-time hashes require knowng the string length :-(
-static constexpr uint32_t ObjectNode::dispatch_hash(const char* s)
+uint32_t constexpr ObjectNode::dispatch_hash(const char* s)
 {
 	uint32_t hash = 0;
 
@@ -45,6 +45,4 @@ static constexpr uint32_t ObjectNode::dispatch_hash(const char* s)
 	return hash;
 }
 
-} // namespace opencog
-
-#endif // _OPENCOG_OBJECT_NODE_H
+// ============================== END OF FILE =========================

@@ -24,7 +24,6 @@
 #define _OPENCOG_OBJECT_NODE_H
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/sensory/types/atom_types.h>
 
 #include <string>
 
@@ -38,7 +37,7 @@ namespace opencog
 class ObjectNode : public Node
 {
 protected:
-	static uint32_t dispatch_hash(const char*);
+	static uint32_t constexpr dispatch_hash(const char*);
 
 	/**
 	 * Return debug diagnostics and/or performance monitoring stats.
