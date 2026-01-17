@@ -117,5 +117,41 @@ And this is why I should not store Atomese as scm files. Store them in
 `RocksStorageNode` and then build up the needed infrastructure to
 introspect the contents.
 
+### Make install
+The above suggests that the perhaps a short-term bootstrap solution is
+to `make install` the Atomese scm files to a well-known directory, and
+defer using `RocksStorageNode` until later. This then raises the issue
+of "how do I load those scm files in the CogServer context?", as they
+are needed to run the analytics pipeline.
+
+Thus, rather than solving the "how do I load flat files into a running
+cogserver?" question, it now seems infinitely preferable to instead ask
+"how do I attach a RocksStorageNode to a running cogserver?" This avoids
+the invention/creation of weirdo ad-hoc code for loading text files,
+while also staying within the project paradigm of designing systems in
+pure Atomese.
+
+That is, the CMakefiles need to create the `RocksStorageNode` locally,
+during build, and then `make install` needs to copy it into place in the
+file system. Perhaps to `/usr/local/share/cogserver/analytics`. This
+feels doable. Some caution with versioning: make install needs to wipe
+out the old directory contents, before copying in the new contents, as
+otherwise there is corruption. This would be for Debian/Redhat; the guix
+system has it's own versioning system that avoids this issue.
+
 ### Runtime loading
-The above 
+Now comes the tricky part. The cogserver is started, the user loads a
+bunch of data into the cogserver, and then the analytics package is
+started. How does this work? The requirements seem to be these:
+
+* Create a `SensoryNode` specialized for opening the `analytics.rdb`
+  file and loading it.
+* This node needs to do as much work as possible in a child AtomSpace
+  of whatever the cogserver is holding.
+* The web interface/network server needs to operate with this child
+  AtomSpace, and not the main one. Do we need to have a custom
+  `NetworkServerNode` for this? or perhaps a brand-new `CogServerNode`?
+  (port numbers get bumped...)
+
+So ...the `SensoryNode` ... how does it interop with the CogServer to
+get started?
