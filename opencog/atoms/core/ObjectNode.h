@@ -81,16 +81,19 @@ protected:
 	static std::unordered_set<uint32_t> _msgset;
 	static HandleSeq _preds;
 	static bool _init;
-	static bool do_init(void)
+	static void do_init(void)
 	{
+		if (_init) return;
+		_init = true;
 		for (const char* msg : Derived::_messages)
 			addMessage(msg);
-		return true;
 	}
 
 	ObjectCRTP(Type t, const std::string&& name) :
 		ObjectNode(t, std::move(name))
-	{}
+	{
+		do_init();
+	}
 
 	static void addMessage(const char* str)
 	{
@@ -129,7 +132,7 @@ template <typename Derived>
 HandleSeq ObjectCRTP<Derived>::_preds;
 
 template <typename Derived>
-bool ObjectCRTP<Derived>::_init = ObjectCRTP<Derived>::do_init();
+bool ObjectCRTP<Derived>::_init = false;
 
 /** @}*/
 } // namespace opencog
