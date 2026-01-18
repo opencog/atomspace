@@ -183,7 +183,7 @@ whenever needed.
 
 More design details:
 
-* `ObserveNode` or maybe `ProbeNode` inherits from `ObjectNode`.
+* `ObserveNode` or maybe `ExamineNode` inherits from `ObjectNode`.
 * It has to be given two things: (a) the `StorageNode` containing
   the probe code, (b) the `CogServerNode` that will allow direct
   communications.
@@ -198,3 +198,21 @@ If it is a `Link`, then `::execute()` needs to:
 * Start the pre-configured `CogServerNode`
 * But this is done only once; i.e. there should be both `*-open-*` and
   `*-close-*` since open and close need to be idempotent.
+* So it needs to be `ObserveNode` (or `AnalyitcsNode`?)
+
+Does this need to be a new Node type, or can we do it entirely with pure
+Atomese?  Lets try it.
+```
+(use-modules (opencog))
+(AtomSpace (cog-atomspace)) ;; XXX not pure Atomese
+(AtomSpace (AtomSpaceOf (Concept "x"))) ;; Yes, creates chold, OK.
+
+; Create just one child atomspace, stash it where we can find it.
+(cog-execute! (SetValue
+	(AnchorNode "observer")
+	(Predicate "*-space-*")
+	(AtomSpace (AtomSpaceOf (AnchorNode "observer")))))
+
+(cog-execute! (ValueOf (AnchorNode "observer") (Predicate "*-space-*")))
+(cog-new-atom (Concept "x") (... some atomspace))
+```
