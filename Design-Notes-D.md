@@ -144,8 +144,9 @@ Now comes the tricky part. The cogserver is started, the user loads a
 bunch of data into the cogserver, and then the analytics package is
 started. How does this work? The requirements seem to be these:
 
-* Create a `SensoryNode` specialized for opening the `analytics.rdb`
-  file and loading it.
+* Create an `ObserveNode` (inheriting from `ObjectNode`, maybe
+  `SensoryNode`, err, well, no see below.) specialized for opening the
+  `analytics.rdb` file and loading it.
 * This node needs to do as much work as possible in a child AtomSpace
   of whatever the cogserver is holding.
 * The web interface/network server needs to operate with this child
@@ -161,5 +162,39 @@ subclassing from `ObjectNode`? The `StorageNode` backend does have a
 remote-execution callback. Lets figure out what it needs to do, and
 what the methods on it need to be.
 
-What does SensoryNode provide? Some c++ virtual methods: open, close,
-read, write, barrier. ... 
+What does `SensoryNode` provide? Some c++ virtual methods: open, close,
+read, write, barrier. ... These are unix-inspired but are not obviously
+appropriate for the present case. Maybe open, close, but the read/write
+idea do not seem transferable to this scenario.
+
+The `StorageNode` has some huge number of methods; most seem
+inappropriate... Well, running wild with imagination suggests some of
+these could be used to copy between disjoint AtomSpaces, but this is
+premature at this point in design space. They do, however, tackle the
+interesting task of "what do I copy, when I don't know what is held at
+the remote end?" So, for example, we "don't know" what is in Rocks,
+until it is actually loaded. We don't know what is in a remote server,
+till it is transfered. The backing store has a "execute remote query"
+which is meant to partially solve this problem, and so perhaps is what
+is needed here, as well. It defines `BackingImplicator` derived from
+`Implicator` and is implemennted in `persist/api/BackingQuery.cc`
+It performs graph traversal with explicit calls to `getIncomingSet()`
+whenever needed.
+
+More design details:
+
+* `ObserveNode` or maybe `ProbeNode` inherits from `ObjectNode`.
+* It has to be given two things: (a) the `StorageNode` containing
+  the probe code, (b) the `CogServerNode` that will allow direct
+  communications.
+* We could stick (b) in (a), except that port numbers need to be
+  configurable.
+* Perhaps it should be an `ObserveLink` so that (a) and (b) can be
+  provided. Is there any reason for it to be an `ObjectNode`, anyway?
+
+If it is a `Link`, then `::execute()` needs to:
+* Create a child AtomSpace
+* Open the `StorageNode`, and load everything into the child.
+* Start the pre-configured `CogServerNode`
+* But this is done only once; i.e. there should be both `*-open-*` and
+  `*-close-*` since open and close need to be idempotent.
