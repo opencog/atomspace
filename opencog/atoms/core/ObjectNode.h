@@ -22,7 +22,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 
 namespace opencog
 {
@@ -78,8 +78,7 @@ template <typename Derived>
 class ObjectCRTP : public ObjectNode
 {
 protected:
-	static std::unordered_set<uint32_t> _msgset;
-	static HandleSeq _preds;
+	static std::unordered_map<std::string, Handle> _msgs;
 	static bool _init;
 	static void do_init(void)
 	{
@@ -97,10 +96,9 @@ protected:
 
 	static void addMessage(const char* str)
 	{
-		_msgset.insert(dispatch_hash(str));
 		Handle h(createNode(PREDICATE_NODE, str));
 		h->markIsMessage();
-		_preds.emplace_back(std::move(h));
+		_msgs.emplace(str, std::move(h));
 	}
 
 public:
@@ -109,8 +107,8 @@ public:
 	{
 		// Copy list above into the local AtomSpace.
 		HandleSeq lms;
-		for (const Handle& m : _preds)
-			lms.emplace_back(_atom_space->add_atom(m));
+		for (const auto& kv : _msgs)
+			lms.emplace_back(_atom_space->add_atom(kv.second));
 		return lms;
 	}
 
@@ -119,17 +117,12 @@ public:
 		if (PREDICATE_NODE != key->get_type()) return false;
 
 		const std::string& pred = key->get_name();
-		uint32_t dhsh = dispatch_hash(pred.c_str());
-		if (_msgset.find(dhsh) != _msgset.end()) return true;
-		return false;
+		return _msgs.find(pred) != _msgs.end();
 	}
 };
 
 template <typename Derived>
-std::unordered_set<uint32_t> ObjectCRTP<Derived>::_msgset;
-
-template <typename Derived>
-HandleSeq ObjectCRTP<Derived>::_preds;
+std::unordered_map<std::string, Handle> ObjectCRTP<Derived>::_msgs;
 
 template <typename Derived>
 bool ObjectCRTP<Derived>::_init = false;
