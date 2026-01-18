@@ -123,10 +123,26 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
 {
     for (const Handle& base : bases)
     {
-        _environ.push_back(AtomSpaceCast(base));
-        if (not _nameserver.isA(base->get_type(), ATOM_SPACE))
-            throw RuntimeException(TRACE_INFO,
-                    "AtomSpace - bases must be AtomSpaces!");
+        if (_nameserver.isA(base->get_type(), ATOM_SPACE))
+        {
+            _environ.push_back(AtomSpaceCast(base));
+            continue;
+        }
+        if (base->is_executable())
+        {
+            ValuePtr vp(base->execute());
+            AtomSpacePtr as(AtomSpaceCast(vp));
+            if (nullptr == as)
+                throw RuntimeException(TRACE_INFO,
+                    "AtomSpace - executable base not an AtomSpace! Got %s",
+                     vp->to_string().c_str());
+            _environ.push_back(as);
+            continue;
+        }
+
+        throw RuntimeException(TRACE_INFO,
+            "AtomSpace - bases must be AtomSpaces! Got %s",
+             base->to_string().c_str());
     }
 
     if (0 < bases.size()) _copy_on_write = true;
