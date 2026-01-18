@@ -68,8 +68,6 @@ protected:
    virtual std::string monitor(void) const;
 
 public:
-	virtual ~ObjectNode() = default;
-
 	virtual HandleSeq getMessages() const = 0;
 	virtual bool usesMessage(const Handle&) const = 0;
 };
