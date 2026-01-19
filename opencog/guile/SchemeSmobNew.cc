@@ -15,6 +15,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/foreign/ForeignAST.h>
+#include <opencog/atoms/parallel/TriggerLink.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -654,6 +655,12 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		// Now, create the actual link... in the actual atom space.
 		Handle h(atomspace->add_link(t, std::move(outgoing_set)));
 		return handle_to_scm(h);
+	}
+	catch (const ValueReturnException& ex)
+	{
+		if (ex._value->is_atom())
+			return handle_to_scm(atomspace->add_atom(HandleCast(ex._value)));
+		return protom_to_scm(ex._value);
 	}
 	catch (const std::exception& ex)
 	{
