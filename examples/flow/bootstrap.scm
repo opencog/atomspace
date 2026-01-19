@@ -44,8 +44,12 @@
 ; space. The `PureExecLink` provides this execution isolation.
 (cog-execute!
 	; Execute a sequence of steps to load the bootstrap space,
-	; and get things started in there.
+	; with contents, and then call a named Atomese snippet to
+	; launch executable code.
 	(PureExec
+		; Where does this all happen? In the child AtomSpace!
+		(AtomSpace "bootstrap")
+
 		; Step one: Open the StorageNode:
 		(SetValue
 			(RocksStorageNode "rocks:///tmp/foo")
@@ -61,10 +65,8 @@
 		; the RocksStorageNode contained a PipeLink hooking the
 		; NameNode to the rest of the bootup sequence, so that
 		; executing it makes the rest of the desired bringup to run.
-		(Name "bootloader")
-
-		; Where does this all happen? In the child AtomSpace!
-		(AtomSpace "bootstrap")))
+		; It runs in the bootstrap space, not the data space.
+		(Name "bootloader")))
 
 ; --------------------------------------------------------------------
 ; The above, as written, will fail, because the the dataset located

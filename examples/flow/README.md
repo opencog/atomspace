@@ -29,3 +29,4 @@ steers the eyes towards "where to look".
 * [`table.scm`](table.scm)                   -- Fetching Values from a CSV/TSV table.
 * [`multi-space.scm`](multi-space.scm)       -- Using multiple AtomSpaces at once.
 * [`episodic-space.scm`](episodic-space.scm) -- Managing multiple AtomSpaces.
+* [`bootstrap.scm`](bootstrap.scm)           -- Loading analytics pipelines.
