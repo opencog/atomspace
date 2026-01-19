@@ -207,27 +207,39 @@ the parent AtomSpace.
 ```
 (use-modules (opencog) (opencog persist) (opencog persist-rocks))
 
-; Create a handle to a child AtomSpace we can hold onto.
-; This always returns one and the same child space (which is good)
-; but it prevents two different users from having their own copy
-; (which is bad).
-(Pipe
-	(Name "make-as")
-	(AtomSpace (AtomSpaceOf (Link))))
+; Create a child AtomSpace with a unique name (the provided string).
+; The `(AtomSpaceOf (Link))` guarantees that the new AtomSpace is a
+; layer on top of the current AtomSpace. I guess it does not have to
+; be a child, but for now, this seems to be the best way of gaining
+; visibility into the parent, without corrupting the parent contents.
+(AtomSpace "bootstrap" (AtomSpaceOf (Link)))
 
-; The StorageNode is where the data will reside. We open it in such a
-; way that when data is loaded from it, it will go into the child space.
-(cog-execute! (SetValue
-	(RocksStorageNode "rocks:///tmp/foo")
-	(Predicate "*-open-*")
-	(Name "make-as")))
+; Define a boostrap sequence. The definition will be in the base space,
+; but when executed, the results will be placed in the provided
+; bootstrap space. The `PureExecLink` provides this execution isolation.
+(cog-execute!
+	; Execute a sequence of steps to load the boostrap space,
+	; and get things started in there.
+	(PureExec
+		; Step one: Open the StorageNode:
+		(SetValue
+			(RocksStorageNode "rocks:///tmp/foo")
+			(Predicate "*-open-*")
+			(AtomSpace "bootstrap"))
 
-; Load data into the child space. All sorts of scripts can be loaded
-; up, including the CogServerNode. Two problems, though: (a) the port
-; numbers on the CogServerNode would need to be configured, and (b) the
-; "*-start-*" message needs to be sent to it.
-(cog-execute! (SetValue
-	(RocksStorageNode "rocks:///tmp/foo")
-	(Predicate "*-load-atomspace-*")
-	(Link)))
+		; Step two: Load up the child space with data:
+		(SetValue
+			(RocksStorageNode "rocks:///tmp/foo")
+			(Predicate "*-load-atomspace-*"))
+
+		; Step three: run something. The assumption here is that
+		; the RocksStorageNode contained a PipeLink hooking the
+		; NameNode to the rest of the boo sequence, so that executing
+		; it makes it actually do something,
+		(Name "bootstrap-sequence")
+
+		; Where does this all happen? In the child AtomSpace!
+		(AtomSpace "bootstrap")))
 ```
+The above creates a minimally invasive boostrap that loads data into a
+child atomspace.

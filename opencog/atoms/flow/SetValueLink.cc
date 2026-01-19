@@ -36,8 +36,9 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 	}
 
 	size_t ary = _outgoing.size();
-	if (3 > ary or 4 < ary)
-		throw SyntaxException(TRACE_INFO, "Expecting two, three or four atoms!");
+	if (2 > ary or 4 < ary)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting two, three or four atoms!");
 }
 
 // ---------------------------------------------------------------
