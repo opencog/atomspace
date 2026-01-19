@@ -47,9 +47,9 @@ ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 	Handle strm(PipeLink::get_stream(get_handle(), search_as));
 
 	// It seems we have a choice of two implementations, here. We can
-	// complain that the desired does not yet have a stream associated
-	// with it, or we can block and wait, until some other thread
-	// provides a definition.  Both implementations seem plausible
+	// complain that the desired name does not yet have a stream
+	// associated with it, or we can block and wait, until some other
+	// thread provides a definition.  Both implementations seem plausible
 	// The first is easier to debug when Atomese is hand-written;
 	// the second seems more appropriate for automation.
 	if (nullptr == strm)
