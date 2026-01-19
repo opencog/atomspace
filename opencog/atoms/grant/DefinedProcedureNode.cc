@@ -75,7 +75,10 @@ ValuePtr DefinedProcedureNode::execute(AtomSpace* as,
 		return nullptr;
 	}
 
-	Handle defn(DefineLink::get_definition(get_handle()));
+	// Definitions might be located in an AtomSpace that is
+	// a child of the AtomSpace holding this DefinedProcedureNode.
+	const AtomSpace* search_as = as ? as : getAtomSpace();
+	Handle defn(DefineLink::get_definition(get_handle(), search_as));
 	if (nullptr == defn)
 		throw RuntimeException(TRACE_INFO,
 			"DefinedProcedureNode \"%s\" is not defined", get_name().c_str());
