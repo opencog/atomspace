@@ -525,19 +525,12 @@ SCM SchemeSmob::ss_execute (SCM satom)
 	const AtomSpacePtr& asp = ss_get_env_as("cog-execute!");
 	AtomSpace* atomspace = asp.get();
 
+	// Non-executable atoms just return themselves
+	if (not h->is_executable())
+		return satom;
+
 	try
 	{
-		// Special handling for DefinedPredicateNode
-		if (h->is_type(DEFINED_PREDICATE_NODE))
-		{
-			Handle defn(DefineLink::get_definition(h));
-			return protom_to_scm(defn->execute(atomspace));
-		}
-
-		// Non-executable atoms just return themselves
-		if (not h->is_executable())
-			return satom;
-
 		// Execute and return result
 		ValuePtr pap(h->execute(atomspace));
 		if (pap and pap->is_atom())
