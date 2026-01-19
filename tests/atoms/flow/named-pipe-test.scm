@@ -111,5 +111,49 @@
 (test-assert "transpose-has-elements" (> (length trans-list) 0))
 
 ; ------------------------------------------------------------
+; Test 6: Definitions can be found in child AtomSpces.
+
+(define base-space (cog-atomspace))
+; Define a child atomspace
+(AtomSpace "bootstrap" (AtomSpaceOf (Link)))
+
+; Put stuff in the parent
+(PureExec
+	(SetValue
+		(Concept "foo")
+		(Predicate "kiwi")
+		(Concept "bar"))
+   (Name "bootloader")
+   (AtomSpace "bootstrap"))
+
+; Switch to the child
+(cog-set-atomspace! (AtomSpace "bootstrap"))
+
+; Something not entirely trivial
+(define (ola) (format #t "hello baby!\n"))
+
+; Attach a name.
+(Pipe
+   (Name "bootloader")
+   (ExecutionOutput
+      (GroundedSchema "scm:ola")
+      (List)))
+
+; Should work fine in the child space.
+(test-assert "Should work great"
+	(begin
+		(cog-execute! (Name "bootloader"))
+		#t))
+
+; Should fail in the base space.
+(cog-set-atomspace! base-space)
+(test-assert "Should not find the defn in the base"
+	(catch #t
+		(lambda ()
+			(cog-execute! (Name "bootloader"))
+			#f)
+		(lambda (key . args) #t)))
+
+; ------------------------------------------------------------
 (test-end tname)
 (opencog-test-end)

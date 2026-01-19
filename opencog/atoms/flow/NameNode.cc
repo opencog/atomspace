@@ -41,7 +41,10 @@ NameNode::NameNode(Type t, const std::string&& str) :
 
 ValuePtr NameNode::execute(AtomSpace* as, bool silent)
 {
-	Handle strm(PipeLink::get_stream(get_handle()));
+	// Pipe definitions might be located in an AtomSpace that is
+	// a child of the AtomSpace holding this NameNode.
+	const AtomSpace* search_as = as ? as : getAtomSpace();
+	Handle strm(PipeLink::get_stream(get_handle(), search_as));
 
 	// It seems we have a choice of two implementations, here. We can
 	// complain that the desired does not yet have a stream associated
