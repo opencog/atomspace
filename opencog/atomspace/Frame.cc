@@ -50,7 +50,11 @@ Frame::~Frame()
 	// However, we can "help", and at least remove other
 	// dead weak pointers. This seems ... helpful ...
 	for (Handle& h : _outgoing)
-		FrameCast(h)->scrub_incoming_set();
+	{
+		// Glurk. This can be null ...
+		FramePtr fp(FrameCast(h));
+		if (fp) fp->scrub_incoming_set();
+	}
 }
 
 void Frame::setAtomSpace(AtomSpace* as)

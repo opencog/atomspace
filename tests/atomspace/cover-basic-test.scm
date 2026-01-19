@@ -3,7 +3,7 @@
 !#
 ;
 ; cover-basic-test.scm
-; Verify basic operations of layere atomspace frames.
+; Verify basic operations of layered atomspace frames.
 ;
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog test-runner))
@@ -96,6 +96,16 @@
 (test-equal 3 (get-val (List xb yb) "bang"))
 (test-equal 3 (get-val (List (Concept "foo") (Concept "bar")) "bang"))
 
+; -------------------------------------------------------------------
+; This passes, if it does not crash. Normally, an exception is thrown.
+(test-assert "Crash on Frame null pointer deref"
+	(catch #t
+		(lambda ()
+			(Pipe
+				(Name "make-as")
+				(AtomSpace (AtomSpaceOf (Name "make-as"))))
+			#f)
+		(lambda (key . args) #t)))
 
 (test-end basic-link)
 

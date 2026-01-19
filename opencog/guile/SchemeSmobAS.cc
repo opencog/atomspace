@@ -54,8 +54,18 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
-	// Create new AtomSpace with the indicated descendants.
-	AtomSpacePtr asp = createAtomSpace(spaces);
+	// Create new AtomSpace with the indicated parents.
+	// This can throw an exception if the parents don't have
+	// a valid form. Catch that exception and rethrow.
+	AtomSpacePtr asp;
+	try
+	{
+		asp = createAtomSpace(spaces);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-atomspace", space_list);
+	}
 
 	// If a name was provided, set that name.
 	if (0 < name.size())
