@@ -37,7 +37,8 @@
 
 ; Properties can be fetched simply by performing a get:
 (cog-execute!
-	(Get
+	(Meet
+		(Variable "$n")
 		(State (List (Concept "qwerty") (Predicate "truthiness"))
 			(Variable "$n"))))
 
@@ -53,7 +54,7 @@
 	(DefinedSchema "get property")
 	(Lambda
 		(VariableList (Variable "$atom") (Variable "$property"))
-		(Get
+		(Meet
 			(Variable "$n")
 			(State (List (Variable "$atom") (Variable "$property"))
 				(Variable "$n"))
