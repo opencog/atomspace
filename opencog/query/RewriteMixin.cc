@@ -104,18 +104,6 @@ static ValuePtr instantiate(AtomSpace* as,
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	Type t = expr->get_type();
-
-	// Execute any DefinedPredicateNodes
-	if (nameserver().isA(t, DEFINED_PREDICATE_NODE) or
-	    nameserver().isA(t, DEFINED_SCHEMA_NODE))
-	{
-		Handle defn(DefineLink::get_definition(expr));
-		if (not defn->is_executable())
-			return defn;
-		return defn->execute(as, silent);
-	}
-
 	// Beta-reduce, respecting quotes
 	Handle grounded(Replacement::replace_nocheck(expr, varmap));
 
@@ -124,7 +112,8 @@ static ValuePtr instantiate(AtomSpace* as,
 	// will have (true == grounded->is_executable()) but currently
 	// a dozen unit tests fail if we execute them. I don't know why.
 	Type gt = grounded->get_type();
-	if (nameserver().isA(gt, EXECUTABLE_LINK))
+	if (nameserver().isA(gt, EXECUTABLE_LINK) or
+	    nameserver().isA(gt, DEFINED_PROCEDURE_NODE))
 		return grounded->execute(as, silent);
 
 	return grounded;
