@@ -107,6 +107,22 @@
 			#f)
 		(lambda (key . args) #t)))
 
+; -------------------------------------------------------------------
+; Problems refering to existing anonymous atomspaces by name.
+; Both named-as and base-as should be the same AtomSpace...
+
+(cog-set-atomspace! (cog-new-atomspace))
+(define base-as (cog-atomspace))
+(define named-as (AtomSpace (cog-name (cog-atomspace))))
+(test-assert "Equality passes"
+	(cog-equal? base-as named-as))
+
+; Add contents, check contents
+(Concept "I'm in base")
+(cog-set-atomspace! named-as)
+(define all-cpts (cog-get-atoms 'Concept))
+(test-equal 1 (length all-cpts))
+
 (test-end basic-link)
 
 ; -------------------------------------------------------------------

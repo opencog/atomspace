@@ -54,6 +54,27 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	spaces = verify_handle_list_msg(space_list, "cog-new-atomspace", 1,
 		"a list of AtomSpaces", "an AtomSpace");
 
+	// If a name was provided without any parent atomspaces,
+	// check if an AtomSpace with that name already exists.
+	if (0 < name.size() and 0 == spaces.size())
+	{
+		const AtomSpacePtr& env = ss_get_env_as("cog-new-atomspace");
+		if (env)
+		{
+			if (env->get_name() == name)
+				return make_as(env);
+
+			// Find ALL frames; even those deep in a stack.
+			HandleSeq existing;
+			env->get_handles_by_type(existing, ATOM_SPACE, false);
+			for (const Handle& h : existing)
+			{
+				if (h->get_name() == name)
+					return handle_to_scm(h);
+			}
+		}
+	}
+
 	// Create new AtomSpace with the indicated parents.
 	// This can throw an exception if the parents don't have
 	// a valid form. Catch that exception and rethrow.

@@ -236,7 +236,7 @@ the parent AtomSpace.
 		; the RocksStorageNode contained a PipeLink hooking the
 		; NameNode to the rest of the boo sequence, so that executing
 		; it makes it actually do something,
-		(Name "bootstrap-sequence")
+		(Name "bootloader")
 
 		; Where does this all happen? In the child AtomSpace!
 		(AtomSpace "bootstrap")))
