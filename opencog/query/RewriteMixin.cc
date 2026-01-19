@@ -110,10 +110,13 @@ static ValuePtr instantiate(AtomSpace* as,
 	// Fire executable links.
 	// We currently exclude EVALUATABLE_LINK here; the evaluatables
 	// will have (true == grounded->is_executable()) but currently
-	// a dozen unit tests fail if we execute them. I don't know why.
-	Type gt = grounded->get_type();
-	if (nameserver().isA(gt, EXECUTABLE_LINK) or
-	    nameserver().isA(gt, DEFINED_PROCEDURE_NODE))
+	// a dozen unit tests fail if we execute them. They fail for two
+	// reasons: (a) Some of the unit tests use EvaluationLinks that
+	// aren't actually evaluatable, and (b) AndLink, OrLink, MemberLink
+	// etc. can all appear here, but executing them will give us
+	// undesirable results.
+	if (grounded->is_executable() and
+	    not grounded->is_type(EVALUATABLE_LINK))
 		return grounded->execute(as, silent);
 
 	return grounded;
