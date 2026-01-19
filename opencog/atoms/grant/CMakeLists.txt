@@ -2,6 +2,7 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (grant
+	DefinedProcedureNode.cc
 	DefineLink.cc
 	GrantLink.cc
 	PipeLink.cc
@@ -23,6 +24,7 @@ INSTALL (TARGETS grant EXPORT AtomSpaceTargets
 )
 
 INSTALL (FILES
+	DefinedProcedureNode.h
 	DefineLink.h
 	GrantLink.h
 	PipeLink.h

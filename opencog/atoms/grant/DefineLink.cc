@@ -1,5 +1,5 @@
 /*
- * DefineLink.cc
+ * opencog/atoms/grant/DefineLink.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  *

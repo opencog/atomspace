@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/parallel/DefinedProcedureNode.h
+ * opencog/atoms/grant/DefinedProcedureNode.h
  *
  * Copyright (C) 2020, 2024 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later

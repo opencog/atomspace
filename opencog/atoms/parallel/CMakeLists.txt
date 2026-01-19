@@ -3,7 +3,6 @@
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (parallel
-	DefinedProcedureNode.cc
 	DontExecLink.cc
 	ExecuteThreadedLink.cc
 	ParallelLink.cc
@@ -25,7 +24,6 @@ INSTALL (TARGETS parallel
 	DESTINATION "${CMAKE_INSTALL_LIBDIR}/opencog")
 
 INSTALL (FILES
-	DefinedProcedureNode.h
 	DontExecLink.h
 	ExecuteThreadedLink.h
 	ParallelLink.h

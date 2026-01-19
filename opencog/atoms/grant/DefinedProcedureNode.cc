@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/parallel/DefinedProcedureNode.cc
+ * opencog/atoms/grant/DefinedProcedureNode.cc
  *
  * Copyright (C) 2009, 2013-2015, 2020, 2024, 2025 Linas Vepstas
  * SPDX-License-Identifier: AGPL-3.0-or-later
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/parallel/DefinedProcedureNode.h>
+#include <opencog/atoms/grant/DefinedProcedureNode.h>
 #include <opencog/atoms/grant/DefineLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
