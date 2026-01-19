@@ -71,7 +71,7 @@
 ; they do not already exist. Access the above:
 (cog-node 'ConceptNode "asdf")
 
-; Access an atom that does not exist. This will return the empty list.
+; Access an atom that does not exist. This will return #f.
 (cog-node 'ConceptNode "qwerty")
 (cog-link 'ListLink (cog-node 'ConceptNode "Oh no!"))
 
