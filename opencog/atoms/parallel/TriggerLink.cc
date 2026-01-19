@@ -31,6 +31,9 @@ using namespace opencog;
 TriggerLink::TriggerLink(const HandleSeq&& oset, Type t)
     : PureExecLink(std::move(oset), t)
 {
+	if (0 == oset.size())
+		throw SyntaxException(TRACE_INFO,
+			"TriggerLink expects at least one Atom!");
 }
 
 void TriggerLink::install()
@@ -41,7 +44,18 @@ void TriggerLink::install()
 
 void TriggerLink::setAtomSpace(AtomSpace* as)
 {
-	ValuePtr vp(PureExecLink::execute(as, false));
+	size_t sz = _outgoing.size();
+
+	for (size_t i=0; i<sz-1; i++)
+	{
+		if (_outgoing[i]->is_executable())
+			_outgoing[i]->execute(as, false);
+	}
+
+	ValuePtr vp(_outgoing[sz-1]);
+	if (_outgoing[sz-1]->is_executable())
+		vp = _outgoing[sz-1]->execute(as, false);
+
 	throw ValueReturnException(vp);
 }
 
