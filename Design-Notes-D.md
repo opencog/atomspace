@@ -28,10 +28,10 @@ The crisis has many components:
 1. Where do these circuits (and there will be many) live and be stored?
    For now, I guess as flat files in the `atomspace-viz/analytics`
    directory, but long term, in some AtomSpace.
-2. How are they moved/copied from thier starting location, to the
+2. How are they moved/copied from their starting location, to the
    AtomSpace on which they are applied? How are they "loaded"?
-3. How do they perform thier observation and processing without
-   polluting the base AtomSpace to which thier processing is being
+3. How do they perform their observation and processing without
+   polluting the base AtomSpace to which their processing is being
    applied?
 4. How are the results to be reported back to the visualizer?
 
@@ -64,7 +64,7 @@ introspection work?  In the past, I was observing word counts. In the
 past, I sketched several reasonable designs for observing audio and
 pictures. But now I want to observe Atomese. How?
 
-### Persistance
+### Persistence
 Where does this analytics code "live"? The simple answer is "wherever
 `make install` installs it. This is the super-conventional answer, and
 reinforces the traditional file-system vs. OS kernel split. The OS
@@ -174,7 +174,7 @@ premature at this point in design space. They do, however, tackle the
 interesting task of "what do I copy, when I don't know what is held at
 the remote end?" So, for example, we "don't know" what is in Rocks,
 until it is actually loaded. We don't know what is in a remote server,
-till it is transfered. The backing store has a "execute remote query"
+till it is transferred. The backing store has a "execute remote query"
 which is meant to partially solve this problem, and so perhaps is what
 is needed here, as well. It defines `BackingImplicator` derived from
 `Implicator` and is implemennted in `persist/api/BackingQuery.cc`
@@ -214,11 +214,11 @@ the parent AtomSpace.
 ; visibility into the parent, without corrupting the parent contents.
 (AtomSpace "bootstrap" (AtomSpaceOf (Link)))
 
-; Define a boostrap sequence. The definition will be in the base space,
+; Define a bootstrap sequence. The definition will be in the base space,
 ; but when executed, the results will be placed in the provided
 ; bootstrap space. The `PureExecLink` provides this execution isolation.
 (cog-execute!
-	; Execute a sequence of steps to load the boostrap space,
+	; Execute a sequence of steps to load the bootstrap space,
 	; and get things started in there.
 	(PureExec
 		; Step one: Open the StorageNode:
@@ -234,12 +234,12 @@ the parent AtomSpace.
 
 		; Step three: run something. The assumption here is that
 		; the RocksStorageNode contained a PipeLink hooking the
-		; NameNode to the rest of the boo sequence, so that executing
-		; it makes it actually do something,
+		; NameNode to the rest of the bootup sequence, so that
+		; executing it makes the rest of the desired bringup to run.
 		(Name "bootloader")
 
 		; Where does this all happen? In the child AtomSpace!
 		(AtomSpace "bootstrap")))
 ```
-The above creates a minimally invasive boostrap that loads data into a
+The above creates a minimally invasive bootstrap that loads data into a
 child atomspace.
