@@ -101,27 +101,32 @@
 ; and then search for it:
 (cog-execute!
    (Meet
-      (GreaterThan
-         (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
-         (Number "10"))))
+      (TypedVariable (Variable "$dog_node") (Type 'ConceptNode))
+      (And
+         (Present (Variable "$dog_node"))
+         (GreaterThan
+            (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
+            (Number 10)))))
 ;
-; The problem here is that this search will examine *every* Atom in the
-; AtomSpace, looking to see if they have the key "weight_in_kg" on it,
-; (and if the value is more than 10). Keys are NOT automatically
-; indexed. This is done to save space (RAM) and time (CPU). If you want
-; this search to run rapidly, you can build your own index:
+; The above query has a problem: it will look at *every* ConceptNode in
+; the AtomSpace, looking at each to see if it has the key "weight_in_kg"
+; on it (and if the value is more than 10). Keys are NOT automatically
+; indexed. This is done to save space (RAM) and time (CPU). To avoid
+; looking at Atoms that do not have the appropriate key, you should
+; build an index. like so:
 (Member (Concept "Fido the Dog") (Concept "things that have weight"))
 ;
-; and then sharply constrain the search:
+; Then constrain the search:
 (cog-execute!
    (Meet
+      (TypedVariable (Variable "$dog_node") (Type 'ConceptNode))
       (And
          (Member (Variable "dog_node") (Concept "things that have weight"))
          (GreaterThan
             (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
             (Number "10")))))
 ;
-; The above will only look at Atoms that have a weight. One can go
+; The above will only look at ConceptNodes that have a weight. One can go
 ; farther, and write:
 (Member (Concept "Fido the Dog") (Concept "things that weigh more than 10 kg"))
 ;
