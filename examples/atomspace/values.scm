@@ -100,7 +100,7 @@
 ;
 ; and then search for it:
 (cog-execute!
-   (Get
+   (Meet
       (GreaterThan
          (FloatValueOf (Variable "dog_node") (Predicate "weight_in_kg"))
          (Number "10"))))
@@ -114,7 +114,7 @@
 ;
 ; and then sharply constrain the search:
 (cog-execute!
-   (Get
+   (Meet
       (And
          (Member (Variable "dog_node") (Concept "things that have weight"))
          (GreaterThan
