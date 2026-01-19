@@ -29,7 +29,7 @@ using namespace opencog;
 /// TriggerLink
 
 TriggerLink::TriggerLink(const HandleSeq&& oset, Type t)
-    : PureExecLink(std::move(oset), t)
+    : Link(std::move(oset), t)
 {
 	if (0 == oset.size())
 		throw SyntaxException(TRACE_INFO,
@@ -42,21 +42,28 @@ void TriggerLink::install()
 		"TriggerLinks cannot be placed into other Links!");
 }
 
-void TriggerLink::setAtomSpace(AtomSpace* as)
+ValuePtr TriggerLink::execute(AtomSpace* as, bool silent)
 {
 	size_t sz = _outgoing.size();
 
+	// I dunno. As I am writing this, this seems like an OK idea
+	// to run all of them, but this is just ... also ... pointless?
+	// Maybe stupid? Bad idea? I don't know...
 	for (size_t i=0; i<sz-1; i++)
 	{
 		if (_outgoing[i]->is_executable())
-			_outgoing[i]->execute(as, false);
+			_outgoing[i]->execute(as, silent);
 	}
 
-	ValuePtr vp(_outgoing[sz-1]);
 	if (_outgoing[sz-1]->is_executable())
-		vp = _outgoing[sz-1]->execute(as, false);
+		return _outgoing[sz-1]->execute(as, silent);
 
-	throw ValueReturnException(vp);
+	return _outgoing[sz-1];
+}
+
+void TriggerLink::setAtomSpace(AtomSpace* as)
+{
+	throw ValueReturnException(execute(as, false));
 }
 
 DEFINE_LINK_FACTORY(TriggerLink, TRIGGER_LINK)

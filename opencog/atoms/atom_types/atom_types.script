@@ -1337,7 +1337,7 @@ PURE_EXEC_LINK <- EXECUTABLE_LINK
 
 // The TriggerLink cannot be placed in an AtomSpace; attempting to do
 // so will cause it to "trigger" and execute it's contents.
-TRIGGER_LINK <- PURE_EXEC_LINK
+TRIGGER_LINK <- EXECUTABLE_LINK
 
 // ==============================================================
 // Object, procedure and schema nodes.

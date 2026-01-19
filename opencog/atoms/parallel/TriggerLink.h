@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_TRIGGER_LINK_H
 #define _OPENCOG_TRIGGER_LINK_H
 
-#include <opencog/atoms/parallel/PureExecLink.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/util/exceptions.h>
 
 namespace opencog
@@ -41,7 +41,7 @@ public:
 	ValueReturnException(const ValuePtr& v) : _value(v) {}
 };
 
-class TriggerLink : public PureExecLink
+class TriggerLink : public Link
 {
 protected:
 	virtual void setAtomSpace(AtomSpace *);
@@ -51,6 +51,9 @@ public:
 	TriggerLink(const HandleSeq&&, Type=TRIGGER_LINK);
 	TriggerLink(const TriggerLink&) = delete;
 	TriggerLink& operator=(const TriggerLink&) = delete;
+
+	virtual bool is_executable() const { return true; }
+	virtual ValuePtr execute(AtomSpace*, bool);
 
 	static Handle factory(const Handle&);
 };
