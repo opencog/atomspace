@@ -19,6 +19,15 @@
 ; constantly being updated in one thread, while the analysis is
 ; happening in another, and so one really wants to keep these separate,
 ; so that they don't step on one-another.
+;
+; Notice that (effectively) all code is written in pure Atomese: the
+; only "true" scheme code here is the call to `cog-execute!`. The
+; reason that everything is in pure Atomese is because that is all that
+; can be stored in StorageNodes; one cannot store either scheme or
+; python. (Well, technically, with some elbow grease, one could do that,
+; but the general intent is not to: the main experiment is to leverage
+; the introspection abilities of Atomese; abilities that scheme and
+; python lack.
 ; -----------------------------------------------------------------
 
 (use-modules (opencog) (opencog persist) (opencog persist-rocks))
@@ -31,8 +40,8 @@
 (AtomSpace "bootstrap" (AtomSpaceOf (Link)))
 
 ; Define a bootstrap sequence. The definition will be in the base space,
-; but when executed, the results will be placed in the provided
-; bootstrap space. The `PureExecLink` provides this execution isolation.
+; but when executed, the results will be placed in the provided bootstrap
+; space. The `PureExecLink` provides this execution isolation.
 (cog-execute!
 	; Execute a sequence of steps to load the bootstrap space,
 	; and get things started in there.
@@ -56,3 +65,38 @@
 
 		; Where does this all happen? In the child AtomSpace!
 		(AtomSpace "bootstrap")))
+
+; --------------------------------------------------------------------
+; The above, as written, will fail, because the the dataset located
+; at /tmp/foo is empty. It is up to you to populate it with something
+; meaningful. The code below will do that.
+
+(cog-set-atomspace! (AtomSpace "bootstrap"))
+
+(define (ola) (format #t "hello baby!\n"))
+(Pipe
+	(Name "bootloader")
+	(ExecutionOutput
+		(GroundedSchema "scm:ola")
+		(List)))
+
+; See that it works:
+(cog-execute! (Name "bootloader"))
+
+; Save the entire definition, including the PipeLink. The PipeLink will
+; be restored, above during the `*-load-atomspace-*` operation. This
+; definition will allow the full bootstrap definition to run. After
+; this, you can exit and restart, and verify that everything works;
+; be sure, however, to `(define olda ...)` again; this is NOT saved!
+(cog-execute!
+   (SetValue
+      (RocksStorageNode "rocks:///tmp/foo")
+      (Predicate "*-store-atom-*")
+		(Pipe
+			(Name "bootloader")
+			(ExecutionOutput
+				(GroundedSchema "scm:ola")
+				(List)))))
+
+; The End! That's All, Folks!
+; --------------------------------------------------------------------
