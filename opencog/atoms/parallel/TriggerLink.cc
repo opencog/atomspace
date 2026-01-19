@@ -35,16 +35,14 @@ TriggerLink::TriggerLink(const HandleSeq&& oset, Type t)
 
 void TriggerLink::install()
 {
-	printf("duuude install incmone\n");
 	throw SyntaxException(TRACE_INFO,
 		"TriggerLinks cannot be placed into other Links!");
 }
 
 void TriggerLink::setAtomSpace(AtomSpace* as)
 {
-	PureExecLink::execute(as, false);
-	printf("duuude insert foo\n");
-	throw SilentException();
+	ValuePtr vp(PureExecLink::execute(as, false));
+	throw ValueReturnException(result);
 }
 
 DEFINE_LINK_FACTORY(TriggerLink, TRIGGER_LINK)

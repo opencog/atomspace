@@ -25,12 +25,21 @@
 #define _OPENCOG_TRIGGER_LINK_H
 
 #include <opencog/atoms/parallel/PureExecLink.h>
+#include <opencog/util/exceptions.h>
 
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+/// Custom exception thrown by TriggerLink to return the execution result.
+class ValueReturnException : public SilentException
+{
+public:
+	ValuePtr _value;
+	ValueReturnException(const ValuePtr& v) : _value(v) {}
+};
 
 class TriggerLink : public PureExecLink
 {
