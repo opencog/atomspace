@@ -344,10 +344,7 @@ Handle AtomSpace::add_atom(const Handle& h)
     try {
         return add(h);
     }
-    catch (const DeleteException& ex) {
-        // Hmmm. Need to notify the backing store
-        // about the deleted atom. But how?
-    }
+    catch (const DeleteException& ex) { /* Do nothing */ }
     catch (const SilentException& ex) {
         // The SilentException is thrown by GrantLink, when the
         // user attempts grants in non-base Frames. We want to
