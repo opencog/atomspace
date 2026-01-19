@@ -67,7 +67,8 @@ ValuePtr AtomSpaceOfLink::execute(AtomSpace* as, bool silent)
 		return Handle::UNDEFINED;
 
 	// Return the AtomSpace as a Handle
-	// Explicitly call Atom::get_handle() to bypass AtomSpace's overloaded methods
+	// Explicitly call Atom::get_handle() to bypass AtomSpace's
+	// overloaded methods
 	return atom_as->Atom::get_handle();
 }
 

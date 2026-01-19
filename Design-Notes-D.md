@@ -200,19 +200,34 @@ If it is a `Link`, then `::execute()` needs to:
   `*-close-*` since open and close need to be idempotent.
 * So it needs to be `ObserveNode` (or `AnalyitcsNode`?)
 
-Does this need to be a new Node type, or can we do it entirely with pure
-Atomese?  Lets try it.
+Does this need to be a new Node type, or can we do it entirely with
+pure Atomese?  Lets try it. This is a "bootstrap" sequence, attempting
+to launch and then populate a child AtomSpace, with minimal invasion of
+the parent AtomSpace.
 ```
-(use-modules (opencog))
-(AtomSpace (cog-atomspace)) ;; XXX not pure Atomese
-(AtomSpace (AtomSpaceOf (Concept "x"))) ;; Yes, creates chold, OK.
+(use-modules (opencog) (opencog persist) (opencog persist-rocks))
 
-; Create just one child atomspace, stash it where we can find it.
+; Create a handle to a child AtomSpace we can hold onto.
+; This always returns one and the same child space (which is good)
+; but it prevents two different users from having their own copy
+; (which is bad).
+(Pipe
+	(Name "make-as")
+	(AtomSpace (AtomSpaceOf (Link))))
+
+; The StorageNode is where the data will reside. We open it in such a
+; way that when data is loaded from it, it will go into the child space.
 (cog-execute! (SetValue
-	(AnchorNode "observer")
-	(Predicate "*-space-*")
-	(AtomSpace (AtomSpaceOf (AnchorNode "observer")))))
+	(RocksStorageNode "rocks:///tmp/foo")
+	(Predicate "*-open-*")
+	(Name "make-as")))
 
-(cog-execute! (ValueOf (AnchorNode "observer") (Predicate "*-space-*")))
-(cog-new-atom (Concept "x") (... some atomspace))
+; Load data into the child space. All sorts of scripts can be loaded
+; up, including the CogServerNode. Two problems, though: (a) the port
+; numbers on the CogServerNode would need to be configured, and (b) the
+; "*-start-*" message needs to be sent to it.
+(cog-execute! (SetValue
+	(RocksStorageNode "rocks:///tmp/foo")
+	(Predicate "*-load-atomspace-*")
+	(Link)))
 ```
