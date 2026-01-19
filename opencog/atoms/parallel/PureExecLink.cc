@@ -69,6 +69,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		if (h->is_type(ATOM_SPACE))
 		{
 			ctxt = AtomSpaceCast(h).get();
+			vseq.push_back(h); // Record it too, for posterity.
 			continue;
 		}
 		if (not h->is_executable())
@@ -78,13 +79,23 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		}
 		if (ctxt)
 		{
-			vseq.push_back(h->execute(ctxt, silent));
+			ValuePtr vp(h->execute(ctxt, silent));
+			// Should not really happen except it sometimes does:
+			// null pointers. Yuck. Oh well.
+			if (nullptr == vp)
+				continue;
+
+			// Special case. New context.
+			if (vp->is_type(ATOM_SPACE))
+				ctxt = AtomSpaceCast(vp).get();
+
+			vseq.emplace_back(vp);
 			continue;
 		}
 
 		// No AtomSpace provided. Use a temporary.
 		AtomSpacePtr scratch = createAtomSpace(as);
-		vseq.push_back(h->execute(scratch.get(), silent));
+		vseq.emplace_back(h->execute(scratch.get(), silent));
 		scratch->clear();
 	}
 
