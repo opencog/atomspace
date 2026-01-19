@@ -42,7 +42,7 @@ void TriggerLink::install()
 void TriggerLink::setAtomSpace(AtomSpace* as)
 {
 	ValuePtr vp(PureExecLink::execute(as, false));
-	throw ValueReturnException(result);
+	throw ValueReturnException(vp);
 }
 
 DEFINE_LINK_FACTORY(TriggerLink, TRIGGER_LINK)
