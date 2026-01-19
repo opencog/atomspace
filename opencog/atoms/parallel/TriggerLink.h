@@ -35,6 +35,8 @@ namespace opencog
 class TriggerLink : public PureExecLink
 {
 protected:
+	virtual void setAtomSpace(AtomSpace *);
+	virtual void install();
 
 public:
 	TriggerLink(const HandleSeq&&, Type=TRIGGER_LINK);

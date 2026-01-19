@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/parallel/TriggerLink.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/exceptions.h>
 
 using namespace opencog;
 
@@ -31,6 +31,20 @@ using namespace opencog;
 TriggerLink::TriggerLink(const HandleSeq&& oset, Type t)
     : PureExecLink(std::move(oset), t)
 {
+}
+
+void TriggerLink::install()
+{
+	printf("duuude install incmone\n");
+	throw SyntaxException(TRACE_INFO,
+		"TriggerLinks cannot be placed into other Links!");
+}
+
+void TriggerLink::setAtomSpace(AtomSpace* as)
+{
+	PureExecLink::execute(as, false);
+	printf("duuude insert foo\n");
+	throw SilentException();
 }
 
 DEFINE_LINK_FACTORY(TriggerLink, TRIGGER_LINK)
