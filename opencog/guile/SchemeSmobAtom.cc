@@ -515,34 +515,4 @@ SCM SchemeSmob::ss_count (SCM stype, SCM aspace)
 	return scm_from_size_t(cnt);
 }
 
-/* ============================================================== */
-/**
- * cog-execute! executes any/all Executable atoms.
- */
-SCM SchemeSmob::ss_execute (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-execute!");
-	const AtomSpacePtr& asp = ss_get_env_as("cog-execute!");
-	AtomSpace* atomspace = asp.get();
-
-	// Non-executable atoms just return themselves
-	if (not h->is_executable())
-		return satom;
-
-	try
-	{
-		// Execute and return result
-		ValuePtr pap(h->execute(atomspace));
-		if (pap and pap->is_atom())
-			return handle_to_scm(atomspace->add_atom(HandleCast(pap)));
-		return protom_to_scm(pap);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-execute!", satom);
-	}
-
-	return SCM_EOL; // not reached
-}
-
 /* ===================== END OF FILE ============================ */

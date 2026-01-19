@@ -120,6 +120,9 @@ cog-update-value!
 ; Load core atom types.
 (include-from-path "opencog/base/core_types.scm")
 
+; Perform execuation by triggering
+(define-public (cog-execute! x) (TriggerLink x))
+
 ; Misc old grunge.
 ; ATTENTION: if you add/remove a file here, then be sure to ALSO
 ; do the same at
