@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/flow/NameNode.h
+ * opencog/atoms/grant/NameNode.h
  *
  * Copyright (C) 2020, 2024 Linas Vepstas
  * Copyright (C) 2026 BrainyBlaze Dynamics, LLC

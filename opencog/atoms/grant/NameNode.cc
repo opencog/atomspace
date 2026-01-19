@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/parallel/NameNode.cc
+ * opencog/atoms/grant/NameNode.cc
  *
  * Copyright (C) 2009, 2013-2015, 2020, 2024, 2025 Linas Vepstas
  * Copyright (C) 2026 BrainyBlaze Dynamics, LLC
@@ -17,7 +17,7 @@
  * GNU General Public License for more details.
  */
 
-#include <opencog/atoms/flow/NameNode.h>
+#include <opencog/atoms/grant/NameNode.h>
 #include <opencog/atoms/grant/PipeLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 

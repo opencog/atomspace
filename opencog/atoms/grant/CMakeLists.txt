@@ -5,6 +5,7 @@ ADD_LIBRARY (grant
 	DefinedProcedureNode.cc
 	DefineLink.cc
 	GrantLink.cc
+	NameNode.cc
 	PipeLink.cc
 	StateLink.cc
 	TypedAtomLink.cc
@@ -27,6 +28,7 @@ INSTALL (FILES
 	DefinedProcedureNode.h
 	DefineLink.h
 	GrantLink.h
+	NameNode.h
 	PipeLink.h
 	StateLink.h
 	TypedAtomLink.h
