@@ -658,6 +658,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	catch (const ValueReturnException& ex)
 	{
+		if (nullptr == ex._value) return SCM_BOOL_F;
 		if (ex._value->is_atom())
 			return handle_to_scm(atomspace->add_atom(HandleCast(ex._value)));
 		return protom_to_scm(ex._value);
