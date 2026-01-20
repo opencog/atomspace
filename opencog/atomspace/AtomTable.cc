@@ -653,12 +653,22 @@ void AtomSpace::get_handles_by_type(HandleSeq& hseq,
     // deduplicate, but that would cost CPU time. (The copy_on_write
     // variant immediately above should haved handled this correctly,
     // I think. Not sure. Confused.)
+    //
+    // Part of the confusion: get the shallowest variant only for the
+    // closed StateLinks (since slp->get_link(cas) returns the closed
+    // variant.)
     if (STATE_LINK == type)
     {
         HandleSeq rawseq;
         typeIndex.get_handles_by_type(rawseq, type, subclass);
         for (const Handle& h : rawseq)
-            hseq.push_back(StateLinkCast(h)->get_link(cas));
+        {
+            StateLinkPtr slp(StateLinkCast(h));
+            if (slp->is_closed())
+                hseq.push_back(slp->get_link(cas));
+            else
+                hseq.push_back(h);
+        }
     }
     else if (DEFINE_LINK == type)
     {
