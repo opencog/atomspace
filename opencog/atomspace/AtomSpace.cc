@@ -32,6 +32,7 @@
 #include <opencog/atoms/atom_types/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/parallel/TriggerLink.h>
 #include <opencog/atoms/value/LinkValue.h>
 #include <opencog/atoms/value/ValueFactory.h>
 
@@ -344,9 +345,10 @@ Handle AtomSpace::add_atom(const Handle& h)
     try {
         return add(h);
     }
-    catch (const DeleteException& ex) {
-        // Hmmm. Need to notify the backing store
-        // about the deleted atom. But how?
+    catch (const DeleteException& ex) { /* Do nothing */ }
+    catch (const ValueReturnException& ex) {
+        // Rethrow to pass results onwards (to scheme/python bindings)
+        throw;
     }
     catch (const SilentException& ex) {
         // The SilentException is thrown by GrantLink, when the

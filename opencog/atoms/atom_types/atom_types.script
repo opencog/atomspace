@@ -1335,6 +1335,10 @@ EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
 // results. If no AtomSpace is specified, a temporary is created.
 PURE_EXEC_LINK <- EXECUTABLE_LINK
 
+// The TriggerLink cannot be placed in an AtomSpace; attempting to do
+// so will cause it to "trigger" and execute it's contents.
+TRIGGER_LINK <- EXECUTABLE_LINK
+
 // ==============================================================
 // Object, procedure and schema nodes.
 //
