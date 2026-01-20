@@ -32,9 +32,6 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs))  ; Needed for define*-public
 
-; Make sure that cog-execute! is visible to the unit tests.
-(define-public cog-execute! TriggerLink)
-
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-value->list x)) (car x)))

@@ -121,7 +121,7 @@ cog-update-value!
 (include-from-path "opencog/base/core_types.scm")
 
 ; Perform execution by triggering
-(define-public (cog-execute! x) (TriggerLink x))
+(define-public cog-execute! TriggerLink)
 
 ; Misc old grunge.
 (include-from-path "opencog/base/core-docs.scm")
