@@ -52,8 +52,6 @@ cog-atomspace-ro!
 cog-atomspace-rw!
 cog-count-atoms
 cog-equal?
-cog-extract!
-cog-extract-recursive!
 cog-get-subtypes
 cog-get-types
 cog-handle
@@ -122,6 +120,8 @@ cog-update-value!
 
 ; Perform execution by triggering
 (define-public cog-execute! TriggerLink)
+(define-public cog-extract! DeleteLink)
+(define-public cog-extract-recursive! DeleteRecursiveLink)
 
 ; Misc old grunge.
 (include-from-path "opencog/base/core-docs.scm")

@@ -100,8 +100,6 @@ private:
 	static SCM ss_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
 	static SCM ss_link(SCM, SCM);
-	static SCM ss_extract(SCM, SCM);
-	static SCM ss_extract_recursive(SCM, SCM);
 
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
