@@ -40,8 +40,7 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 		return;
 	}
 
-	for (const Handle& h : _outgoing)
-		as->extract_atom(h, true);
+	DeleteLink::execute(as, true);
 
 	throw DeleteException();
 }
@@ -52,8 +51,7 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 	// are variables. The goal is to allow DeleteLinks to be used in
 	// query patterns (where they will have ... variables in them!)
 	if (not is_closed(get_handle()))
-		// return createVoidValue();
-		return nullptr;
+		return createVoidValue();
 
 	// In general, neither this link, nor it's outgoing set will be in
 	// any AtomSpace at all. So, in order for the delete to be successful,
@@ -65,17 +63,26 @@ ValuePtr DeleteLink::execute(AtomSpace * as, bool silent)
 		throw InvalidParamException(TRACE_INFO,
 			"DeleteLink::execute() expects AtomSpace");
 
-	for (const Handle& h : _outgoing)
+	if (DELETE_RECURSIVE_LINK == _type)
 	{
-		AtomSpace* oas = h->getAtomSpace();
-		if (nullptr == oas) oas = as;
-		oas->extract_atom(h, true);
+		for (const Handle& h : _outgoing)
+		{
+			AtomSpace* oas = h->getAtomSpace();
+			if (nullptr == oas) oas = as;
+			oas->extract_atom(h, true);
+		}
+	}
+	else
+	{
+		for (const Handle& h : _outgoing)
+		{
+			AtomSpace* oas = h->getAtomSpace();
+			if (nullptr == oas) oas = as;
+			oas->extract_atom(h, false);
+		}
 	}
 
-	// TODO FIXME: It might be cleaner to return VoidValue here,
-	// instead of nullptr... I guess. Doesn't seem to matter, mostly!?
-	// return createVoidValue();
-	return nullptr;
+	return createVoidValue();
 }
 
 DeleteLink::DeleteLink(const HandleSeq&& oset, Type type)
