@@ -167,8 +167,9 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 
 	// There is no definition for the alias.
 	throw InvalidParamException(TRACE_INFO,
-	                            "Cannot find definition for atom %s",
-	                            alias->to_string().c_str());
+	   "Cannot find definition for %s in %s",
+	   alias->to_string().c_str(),
+	   as->to_string("").c_str());
 }
 
 DEFINE_LINK_FACTORY(UniqueLink, UNIQUE_LINK)
