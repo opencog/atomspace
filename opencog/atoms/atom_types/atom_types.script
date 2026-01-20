@@ -1337,7 +1337,8 @@ EXECUTE_THREADED_LINK <- EXECUTABLE_LINK
 PURE_EXEC_LINK <- EXECUTABLE_LINK
 
 // The TriggerLink cannot be placed in an AtomSpace; attempting to do
-// so will cause it to "trigger" and execute it's contents.
+// so will cause it to "trigger" and execute it's contents. See also
+// DeleteLink for another Link that can't be added.
 TRIGGER_LINK <- EXECUTABLE_LINK
 
 // ==============================================================
