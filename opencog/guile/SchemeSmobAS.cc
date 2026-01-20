@@ -310,7 +310,7 @@ SCM SchemeSmob::ss_as(SCM satom)
  *
  * Phew. It works, and there's lots of unit tests for this.
  */
-SCM SchemeSmob::atomspace_fluid;
+SCM SchemeSmob::atomspace_fluid = SCM_UNDEFINED;
 
 /**
  * Set the current atomspace for this dynamic state.

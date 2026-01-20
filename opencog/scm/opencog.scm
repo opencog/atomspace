@@ -121,10 +121,6 @@ cog-update-value!
 (include-from-path "opencog/base/core_types.scm")
 
 ; Misc old grunge.
-; ATTENTION: if you add/remove a file here, then be sure to ALSO
-; do the same at
-;    guile/SchemeSmob.cc SchemeSmob::module_init() circa line 260
-
 (include-from-path "opencog/base/core-docs.scm")
 (include-from-path "opencog/base/utilities.scm")
 (include-from-path "opencog/base/atom-cache.scm")
