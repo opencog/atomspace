@@ -59,6 +59,8 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
 			asargs = scratch->add_atom(hargs);
 	}
 
+	AtomSpacePtr saved_as = SchemeSmob::ss_get_env_as("scm-runner");
+
 	SchemeEval* applier = get_evaluator_for_scheme(scratch);
 	ValuePtr vp(applier->apply_v(_fname, asargs));
 
@@ -70,8 +72,8 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
 	// Thus happens during the recursive lollapalooza tested in
 	// MultiAtomSpaceUTest, and also trips in a few other unit
 	// tests.
-	SchemeEval* ev = get_evaluator_for_scheme(base_as);
-	ev->set_atomspace(AtomSpaceCast(base_as));
+	SchemeEval* ev = get_evaluator_for_scheme(saved_as.get());
+	ev->set_atomspace(saved_as);
 
 	// In general, we expect the scheme fuction to return some Value.
 	// But user-written functions can return anything, e.g. scheme
