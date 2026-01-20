@@ -63,8 +63,6 @@ private:
 
 	static bool server_mode;
 	static std::atomic_flag is_inited;
-	static void module_init(void*);
-	static void register_procs();
 	static void register_proc(const char*, int, int, int, scm_t_subr);
 
 	// The cog_misc_tag are for all other opencog types, such
@@ -206,6 +204,7 @@ private:
 public:
 	// This makes init publicly visible; needed for the guile module.
 	static void init();
+	static void register_procs();
 
 	// This is used in the guile module wrappers for foreign calls.
 	static const AtomSpacePtr& ss_get_env_as(const char *);

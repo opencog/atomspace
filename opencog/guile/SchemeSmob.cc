@@ -78,12 +78,9 @@ void SchemeSmob::init()
 		(sizeof(void*) == 4 and sizeof(ValuePtr) == 8),
 		"Unexpected ValuePtr size");
 
-	init_smob_type();
-	scm_c_define_module("opencog", module_init, NULL);
+	// Load the (opencog) module via guile's autoloader.
+	// The triggers (via load-extension) a call to opencog_guile_init
 	scm_c_use_module("opencog");
-
-	atomspace_fluid = scm_make_fluid();
-	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
@@ -97,7 +94,7 @@ SchemeSmob::SchemeSmob()
 
 void opencog_guile_init(void)
 {
-	SchemeSmob::init();
+	SchemeSmob::register_procs();
 }
 
 /* ============================================================== */
@@ -245,38 +242,25 @@ bool SchemeSmob::scm_is_protom(SCM s)
 
 /* ============================================================== */
 
-/// Define the (opencog) module.
-//
-// This is implemented somewhat awkwardly, in that *scm files are
-// being loaded here.  This is due to a design tangle where C++ code
-// needs to call the scheme evaluator; each evaluator uses its own
-// atomspace in each thread (stored in a fluid); thus, the C++ code
-// must link to the module definition, which is thus incomplete without
-// the load of the *.scm files.
-//
-// The below solves the problem of running the evaluator inside a
-// CogServer guile shell. However, at the guile prompt, this causes
-// all files to be loaded twice; once from `opencog.scm` and once below.
-//
-void SchemeSmob::module_init(void*)
-{
-	// The portion of (opencog) done in C++
-	register_procs();
-	
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/atom-cache.scm"));
-}
-
 #if defined(HAVE_GUILE2) || defined(HAVE_GUILE3)
  #define C(X) ((scm_t_subr) X)
 #else
  #define C(X) ((SCM (*) ()) X)
 #endif
 
+/// Register all the twiddly c++ pieces for the (opencog) module.
+/// This is called indirectly from scm_c_use_module("opencog"); above.
+/// That call triggers the autoloader, which then does the oad-extension
+/// shlib load thing.
 void SchemeSmob::register_procs()
 {
+	// General setup.
+	init_smob_type();
+
+	// Fluid for multiple evaluators, each with their own AtomSpace pointer.
+	atomspace_fluid = scm_make_fluid();
+	atomspace_fluid = scm_permanent_object(atomspace_fluid);
+
 	// The three numbers are these:
 	// First, the number of mandatory arguments,
 	// Next, the number of fixed optional arguments,
