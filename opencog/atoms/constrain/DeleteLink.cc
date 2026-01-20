@@ -40,7 +40,16 @@ void DeleteLink::setAtomSpace(AtomSpace * as)
 		return;
 	}
 
-	DeleteLink::execute(as, true);
+	if (DELETE_RECURSIVE_LINK == _type)
+	{
+		for (const Handle& h : _outgoing)
+			as->extract_atom(h, true);
+	}
+	else
+	{
+		for (const Handle& h : _outgoing)
+			as->extract_atom(h, false);
+	}
 
 	throw DeleteException();
 }
