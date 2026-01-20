@@ -48,8 +48,7 @@ LibraryRunner::LibraryRunner(std::string s)
 /// Expects "args" to be a ListLink. These arguments will be
 ///     substituted into the predicate.
 ///
-ValuePtr LibraryRunner::execute(AtomSpace* as,
-                                AtomSpace* scratch,
+ValuePtr LibraryRunner::execute(AtomSpace* scratch,
                                 const ValuePtr& vargs,
                                 bool silent)
 {

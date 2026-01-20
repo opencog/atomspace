@@ -44,8 +44,7 @@ SCMRunner::SCMRunner(std::string s)
 /// do it itself. The arguments are then inserted into the predicate,
 /// and the predicate as a whole is then evaluated.
 ///
-ValuePtr SCMRunner::execute(AtomSpace* base_as,
-                            AtomSpace* scratch,
+ValuePtr SCMRunner::execute(AtomSpace* scratch,
                             const ValuePtr& vargs,
                             bool silent)
 {
@@ -61,17 +60,6 @@ ValuePtr SCMRunner::execute(AtomSpace* base_as,
 
 	SchemeEval* applier = get_evaluator_for_scheme(scratch);
 	ValuePtr vp(applier->apply_v(_fname, asargs));
-
-	// The Scheme evaluator uses a fluid to hold "the current
-	// atomspace", and this fluid is typically set to the scratch
-	// space (in this thread). Set it back to "what it was", which
-	// should be the provided base_as.
-	//
-	// Thus happens during the recursive lollapalooza tested in
-	// MultiAtomSpaceUTest, and also trips in a few other unit
-	// tests.
-	SchemeEval* ev = get_evaluator_for_scheme(base_as);
-	ev->set_atomspace(AtomSpaceCast(base_as));
 
 	// In general, we expect the scheme fuction to return some Value.
 	// But user-written functions can return anything, e.g. scheme
