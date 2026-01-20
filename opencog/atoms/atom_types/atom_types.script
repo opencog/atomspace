@@ -841,6 +841,7 @@ FREE_LINK <- ORDERED_LINK
 // whether it is open or closed on the fly.
 //
 DELETE_LINK <- EXECUTABLE_LINK, CONSTRAINT_SIG
+DELETE_RECURSIVE_LINK <- DELETE_LINK
 
 // Only one "closed" UniqueLink may exist (in the AtomSpace), for a
 // fixed first Atom of the Link.  Useful for defining state.  Additional

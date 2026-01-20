@@ -146,12 +146,6 @@ class BindlinkTest(unittest.TestCase):
                 ).execute()
         self.assertEqual(result, BoolValue(True))
 
-    def test_execute_atom_no_return_value(self):
-        result = PutLink(DeleteLink(VariableNode("X")),
-                        ConceptNode("deleteme")).execute()
-        self.assertEqual(result, None)
-
-
     def test_tmp_atomspace(self):
         ListLink(ConceptNode("foo"), ConceptNode("bar"))
 

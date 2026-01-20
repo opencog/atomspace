@@ -135,53 +135,6 @@ Example:
        (ConceptNode "def")
     )
 
-=== cog-extract atom ===
-Delete the indicated atom, but only if it has no incoming links.
-
-Returns #t if the atom was deleted, else returns #f if not deleted.
-
-=== cog-extract-recursive atom ===
-Delete the indicated atom, and all atoms that point at it.
-
-Both functions return #t on success, else they return #f.
-If #f is returned, then the delete failed.
-
-Example:
-   ; Define two nodes and a link between them:
-   guile> (define x (ConceptNode "abc"))
-   guile> (define y (ConceptNode "def"))
-   guile> (define l (Link x y))
-
-   ; Verify that there's an atom called x:
-   guile> x
-   (Link
-      (ConceptNode "abc")
-      (ConceptNode "def")
-   )
-
-   ; Try to delete x. This should fail, since there's a link
-   ; containing x.
-   guile> (cog-extract x)
-   #f
-
-   ; Delete x, and everything pointing to it. This should delete
-   ; both x, and the link l.
-   guile> (cog-extract-recursive x)
-   #t
-
-   ; Verify that the link l is gone:
-   guile> l
-   Invalid handle
-
-   ; Verify that the node x is gone:
-   guile> x
-   Invalid handle
-
-   ; Verify that the node y still exists:
-   guile> y
-   (ConceptNode "def")
-
-
 === cog-atom? exp ===
 Return #t if exp is an atom, else return #f
 

@@ -37,11 +37,11 @@
 
 	(test-equal "lower-node-size" 2 (length (cog-get-atoms 'Node #t)))
 	(test-equal "lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
-	(test-assert "extract-fail" (not (cog-extract! a)))
+	(Delete a)
 	(test-equal "ex-lower-node-size" 2 (length (cog-get-atoms 'Node #t)))
 	(test-equal "ex-lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
 
-	(test-assert "extract-works" (cog-extract-recursive! a))
+	(DeleteRecursive a)
 	(test-equal "post-ex-lower-node-size" 1 (length (cog-get-atoms 'Node #t)))
 	(test-equal "post-ex-lower-link-size" 0 (length (cog-get-atoms 'Link #t)))
 
@@ -88,10 +88,10 @@
 	(cog-set-atomspace! upper-space)
 	(test-equal "upper-size" 3 (length (cog-get-atoms 'Atom #t)))
 
-	(test-assert "extract-fail" (not (cog-extract! a)))
+	(Delete a)
 	(test-equal "ex-upper-size" 3 (length (cog-get-atoms 'Atom #t)))
 
-	(test-assert "extract-works" (cog-extract-recursive! a))
+	(DeleteRecursive a)
 	(test-equal "post-ex-upper-size" 1 (length (cog-get-atoms 'Atom #t)))
 	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
 
@@ -126,7 +126,7 @@
 	(cog-set-atomspace! lower-space)
 
 	(test-equal "lower-size" 2 (length (cog-get-atoms 'Atom #t)))
-	(test-assert "extract-works" (cog-extract! a))
+	(Delete a)
 	(test-equal "ex-lower-size" 1 (length (cog-get-atoms 'Atom #t)))
 	(test-equal "lower-b-only" (list b) (cog-get-atoms 'Atom #t))
 	(test-equal "empty-income" 0 (length (cog-incoming-set b)))
