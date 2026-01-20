@@ -42,8 +42,7 @@ public:
 	Runner& operator=(const Runner&) = delete;
 	virtual ~Runner() {}
 
-	virtual ValuePtr execute(AtomSpace* base,
-	                         AtomSpace* scratch,
+	virtual ValuePtr execute(AtomSpace* scratch,
                             const ValuePtr&, bool silent=false) = 0;
 };
 

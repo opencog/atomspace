@@ -114,7 +114,7 @@ ValuePtr GroundedPredicateNode::execute_args(AtomSpace* scratch,
                                              const ValuePtr& cargs,
                                              bool silent)
 {
-	if (_runner) return _runner->execute(_atom_space, scratch, cargs, silent);
+	if (_runner) return _runner->execute(scratch, cargs, silent);
 
 	// Unknown procedure type.
 	throw RuntimeException(TRACE_INFO,

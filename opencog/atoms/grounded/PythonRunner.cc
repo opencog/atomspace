@@ -43,8 +43,7 @@ PythonRunner::PythonRunner(std::string s)
 /// Expects "args" to be a ListLink. These arguments
 ///     will be substituted into the predicate.
 ///
-ValuePtr PythonRunner::execute(AtomSpace* as,
-                               AtomSpace* scratch,
+ValuePtr PythonRunner::execute(AtomSpace* scratch,
                                const ValuePtr& vargs,
                                bool silent)
 {

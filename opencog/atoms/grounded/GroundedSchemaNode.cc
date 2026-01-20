@@ -119,7 +119,7 @@ ValuePtr GroundedSchemaNode::execute_args(AtomSpace* scratch,
 	              << " with arguments: " << oc_to_string(cargs)
 	              << std::endl;
 
-	return _runner->execute(_atom_space, scratch, cargs, silent);
+	return _runner->execute(scratch, cargs, silent);
 }
 
 DEFINE_NODE_FACTORY(GroundedSchemaNode, GROUNDED_SCHEMA_NODE)
