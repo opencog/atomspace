@@ -109,30 +109,6 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     _nameserver(nameserver()),
     addedTypeConnection(0)
 {
-    for (const Handle& base : bases)
-    {
-        if (_nameserver.isA(base->get_type(), ATOM_SPACE))
-        {
-            _environ.push_back(AtomSpaceCast(base));
-            continue;
-        }
-        if (base->is_executable())
-        {
-            ValuePtr vp(base->execute());
-            AtomSpacePtr as(AtomSpaceCast(vp));
-            if (nullptr == as)
-                throw RuntimeException(TRACE_INFO,
-                    "AtomSpace - executable base not an AtomSpace! Got %s",
-                     vp->to_string().c_str());
-            _environ.push_back(as);
-            continue;
-        }
-
-        throw RuntimeException(TRACE_INFO,
-            "AtomSpace - bases must be AtomSpaces! Got %s",
-             base->to_string().c_str());
-    }
-
     if (0 < bases.size()) _copy_on_write = true;
     init();
 }
@@ -143,8 +119,36 @@ AtomSpace::~AtomSpace()
     clear_all_atoms();
 }
 
+// Set up a vector points to the parent AtomSpaces.
 void AtomSpace::do_install(void)
 {
+    if (0 == _environ.size())
+    {
+        for (const Handle& base : _outgoing)
+        {
+            if (_nameserver.isA(base->get_type(), ATOM_SPACE))
+            {
+                _environ.push_back(AtomSpaceCast(base));
+                continue;
+            }
+            if (base->is_executable())
+            {
+                ValuePtr vp(base->execute());
+                AtomSpacePtr as(AtomSpaceCast(vp));
+                if (nullptr == as)
+                    throw RuntimeException(TRACE_INFO,
+                        "AtomSpace - executable base not an AtomSpace! Got %s",
+                         vp->to_string().c_str());
+                _environ.push_back(as);
+                continue;
+            }
+
+            throw RuntimeException(TRACE_INFO,
+                "AtomSpace - bases must be AtomSpaces! Got %s",
+                 base->to_string().c_str());
+        }
+    }
+
     // XXX FIXME. I think this is installing into the wrong AtomSpace.
     // Maybe. I'm confused.  But no unit test seems to fail as a result
     // of this, so I dunno. Go figure.

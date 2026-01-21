@@ -73,9 +73,12 @@ class AtomSpace : public Frame
     /// This AtomSpace will behave like the set-union of the base
     /// atomspaces in the `_environ`: it exposes all Atoms in those
     /// bases, plus also anything in this AtomSpace.
-    // Both _environ and _outgoing contain exactly the same pointers;
-    // we keep two distinct lists to avoid the CPU overhead of casting
-    // between the two different pointer types (its significant).
+    //
+    // This _environ vector is similar to _outgoing but not the same.
+    // The _outgoing vector can contain regular Atoms (not AtomSpaces)
+    // that are executable, and, when executed, return AtomSpaces. The
+    // result of this execution is stored in _environ; the original
+    // Atoms are in _outgoing.
     std::vector<AtomSpacePtr> _environ;
     void do_install();
 
