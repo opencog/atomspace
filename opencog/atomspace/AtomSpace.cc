@@ -175,6 +175,15 @@ void AtomSpace::install(void)
     Handle llc(get_handle());
     for (const AtomSpacePtr& has : _environ)
         has->insert_atom(llc);
+
+    // Avoid a minor(?) amount of confusion by blanking the _atom_space
+    // pointer. A non-null pointer was required, so that the above exec
+    // could happen. But now that it has happened, we do not want to track
+    // this any longer. Our parents are being held in the _environ vector
+    // and not by this pointer.So kill it before someone else notices
+    // that it is not null, and decides to use it for some nefarious
+    // underhanded covert operation. Someone like Abbe Dala Pikola...
+    _atom_space = nullptr;
 }
 
 void AtomSpace::remove(void)
