@@ -86,6 +86,10 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		HandleSeq chopped;
 		for (double d : vindex)
 			chopped.push_back(oset.at((int)(d+0.5)));
+
+		// If user asked for just one thing, hand them that one thing.
+		if (1 == chopped.size())
+			return chopped[0];
 		return createLink(std::move(chopped), vitype);
 	}
 
@@ -96,6 +100,16 @@ ValuePtr ElementOfLink::do_execute(const std::vector<double>& vindex,
 		std::vector<ValuePtr> chopped;
 		for (double d : vindex)
 			chopped.push_back(lvec.at((int)(d+0.5)));
+
+		// Special case "hack". This feels both ugly, and natural.
+		// Ugly, because it breaks with the rhythm below, where
+		// everything gets wrapped. Natural, because if the user
+		// asked for just one thing, we should give them ... just
+		// one thing. Re-wrapping it forces the user to then take
+		// another step to unwrap it. Anyway, this is an important
+		// enough design decision, that I write it up, here.
+		if (1 == chopped.size())
+			return chopped[0];
 		return createLinkValue(std::move(chopped));
 	}
 
