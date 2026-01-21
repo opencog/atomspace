@@ -57,6 +57,9 @@ class AtomSpace : public Frame
     static const bool CHECK_VALUES = true;
     static const bool DONT_CHECK_VALUES = false;
 
+    bool _read_only;
+    bool _copy_on_write;
+
     /**
      * Drop copy constructor and equals operator to
      * prevent accidental copying of large objects.
@@ -64,9 +67,17 @@ class AtomSpace : public Frame
     AtomSpace& operator=(const AtomSpace&) = delete;
     AtomSpace(const AtomSpace&) = delete;
 
-    // --------------------------------------------------
-    //! Index of atoms.
-    TypeIndex typeIndex;
+    /// Base AtomSpaces wrapped by this space. Empty if top-level.
+    /// This AtomSpace will behave like the set-union of the base
+    /// atomspaces in the `_environ`: it exposes all Atoms in those
+    /// bases, plus also anything in this AtomSpace.
+    // Both _environ and _outgoing contain exactly the same pointers;
+    // we keep two distinct lists to avoid the CPU overhead of casting
+    // between the two different pointer types (its significant).
+    std::vector<AtomSpacePtr> _environ;
+
+    void init();
+    void clear_all_atoms();
 
 #if USE_INCOME_INDEX
     // This is never used, and remains here for historical reference.
@@ -83,25 +94,14 @@ public:
 private:
 #endif
 
-    bool _read_only;
-    bool _copy_on_write;
-
-    /// Base AtomSpaces wrapped by this space. Empty if top-level.
-    /// This AtomSpace will behave like the set-union of the base
-    /// atomspaces in the `_environ`: it exposes all Atoms in those
-    /// bases, plus also anything in this AtomSpace.
-    // Both _environ and _outgoing contain exactly the same pointers;
-    // we keep two distinct lists to avoid the CPU overhead of casting
-    // between the two different pointer types (its significant).
-    std::vector<AtomSpacePtr> _environ;
+    // --------------------------------------------------
+    //! Index of atoms.
+    TypeIndex typeIndex;
 
     /** Find out about atom type additions in the NameServer. */
     NameServer& _nameserver;
     int addedTypeConnection;
     void typeAdded(Type);
-
-    void init();
-    void clear_all_atoms();
 
     /**
      * Private: add an atom to the table. This skips the read-only
