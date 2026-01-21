@@ -44,11 +44,8 @@ protected:
 	HandleSeq _outgoing;
 	std::string _name;
 	void scrub_incoming_set();
-	virtual void remove();
-
-public:
-	// Must be public, so that createAtomSpace() can call this.
-	virtual void install();
+	virtual void remove() override;
+	virtual void install() override;
 
 public:
 	/**
