@@ -120,7 +120,7 @@ AtomSpace::~AtomSpace()
 }
 
 /// Set up a vector of pointers to the parent AtomSpaces.
-void AtomSpace::do_install(void)
+void AtomSpace::install(void)
 {
     if (0 == _environ.size())
     {
@@ -144,7 +144,7 @@ void AtomSpace::do_install(void)
             {
                 Handle bh(base);
                 if (nullptr == base->getAtomSpace())
-                    bh = this->add_atom(base);
+                    bh = _atom_space->add_atom(base);
 
                 ValuePtr vp(bh->execute(this));
                 AtomSpacePtr as(AtomSpaceCast(vp));
@@ -162,12 +162,10 @@ void AtomSpace::do_install(void)
         }
     }
 
-    // XXX FIXME. I think this is installing into the wrong AtomSpace.
-    // Maybe. I'm confused.  But no unit test seems to fail as a result
-    // of this, so I dunno. Go figure.
-    setAtomSpace(this);
+    // XXX FIXME: Frame::install loops over _outgoing but maybe it
+    // should be looping over _environ, instead? Maybe we should copy
+    // _environ to _outgoing?
     Frame::install();
-    setAtomSpace(nullptr);
 }
 
 // ====================================================================

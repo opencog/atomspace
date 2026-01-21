@@ -80,7 +80,7 @@ class AtomSpace : public Frame
     // result of this execution is stored in _environ; the original
     // Atoms are in _outgoing.
     std::vector<AtomSpacePtr> _environ;
-    void do_install();
+    virtual void install(void) override;
 
     void init();
     void clear_all_atoms();
@@ -539,10 +539,6 @@ template< class... Args >
 AtomSpacePtr createAtomSpace( Args&&... args )
 {
 	AtomSpacePtr asp(std::make_shared<AtomSpace>(std::forward<Args>(args) ...));
-	// Unfortunately, Frame::install() cannot be called in the ctor
-	// because shared_from_this() cannot be called in the ctor.
-	// So we do this after the ctor has finished.
-	asp->do_install();
 	return asp;
 }
 

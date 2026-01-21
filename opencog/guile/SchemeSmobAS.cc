@@ -76,27 +76,25 @@ SCM SchemeSmob::ss_new_as (SCM space_list)
 	}
 
 	// Create new AtomSpace with the indicated parents.
-	// This can throw an exception if the parents don't have
-	// a valid form. Catch that exception and rethrow.
-	AtomSpacePtr asp;
-	try
-	{
-		asp = createAtomSpace(spaces);
-	}
-	catch (const std::exception& ex)
-	{
-		throw_exception(ex, "cog-new-atomspace", space_list);
-	}
+	AtomSpacePtr asp(createAtomSpace(spaces));
 
 	// If a name was provided, set that name.
 	if (0 < name.size())
 		asp->set_name(name);
 
 	Handle hasp(HandleCast(asp));
-
-	// Insert it nto the current AtomSpace
-	const AtomSpacePtr& env = ss_get_env_as("cog-new-atomspace");
-	if (env) hasp = env->add_atom(hasp);
+	try
+	{
+		// Insert it into the current AtomSpace
+		// This can throw an exception if the parents don't have
+		// a valid form. Catch that exception and rethrow.
+		const AtomSpacePtr& env = ss_get_env_as("cog-new-atomspace");
+		if (env) hasp = env->add_atom(hasp);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-new-atomspace", space_list);
+	}
 
 	return protom_to_scm(hasp);
 }
