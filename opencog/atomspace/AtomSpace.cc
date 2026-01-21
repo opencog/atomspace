@@ -122,44 +122,47 @@ AtomSpace::~AtomSpace()
 /// Set up a vector of pointers to the parent AtomSpaces.
 void AtomSpace::install(void)
 {
-    if (0 == _environ.size())
+    if (0 < _environ.size())
     {
-        for (const Handle& base : _outgoing)
+        Frame::install();
+        return;
+    }
+
+    for (const Handle& base : _outgoing)
+    {
+        // Easy. Just copy cast.
+        if (_nameserver.isA(base->get_type(), ATOM_SPACE))
         {
-            // Easy. Just copy cast.
-            if (_nameserver.isA(base->get_type(), ATOM_SPACE))
-            {
-                _environ.push_back(AtomSpaceCast(base));
-                continue;
-            }
-
-            // The provided Atom in the outgoing set might be
-            // executable and so we need to execute it, and
-            // hopefully get an AtomSpace back. The only tricky
-            // part here is that we might have been called from
-            // Sexpr::decode_atom(), and so `base` might not be
-            // in any AtomSpace, yet(!) So we put it in this one.
-            // Duhh. Just like everything else in the world.
-            if (base->is_executable())
-            {
-                Handle bh(base);
-                if (nullptr == base->getAtomSpace())
-                    bh = _atom_space->add_atom(base);
-
-                ValuePtr vp(bh->execute(this));
-                AtomSpacePtr as(AtomSpaceCast(vp));
-                if (nullptr == as)
-                    throw RuntimeException(TRACE_INFO,
-                        "AtomSpace - executable base not an AtomSpace! Got %s",
-                         vp->to_string().c_str());
-                _environ.push_back(as);
-                continue;
-            }
-
-            throw RuntimeException(TRACE_INFO,
-                "AtomSpace - bases must be AtomSpaces! Got %s",
-                 base->to_string().c_str());
+            _environ.push_back(AtomSpaceCast(base));
+            continue;
         }
+
+        // The provided Atom in the outgoing set might be
+        // executable and so we need to execute it, and
+        // hopefully get an AtomSpace back. The only tricky
+        // part here is that we might have been called from
+        // Sexpr::decode_atom(), and so `base` might not be
+        // in any AtomSpace, yet(!) So we put it in this one.
+        // Duhh. Just like everything else in the world.
+        if (base->is_executable())
+        {
+            Handle bh(base);
+            if (nullptr == base->getAtomSpace())
+                bh = _atom_space->add_atom(base);
+
+            ValuePtr vp(bh->execute(this));
+            AtomSpacePtr as(AtomSpaceCast(vp));
+            if (nullptr == as)
+                throw RuntimeException(TRACE_INFO,
+                    "AtomSpace - executable base not an AtomSpace! Got %s",
+                     vp->to_string().c_str());
+            _environ.push_back(as);
+            continue;
+        }
+
+        throw RuntimeException(TRACE_INFO,
+            "AtomSpace - bases must be AtomSpaces! Got %s",
+             base->to_string().c_str());
     }
 
     // XXX FIXME: Frame::install loops over _outgoing but maybe it
