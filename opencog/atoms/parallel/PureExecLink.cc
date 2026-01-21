@@ -70,7 +70,13 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		if (h->is_type(ATOM_SPACE))
 		{
 			ctxt = AtomSpaceCast(h).get();
-			vseq.push_back(h); // Record it too, for posterity.
+			// Well, we could "record it for posterity", but if the
+			// user only wanted to do one thing and get the result,
+			// this extra labelling just gets in the way. Worse, the
+			// user would almost surely discard this label, anyway.
+			// If they really really need this info, they can get it
+			// in other ways.
+			// vseq.push_back(h); // Record it, for posterity.
 			continue;
 		}
 		if (not h->is_executable())
@@ -96,13 +102,23 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		// Special case. New context.
 		if (vp->is_type(ATOM_SPACE))
 			ctxt = AtomSpaceCast(vp).get();
-
-		vseq.emplace_back(vp);
+		else
+			vseq.emplace_back(vp);
 
 		// If we are using a scratch space, clear it.
 		if (scratch.get() == ctxt)
 			scratch->clear();
 	}
+
+	// Sop to the user. If only one item, return that one item.
+	// This feels both hacky, and also reasonable. The hacky
+	// feeling is that it behaves differently, based on size. Yuck.
+	// But its also natural, as why should we wrap just one thing?
+	// This would force the user to unwrap, adding complexity to
+	// processing pipelines. The user just wanted to "do just one
+	// thing", and we did it; the extra gift-wrapping is just junk.
+	if (1 == vseq.size())
+		return vseq[0];
 
 	return createLinkValue(std::move(vseq));
 }
