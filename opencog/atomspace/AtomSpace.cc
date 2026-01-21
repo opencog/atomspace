@@ -128,6 +128,11 @@ void AtomSpace::install(void)
         return;
     }
 
+    // _environ will be empty, if we came through the
+    // AtomSpace::AtomSpace(const HandleSeq&) ctor above.
+    // We have to delay setup of _environ until after the
+    // parent _atom_space is set, si that the exec below
+    // works.
     for (const Handle& base : _outgoing)
     {
         // Easy. Just copy cast.
@@ -165,10 +170,11 @@ void AtomSpace::install(void)
              base->to_string().c_str());
     }
 
-    // XXX FIXME: Frame::install loops over _outgoing but maybe it
-    // should be looping over _environ, instead? Maybe we should copy
-    // _environ to _outgoing?
-    Frame::install();
+    // It is the _environ and not the _outgoing that has to get it's
+    // incoming set set up.
+    Handle llc(get_handle());
+    for (const AtomSpacePtr& has : _environ)
+       has->insert_atom(llc);
 }
 
 // ====================================================================
