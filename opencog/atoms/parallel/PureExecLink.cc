@@ -64,6 +64,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 {
 	ValueSeq vseq;
 	AtomSpace* ctxt = nullptr;
+	AtomSpacePtr scratch = nullptr;
 	for (const Handle& h : _outgoing)
 	{
 		if (h->is_type(ATOM_SPACE))
@@ -77,26 +78,30 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 			vseq.push_back(h);
 			continue;
 		}
-		if (ctxt)
+
+		// If we don't have a context to run in, create a scratch space.
+		if (nullptr == ctxt)
 		{
-			ValuePtr vp(h->execute(ctxt, silent));
-			// Should not really happen except it sometimes does:
-			// null pointers. Yuck. Oh well.
-			if (nullptr == vp)
-				continue;
-
-			// Special case. New context.
-			if (vp->is_type(ATOM_SPACE))
-				ctxt = AtomSpaceCast(vp).get();
-
-			vseq.emplace_back(vp);
-			continue;
+			scratch = createAtomSpace(as);
+			ctxt = scratch.get();
 		}
 
-		// No AtomSpace provided. Use a temporary.
-		AtomSpacePtr scratch = createAtomSpace(as);
-		vseq.emplace_back(h->execute(scratch.get(), silent));
-		scratch->clear();
+		ValuePtr vp(h->execute(ctxt, silent));
+
+		// Should not really happen except it sometimes does:
+		// null pointers. Yuck. Oh well.
+		if (nullptr == vp)
+			continue;
+
+		// Special case. New context.
+		if (vp->is_type(ATOM_SPACE))
+			ctxt = AtomSpaceCast(vp).get();
+
+		vseq.emplace_back(vp);
+
+		// If we are using a scratch space, clear it.
+		if (scratch.get() == ctxt)
+			scratch->clear();
 	}
 
 	return createLinkValue(std::move(vseq));
