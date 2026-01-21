@@ -19,11 +19,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program; if not, write to:
- * Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "AtomSpace.h"
@@ -48,113 +43,6 @@
 using namespace opencog;
 
 // ====================================================================
-
-void AtomSpace::init(void)
-{
-    // Timestamp provides the primary ID, which the user might
-    // over-write with a given name. Normally, the timestamp is
-    // (almost) enough to provide a distinct, unique name...
-    // expect in cases of extreme multi-threading, when multiple
-    // thread can end up with the same timestamp, even at the
-    // nanosecond level, dependong on the OS, scheduling, interrupts,
-    // etc. So we further disambiguate (DAB) with a per-session counter.
-    static std::atomic_uint64_t dabcnt(1);
-
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    char buf[64];
-    strftime(buf, sizeof(buf), "/%Y-%m-%d %H:%M:%S", gmtime(&ts.tv_sec));
-    sprintf(buf + strlen(buf), ".%09ld/%ld", ts.tv_nsec, dabcnt.fetch_add(1));
-
-    _name = buf;
-
-    // Connect signal to find out about type additions
-    addedTypeConnection =
-        _nameserver.typeAddedSignal().connect(
-            &AtomSpace::typeAdded, this);
-}
-
-/**
- * Transient atomspaces are intended for use as scratch spaces, to hold
- * temporary results during evaluation, pattern matching and inference.
- */
-AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    Frame(ATOM_SPACE),
-    _read_only(false),
-    _copy_on_write(transient),
-    _nameserver(nameserver()),
-    addedTypeConnection(0)
-{
-    if (parent) {
-        // Set the COW flag by default, for any Atomspace that sits on
-        // top of another one. This provides a "common-sense" behavior
-        // that most users would expect.
-        _copy_on_write = true;
-        _environ.push_back(AtomSpaceCast(parent));
-        _outgoing.push_back(HandleCast(parent));
-    }
-    init();
-}
-
-AtomSpace::AtomSpace(const AtomSpacePtr& parent) :
-    Frame(ATOM_SPACE),
-    _read_only(false),
-    _copy_on_write(false),
-    _nameserver(nameserver()),
-    addedTypeConnection(0)
-{
-    if (nullptr != parent) {
-        // Set the COW flag by default; it seems like a simpler
-        // default than setting it to be write-through.
-        _copy_on_write = true;
-        _environ.push_back(parent);
-        _outgoing.push_back(HandleCast(parent));
-    }
-
-    init();
-}
-
-AtomSpace::AtomSpace(const HandleSeq& bases) :
-    Frame(ATOM_SPACE, bases),
-    _read_only(false),
-    _copy_on_write(false),
-    _nameserver(nameserver()),
-    addedTypeConnection(0)
-{
-    for (const Handle& base : bases)
-    {
-        if (_nameserver.isA(base->get_type(), ATOM_SPACE))
-        {
-            _environ.push_back(AtomSpaceCast(base));
-            continue;
-        }
-        if (base->is_executable())
-        {
-            ValuePtr vp(base->execute());
-            AtomSpacePtr as(AtomSpaceCast(vp));
-            if (nullptr == as)
-                throw RuntimeException(TRACE_INFO,
-                    "AtomSpace - executable base not an AtomSpace! Got %s",
-                     vp->to_string().c_str());
-            _environ.push_back(as);
-            continue;
-        }
-
-        throw RuntimeException(TRACE_INFO,
-            "AtomSpace - bases must be AtomSpaces! Got %s",
-             base->to_string().c_str());
-    }
-
-    if (0 < bases.size()) _copy_on_write = true;
-    init();
-}
-
-
-AtomSpace::~AtomSpace()
-{
-    _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
-    clear_all_atoms();
-}
 
 void AtomSpace::clear_all_atoms()
 {
