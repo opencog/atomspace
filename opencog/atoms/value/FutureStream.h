@@ -53,7 +53,7 @@ public:
 	FutureStream(const Handle&);
 	FutureStream(const HandleSeq&&);
 	FutureStream(const ValueSeq&);
-	virtual ~FutureStream() {}
+	virtual ~FutureStream() override;
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;

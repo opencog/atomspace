@@ -33,6 +33,8 @@ RelationalValue::RelationalValue(Type t, const Handle& schema)
 
 RelationalValue::~RelationalValue()
 {
+	// Can't leave the scratch space hanging around...
+	_schema->getAtomSpace()->remove_atom(HandleCast(_scratch), true);
 }
 
 // ==============================================================
@@ -67,6 +69,7 @@ void RelationalValue::init_schema(void)
 	// the AtomSpace in which the schema lives, and thus the schema has
 	// access to this, to use as context.
 	_scratch = createAtomSpace(_schema->getAtomSpace());
+	_scratch->set_copy_on_write();
 }
 
 // ==============================================================

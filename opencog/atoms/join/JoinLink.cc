@@ -354,6 +354,7 @@ HandleSet JoinLink::principals(AtomSpace* as,
 	// If we are here, the expression had variables in it.
 	// Perform a search to ground those.
 	AtomSpacePtr scratch = createAtomSpace(as);
+	scratch->set_copy_on_write();
 	Handle meet = scratch->add_atom(_meet);
 	ValuePtr vp = meet->execute();
 	scratch->clear();
@@ -604,6 +605,7 @@ HandleSet JoinLink::constrain(AtomSpace* as, bool silent,
 {
 	HandleSet rejects;
 	AtomSpacePtr scratch = createAtomSpace(as);
+	scratch->set_copy_on_write();
 
 	for (const Handle& h : trav.containers)
 	{

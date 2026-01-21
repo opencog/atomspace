@@ -83,8 +83,14 @@ void FutureStream::init(void)
 	}
 
 	_scratch = createAtomSpace(_formula[0]->getAtomSpace());
+	_scratch->set_copy_on_write();
 }
 
+FutureStream::~FutureStream()
+{
+	// Can't leave the scratch space hanging around...
+	_formula[0]->getAtomSpace()->remove_atom(HandleCast(_scratch), true);
+}
 
 // ==============================================================
 
