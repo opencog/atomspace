@@ -81,6 +81,7 @@ class AtomSpace : public Frame
     // Atoms are in _outgoing.
     std::vector<AtomSpacePtr> _environ;
     virtual void install(void) override;
+    virtual void remove(void) override;
 
     void init();
     void clear_all_atoms();

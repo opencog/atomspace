@@ -174,7 +174,14 @@ void AtomSpace::install(void)
     // incoming set set up.
     Handle llc(get_handle());
     for (const AtomSpacePtr& has : _environ)
-       has->insert_atom(llc);
+        has->insert_atom(llc);
+}
+
+void AtomSpace::remove(void)
+{
+    Handle lll(get_handle());
+    for (const AtomSpacePtr& has : _environ)
+        has->remove_atom(lll);
 }
 
 // ====================================================================
