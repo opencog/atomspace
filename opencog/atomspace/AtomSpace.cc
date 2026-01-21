@@ -137,11 +137,20 @@ AtomSpace::AtomSpace(const HandleSeq& bases) :
     init();
 }
 
-
 AtomSpace::~AtomSpace()
 {
     _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
     clear_all_atoms();
+}
+
+void AtomSpace::do_install(void)
+{
+    // XXX FIXME. I think this is installing into the wrong AtomSpace.
+    // Maybe. I'm confused.  But no unit test seems to fail as a result
+    // of this, so I dunno. Go figure.
+    setAtomSpace(this);
+    Frame::install();
+    setAtomSpace(nullptr);
 }
 
 // ====================================================================

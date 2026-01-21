@@ -50,6 +50,8 @@ typedef std::shared_ptr<AtomSpace> AtomSpacePtr;
 class AtomSpace : public Frame
 {
     friend class StorageNode;     // Needs to call add() directly.
+    template< class... Args >
+    friend AtomSpacePtr createAtomSpace(Args&&...); // Needs to call install()
 
     // Debug tools
     static const bool EMIT_DIAGNOSTICS = true;
@@ -75,6 +77,7 @@ class AtomSpace : public Frame
     // we keep two distinct lists to avoid the CPU overhead of casting
     // between the two different pointer types (its significant).
     std::vector<AtomSpacePtr> _environ;
+    void do_install();
 
     void init();
     void clear_all_atoms();
@@ -536,13 +539,7 @@ AtomSpacePtr createAtomSpace( Args&&... args )
 	// Unfortunately, Frame::install() cannot be called in the ctor
 	// because shared_from_this() cannot be called in the ctor.
 	// So we do this after the ctor has finished.
-
-	// XXX FIXME. I think this is installing into the wrong AtomSpace.
-	// But no unit test seems to fail as a result of this, so I dunno.
-	// But this can't be right, as written.
-	asp->setAtomSpace(asp.get());
-	asp->install();
-	asp->setAtomSpace(nullptr);
+	asp->do_install();
 	return asp;
 }
 
