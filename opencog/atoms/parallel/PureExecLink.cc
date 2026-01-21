@@ -89,6 +89,7 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		if (nullptr == ctxt)
 		{
 			scratch = createAtomSpace(as);
+			scratch->set_copy_on_write();
 			ctxt = scratch.get();
 		}
 
@@ -108,6 +109,15 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 		// If we are using a scratch space, clear it.
 		if (scratch.get() == ctxt)
 			scratch->clear();
+	}
+
+	// The scratch space got placed into the parent. Remove it.
+	// Force a recursive remove, in case even more spaces got
+	// placed in there. (Does recursive remove for AtomSpaces work??)
+	if (scratch.get())
+	{
+		scratch->clear();
+		as->remove_atom(HandleCast(scratch), true);
 	}
 
 	// Sop to the user. If only one item, return that one item.
