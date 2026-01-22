@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/value/VoidValue.h>
 #include "LiteralValueOfLink.h"
 
 using namespace opencog;
@@ -45,13 +46,17 @@ ValuePtr LiteralValueOfLink::execute(AtomSpace* as, bool silent)
 	ValuePtr pap(get_literal(as, silent));
 	if (pap) return pap;
 
+	// If we are here, then no Value was found. If there is a
+	// third Atom, then it specifies a default to use instead.
+	if (2 < _outgoing.size())
+		return _outgoing[2];
+
 	// Oh no! Nothing was found!
 	if (silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
-	   "No value at key %s on atom %s",
-	   ak->to_string().c_str(), ah->to_string().c_str());
+	   "No value for %s", to_string().c_str());
 
 	return createVoidValue();
 }
