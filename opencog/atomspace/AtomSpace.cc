@@ -434,7 +434,7 @@ int AtomSpace::depth(const AtomSpace* as) const
     for (const AtomSpacePtr& base : _environ)
     {
         int d = base->depth(as);
-        if (0 < d) return d+1;
+        if (0 <= d) return d+1;
     }
     return -1;
 }
@@ -448,7 +448,7 @@ int AtomSpace::depth(const Handle& atom) const
     for (const AtomSpacePtr& base : _environ)
     {
         int d = base->depth(as);
-        if (0 < d) return d+1;
+        if (0 <= d) return d+1;
     }
     return -1;
 }
