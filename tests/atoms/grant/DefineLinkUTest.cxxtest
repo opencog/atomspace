@@ -44,6 +44,7 @@ public:
 	void tearDown() {}
 
 	void test_define_concept();
+	void test_define_in_child_space();
 	// void test_define_pattern();
 	// void test_define_function();
 };
@@ -83,6 +84,43 @@ void DefineLinkUTest::test_define_concept()
 
 	body = DefineLink::get_definition(aliasA);
 	TS_ASSERT_EQUALS(A, body);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test that DefineLink lookup works when the alias is localized
+// (copied) to a child AtomSpace. This tests the AtomSpace::depth()
+// function which must correctly find atoms in parent spaces.
+void DefineLinkUTest::test_define_in_child_space()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create a parent AtomSpace with a definition
+	AtomSpacePtr parent = createAtomSpace();
+	Handle body = parent->add_node(CONCEPT_NODE, "the-body");
+	Handle alias = parent->add_node(DEFINED_SCHEMA_NODE, "the-alias");
+	parent->add_link(DEFINE_LINK, alias, body);
+
+	// Verify lookup works in parent
+	Handle got = DefineLink::get_definition(alias, parent.get());
+	TS_ASSERT_EQUALS(body, got);
+
+	// Create a child AtomSpace
+	AtomSpacePtr child = createAtomSpace(parent);
+
+	// Localize (copy) the alias to the child space
+	Handle local_alias = child->localize(alias);
+	TS_ASSERT(local_alias != nullptr);
+	TS_ASSERT(local_alias->getAtomSpace() == child.get());
+
+	// Verify depth calculation: alias in parent should be at depth 1
+	int depth = child->depth(alias);
+	TS_ASSERT_EQUALS(1, depth);
+
+	// The key test: lookup should still work from the child space,
+	// even though the DefineLink is in the parent (depth 1).
+	got = DefineLink::get_definition(local_alias, child.get());
+	TS_ASSERT_EQUALS(body, got);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
