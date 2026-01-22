@@ -6,6 +6,7 @@
 ;
 (use-modules (opencog))
 (use-modules (opencog test-runner))
+(use-modules (srfi srfi-1)) ; for fold
 
 (opencog-test-runner)
 (define tname "count-pipeline-test")
@@ -44,7 +45,7 @@
 
 ; Run the counting pipeline for the first time.
 ; At this point, relatively few atoms exist in the AtomSpace.
-(cog-execute! (Name "count-types"))
+(Trigger (Name "count-types"))
 
 ; ------------------------------------------------------------
 ; Pipeline Stage 4: De-duplicate types
@@ -115,7 +116,7 @@
 ; Some TypeNodes created after count-types ran won't have counts.
 
 (reset-counters)
-(define first-result (cog-execute! guarded-counter))
+(define first-result (Trigger guarded-counter))
 
 ; The result should be a LinkValue containing TypeNodes
 (test-assert "first-result-is-link-value"
@@ -139,10 +140,10 @@
 ; TEST 3: Run count-types again - this will add to existing counts
 ; and count new types that were created (like AndLink from the guard)
 
-(cog-execute! (Name "count-types"))
+(Trigger (Name "count-types"))
 
 (reset-counters)
-(cog-execute! guarded-counter)
+(Trigger guarded-counter)
 
 (format #t "Second run: ~A types, total count ~A\n"
 	*type-count* *total-count*)
@@ -164,10 +165,10 @@
 ; ------------------------------------------------------------
 ; TEST 5: Run count-types a third time and verify continued accumulation
 
-(cog-execute! (Name "count-types"))
+(Trigger (Name "count-types"))
 
 (reset-counters)
-(cog-execute! guarded-counter)
+(Trigger guarded-counter)
 
 (format #t "Third run: ~A types, total count ~A\n"
 	*type-count* *total-count*)
@@ -205,7 +206,7 @@
 				(Number 0 0 1)))
 		(Name "unique-types")))
 
-(cog-execute! (Name "grand-total"))
+(Trigger (Name "grand-total"))
 
 (define tot-types (cog-value-ref (Any "totals") (Predicate "tot-types") 2))
 (test-assert "tot-types" (= 27 tot-types))
@@ -245,13 +246,117 @@
 ;;; what lies down that path. I have no desire to create a Sinclair
 ;;; Z80 in Minecraft. We're not emulating to emulate badly and
 ;;; inefficiently. ... at least not yet ... :-/
-;;; (cog-execute! (Name "deref grand-total"))
+;;; (Trigger (Name "deref grand-total"))
 ;;;
 ;;; (define tot-types (cog-value-ref (Any "deref totals") (Predicate "tot-types") 2))
 ;;; (test-assert "deref tot-types" (= 27 tot-types))
 ;;;
 ;;; (define tot-counts (cog-value-ref (Any "deref totals") (Predicate "tot-counts") 2))
 ;;; (test-assert "deref tot-counts" (= 182 tot-counts))
+
+; ------------------------------------------------------------
+; TEST 8: Verify PureExec prevents double-counting
+;
+; This tests the full type-counts pipeline from atomspace-viz.
+; The key feature is that it uses PureExec to run the counting in
+; a fresh (scratch) AtomSpace, which prevents double-counting.
+; Running the pipeline multiple times should produce identical results.
+
+; Define the comparison predicate for sorting types by count.
+(DefineLink
+	(DefinedPredicate "viz-count-order")
+	(Lambda
+		(VariableList (Variable "left") (Variable "right"))
+		(Not
+			(LessThan
+				(ElementOf (Number 2)
+					(ValueOf (Variable "left") (Predicate "vcnt")))
+				(ElementOf (Number 2)
+					(ValueOf (Variable "right") (Predicate "vcnt")))))))
+
+; The type-counting pipeline that uses PureExec to prevent double-counting.
+; This is a copy of the pipeline from atomspace-viz/analytics/count-types.scm
+(PipeLink
+	(Name "viz-type-counts")
+	(PureExec
+		(Filter
+			(Rule
+				(TypedVariable (Variable "$typ") (Type 'Type))
+				; Guard: only accept types that have a count attached
+				(And
+					(Present (Variable "$typ"))
+					(Equal
+						(Type 'FloatValue)
+						(TypeOf (ValueOf (Variable "$typ") (Predicate "vcnt")))))
+				; Output: table row with type and count
+				(LinkSignature (Type 'LinkValue)
+					(Variable "$typ")
+					(ValueOf (Variable "$typ") (Predicate "vcnt"))))
+			; Input: sorted unique types
+			(LinkSignature
+				(TypeNode 'SortedValue)
+				(DefinedPredicate "viz-count-order")
+				; Input: unique types (deduplicated)
+				(CollectionOf (TypeNode 'UnisetValue)
+					; Input: types extracted from atoms, with counts attached
+					(Filter
+						(Rule
+							(TypedVariable (Variable "$typ") (Type 'Type))
+							(Variable "$typ")
+							; Increment the count on this TypeNode, return TypeNode
+							(IncrementValueOn (Variable "$typ") (Predicate "vcnt") (Number 0 0 1)))
+						; Input: types of all atoms
+						(Filter
+							(Rule
+								(TypedVariable (Variable "$atom") (Type 'Atom))
+								(Variable "$atom")
+								(TypeOf (DontExec (Variable "$atom"))))
+							; Input: all atoms in the base AtomSpace
+							(PureExec
+								(AtomSpaceOf (Link))
+								(Meet
+									(Variable "$atom")
+									(Variable "$atom"))))))))))
+
+; Helper to sum all counts in the result
+(define (sum-counts result)
+	(fold (lambda (row acc)
+		(+ acc (inexact->exact (cog-value-ref (cog-value-ref row 1) 2))))
+		0
+		(cog-value->list result)))
+
+; Helper to count rows in result
+(define (count-rows result)
+	(length (cog-value->list result)))
+
+; Run the pipeline three times and collect results
+(define viz-result-1 (Trigger (Name "viz-type-counts")))
+(define viz-rows-1 (count-rows viz-result-1))
+(define viz-sum-1 (sum-counts viz-result-1))
+
+(format #t "PureExec run 1: ~A types, total ~A\n" viz-rows-1 viz-sum-1)
+
+(define viz-result-2 (Trigger (Name "viz-type-counts")))
+(define viz-rows-2 (count-rows viz-result-2))
+(define viz-sum-2 (sum-counts viz-result-2))
+
+(format #t "PureExec run 2: ~A types, total ~A\n" viz-rows-2 viz-sum-2)
+
+(define viz-result-3 (Trigger (Name "viz-type-counts")))
+(define viz-rows-3 (count-rows viz-result-3))
+(define viz-sum-3 (sum-counts viz-result-3))
+
+(format #t "PureExec run 3: ~A types, total ~A\n" viz-rows-3 viz-sum-3)
+
+; The key test: all three runs should produce identical counts
+; If double-counting occurs, the counts would increase each time
+(test-assert "pureexec-consistent-row-count-1-2" (= viz-rows-1 viz-rows-2))
+(test-assert "pureexec-consistent-row-count-2-3" (= viz-rows-2 viz-rows-3))
+(test-assert "pureexec-consistent-total-1-2" (= viz-sum-1 viz-sum-2))
+(test-assert "pureexec-consistent-total-2-3" (= viz-sum-2 viz-sum-3))
+
+(format #t "PureExec consistency verified: ~A types, ~A total (all 3 runs identical)\n"
+	viz-rows-1 viz-sum-1)
 
 ; ------------------------------------------------------------
 (test-end tname)
