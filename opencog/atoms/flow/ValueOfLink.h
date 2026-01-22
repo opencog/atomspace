@@ -53,6 +53,7 @@ private:
 	void init(void);
 
 protected:
+	ValuePtr get_literal(AtomSpace*, bool);
 	ValuePtr do_execute(AtomSpace*, bool);
 
 public:
