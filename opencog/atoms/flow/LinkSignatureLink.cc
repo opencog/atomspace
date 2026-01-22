@@ -183,13 +183,17 @@ ValuePtr LinkSignatureLink::execute(AtomSpace* as, bool silent)
 	// The _kind will usually be some LinkValue. One interesting
 	// case is the stream, which takes some Handle argument that
 	// controls the stream operation. Examples include SortedStream
-	// and FlatStream. Pass that directly to the correct factory.
+	// and FlatStream. Those Handles are given directly to the Value
+	// factory. In order to work correctly for scratch spaces, these
+	// Atoms have to be localized to this space.
 	if (nameserver().isA(_kind, HANDLE_ARG) and 2 == _outgoing.size())
-		return valueserver().create(_kind, _outgoing[1]);
+		return valueserver().create(_kind, as->localize(_outgoing[1]));
 
 	if (nameserver().isA(_kind, HANDLE_VEC_ARG) and 1 <  _outgoing.size())
 	{
-		HandleSeq rest(_outgoing.begin() + 1, _outgoing.end());
+		HandleSeq rest;
+		for (size_t i=1; i<_outgoing.size(); i++)
+			rest.emplace_back(as->localize(_outgoing[i]));
 		return valueserver().create(_kind, std::move(rest));
 	}
 

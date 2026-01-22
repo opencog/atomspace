@@ -44,7 +44,7 @@ SortedValue::SortedValue(const HandleSeq& hs)
 		init_src(hs[1]);
 }
 
-// Same as above, but the two arguments arive in a ValueSeq.
+// Same as above, but the two arguments arrive in a ValueSeq.
 // Ideally, the factory *should* have given us a pair of Handles,
 // but twiddling this is a hassle, so not doing that right now.
 // XXX FIXME maybe fix the factory, some day.
