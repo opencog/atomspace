@@ -142,7 +142,8 @@ Handle UniqueLink::get_unique_nt(const Handle& alias, Type type,
 	int depth = INT_MAX;
 	for (const Handle& defl : defs)
 	{
-		if (defl->getOutgoingAtom(0) != alias) continue;
+		// Do content-compare; the alias might be in a different space.
+		if (*defl->getOutgoingAtom(0) != *alias) continue;
 		if (disallow_open)
 		{
 			UniqueLinkPtr ulp(UniqueLinkCast(defl));
