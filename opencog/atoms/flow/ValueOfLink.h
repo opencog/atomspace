@@ -31,15 +31,29 @@ namespace opencog
  *  @{
  */
 
-/// The ValueOfLink returns the value on the indicated atom (first
-/// argument) at the indicated key (second argument).
+/// The ValueOfLink obtains the Value on the indicated Atom (first
+/// argument) at the indicated key (second argument). If that Value is
+/// an executable Atom, then it is executed, and the result returned.
 ///
+/// This design allows ValueOf to be used in constructing execution
+/// chains that run automatically.  Consider, for example,
+///
+///    (Plus (Number 2) (ValueOf (Anchor "foo") (Predicate "bar")))
+///
+/// Suppose that the Value at foo-bar was a function definition; of
+/// course, this would need to be run, before the Plus could be
+/// performed. That function might be another ValueOf ... ad infinitum.
+/// The ValueOfLink performs all of that unwrapping, delivering the
+/// final result.
+///
+/// Use LiteralValueOf to get the unexecuted literal Value.
 class ValueOfLink : public FunctionLink
 {
 private:
 	void init(void);
 
 protected:
+	ValuePtr get_literal(AtomSpace*, bool);
 	ValuePtr do_execute(AtomSpace*, bool);
 
 public:

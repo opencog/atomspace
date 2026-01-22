@@ -1181,15 +1181,34 @@ TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_SIG
 // However, none of these do anything with free variables, so this
 // is both compute and RAM overhead, right? ??
 
-// Return the indicated Value on the indicated Atom.
+// Locate the Value attached at Key on Atom. If the Value is executable,
+// then execute it, and return that. This kind of eager execution allows
+// chaining of function calls. For example, consider (Plus 2 (ValueOf..))
+// where the literal value at the key is some function. If ValueOf
+// returned returned the literal value, then Plus would need to run the
+// execute twice: once on ValueOf, and again on whatever was returned.
+// Even then, twice might not be enough... Thus, the design point is to
+// have ValueOf not just "fetch the contents", but actually run them.
+// If you want the literal value without execution, use LiterlValueOf.
+VALUE_OF_LINK <- FUNCTION_LINK
+
 // The BoolValueOf and FloatValueOf links exist only to provide
 // creation-time type checking; otherwise, they behave just like
-// the ValueOfLink. The StreamValueOf can return non-number streams,
-// but we lie about this to keep the static typechecker happy.
-VALUE_OF_LINK <- FUNCTION_LINK
+// the ValueOfLink. These are only marginally useful, but seem needed
+// in some uncertain special cases.
 BOOL_VALUE_OF_LINK <- VALUE_OF_LINK,BOOLEAN_OUTPUT_SIG
 FLOAT_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
+
+// The StreamValueOf returns one item at a time. That is, it treats
+// its input as a queue or set, handing out one at a time. See the
+// DesignNotes-A.md for discussion.
+// It can return non-number streams, but we lie about this to keep
+// the static typechecker happy. (Because most streams are numeric.)
 STREAM_VALUE_OF_LINK <- VALUE_OF_LINK,NUMERIC_OUTPUT_SIG
+
+// Return the literal Value located at Key, without executing what
+// is found, there.
+LITERAL_VALUE_OF_LINK <- VALUE_OF_LINK
 
 // Return the AtomSpace that the wrapped Atom is in.
 ATOM_SPACE_OF_LINK <- VALUE_OF_LINK

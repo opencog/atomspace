@@ -13,6 +13,7 @@ ADD_LIBRARY (atomflow
 	JsonSplitLink.cc
 	KeysOfLink.cc
 	LinkSignatureLink.cc
+	LiteralValueOfLink.cc
 	MessagesOfLink.cc
 	SetValueLink.cc
 	SizeOfLink.cc
@@ -48,6 +49,7 @@ INSTALL (FILES
 	JsonSplitLink.h
 	KeysOfLink.h
 	LinkSignatureLink.h
+	LiteralValueOfLink.h
 	MessagesOfLink.h
 	SetValueLink.h
 	SizeOfLink.h

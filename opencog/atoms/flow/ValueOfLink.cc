@@ -64,8 +64,8 @@ void ValueOfLink::init(void)
 
 // ---------------------------------------------------------------
 
-/// When executed, this will return the value at the indicated key.
-ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
+/// Return the literal value at the indicated key.
+ValuePtr ValueOfLink::get_literal(AtomSpace* as, bool silent)
 {
 	// We cannot know the Value of the Atom unless we are
 	// working with the unique version that sits in the
@@ -85,6 +85,7 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 	Handle ah(as->add_atom(_outgoing[0]));
 	Handle ak(as->add_atom(_outgoing[1]));
 
+	// Get the concrete Atom
 	if (ah->is_executable())
 	{
 		ValuePtr pap(ah->execute(as, silent));
@@ -102,7 +103,13 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 			ak = as->add_atom(HandleCast(pap));
 	}
 
-	ValuePtr pap = ah->getValue(ak);
+	return ah->getValue(ak);
+}
+
+/// When executed, this will return the value at the indicated key.
+ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
+{
+	ValuePtr pap(get_literal(as, silent));
 	if (pap)
 	{
 		if (not pap->is_atom())
@@ -149,8 +156,7 @@ ValuePtr ValueOfLink::do_execute(AtomSpace* as, bool silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
-	   "No value at key %s on atom %s",
-	   ak->to_string().c_str(), ah->to_string().c_str());
+	   "No value for %s", to_string().c_str());
 
 	return createVoidValue();
 }
