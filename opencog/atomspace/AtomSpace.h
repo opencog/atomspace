@@ -253,9 +253,24 @@ public:
 
     /**
      * Add an atom to the Atom Table.  If the atom already exists
-     * then that is returned.
+     * then that is returned. If this AtomSpace is stacked on top
+     * of others, then the shallowest copy of an existing Atom will
+     * be returrned.
      */
     Handle add_atom(const Handle&);
+
+    /**
+     * Add an atom to the Atom Table.  If the atom already exists
+     * then that is returned. It is force-added to this AtomSpace,
+     * even if a version of this same Atom exists deeper in the
+     * AtomSpace stack. This is conventionally used to guarantee
+     * that execution happens in scratch AtomSpaces.
+     */
+    Handle localize(const Handle& h)
+    {
+        if (h->getAtomSpace() == this) return h;
+        return add(h, true);  // force copy
+    }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
