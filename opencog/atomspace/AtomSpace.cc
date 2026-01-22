@@ -418,24 +418,42 @@ Handle AtomSpace::getOutgoingAtom(Arity n) const
 }
 
 // ====================================================================
-// XXX FIXME -- The recursive design of the depth() routine below makes
-// it into a bottleneck, when the stack of AtomSpaces exceeds a few
-// hundred. In particular, the recursion is on the C stack, and I don't
-// believe the compiler has optimized them to be tail-recursive. (If
-// they are tail-recursive, I guess that's OK, eh?)
-// At this time, the only user of this code appears to be UniqueLink.cc
-// It is NOT used by Rocks.
-
+/// Search for the given AtomSpace in our stack. Return a count to
+/// the shallowest copy found. Return -1 if the AtomSpace is not found
+/// in the stack.
+// Tail-recursive implementation, should be fast.
 int AtomSpace::depth(const AtomSpace* as) const
 {
     if (nullptr == as) return -1;
     if (as == this) return 0;
 
+    // As long as _environ is exactly one in size, just loop.
+    int lvl = 1;
+    const std::vector<AtomSpacePtr>* env = &_environ;
+    while (true)
+    {
+        size_t evs = env->size();
+        if (0 == evs) return -1;
+        if (1 < evs) break;
+        if (as == (*env)[0].get()) return lvl;
+        lvl++;
+        env = &((*env)[0]->_environ);
+    }
+
+    // Hunt for shallowest.
+    int shallowest = -1;
     for (const AtomSpacePtr& base : _environ)
     {
         int d = base->depth(as);
-        if (0 <= d) return d+1;
+        if (0 <= d and
+            ((-1 == shallowest) or (d < shallowest)))
+        {
+            shallowest = d;
+        }
     }
+    if (0 <= shallowest)
+        return lvl + shallowest;
+
     return -1;
 }
 
@@ -444,13 +462,7 @@ int AtomSpace::depth(const Handle& atom) const
     if (nullptr == atom) return -1;
     AtomSpace* as = atom->getAtomSpace();
     if (as == this) return 0;
-
-    for (const AtomSpacePtr& base : _environ)
-    {
-        int d = base->depth(as);
-        if (0 <= d) return d+1;
-    }
-    return -1;
+    return depth(as);
 }
 
 bool AtomSpace::in_environ(const AtomSpace* as) const
