@@ -178,8 +178,13 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 			vp = hs[0];
 	}
 
-	// XXX FIXME? should we be doing the add here? Isn't this the
-	// callers reponsibility?
+	// XXX FIXME? Should we be doing the add here? Isn't this the
+	// callers reponsibility? Three unit tests fail, if we don't
+	// do the add: RandomUTest FormulaUTest SequenceUTest and one
+	// fails: SequenceUTest if we add to scratch instead of main.
+	// I'm not sure if something is buggy or not, or if this is an
+	// intentional design choice. FWIW there are many places in the
+	// code base that do something like this.
 	// if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
 	if (vp->is_atom()) as->add_atom(HandleCast(vp));
 	return vp;
