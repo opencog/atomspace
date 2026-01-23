@@ -145,7 +145,7 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 
 	// Nothing to do, here.
 	if (VALUE_SHIM_LINK == term->get_type())
-		return term->execute();
+		return term->execute(scratch);
 
 	// Argh. The ValueShimLink might be buried deeper in the expression.
 	// In this case, ValueShimLink::setAtomSpace() will throw a
@@ -159,13 +159,13 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 	}
 	catch (const RuntimeException& ex)
 	{
-		return term->execute();
+		return term->execute(scratch);
 	}
 
 	if (not sterm->is_executable())
 		return sterm;
 
-	ValuePtr vp(sterm->execute(as, silent));
+	ValuePtr vp(sterm->execute(scratch, silent));
 
 	// If the return value is a ContainerValue, we assume that this
 	// is the result of executing a MeetLink or QueryLink.
@@ -177,6 +177,9 @@ static ValuePtr exec_or_eval(AtomSpace* as,
 		if (1 == hs.size())
 			vp = hs[0];
 	}
+
+	// XXX FIXME? should we be doing the add here? Isn't this the
+	// callers reponsibility?
 	// if (vp->is_atom()) scratch->add_atom(HandleCast(vp));
 	if (vp->is_atom()) as->add_atom(HandleCast(vp));
 	return vp;
