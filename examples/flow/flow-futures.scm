@@ -24,12 +24,17 @@
 
 ; Counts are located in the third slot of the TV predicate.
 (define cvp (PredicateNode "*-CountingKey-*"))
+(define one (NumberNode 1))
 
 (define (incr-counts THING-A THING-B)
-	(cog-inc-value! (List THING-A THING-B) cvp 1.0 2)
-	(cog-inc-value! (List (AnyNode "left wildcard") THING-B) cvp 1.0 2)
-	(cog-inc-value! (List THING-A (AnyNode "right wildcard")) cvp 1.0 2)
-	(cog-inc-value! (AnyNode "grand total") cvp 1.0 2))
+	(Trigger (IncrementValue
+		(List THING-A THING-B) cvp one))
+	(Trigger (IncrementValue
+		(List (AnyNode "left wildcard") THING-B) cvp one))
+	(Trigger (IncrementValue
+		(List THING-A (AnyNode "right wildcard")) cvp one))
+	(Trigger (IncrementValue
+		(List (Any "left wildcard") (Any "right wildcard")) cvp one)))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".
@@ -56,7 +61,7 @@
 			(Divide
 				(Times
 					(FloatValueOf (List (Variable "$L") (Variable "$R")) cvp)
-					(FloatValueOf (AnyNode "grand total") cvp))
+					(FloatValueOf (List (Any "left wildcard") (Any "right wildcard")) cvp))
 				(Times
 					(FloatValueOf (List (Variable "$L") (Any "right wildcard")) cvp)
 					(FloatValueOf (List (Any "left wildcard") (Variable "$R")) cvp))))))
@@ -68,7 +73,7 @@
 ; returns the correct value at that given time.
 (define (install-formula THING-A THING-B)
 	(define pair (List THING-A THING-B))
-	(cog-execute!
+	(Trigger
 		(SetValue pair (Predicate "MI Key")
 			(CollectionOf (Type 'FormulaStream) (OrderedLink
 				(ExecutionOutput (DefinedProcedure "dynamic MI") pair))))))
