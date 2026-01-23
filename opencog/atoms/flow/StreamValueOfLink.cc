@@ -50,26 +50,14 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 	if (2 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
-	// We cannot know the Value of the Atom unless we are
-	// working with the unique version that sits in the
-	// AtomSpace! It can happen, during evaluation e.g. of
-	// a PutLink, that we are given an Atom that is not in
-	// any AtomSpace. In this case, `as` will be a scratch
-	// space; we can add the Atom there, and things will
-	// trickle out properly in the end.
-	//
-	Handle ah(as->add_atom(_outgoing[0]));
-	Handle ak(as->add_atom(_outgoing[1]));
-
-	ValuePtr stream = ah->getValue(ak);
+	ValuePtr stream(get_literal(as, silent));
 	if (nullptr == stream)
 	{
 		if (silent)
 			throw SilentException();
 
 		throw InvalidParamException(TRACE_INFO,
-		   "No value at key %s on atom %s",
-		   ak->to_string().c_str(), ah->to_string().c_str());
+		   "No value for %s", to_string().c_str());
 	}
 
 	if (stream->is_type(FLOAT_VALUE))
@@ -104,9 +92,8 @@ ValuePtr StreamValueOfLink::execute(AtomSpace* as, bool silent)
 		throw SilentException();
 
 	throw InvalidParamException(TRACE_INFO,
-	   "Expecting a stream at key %s on atom %s, got %s",
-	   ak->to_string().c_str(), ah->to_string().c_str(),
-	   stream->to_string().c_str());
+	   "Expecting a stream for %s, got %s",
+	   to_string().c_str(), stream->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(StreamValueOfLink, STREAM_VALUE_OF_LINK)

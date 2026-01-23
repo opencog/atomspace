@@ -53,6 +53,7 @@ private:
 	void init(void);
 
 protected:
+	Handle localize(AtomSpace*, bool, const Handle&) const;
 	ValuePtr get_literal(AtomSpace*, bool);
 	ValuePtr do_execute(AtomSpace*, bool);
 

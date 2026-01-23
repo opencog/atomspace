@@ -64,6 +64,19 @@ void ValueOfLink::init(void)
 
 // ---------------------------------------------------------------
 
+// ValueOf must work in the local AtomSpace. This includes
+// the evaluation of keys, as needed.
+Handle ValueOfLink::localize(AtomSpace* as, bool silent, const Handle& h) const
+{
+	if (not h->is_executable())
+		return as->add_atom(h);
+
+	ValuePtr pap(h->execute(as, silent));
+	if (pap and pap->is_atom())
+		return as->add_atom(HandleCast(pap));
+	return h;
+}
+
 /// Return the literal value at the indicated key.
 ValuePtr ValueOfLink::get_literal(AtomSpace* as, bool silent)
 {
@@ -82,26 +95,8 @@ ValuePtr ValueOfLink::get_literal(AtomSpace* as, bool silent)
 			"Expecting AtomSpace, got null pointer for %s\n",
 			to_string().c_str());
 
-	Handle ah(as->add_atom(_outgoing[0]));
-	Handle ak(as->add_atom(_outgoing[1]));
-
-	// Get the concrete Atom
-	if (ah->is_executable())
-	{
-		ValuePtr pap(ah->execute(as, silent));
-		if (pap and pap->is_atom())
-			ah = as->add_atom(HandleCast(pap));
-	}
-
-	// It seems extremely unlikely (to me, at this time) that
-	// the key will arrive as the result of some kind of execution.
-	// But predicting the future is hard, so ...
-	if (ak->is_executable())
-	{
-		ValuePtr pap(ak->execute(as, silent));
-		if (pap and pap->is_atom())
-			ak = as->add_atom(HandleCast(pap));
-	}
+	Handle ah(localize(as, silent, _outgoing[0]));
+	Handle ak(localize(as, silent, _outgoing[1]));
 
 	return ah->getValue(ak);
 }
