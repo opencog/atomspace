@@ -22,9 +22,11 @@
 ; Below is a toy pair-counting framework.  It increments counts
 ; on pairs, as well as on marginals.
 
-; Counts are located in the third slot of the TV predicate.
+; Counts are located in the third slot of the predicate.
+; Why the third? Historical precedent, plus it makes for a good demo:
+; one can work with vectors of numbers, as one pleases.
 (define cvp (PredicateNode "*-CountingKey-*"))
-(define one (NumberNode 1))
+(define one (NumberNode 0 0 1))
 
 (define (incr-counts THING-A THING-B)
 	(Trigger (IncrementValue
@@ -84,7 +86,7 @@
 
 ; Get the value
 (define (get-computed-value THING-A THING-B)
-	(cog-value (List THING-A THING-B) (Predicate "MI Key")))
+	(ValueOf (List THING-A THING-B) (Predicate "MI Key")))
 
 (define (get-mi-stream STRING-A STRING-B)
 	(get-computed-value (Concept STRING-A) (Concept STRING-B)))
@@ -93,7 +95,7 @@
 ; OK, we're done. Lets see what happens.
 
 (install-mi "hello" "world")
-(get-mi-stream "hello" "world")
+(Trigger (get-mi-stream "hello" "world"))
 
 ; Well, that's messy! But it does show the full structure of
 ; what was set up. Note that the formulas were applied to the
@@ -110,7 +112,8 @@
 
 ; We really only want the third number. So grab that.
 (define (get-mi STRING-A STRING-B)
-	(cog-value-ref (get-mi-stream STRING-A STRING-B) 2))
+	(Trigger
+		(ElementOf (Number 2) (get-mi-stream STRING-A STRING-B))))
 
 (get-mi "hello" "world")
 
