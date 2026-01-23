@@ -28,15 +28,16 @@
 (define cvp (PredicateNode "*-CountingKey-*"))
 (define one (NumberNode 0 0 1))
 
+; The TriggerLink will execute, in sequential order, whatever it wraps.
+; It will return the result of the last thing that was executed; here,
+; the total count, providing visual confirmation that it's working.
 (define (incr-counts THING-A THING-B)
-	(Trigger (IncrementValue
-		(List THING-A THING-B) cvp one))
-	(Trigger (IncrementValue
-		(List (AnyNode "left wildcard") THING-B) cvp one))
-	(Trigger (IncrementValue
-		(List THING-A (AnyNode "right wildcard")) cvp one))
-	(Trigger (IncrementValue
-		(List (Any "left wildcard") (Any "right wildcard")) cvp one)))
+	(Trigger
+		(IncrementValue (List THING-A THING-B) cvp one)
+		(IncrementValue (List (AnyNode "left wildcard") THING-B) cvp one)
+		(IncrementValue (List THING-A (AnyNode "right wildcard")) cvp one)
+		(IncrementValue
+			(List (Any "left wildcard") (Any "right wildcard")) cvp one)))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".
