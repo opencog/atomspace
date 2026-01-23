@@ -37,6 +37,9 @@ namespace opencog
 ///
 class SetValueLink : public FunctionLink
 {
+protected:
+	Handle localize(AtomSpace*, bool, const Handle&) const;
+
 public:
 	SetValueLink(const HandleSeq&&, Type=SET_VALUE_LINK);
 

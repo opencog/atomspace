@@ -43,19 +43,50 @@ SetValueLink::SetValueLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
+// SetValue must work in the local AtomSpace. This includes
+// the evaluation of keys, as needed.
+Handle SetValueLink::localize(AtomSpace* as, bool silent, const Handle& h) const
+{
+	if (not h->is_executable())
+		return as->add_atom(h);
+
+	ValuePtr pap(h->execute(as, silent));
+	if (pap and pap->is_atom())
+		return as->add_atom(HandleCast(pap));
+	return h;
+}
+
 /// When executed, this will execute the third argument to obtain
 /// a Value, and then set that Value at the indicated key on the
 /// first argument. The computed value is returned.
 /// The SetValueOn link returns the Atom, not the Value.
 ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 {
+	// We cannot know the Value of the Atom unless we are
+	// working with the unique version that sits in the
+	// AtomSpace! It can happen, during evaluation e.g. of
+	// a PutLink, that we are given an Atom that is not in
+	// any AtomSpace. In this case, `as` will be a scratch
+	// space; we can add the Atom there, and things will
+	// trickle out properly in the end.
+	//
+	// Avoid null-pointer deref due to user error.
+	// This can happen with improperly built FilterLinks.
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+			"Expecting AtomSpace, got null pointer for %s\n",
+			to_string().c_str());
+
+	Handle ah(localize(as, silent, _outgoing[0]));
+	Handle ak(localize(as, silent, _outgoing[1]));
+
 	// Default VoidValue
 	if (2 == _outgoing.size())
 	{
 		ValuePtr pap(createVoidValue());
-		as->set_value(_outgoing[0], _outgoing[1], pap);
+		as->set_value(ah, ak, pap);
 		if (SET_VALUE_ON_LINK == get_type())
-			return _outgoing[0];
+			return ah;
 		return pap;
 	}
 
@@ -68,10 +99,10 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 		else
 			pap = _outgoing[2];
 
-		as->set_value(_outgoing[0], _outgoing[1], pap);
+		as->set_value(ah, ak, pap);
 
 		if (SET_VALUE_ON_LINK == get_type())
-			return _outgoing[0];
+			return ah;
 		return pap;
 	}
 
@@ -99,10 +130,10 @@ ValuePtr SetValueLink::execute(AtomSpace* as, bool silent)
 	else
 		fsp = createFutureStream(exo);
 
-	as->set_value(_outgoing[0], _outgoing[1], fsp);
+	as->set_value(ah, ak, fsp);
 
 	if (SET_VALUE_ON_LINK == get_type())
-		return _outgoing[0];
+		return ah;
 	return fsp;
 }
 
