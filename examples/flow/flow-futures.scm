@@ -23,13 +23,13 @@
 ; on pairs, as well as on marginals.
 
 ; Counts are located in the third slot of the TV predicate.
-(define tvp (PredicateNode "*-TruthValueKey-*"))
+(define cvp (PredicateNode "*-CountingKey-*"))
 
 (define (incr-counts THING-A THING-B)
-	(cog-inc-value! (List THING-A THING-B) tvp 1.0 2)
-	(cog-inc-value! (List (AnyNode "left wildcard") THING-B) tvp 1.0 2)
-	(cog-inc-value! (List THING-A (AnyNode "right wildcard")) tvp 1.0 2)
-	(cog-inc-value! (AnyNode "grand total") tvp 1.0 2))
+	(cog-inc-value! (List THING-A THING-B) cvp 1.0 2)
+	(cog-inc-value! (List (AnyNode "left wildcard") THING-B) cvp 1.0 2)
+	(cog-inc-value! (List THING-A (AnyNode "right wildcard")) cvp 1.0 2)
+	(cog-inc-value! (AnyNode "grand total") cvp 1.0 2))
 
 ; Same as above, but works with strings. It counts how often a pair
 ; was "observed".
@@ -55,11 +55,11 @@
 		(Log2
 			(Divide
 				(Times
-					(FloatValueOf (List (Variable "$L") (Variable "$R")) tvp)
-					(FloatValueOf (AnyNode "grand total") tvp))
+					(FloatValueOf (List (Variable "$L") (Variable "$R")) cvp)
+					(FloatValueOf (AnyNode "grand total") cvp))
 				(Times
-					(FloatValueOf (List (Variable "$L") (Any "right wildcard")) tvp)
-					(FloatValueOf (List (Any "left wildcard") (Variable "$R")) tvp))))))
+					(FloatValueOf (List (Variable "$L") (Any "right wildcard")) cvp)
+					(FloatValueOf (List (Any "left wildcard") (Variable "$R")) cvp))))))
 
 ; A utility to install the above formula on a pair.
 ; The CollectionOfLink is used to wrap the formula with a FormulaStream.
@@ -137,13 +137,13 @@
 (cog-execute!
 	(Decimate
 		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
-		(FloatValueOf (AnyNode "grand total") tvp)))
+		(FloatValueOf (AnyNode "grand total") cvp)))
 
 ; Wrap it in a utility constructor
 (define (make-deci ATOM)
 	(Decimate
 		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
-		(FloatValueOf ATOM tvp)))
+		(FloatValueOf ATOM cvp)))
 
 ; A new procedure, that works only on the one item.
 (DefineLink
