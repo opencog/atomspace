@@ -142,10 +142,10 @@
 	(BoolValue 0 0 1))
 
 ; Verify that masking works
-(cog-execute!
+(Trigger
 	(Decimate
 		(BoolValueOf (Concept "someplace") (Predicate "mask key"))
-		(FloatValueOf (AnyNode "grand total") cvp)))
+		(FloatValueOf (List (Any "left wildcard") (Any "right wildcard")) cvp)))
 
 ; Wrap it in a utility constructor
 (define (make-deci ATOM)
@@ -162,7 +162,7 @@
 			(Divide
 				(Times
 					(make-deci (List (Variable "$L") (Variable "$R")))
-					(make-deci (AnyNode "grand total")))
+					(make-deci (List (Any "left wildcard") (Any "right wildcard"))))
 				(Times
 					(make-deci (List (Variable "$L") (Any "right wildcard")))
 					(make-deci (List (Any "left wildcard") (Variable "$R"))))))))
@@ -171,7 +171,7 @@
 ; As before.
 (define (install-scalar THING-A THING-B)
 	(define pair (List THING-A THING-B))
-	(cog-execute!
+	(Trigger
 		(SetValue pair (Predicate "Alt MI Key")
 			(CollectionOf (Type 'FormulaStream) (OrderedLink
 				(ExecutionOutput (DefinedProcedure "scalar MI") pair))))))
@@ -182,10 +182,10 @@
 
 ; Get the value
 (define (get-computed-scalar THING-A THING-B)
-	(cog-value (List THING-A THING-B) (Predicate "Alt MI Key")))
+	(ValueOf (List THING-A THING-B) (Predicate "Alt MI Key")))
 
 (define (get-mi-scalar STRING-A STRING-B)
-	(get-computed-scalar (Concept STRING-A) (Concept STRING-B)))
+	(Trigger (get-computed-scalar (Concept STRING-A) (Concept STRING-B))))
 
 ; Try it out. Need to install it before first use.
 (install-scalar-mi "hello" "world")
