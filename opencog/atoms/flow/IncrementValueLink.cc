@@ -46,6 +46,19 @@ IncrementValueLink::IncrementValueLink(const HandleSeq&& oset, Type t)
 
 // ---------------------------------------------------------------
 
+// IncrementValue must work in the local AtomSpace. This includes
+// the evaluation of keys, as needed.
+Handle IncrementValueLink::localize(AtomSpace* as, bool silent, const Handle& h) const
+{
+	if (not h->is_executable())
+		return as->add_atom(h);
+
+	ValuePtr pap(h->execute(as, silent));
+	if (pap and pap->is_atom())
+		return as->add_atom(HandleCast(pap));
+	return h;
+}
+
 /// When executed, this will execute the third argument to obtain
 /// a FloatValue or NumberNode, and then use those numbers to atomically
 /// increment the FloatValue at the indicated key on the indicated
@@ -67,8 +80,8 @@ ValuePtr IncrementValueLink::execute(AtomSpace* as, bool silent)
 			"Expecting AtomSpace, got null pointer for %s\n",
 			to_string().c_str());
 
-	Handle ah(as->add_atom(_outgoing[0]));
-	Handle ak(as->add_atom(_outgoing[1]));
+	Handle ah(localize(as, silent, _outgoing[0]));
+	Handle ak(localize(as, silent, _outgoing[1]));
 
 	// Copy-on-write semantics means as->increment_count() might return
 	// a different Atom than the current ah.

@@ -38,6 +38,9 @@ namespace opencog
 ///
 class IncrementValueLink : public FunctionLink
 {
+protected:
+	Handle localize(AtomSpace*, bool, const Handle&) const;
+
 public:
 	IncrementValueLink(const HandleSeq&&, Type=INCREMENT_VALUE_LINK);
 
