@@ -105,10 +105,6 @@ ValuePtr PureExecLink::execute(AtomSpace* as,
 			ctxt = AtomSpaceCast(vp).get();
 		else
 			vseq.emplace_back(vp);
-
-		// If we are using a scratch space, clear it.
-		if (scratch.get() == ctxt)
-			scratch->clear();
 	}
 
 	// The scratch space got placed into the parent. Remove it.
