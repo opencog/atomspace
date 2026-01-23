@@ -169,7 +169,7 @@ bool BoolValue::operator==(const Value& other) const
 std::string BoolValue::raw_hex_string() const
 {
 	// Print in hexadecimal
-	std::string rv = " #x";
+	std::string rv = "#x";
 
 	// The native storage format used above is big endian, in that
 	// bit zero is the left-most bit, bit one is to the right of that,
@@ -187,7 +187,6 @@ std::string BoolValue::raw_hex_string() const
 			snprintf(buf, sizeof(buf), "%016lx", word);
 			rv += buf;
 		}
-		rv += ")";
 		return rv;
 	}
 
@@ -203,10 +202,7 @@ std::string BoolValue::raw_hex_string() const
 
 	// Are we done yet?
 	if (1 == word_count)
-	{
-		rv += ")";
 		return rv;
-	}
 
 	// Middle words are spliced from low bits of previous
 	// and high bits of current.
@@ -247,7 +243,7 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 			}
 		}
 		else
-			rv += raw_hex_string();
+			rv += " " + raw_hex_string();
 	});
 
 	rv += ")";
