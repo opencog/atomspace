@@ -166,6 +166,72 @@ bool BoolValue::operator==(const Value& other) const
 // and even then, storing super-long bitstrings should probably
 // be done in some way that is more efficient. For now, this is
 // a stop-gap for experimentation. As always ...
+std::string BoolValue::raw_hex_string() const
+{
+	// Print in hexadecimal
+	std::string rv = " #x";
+
+	// The native storage format used above is big endian, in that
+	// bit zero is the left-most bit, bit one is to the right of that,
+	// and so on. This is easier to print than little-endian (which
+	// would force us to bit swap) but still presents some challenge.
+	size_t word_count = words_needed(_bit_count);
+
+	// Print full 16 hex digits if we're lucky.
+	int bit_align = _bit_count % 64;
+	if (0 == bit_align)
+	{
+		for (size_t w = 0; w < word_count; w++) {
+			uint64_t word = _packed_bits[w];
+			char buf[17];
+			snprintf(buf, sizeof(buf), "%016lx", word);
+			rv += buf;
+		}
+		rv += ")";
+		return rv;
+	}
+
+	// First word to be padded by zeros, as needed.
+	uint64_t word = _packed_bits[0];
+	uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+	uint64_t carry = (word & mask) << bit_align;
+	word >>= (64 - bit_align);
+	int width = (bit_align + 3) >> 2;
+	char buf[17];
+	snprintf(buf, sizeof(buf), "%0*lx", width, word);
+	rv += buf;
+
+	// Are we done yet?
+	if (1 == word_count)
+	{
+		rv += ")";
+		return rv;
+	}
+
+	// Middle words are spliced from low bits of previous
+	// and high bits of current.
+	for (size_t w = 1; w < word_count - 1; w++)
+	{
+		uint64_t word = _packed_bits[w];
+		uint64_t mask = (1ULL << (64 - bit_align)) - 1;
+		uint64_t rbits = (word & mask) << bit_align;
+		word >>= (64 - bit_align);
+		word = word | carry;
+		carry = rbits;
+		snprintf(buf, sizeof(buf), "%016lx", word);
+		rv += buf;
+	}
+
+	// Last word handling
+	word = _packed_bits[word_count - 1];
+	word >>= (64 - bit_align);
+	word = word | carry;
+	snprintf(buf, sizeof(buf), "%lx", word);
+	rv += buf;
+
+	return rv;
+}
+
 std::string BoolValue::to_string(const std::string& indent, Type t) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(t);
@@ -179,73 +245,22 @@ std::string BoolValue::to_string(const std::string& indent, Type t) const
 				if (get_bit(i)) rv += " 1";
 				else rv += " 0";
 			}
-			rv += ")";
-			return rv;
 		}
-
-		// For longer bitstrings, print in hexadecimal
-		rv += " #x";
-
-		// The native storage format used above is big endian, in that
-		// bit zero is the left-most bit, bit one is to the right of that,
-		// and so on. This is easier to print than little-endian (which
-		// would force us to bit swap) but still presents some challenge.
-		size_t word_count = words_needed(_bit_count);
-
-		// Print full 16 hex digits if we're lucky.
-		int bit_align = _bit_count % 64;
-		if (0 == bit_align)
-		{
-			for (size_t w = 0; w < word_count; w++) {
-				uint64_t word = _packed_bits[w];
-				char buf[17];
-				snprintf(buf, sizeof(buf), "%016lx", word);
-				rv += buf;
-			}
-			rv += ")";
-			return rv;
-		}
-
-		// First word to be padded by zeros, as needed.
-		uint64_t word = _packed_bits[0];
-		uint64_t mask = (1ULL << (64 - bit_align)) - 1;
-		uint64_t carry = (word & mask) << bit_align;
-		word >>= (64 - bit_align);
-		int width = (bit_align + 3) >> 2;
-		char buf[17];
-		snprintf(buf, sizeof(buf), "%0*lx", width, word);
-		rv += buf;
-
-		// Are we done yet?
-		if (1 == word_count)
-		{
-			rv += ")";
-			return rv;
-		}
-
-		// Middle words are spliced from low bits of previous
-		// and high bits of current.
-		for (size_t w = 1; w < word_count - 1; w++)
-		{
-			uint64_t word = _packed_bits[w];
-			uint64_t mask = (1ULL << (64 - bit_align)) - 1;
-			uint64_t rbits = (word & mask) << bit_align;
-			word >>= (64 - bit_align);
-			word = word | carry;
-			carry = rbits;
-			snprintf(buf, sizeof(buf), "%016lx", word);
-			rv += buf;
-		}
-
-		// Last word handling
-		word = _packed_bits[word_count - 1];
-		word >>= (64 - bit_align);
-		word = word | carry;
-		snprintf(buf, sizeof(buf), "%lx", word);
-		rv += buf;
+		else
+			rv += raw_hex_string();
 	});
 
 	rv += ")";
+	return rv;
+}
+
+std::string BoolValue::hex_string() const
+{
+	std::string rv;
+	SAFE_UPDATE(rv,
+	{
+		rv = raw_hex_string();
+	});
 	return rv;
 }
 

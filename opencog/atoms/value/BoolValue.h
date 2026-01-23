@@ -56,6 +56,7 @@ protected:
 	void set_bit(size_t index, bool value) const;
 	void pack_vector(const std::vector<bool>&);
 	std::vector<bool> unpack_vector() const;
+	std::string raw_hex_string() const;
 
 	BoolValue(Type t, const std::vector<bool>&);
 	BoolValue(Type t, std::vector<uint64_t>&&);
@@ -72,6 +73,7 @@ public:
 	/** Returns a string representation of the value. */
 	virtual std::string to_string(const std::string& indent = "") const;
 	std::string to_string(const std::string& indent, Type) const;
+	std::string hex_string() const;
 
 	/** Returns true if two values are equal. */
 	virtual bool operator==(const Value&) const;
