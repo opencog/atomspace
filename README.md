@@ -734,6 +734,35 @@ Most tests can be run in parallel:
     make -j8 check ARGS=-j4
 ```
 
+### Docker development environment
+
+AtomSpace requires Linux. A reproducible Ubuntu development image is provided
+for hosts with Docker Desktop. It installs the native build dependencies,
+builds CogUtil, and then builds and tests the mounted AtomSpace checkout.
+From PowerShell at the repository root:
+
+```
+.\scripts\atomspace-docker.ps1 -Action test
+```
+
+To open a shell in the same environment:
+
+```
+.\scripts\atomspace-docker.ps1 -Action shell
+```
+
+The first invocation downloads the image dependencies and may take several
+minutes. Build artifacts are written to the local `build` directory through
+the mounted checkout.
+
+To run the primary AtomSpace job from the legacy CircleCI workflow
+(configure, build, build tests, run checks, install, build examples, and
+print the test log):
+
+```
+.\scripts\atomspace-docker.ps1 -Action ci -Jobs 2
+```
+
 Specific subsets of the unit tests can be run:
 ```
     make test_atomese

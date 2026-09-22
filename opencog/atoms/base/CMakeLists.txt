@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (atombase
 	Atom.cc
 	ClassServer.cc
+	FreeHypermultiset.cc
 	Handle.cc
 	Link.cc
 	Node.cc
@@ -33,6 +34,7 @@ INSTALL (TARGETS atombase EXPORT AtomSpaceTargets
 INSTALL (FILES
 	Atom.h
 	ClassServer.h
+	FreeHypermultiset.h
 	Handle.h
 	Link.h
 	Node.h

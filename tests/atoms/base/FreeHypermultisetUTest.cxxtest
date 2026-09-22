@@ -1,0 +1,40 @@
+/*
+ * tests/atoms/base/FreeHypermultisetUTest.cxxtest
+ *
+ * Copyright (C) 2026 OpenCog Foundation
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+#include <vector>
+#include <limits>
+#include <stdexcept>
+
+#include <opencog/atoms/base/FreeHypermultiset.h>
+
+using namespace opencog;
+
+class FreeHypermultisetUTest : public CxxTest::TestSuite
+{
+public:
+	void test_base_case()
+	{
+		TS_ASSERT_EQUALS(free_hypermultiset_count(0), 1);
+	}
+
+	void test_published_sequence()
+	{
+		const std::vector<FreeHypermultisetCount> expected = {
+			1, 1, 2, 4, 9, 20, 48, 115, 286, 719,
+			1842, 4766, 12486
+		};
+
+		TS_ASSERT_EQUALS(free_hypermultiset_counts(expected.size() - 1),
+			expected);
+	}
+
+	void test_rejects_unrepresentable_bound()
+	{
+		TS_ASSERT_THROWS(free_hypermultiset_count(
+			std::numeric_limits<std::size_t>::max()), std::length_error);
+	}
+};

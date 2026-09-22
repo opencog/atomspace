@@ -1,4 +1,4 @@
-IF (DOXYGEN_FOUND)
+﻿IF (DOXYGEN_FOUND)
 	EXECUTE_PROCESS(
 		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
 		# COMMAND bzr nick
@@ -32,3 +32,9 @@ IF (DOXYGEN_FOUND)
 ELSE (DOXYGEN_FOUND)
     MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
 ENDIF (DOXYGEN_FOUND)
+INSTALL(FILES
+    free-hypermultisets/README.md
+    free-hypermultisets/free_hypermultiset_counts.m
+    free-hypermultisets/free_hypermultiset_count.m
+    DESTINATION "share/doc/atomspace/free-hypermultisets"
+)

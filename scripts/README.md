@@ -28,3 +28,18 @@ Memory profile:    `valgrind --tool=massif`
 CPU profile:       `valgrind --tool=callgrind`
 
 then: `callgrind_annotate callgrind.out.nnnn`
+
+
+Free hypermultiset emulator
+---------------------------
+On Windows, the native C++ build requires a compiler, CMake, and AtomSpace
+dependencies. The recurrence can be exercised independently with PowerShell:
+
+```
+powershell -ExecutionPolicy Bypass -File .\scripts\free_hypermultiset.ps1 `
+    -MaxMembranes 12 -ValidatePublished
+```
+
+The emulator uses .NET `BigInteger` and is intended for smoke testing and
+reference output; the production implementation is
+`opencog/atoms/base/FreeHypermultiset.cc`.
