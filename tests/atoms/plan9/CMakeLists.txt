@@ -1,0 +1,9 @@
+
+ADD_CXXTEST(NineProtocolUTest)
+TARGET_LINK_LIBRARIES(NineProtocolUTest atomplan9)
+
+ADD_CXXTEST(NineNamespaceUTest)
+TARGET_LINK_LIBRARIES(NineNamespaceUTest atomplan9)
+
+ADD_CXXTEST(AtomFsUTest)
+TARGET_LINK_LIBRARIES(AtomFsUTest atomplan9)

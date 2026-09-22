@@ -1,0 +1,218 @@
+/*
+ * tests/atoms/plan9/NineNamespaceUTest.cxxtest
+ *
+ * Copyright (c) 2024 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/plan9/NineNamespace.h>
+
+#include <algorithm>
+#include <stdexcept>
+#include <unordered_map>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog::plan9;
+
+namespace
+{
+// A trivial in-memory NineNode used only to exercise NineNamespace's
+// bind/mount/union/walk logic, independent of AtomFs.
+class TestNode : public NineNode
+{
+public:
+	TestNode(std::string name, uint64_t path, bool dir)
+		: _name(std::move(name)), _dir(dir)
+	{
+		_qid.type = dir ? QTDIR : QTFILE;
+		_qid.path = path;
+	}
+
+	std::string name() const override { return _name; }
+	bool is_dir() const override { return _dir; }
+	NineQid qid() const override { return _qid; }
+
+	std::vector<NineNodePtr> children() const override
+	{
+		std::vector<NineNodePtr> out;
+		for (auto& kv : _children) out.push_back(kv.second);
+		return out;
+	}
+
+	void add_child(const NineNodePtr& c) { _children[c->name()] = c; }
+
+	std::string read(uint64_t, uint32_t) const override { return _text; }
+	std::string _text;
+
+private:
+	std::string _name;
+	bool _dir;
+	NineQid _qid;
+	std::unordered_map<std::string, NineNodePtr> _children;
+};
+
+typedef std::shared_ptr<TestNode> TestNodePtr;
+
+TestNodePtr mkdir_node(const std::string& name, uint64_t path)
+{
+	return std::make_shared<TestNode>(name, path, true);
+}
+
+TestNodePtr mkfile_node(const std::string& name, uint64_t path,
+                         const std::string& text)
+{
+	auto n = std::make_shared<TestNode>(name, path, false);
+	n->_text = text;
+	return n;
+}
+} // namespace
+
+class NineNamespaceUTest : public CxxTest::TestSuite
+{
+public:
+	void test_walk_basic_tree(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto sub = mkdir_node("sub", 2);
+		auto leaf = mkfile_node("leaf", 3, "hi");
+		sub->add_child(leaf);
+		root->add_child(sub);
+
+		NineNamespace ns(root);
+
+		NineNodePtr found = ns.walk("/sub/leaf");
+		TS_ASSERT(found != nullptr);
+		TS_ASSERT_EQUALS(found->name(), "leaf");
+		TS_ASSERT_EQUALS(found->read(0, 100), "hi");
+
+		TS_ASSERT(ns.walk("/sub/nope") == nullptr);
+	}
+
+	void test_mount_replaces_subtree(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto orig = mkdir_node("mnt", 2);
+		orig->add_child(mkfile_node("old", 3, "old-data"));
+		root->add_child(orig);
+
+		NineNamespace ns(root);
+		TS_ASSERT_EQUALS(ns.walk("/mnt/old")->read(0, 10), "old-data");
+
+		auto replacement = mkdir_node("mnt", 4);
+		replacement->add_child(mkfile_node("new", 5, "new-data"));
+		ns.mount("/mnt", replacement, MREPL);
+
+		TS_ASSERT(ns.walk("/mnt/old") == nullptr);
+		TS_ASSERT_EQUALS(ns.walk("/mnt/new")->read(0, 10), "new-data");
+	}
+
+	void test_mount_before_shadows_but_unions(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto base = mkdir_node("mnt", 2);
+		base->add_child(mkfile_node("shared", 3, "base-shared"));
+		base->add_child(mkfile_node("base-only", 6, "base-only-data"));
+		root->add_child(base);
+
+		NineNamespace ns(root);
+
+		auto over = mkdir_node("mnt", 4);
+		over->add_child(mkfile_node("shared", 5, "over-shared"));
+		ns.mount("/mnt", over, MBEFORE);
+
+		// Shadowed (MBEFORE puts `over` first): "shared" resolves to
+		// the newly-mounted copy...
+		TS_ASSERT_EQUALS(ns.walk("/mnt/shared")->read(0, 20), "over-shared");
+		// ...but base-only, unique to the old tree, is still visible
+		// through the union directory listing.
+		std::vector<NineNodePtr> kids = ns.list("/mnt");
+		bool saw_base_only = false;
+		for (auto& k : kids) if (k->name() == "base-only") saw_base_only = true;
+		TS_ASSERT(saw_base_only);
+	}
+
+	void test_bind_creates_alias(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto a = mkdir_node("a", 2);
+		a->add_child(mkfile_node("f", 3, "a-data"));
+		root->add_child(a);
+		root->add_child(mkdir_node("b", 4));
+
+		NineNamespace ns(root);
+		ns.bind("/b", "/a", MREPL);
+
+		TS_ASSERT_EQUALS(ns.walk("/b/f")->read(0, 10), "a-data");
+	}
+
+	void test_bind_missing_source_throws(void)
+	{
+		auto root = mkdir_node("/", 1);
+		NineNamespace ns(root);
+		TS_ASSERT_THROWS(ns.bind("/x", "/does-not-exist", MREPL),
+			std::runtime_error);
+	}
+
+	void test_unmount_reverts(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto orig = mkdir_node("mnt", 2);
+		orig->add_child(mkfile_node("old", 3, "old-data"));
+		root->add_child(orig);
+
+		NineNamespace ns(root);
+		auto replacement = mkdir_node("mnt", 4);
+		replacement->add_child(mkfile_node("new", 5, "new-data"));
+		ns.mount("/mnt", replacement, MREPL);
+		TS_ASSERT(ns.walk("/mnt/old") == nullptr);
+
+		ns.unmount("/mnt");
+		TS_ASSERT_EQUALS(ns.walk("/mnt/old")->read(0, 10), "old-data");
+	}
+
+	void test_independent_copies_after_fork(void)
+	{
+		auto root = mkdir_node("/", 1);
+		auto mnt = mkdir_node("mnt", 2);
+		mnt->add_child(mkfile_node("f", 3, "shared-data"));
+		root->add_child(mnt);
+
+		NineNamespace parent_ns(root);
+		NineNamespace child_ns = parent_ns; // Copy, as at rfork(RFNAMEG).
+
+		auto replacement = mkdir_node("mnt", 4);
+		replacement->add_child(mkfile_node("g", 5, "child-only"));
+		child_ns.mount("/mnt", replacement, MREPL);
+
+		// The child's bind is invisible to the parent...
+		TS_ASSERT_EQUALS(parent_ns.walk("/mnt/f")->read(0, 20), "shared-data");
+		TS_ASSERT(parent_ns.walk("/mnt/g") == nullptr);
+		// ...and the parent's original view is invisible to the child.
+		TS_ASSERT(child_ns.walk("/mnt/f") == nullptr);
+		TS_ASSERT_EQUALS(child_ns.walk("/mnt/g")->read(0, 20), "child-only");
+	}
+
+	void test_canon_normalizes_paths(void)
+	{
+		TS_ASSERT_EQUALS(NineNamespace::canon(""), "/");
+		TS_ASSERT_EQUALS(NineNamespace::canon("/"), "/");
+		TS_ASSERT_EQUALS(NineNamespace::canon("//a//b/"), "/a/b");
+		TS_ASSERT_EQUALS(NineNamespace::canon("a/b"), "/a/b");
+	}
+};
