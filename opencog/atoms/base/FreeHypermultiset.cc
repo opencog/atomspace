@@ -12,6 +12,29 @@
 
 namespace opencog
 {
+namespace
+{
+FreeHypermultisetCount checked_add(FreeHypermultisetCount lhs,
+                                   FreeHypermultisetCount rhs)
+{
+	const FreeHypermultisetCount max =
+		std::numeric_limits<FreeHypermultisetCount>::max();
+	if (rhs > max - lhs)
+		throw std::overflow_error("Free hypermultiset count is too large");
+	return lhs + rhs;
+}
+
+FreeHypermultisetCount checked_multiply(FreeHypermultisetCount lhs,
+                                        FreeHypermultisetCount rhs)
+{
+	const FreeHypermultisetCount max =
+		std::numeric_limits<FreeHypermultisetCount>::max();
+	if (lhs != 0 && rhs > max / lhs)
+		throw std::overflow_error("Free hypermultiset count is too large");
+	return lhs * rhs;
+}
+}
+
 std::vector<FreeHypermultisetCount>
 free_hypermultiset_counts(std::size_t max_membranes)
 {
@@ -32,12 +55,20 @@ free_hypermultiset_counts(std::size_t max_membranes)
 	{
 		FreeHypermultisetCount sum = 0;
 		for (std::size_t part = 1; part < nodes; ++part)
-			sum += trees[nodes - part] * divisor_sums[part];
+			sum = checked_add(sum, checked_multiply(
+				trees[nodes - part], divisor_sums[part]));
 		trees[nodes] = sum / (nodes - 1);
 
 		for (std::size_t multiple = nodes; multiple <= max_nodes;)
 		{
-			divisor_sums[multiple] += nodes * trees[nodes];
+			if (static_cast<std::uintmax_t>(nodes) >
+			    std::numeric_limits<FreeHypermultisetCount>::max())
+				throw std::overflow_error(
+					"Free hypermultiset count is too large");
+			const FreeHypermultisetCount node_count =
+				static_cast<FreeHypermultisetCount>(nodes);
+			divisor_sums[multiple] = checked_add(divisor_sums[multiple],
+				checked_multiply(node_count, trees[nodes]));
 			if (multiple > max_nodes - nodes)
 				break;
 			multiple += nodes;

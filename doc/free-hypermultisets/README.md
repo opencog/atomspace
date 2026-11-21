@@ -13,6 +13,9 @@ membranes is `M(m) = T(m + 1)`.
 - `free_hypermultiset_counts(maxMembranes)` returns `M(0)` through
   `M(maxMembranes)`.
 - `free_hypermultiset_count(membranes)` returns one count.
+- Counts use an unsigned 64-bit integer; either function throws
+  `std::overflow_error` rather than returning an inexact result if a count
+  calculation exceeds that range.
 
 The implementation uses Otter's recurrence:
 

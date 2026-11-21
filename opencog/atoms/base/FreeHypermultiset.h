@@ -9,9 +9,8 @@
 #define _OPENCOG_FREE_HYPERMULTISET_H
 
 #include <cstddef>
+#include <cstdint>
 #include <vector>
-
-#include <boost/multiprecision/cpp_int.hpp>
 
 namespace opencog
 {
@@ -22,17 +21,19 @@ namespace opencog
  * Thus, the count for n membranes is the number of rooted trees with n + 1
  * nodes (OEIS A000081).
  */
-using FreeHypermultisetCount = boost::multiprecision::cpp_int;
+using FreeHypermultisetCount = std::uint64_t;
 
 /**
  * Return the number of free hypermultisets with exactly `membranes`
- * non-skin membranes.
+ * non-skin membranes. Throws std::overflow_error if the calculation exceeds
+ * the range of FreeHypermultisetCount.
  */
 FreeHypermultisetCount free_hypermultiset_count(std::size_t membranes);
 
 /**
  * Return counts indexed by their number of non-skin membranes from zero
- * through `max_membranes`, inclusive.
+ * through `max_membranes`, inclusive. Throws std::overflow_error if the
+ * calculation exceeds the range of FreeHypermultisetCount.
  */
 std::vector<FreeHypermultisetCount>
 free_hypermultiset_counts(std::size_t max_membranes);
