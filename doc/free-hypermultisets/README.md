@@ -8,6 +8,19 @@ Free hypermultisets are equivalent to unlabeled unordered rooted trees. If
 `T(n)` counts rooted trees with `n` nodes, the number with `m` non-skin
 membranes is `M(m) = T(m + 1)`.
 
+## Motivation
+
+The rooted-tree sequence OEIS A000081 appears in several settings:
+
+- membrane structures in P systems, relevant to evolving production rules;
+- Butcher trees, which index Runge-Kutta order conditions and B-series terms;
+- elementary differentials in Taylor expansions of ODE solutions.
+
+This enumeration is a small, exact building block for exploring AtomSpace
+hypergraphs typed by generalized elementary differentials. Whether that typing
+gives a domain-agnostic basis with maximal contrast is a research hypothesis;
+this module does not establish it.
+
 ## MATLAB implementation
 
 - `free_hypermultiset_counts(maxMembranes)` returns `M(0)` through
