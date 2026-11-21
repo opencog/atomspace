@@ -13,9 +13,13 @@ membranes is `M(m) = T(m + 1)`.
 - `free_hypermultiset_counts(maxMembranes)` returns `M(0)` through
   `M(maxMembranes)`.
 - `free_hypermultiset_count(membranes)` returns one count.
-- Counts use an unsigned 64-bit integer; either function throws
-  `std::overflow_error` rather than returning an inexact result if a count
-  calculation exceeds that range.
+- MATLAB counts use double precision and accept only bounds from 0 through
+  30. All integer intermediates in that range are below `2^53` and exactly
+  representable; larger bounds raise `free_hypermultiset_counts:InexactBound`
+  before calculation.
+- The separate C++ API uses unsigned 64-bit counts and throws
+  `std::overflow_error` if a calculation exceeds that range. The PowerShell
+  reference tool uses arbitrary-precision integers for larger bounds.
 
 The implementation uses Otter's recurrence:
 
@@ -28,6 +32,9 @@ The first values are:
 ```text
 M(0..12) = 1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766, 12486
 ```
+
+Run `test_free_hypermultiset_counts` from this directory in MATLAB or Octave
+to check the published values, the upper bound, and invalid-bound rejection.
 
 ## Corrections to the supplied MATLAB listing
 

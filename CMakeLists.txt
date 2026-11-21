@@ -275,6 +275,13 @@ INCLUDE(CPack)
 # Documentation.
 FIND_PACKAGE(Doxygen)
 ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
+INSTALL(FILES
+    doc/free-hypermultisets/README.md
+    doc/free-hypermultisets/free_hypermultiset_counts.m
+    doc/free-hypermultisets/free_hypermultiset_count.m
+    doc/free-hypermultisets/test_free_hypermultiset_counts.m
+    DESTINATION "share/doc/atomspace/free-hypermultisets"
+)
 
 # ===================================================================
 # Show a summary of what we found, what we will do.

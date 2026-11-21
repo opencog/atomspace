@@ -36,6 +36,8 @@ public:
 	{
 		TS_ASSERT_THROWS(free_hypermultiset_count(
 			std::numeric_limits<std::size_t>::max()), std::length_error);
+		TS_ASSERT_THROWS(free_hypermultiset_count(
+			std::numeric_limits<std::size_t>::max() - 1), std::length_error);
 	}
 
 	void test_rejects_count_overflow()

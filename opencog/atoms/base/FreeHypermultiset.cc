@@ -38,7 +38,7 @@ FreeHypermultisetCount checked_multiply(FreeHypermultisetCount lhs,
 std::vector<FreeHypermultisetCount>
 free_hypermultiset_counts(std::size_t max_membranes)
 {
-	if (max_membranes == std::numeric_limits<std::size_t>::max())
+	if (max_membranes > std::numeric_limits<std::size_t>::max() - 2)
 		throw std::length_error("Free hypermultiset membrane bound is too large");
 
 	// Let T(n) count rooted trees with n nodes. Otter's recurrence is

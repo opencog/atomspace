@@ -7,13 +7,21 @@
 %   The implementation uses Otter's recurrence:
 %     n*T(n) = sum_{k=1}^{n-1} T(n-k) * sum_{d|k} d*T(d)
 %   where COUNTS(m+1) = T(m+1).
+%   Bounds are limited to 30 so all integer intermediates are exactly
+%   representable in double precision.
 
-if nargin ~= 1 || ~isscalar(maxMembranes) || maxMembranes < 0 || ...
+if nargin ~= 1 || ~isnumeric(maxMembranes) || ~isreal(maxMembranes) || ...
+        ~isscalar(maxMembranes) || ~isfinite(maxMembranes) || maxMembranes < 0 || ...
         maxMembranes ~= floor(maxMembranes)
     error('free_hypermultiset_counts:InvalidBound', ...
         'maxMembranes must be a non-negative integer scalar.');
 end
 
+if maxMembranes > 30
+    error('free_hypermultiset_counts:InexactBound', ...
+        'maxMembranes must not exceed 30 for exact double-precision counts.');
+end
+maxMembranes = double(maxMembranes);
 maxNodes = maxMembranes + 1;
 treeCounts = zeros(1, maxNodes + 1);
 divisorSums = zeros(1, maxNodes + 1);
