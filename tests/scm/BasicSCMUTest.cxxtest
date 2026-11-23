@@ -158,7 +158,8 @@ void BasicSCMUTest::test_utf8(void)
 
 void BasicSCMUTest::check_tv(const Handle& h, double mean, double conf)
 {
-	ValuePtr tv = h->getValue(truth_key());
+	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+	ValuePtr tv = h->getValue(tk);
 	FloatValuePtr fvp = FloatValueCast(tv);
 	double m = fvp->value()[0];
 	double c = fvp->value()[1];
@@ -304,6 +305,7 @@ void BasicSCMUTest::test_extract_hypergraph(void)
 
 void BasicSCMUTest::check_truth_value(const ValuePtr& tv)
 {
+	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
 	// logger().debug() << "check_node_truth_value(" << tv << ")";
 
 	// added check_truth_value_node in the atomspace
@@ -335,7 +337,7 @@ void BasicSCMUTest::check_truth_value(const ValuePtr& tv)
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	TSM_ASSERT("Failed to get the correct handle", h == hadd);
 	// hack to avoid floating error
-	bool tv_eq = tv->to_string() == h->getValue(truth_key())->to_string();
+	bool tv_eq = tv->to_string() == h->getValue(tk)->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// Check the slow-path API, too

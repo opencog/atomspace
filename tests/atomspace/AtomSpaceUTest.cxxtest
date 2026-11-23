@@ -55,7 +55,8 @@ using namespace std;
 Handle addRealAtom(AtomSpace& as, Handle atom,
                    ValuePtr tvn = ValuePtr())
 {
-    ValuePtr newTV = tvn ? tvn: FloatValueCast(atom->getValue(truth_key()));
+    static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+    ValuePtr newTV = tvn ? tvn: FloatValueCast(atom->getValue(tk));
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
@@ -67,7 +68,7 @@ Handle addRealAtom(AtomSpace& as, Handle atom,
         if (result == Handle::UNDEFINED) {
             result = as.add_node(node->get_type(),
                                  std::move(std::string(node->get_name())));
-            result->setValue(truth_key(), newTV);
+            result->setValue(tk, newTV);
             return result;
         }
     } else {
@@ -76,16 +77,17 @@ Handle addRealAtom(AtomSpace& as, Handle atom,
         if (result == Handle::UNDEFINED) {
             result = as.add_link(link->get_type(),
                                  std::move(HandleSeq(link->getOutgoingSet())));
-            result->setValue(truth_key(), newTV);
+            result->setValue(tk, newTV);
             return result;
         }
     }
-    result->setValue(truth_key(), newTV);
+    result->setValue(tk, newTV);
     return result;
 }
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
+    static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
     char buf[256];
     memset(buf, 0, 256);
     int baseNameLength = strlen(baseName);
@@ -96,24 +98,24 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     ValuePtr tv3 = createFloatValue(std::vector<double>({0.5, 0.99}));
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h1->setValue(truth_key(), tv1);
+    h1->setValue(tk, tv1);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h2->setValue(truth_key(), tv2);
+    h2->setValue(tk, tv2);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h3->setValue(truth_key(), tv3);
+    h3->setValue(tk, tv3);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
     outgoing1.push_back(h3);
     Handle l1 = atomSpace->add_link(LIST_LINK, std::move(outgoing1));
-    l1->setValue(truth_key(), tv1);
+    l1->setValue(tk, tv1);
     HandleSeq outgoing2;
     outgoing2.push_back(h1);
     outgoing2.push_back(l1);
     Handle l2 = atomSpace->add_link(EVALUATION_LINK, std::move(outgoing2));
-    l2->setValue(truth_key(), tv2);
+    l2->setValue(tk, tv2);
 
     HandleSeq testAtoms;
     testAtoms.push_back(h1);
@@ -285,7 +287,8 @@ public:
 
     struct mean : public HandlePredicate {
         virtual bool test(const Handle& h) const {
-            return FloatValueCast(h->getValue(truth_key()))->value()[0] > 0.8;
+            static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+            return FloatValueCast(h->getValue(tk))->value()[0] > 0.8;
         }
     };
 
@@ -297,6 +300,7 @@ public:
 
     void testMiscellaneous()
     {
+        static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
         logger().info("Begin testMiscellaneous()");
 
         const char* nodeNames[NUM_NODES] = {
@@ -311,7 +315,7 @@ public:
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
             h[i] = atomSpace->add_node(CONCEPT_NODE, nodeNames[i]);
-            h[i]->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.99})));
+            h[i]->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.99})));
         }
         logger().debug("Nodes created");
 
@@ -322,7 +326,7 @@ public:
             temp[0] = h[i];
             temp[1] = h[4];
             FU[i] = atomSpace->add_link(SUBSET_LINK, std::move(temp));
-            FU[i]->setValue(truth_key(), createFloatValue(std::vector<double>({ForceUser[i], 0.99})));
+            FU[i]->setValue(tk, createFloatValue(std::vector<double>({ForceUser[i], 0.99})));
         }
         logger().debug("ForceUser links created");
 
@@ -334,32 +338,32 @@ public:
             out[i].push_back(h[5]);
             H[i] = atomSpace->add_link(INHERITANCE_LINK,
                                        std::move(HandleSeq(out[i])));
-            H[i]->setValue(truth_key(), createFloatValue(std::vector<double>({Human[i], 0.99})));
+            H[i]->setValue(tk, createFloatValue(std::vector<double>({Human[i], 0.99})));
         }
         logger().debug("Human links created");
 
         // Check TVS
         for (int i = 0; i < NUM_NODES; i++) {
-            FloatValuePtr tv = FloatValueCast(h[i]->getValue(truth_key()));
+            FloatValuePtr tv = FloatValueCast(h[i]->getValue(tk));
             logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                 tv->value()[0], FloatValueCast(h[i]->getValue(truth_key()))->value()[0]);
+                 tv->value()[0], FloatValueCast(h[i]->getValue(tk))->value()[0]);
             TS_ASSERT(fabs(tv->value()[0] - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f", tv->value()[1], fabs(tv->value()[1] - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->value()[1] - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
-                FloatValuePtr tv = FloatValueCast(FU[i]->getValue(truth_key()));
+                FloatValuePtr tv = FloatValueCast(FU[i]->getValue(tk));
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                  tv->value()[0], FloatValueCast(h[i]->getValue(truth_key()))->value()[0]);
+                  tv->value()[0], FloatValueCast(h[i]->getValue(tk))->value()[0]);
                 logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n",
-                 tv->value()[0], FloatValueCast(FU[i]->getValue(truth_key()))->value()[0]);
+                 tv->value()[0], FloatValueCast(FU[i]->getValue(tk))->value()[0]);
                 TS_ASSERT(fabs(tv->value()[0] - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("FU: confidence = %f, diff = %f, error = %f", tv->value()[1], fabs(tv->value()[1] - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->value()[1] - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
-                FloatValuePtr tv = FloatValueCast(H[i]->getValue(truth_key()));
+                FloatValuePtr tv = FloatValueCast(H[i]->getValue(tk));
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                     tv->value()[0], FloatValueCast(h[i]->getValue(truth_key()))->value()[0]);
+                     tv->value()[0], FloatValueCast(h[i]->getValue(tk))->value()[0]);
                 TS_ASSERT(fabs(tv->value()[0] - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("H: confidence = %f, diff = %f, error = %f", tv->value()[1], fabs(tv->value()[1] - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->value()[1] - 0.99) < FLOAT_ACCEPTABLE_ERROR);
@@ -498,41 +502,42 @@ public:
      */
     void testAddNode()
     {
+        static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
         logger().info("Begin testAddNode()");
         ValuePtr tv1 = createFloatValue(std::vector<double>({0.001, 0.00001}));
         ValuePtr tv2 = createFloatValue(std::vector<double>({0.001, 0.00001}));
         ValuePtr tv3 = createFloatValue(std::vector<double>({0.5, 0.99}));
         Handle h1 = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        h1->setValue(truth_key(), tv1);
+        h1->setValue(tk, tv1);
         Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setValue(truth_key(), tv2);
+        h2->setValue(tk, tv2);
         Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
-        h3->setValue(truth_key(), tv3);
+        h3->setValue(tk, tv3);
 
         tv1 = createFloatValue(std::vector<double>({0.002, 0.00002}));
         tv2 = createFloatValue(std::vector<double>({0.1, 0.0}));
         tv3 = createFloatValue(std::vector<double>({0.6, 0.90}));
-        h1->setValue(truth_key(), tv1);
-        h2->setValue(truth_key(), tv2);
-        h3->setValue(truth_key(), tv3);
+        h1->setValue(tk, tv1);
+        h2->setValue(tk, tv2);
+        h3->setValue(tk, tv3);
         Handle h1_ = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
         Handle h2_ = atomSpace->add_node(CONCEPT_NODE, "dog1");
         Handle h3_ = atomSpace->add_node(CONCEPT_NODE, "tree");
 
         TS_ASSERT(h1 == h1_);
-        FloatValuePtr h1tv = FloatValueCast(h1->getValue(truth_key()));
+        FloatValuePtr h1tv = FloatValueCast(h1->getValue(tk));
         logger().debug("h1tv = %s", h1tv->to_string().c_str());
         logger().debug("tv1 = %s", tv1->to_string().c_str());
         FloatValuePtr fv1 = FloatValueCast(tv1);
         TS_ASSERT(fabs(h1tv->value()[0] - fv1->value()[0]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(h1tv->value()[1] - fv1->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h2 == h2_);
-        FloatValuePtr h2tv = FloatValueCast(h2->getValue(truth_key()));
+        FloatValuePtr h2tv = FloatValueCast(h2->getValue(tk));
         FloatValuePtr fv2 = FloatValueCast(tv2);
         TS_ASSERT(fabs(h2tv->value()[0] - fv2->value()[0]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(h2tv->value()[1] - fv2->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h3 == h3_);
-        FloatValuePtr h3tv = FloatValueCast(h3->getValue(truth_key()));
+        FloatValuePtr h3tv = FloatValueCast(h3->getValue(tk));
         FloatValuePtr fv3 = FloatValueCast(tv3);
         TS_ASSERT(fabs(h3tv->value()[0] - fv3->value()[0]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(h3tv->value()[1] - fv3->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
@@ -556,13 +561,14 @@ public:
      */
     void testAddLink()
     {
+        static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
         logger().info("Begin testAddLink()");
         Handle h1 = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        h1->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.00001})));
+        h1->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.00001})));
         Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.00001})));
+        h2->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.00001})));
         Handle h3 = atomSpace->add_node(CONCEPT_NODE, "tree");
-        h3->setValue(truth_key(), createFloatValue(std::vector<double>({0.5, 0.99})));
+        h3->setValue(tk, createFloatValue(std::vector<double>({0.5, 0.99})));
         ValuePtr tv1 = createFloatValue(std::vector<double>({0.001, 0.00001}));
         ValuePtr tv2 = createFloatValue(std::vector<double>({0.001, 0.00001}));
         HandleSeq outgoing1;
@@ -570,32 +576,32 @@ public:
         outgoing1.push_back(h3);
         Handle l1 = atomSpace->add_link(LIST_LINK,
                                         std::move(HandleSeq(outgoing1)));
-        l1->setValue(truth_key(), tv1);
+        l1->setValue(tk, tv1);
         HandleSeq outgoing2;
         outgoing2.push_back(h1);
         outgoing2.push_back(l1);
         Handle l2 = atomSpace->add_link(EVALUATION_LINK,
                                         std::move(HandleSeq(outgoing2)));
-        l2->setValue(truth_key(), tv2);
+        l2->setValue(tk, tv2);
 
         tv1 = createFloatValue(std::vector<double>({0.002, 0.00002}));
-        l1->setValue(truth_key(), tv1);
+        l1->setValue(tk, tv1);
         Handle l1_ = atomSpace->add_link(LIST_LINK,
                                          std::move(HandleSeq(outgoing1)));
         tv2 = createFloatValue(std::vector<double>({0.1, 0.0}));
-        l2->setValue(truth_key(), tv2);
+        l2->setValue(tk, tv2);
         Handle l2_ = atomSpace->add_link(EVALUATION_LINK,
                                          std::move(HandleSeq(outgoing2)));
 
         TS_ASSERT(l1 == l1_);
-        FloatValuePtr l1tv = FloatValueCast(l1->getValue(truth_key()));
+        FloatValuePtr l1tv = FloatValueCast(l1->getValue(tk));
         logger().debug("l1tv = %s", l1tv->to_string().c_str());
         logger().debug("tv1 = %s", tv1->to_string().c_str());
         FloatValuePtr fv1 = FloatValueCast(tv1);
         TS_ASSERT(fabs(l1tv->value()[0] - fv1->value()[0]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(l1tv->value()[1] - fv1->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l2 ==  l2_);
-        FloatValuePtr l2tv = FloatValueCast(l2->getValue(truth_key()));
+        FloatValuePtr l2tv = FloatValueCast(l2->getValue(tk));
         FloatValuePtr fv2 = FloatValueCast(tv2);
         TS_ASSERT(fabs(l2tv->value()[0] - fv2->value()[0]) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(l2tv->value()[1] - fv2->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
@@ -608,13 +614,14 @@ public:
      */
     void testTVUpdate()
     {
+        static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
         logger().info("Begin testTVUpdate");
 
         Handle h1 = createNode(CONCEPT_NODE, "dog1");
-        h1->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.00001})));
+        h1->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.00001})));
         Handle ash1 = atomSpace->add_atom(h1);
         ValuePtr tv1 = createFloatValue(std::vector<double>({0.001, 0.00001}));
-        FloatValuePtr htv = FloatValueCast(ash1->getValue(truth_key()));
+        FloatValuePtr htv = FloatValueCast(ash1->getValue(tk));
         logger().debug("ash1 = %s", ash1->to_string().c_str());
         logger().debug("htv = %s", htv->to_string().c_str());
         logger().debug("tv1 = %s", tv1->to_string().c_str());
@@ -624,13 +631,13 @@ public:
         TS_ASSERT(fabs(htv->value()[1] - fv1->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h2 = createNode(CONCEPT_NODE, "dog1");
-        h2->setValue(truth_key(), createFloatValue(std::vector<double>({0.02, 0.002})));
+        h2->setValue(tk, createFloatValue(std::vector<double>({0.02, 0.002})));
         Handle ash2 = atomSpace->add_atom(h2);
         ValuePtr tv2 = createFloatValue(std::vector<double>({0.02, 0.002}));
         logger().debug("ash2 = %s", ash2->to_string().c_str());
 
         TS_ASSERT(ash1 == ash2);
-        htv = FloatValueCast(ash1->getValue(truth_key()));
+        htv = FloatValueCast(ash1->getValue(tk));
         logger().debug("htv = %s", htv->to_string().c_str());
         logger().debug("tv2 = %s", tv2->to_string().c_str());
         FloatValuePtr fv2 = FloatValueCast(tv2);
@@ -638,13 +645,13 @@ public:
         TS_ASSERT(fabs(htv->value()[1] - fv2->value()[1]) < FLOAT_ACCEPTABLE_ERROR);
 
         Handle h3 = createNode(CONCEPT_NODE, "dog1");
-        h3->setValue(truth_key(), createFloatValue(std::vector<double>({0.3, 0.03})));
+        h3->setValue(tk, createFloatValue(std::vector<double>({0.3, 0.03})));
         Handle ash3 = atomSpace->add_atom(h3);
         ValuePtr tv3 = createFloatValue(std::vector<double>({0.3, 0.03}));
         logger().debug("ash3 = %s", ash3->to_string().c_str());
 
         TS_ASSERT(ash1 == ash3);
-        htv = FloatValueCast(ash1->getValue(truth_key()));
+        htv = FloatValueCast(ash1->getValue(tk));
         logger().debug("htv = %s", htv->to_string().c_str());
         logger().debug("tv3 = %s", tv3->to_string().c_str());
         FloatValuePtr fv3 = FloatValueCast(tv3);
@@ -667,12 +674,13 @@ public:
 
     void testGetHandleSetByName()
     {
+        static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
         Handle h1 = atomSpace->add_node(PREDICATE_NODE, "dog1");
-        h1->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.00001})));
+        h1->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.00001})));
         Handle h2 = atomSpace->add_node(CONCEPT_NODE, "dog1");
-        h2->setValue(truth_key(), createFloatValue(std::vector<double>({0.001, 0.00001})));
+        h2->setValue(tk, createFloatValue(std::vector<double>({0.001, 0.00001})));
         Handle h3 = atomSpace->add_node(NODE, "dog1");
-        h3->setValue(truth_key(), createFloatValue(std::vector<double>({0.5, 0.99})));
+        h3->setValue(tk, createFloatValue(std::vector<double>({0.5, 0.99})));
 
         HandleSeq namedAtoms;
         atomSpace->get_handles_by_type(namedAtoms, NODE, true);

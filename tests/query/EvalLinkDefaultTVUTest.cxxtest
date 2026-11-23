@@ -52,14 +52,16 @@ public:
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
-	~EvalLinkDefaultTVUTest(){
-
+	~EvalLinkDefaultTVUTest()
+	{
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
 	}
 
-	void test_query_evallink(){
+	void test_query_evallink()
+	{
+		static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		this->eval->eval("(load-from-path \"tests/query/eval-default-tv.scm\")");
 		Handle query = eval->eval_h("query");
@@ -67,7 +69,7 @@ public:
 		Handle answer = answers->getOutgoingAtom(0);
 		int num_results = answers->getOutgoingSet().size();
 		TS_ASSERT_EQUALS(num_results, 1);
-		ValuePtr stv = answer->getValue(truth_key());
+		ValuePtr stv = answer->getValue(tk);
 		TS_ASSERT_EQUALS(nullptr, stv);
 	}
 };
