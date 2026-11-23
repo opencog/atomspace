@@ -92,7 +92,6 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 
     cdef cHandle handle_cast "HandleCast" (cValuePtr) nogil except +
-    cdef cHandle truth_key() nogil
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
@@ -176,10 +175,9 @@ cdef object py_atom(cHandle h)
 cdef cValuePtr py_value_ptr(object py_value) with gil
 
 # The two below are used by cython code to work with the C++
-# incstances flowing across the cython declarations.
+# instances flowing across the cython declarations.
 cdef object AtomSpace_factoid(cHandle to_wrap)
 cdef object create_python_value_from_c_value(const cValuePtr& value)
-
 
 # BoolValue
 cdef extern from "opencog/atoms/value/BoolValue.h" namespace "opencog":

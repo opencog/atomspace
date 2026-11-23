@@ -17,3 +17,12 @@ ValuePtr opencog::do_execute(AtomSpace* atomspace, Handle h)
 		return atomspace->add_atom(HandleCast(pap));
 	return pap;
 }
+
+// ==============================================================
+// Singleton key for backwards compat with TruthValues
+
+const Handle& opencog::truth_key(void)
+{
+	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+	return tk;
+}

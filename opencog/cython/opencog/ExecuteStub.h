@@ -28,6 +28,9 @@ namespace opencog {
 
 ValuePtr do_execute(AtomSpace*, Handle);
 
+// Old backwards-compat function. Should be removed someday.
+const Handle& truth_key(void);
+
 } // namespace opencog
 
 

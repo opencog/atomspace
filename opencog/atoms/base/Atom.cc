@@ -74,7 +74,7 @@ Atom::~Atom()
 // ==============================================================
 // Singleton key for backwards compat with TruthValues
 
-const Handle& truth_key(void)
+static const Handle& truf_key(void)
 {
 	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
 	return tk;
@@ -93,13 +93,13 @@ void Atom::setValue(const Handle& key, const ValuePtr& value)
 	// This is rather irritating, but we fake it for the
 	// PredicateNode "*-TruthValueKey-*" because if we don't
 	// then load-from-file and load-from-network breaks.
-	if (key != truth_key() and *key == *truth_key())
+	if (key != truf_key() and *key == *truf_key())
 	{
 		KVP_UNIQUE_LOCK;
 		if (nullptr != value)
-			_values[truth_key()] = value;
+			_values[truf_key()] = value;
 		else
-			_values.erase(truth_key());
+			_values.erase(truf_key());
 	}
 	else
 	{
@@ -127,10 +127,10 @@ ValuePtr Atom::getValue(const Handle& key) const
     // This is rather irritating, but we fake it for the
     // PredicateNode "*-TruthValueKey-*" because if we don't
     // then load-from-file and load-from-network breaks.
-    if ((key != truth_key()) and (*key == *truth_key()))
+    if ((key != truf_key()) and (*key == *truf_key()))
     {
         KVP_SHARED_LOCK;
-        auto pr = _values.find(truth_key());
+        auto pr = _values.find(truf_key());
         if (_values.end() != pr) return pr->second;
     }
     else

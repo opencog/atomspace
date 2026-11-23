@@ -16,6 +16,9 @@ cdef extern from "Python.h":
 # This is technically obsolete, but is heavily used in the unit tests.
 # So, for now, leave it as a weirdo backwards compatibility hack,
 # XXX FIXME -- remove this someday.
+cdef extern from "opencog/cython/opencog/ExecuteStub.h" namespace "opencog":
+    cdef cHandle truth_key()
+
 tvkey = create_python_value_from_c_value(<cValuePtr>(truth_key()))
 
 # @todo use the guide here to separate out into a hierarchy
